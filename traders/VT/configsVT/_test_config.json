@@ -1,0 +1,47 @@
+{
+    "base":{
+        "doms":[
+            {
+                "direction": "row",
+                "dom_field_xyxy":[1,58,1917,491],
+                "f_cluster_e_x":90,
+                "f_tape_se_xx":[95,350],
+                "f_glass_s_x":360
+            }
+        ],
+        "charts":[
+            {
+                "direction":"row",
+                "field":[1,551,1917,997]
+            },
+            {
+                "direction":"column",
+                "field":[500,1,700,997]
+            }
+        ],
+        "pos_offset":25,
+        "amount": 4,
+        "price_step":12
+    },
+    "2":{
+        "doms":[
+            {
+                "direction": "row",
+                "dom_field_xyxy":[1,58,1917,491],
+                "f_cluster_e_x":90,
+                "f_tape_se_xx":[95,350],
+                "f_glass_s_x":360
+                
+        }
+    ],
+        "charts":[
+            {
+                "direction":"row",
+                "field":[1,551,1917,997]
+        }
+    ],
+        "amount": 3,
+        "price_step":12,
+        "pos_offset":25
+    }
+}
