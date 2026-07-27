@@ -17,42 +17,58 @@ from strategies.BaseEG import BaseEG
 class VT7:
     def __init__(
             self,
-            glass:tuple,
-            chart:tuple,
-            position:tuple,
-            tape:tuple,
-            cluster:tuple,
-            price_step:int,
-            name:str,
-            ws:tuple=(BaseEG,(20,)),
+            conf_data:dict,
+            symbols:list[str],
+            list_ws:list,
             close_on_time:bool=True,
-            close_map:tuple=((22,30),(22,30),(22,30),(22,30),(22,30),(17,30),(17,30),),
-            close_ff:bool=True
+            close_map:tuple=((22,30),(22,30),(22,30),(22,30),(22,30),(17,30),(17,30),)
             ):
-        self.glass_region = glass
-        self.chart_region = chart
-        self.position_region = position
-        self.tape_region = tape
-        self.cluster_region = cluster
-        self.close_ff = close_ff
+        
+        self.can_work = True
+        self.symbols = symbols
+        self.amount = conf_data['amount']
+        if self.amount != len(symbols):
+            self.can_work = False
+            print('VT7 insufficient data',symbols)
+            raise ValueError(f"VT7 insufficient data: {symbols}")
+        
+        self.glass_region = {symbol: [] for symbol in symbols}
+        self.chart_region = {symbol: [] for symbol in symbols}
+        self.position_region = {symbol: [] for symbol in symbols}
+        self.tape_region = {symbol: [] for symbol in symbols}
+        self.cluster_region = {symbol: [] for symbol in symbols}
+        for dom in conf_data['doms']:
+            for i, symbol in enumerate(symbols):
+                if i < len(dom['glasses']):
+                    self.glass_region[symbol].append(dom['glasses'][i])
+                    self.position_region[symbol].append(dom['poses'][i])
+                    self.tape_region[symbol].append(dom['tapes'][i])
+                    self.cluster_region[symbol].append(dom['clusters'][i])
+        
+        # Распаковка charts
+        for chart in conf_data['charts']:
+            for i, symbol in enumerate(symbols):
+                if i < len(chart):
+                    self.chart_region[symbol].append(chart[i])
+
+        self.price_step = conf_data['price_step']
+        self.wss = dict()
+        for symbol in self.symbols:
+            ...
         now = datetime.now()
         cwd = now.weekday()
         self.close_on_time = close_on_time
         self.close_time = close_map[cwd]
-        self.name = name
-        self.funding = False
-        self.trader_name = 'VT6'
-        conf = ws[1]
-        self.ws = ws[0](name,'1m',"moex_stock",1,*conf)
-        folder_error = 'logs/error_logs_VT6'
+        self.trader_name = 'VT7'
+        # conf = ws[1]
+        # self.ws = ws[0](name,'1m',"moex_stock",1,*conf)
+        folder_error = '_logs/error_logs_VT7'
         if not os.path.exists(folder_error):
             os.makedirs(folder_error)
-        self.error_log = os.path.join(folder_error,self.trader_name + '_' + self.name + '.txt')
-        self.close_long = False
-        self.close_short = False
+        self.error_log = os.path.join(folder_error,self.trader_name + '_' + "_".join(self.symbols) + '.txt')
         self.time_mode = None
-        self.offset = 0
-        self.price_step = price_step
+        #тут надо подумать ⬇⬇⬇
+        self.offset = 0 
 
     def _color_search(self,img:npt.ArrayLike,color:tuple[int],region:tuple[int]=(None,None,None,None),reverse:bool=False):
         try:
