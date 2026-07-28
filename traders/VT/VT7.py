@@ -11,7 +11,8 @@ from datetime import datetime
 import pydirectinput as pdi
 from traders.VT.settingsPB import ColorsBtnBGR,TemplateCandle
 from strategies.BaseEG import BaseEG
-# from utils.help_trades import funding_map
+from traders.VT.bot_on_ticker import init_trader
+
 
 
 class VT7:
@@ -19,7 +20,6 @@ class VT7:
             self,
             conf_data:dict,
             symbols:list[str],
-            list_ws:list,
             close_on_time:bool=True,
             close_map:tuple=((22,30),(22,30),(22,30),(22,30),(22,30),(17,30),(17,30),)
             ):
@@ -33,7 +33,6 @@ class VT7:
             raise ValueError(f"VT7 insufficient data: {symbols}")
         
         self.glass_region = {symbol: [] for symbol in symbols}
-        self.chart_region = {symbol: [] for symbol in symbols}
         self.position_region = {symbol: [] for symbol in symbols}
         self.tape_region = {symbol: [] for symbol in symbols}
         self.cluster_region = {symbol: [] for symbol in symbols}
@@ -46,29 +45,33 @@ class VT7:
                     self.cluster_region[symbol].append(dom['clusters'][i])
         
         # Распаковка charts
+        self.chart_region = {symbol: [] for symbol in symbols}
+        self.offset = {symbol: [] for symbol in symbols}
+
         for chart in conf_data['charts']:
             for i, symbol in enumerate(symbols):
                 if i < len(chart):
                     self.chart_region[symbol].append(chart[i])
+                    self.offset[symbol].append(None)
 
         self.price_step = conf_data['price_step']
-        self.wss = dict()
+        self.wss: dict[str, BaseEG] = dict()
         for symbol in self.symbols:
-            ...
+            ws = init_trader(symbol)
+            self.wss[symbol] = ws[0](symbol,ws[1])
         now = datetime.now()
         cwd = now.weekday()
         self.close_on_time = close_on_time
         self.close_time = close_map[cwd]
         self.trader_name = 'VT7'
-        # conf = ws[1]
-        # self.ws = ws[0](name,'1m',"moex_stock",1,*conf)
         folder_error = '_logs/error_logs_VT7'
         if not os.path.exists(folder_error):
             os.makedirs(folder_error)
-        self.error_log = os.path.join(folder_error,self.trader_name + '_' + "_".join(self.symbols) + '.txt')
+        self.error_log = dict()
+        for symbol in self.symbols:
+            self.error_log[symbol] = os.path.join(folder_error,self.trader_name + '_' + symbols + '.txt')
         self.time_mode = None
-        #тут надо подумать ⬇⬇⬇
-        self.offset = 0 
+
 
     def _color_search(self,img:npt.ArrayLike,color:tuple[int],region:tuple[int]=(None,None,None,None),reverse:bool=False):
         try:
@@ -152,31 +155,33 @@ class VT7:
             return 1
         return 0
     
-    def _check_position(self,img) -> int:
-        x,y = self._color_search(img,ColorsBtnBGR.best_bid,self.position_region)
+    def _check_position(self,img,pos_region) -> int:
+        x,y = self._color_search(img,ColorsBtnBGR.best_bid,pos_region)
         if x >= 0:
             return 1
-        x,y = self._color_search(img,ColorsBtnBGR.best_ask,self.position_region)
+        x,y = self._color_search(img,ColorsBtnBGR.best_ask,pos_region)
         if x >= 0:
             return -1
         return 0
     
-    def _check_z_tape(self,img):
-        tape_img = self._get_region(img, region=self.tape_region).copy()
-        # x,y = self._color_search(img,ColorsBtnBGR.z_tape,self.tape_region)
-        mask = cv2.inRange(tape_img, ColorsBtnBGR.z_tape, ColorsBtnBGR.z_tape)
-        contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        for contour in contours:
-            area = cv2.contourArea(contour)
-            # Фильтр по площади
-            if area > 100:
-                pdi.moveTo(self.glass_region[0]+11,self.glass_region[1]+11)
-                pdi.press('z')
-                break
+    def _check_z_tape(self,img,symbol):
+        for i in range(len(self.glass_region[symbol])):
+            tape_region = self.tape_region[symbol][i]
+            glass_region = self.glass_region[symbol][i]
+            tape_img = self._get_region(img, region=tape_region).copy()
+            mask = cv2.inRange(tape_img, ColorsBtnBGR.z_tape, ColorsBtnBGR.z_tape)
+            contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            for contour in contours:
+                area = cv2.contourArea(contour)
+                # Фильтр по площади
+                if area > 100:
+                    pdi.moveTo(glass_region[0]+11,glass_region[1]+11)
+                    pdi.press('z')
+                    break
 
     
-    def _send_open(self,direction):
-        pdi.moveTo(self.glass_region[0]+11,self.glass_region[1]+11)
+    def _send_open(self,direction,glass_region):
+        pdi.moveTo(glass_region[0]+11,glass_region[1]+11)
         pdi.press('f')
         if direction == 'long':
             button = 'a'
@@ -186,14 +191,15 @@ class VT7:
             button = 'f'
         pdi.press(button)
 
-    def _send_close(self,direction):
+    def _send_close(self,direction,glass_region):
         rev_direction = 'long' if direction == 'short' else 'short'
+        pdi.moveTo(glass_region[0]+11,glass_region[1]+11)
         pdi.press('z')
-        self._send_open(rev_direction)
+        self._send_open(rev_direction,glass_region)
         pdi.press('z')
 
-    def _reverse_pos(self,direction):
-        pdi.moveTo(self.glass_region[0]+11,self.glass_region[1]+11)
+    def _reverse_pos(self,direction,glass_region):
+        pdi.moveTo(glass_region[0]+11,glass_region[1]+11)
         pdi.press('f')
         if direction == 'long':
             button = 'a'
@@ -206,27 +212,27 @@ class VT7:
         pdi.press('z')
         pdi.press(button)
 
-    def _reset_req(self):
-        pdi.moveTo(self.glass_region[0]+11,self.glass_region[1]+11)
+    def _reset_req(self,glass_region):
+        pdi.moveTo(glass_region[0]+11,glass_region[1]+11)
         pdi.press('f')
 
     # new_methods
-    def _add_level(self,dx,dy):
-        pdi.moveTo(self.chart_region[0]+69,self.chart_region[1]+10)
+    def _add_level(self,dx,dy,chart_region):
+        pdi.moveTo(chart_region[0]+69,chart_region[1]+10)
         pdi.click()
-        pdi.moveTo(self.chart_region[0]+dx,self.chart_region[1]+dy)
+        pdi.moveTo(chart_region[0]+dx,chart_region[1]+dy)
         pdi.click()
 
-    def _remove_levels(self):
-        pdi.moveTo(self.glass_region[0]+11,self.glass_region[1]+11)
+    def _remove_levels(self,glass_region):
+        pdi.moveTo(glass_region[0]+11,glass_region[1]+11)
         pdi.press('o')
 
-    def _reset_draw_chart(self):
-        pdi.moveTo(self.chart_region[0]+50,self.chart_region[1]+50)
+    def _reset_draw_chart(self,chart_region):
+        pdi.moveTo(chart_region[0]+50,chart_region[1]+50)
         pdi.rightClick()
-        pdi.moveTo(self.chart_region[0]+45,self.chart_region[1]+45)
+        pdi.moveTo(chart_region[0]+45,chart_region[1]+45)
         pdi.click()
-        pdi.moveTo(self.chart_region[0]+150,self.chart_region[1]+10)
+        pdi.moveTo(chart_region[0]+150,chart_region[1]+10)
         pdi.click()
 
 
@@ -423,7 +429,7 @@ class VT7:
         filtered_x = np.array(full_x)
         return filtered_x, int(step)
        
-    def _clear_bars(self,bars:pd.DataFrame):
+    def _clear_bars(self,bars:pd.DataFrame,symbol,idx):
         bars = bars.astype(float)
         bars['middle'] = (bars['low'] +bars['high']) // 2
         bars['open'] = bars['open'].fillna(bars['close'].shift(1))
@@ -438,13 +444,14 @@ class VT7:
         bars['low'] = np.where(bars['low'] < bars['close'],bars['close'],bars['low'])
         numeric_cols = bars.select_dtypes(include=['float', 'int']).columns
         bars[numeric_cols] = bars[numeric_cols].astype(int)
-        self.offset = bars['volume'].max() + 1
+        self.offset[symbol][idx] = bars['volume'].max() + 1
         for k in ('high','low','volume','middle','open','close'):
-            bars[k] = -bars[k] + self.offset
+            bars[k] = -bars[k] + self.offset[symbol][idx]
         return bars
     
-    def _get_df(self,img) -> pd.DataFrame:
-        chart = self._get_region(img,self.chart_region)
+    def _get_df(self,img,symbol,idx) -> pd.DataFrame:
+        chart_region = self.chart_region[symbol][idx]
+        chart = self._get_region(img,chart_region)
         volume_mask = self._get_volume_mask(chart)
         volume_cords = np.argwhere(volume_mask == 255)
         candle_mask = self._get_candle_mask(chart)
@@ -463,11 +470,6 @@ class VT7:
                 low_bar = best_line[:, 0].max()
             volume = volume_cords[np.where(volume_cords[:,1] == real_x)]
             volume_bar = volume[:,0].min()
-            # Если это поставить, то не будет вылетать при отставшем графике!
-            # if volume.size > 0:
-            #     volume_bar = volume[:,0].min()
-            # else:
-            #     volume_bar = None
             close_line = candle_cords[np.where(candle_cords[:,1] == real_x+1)]
             if close_line.size == 0:
                 close_bar = None
@@ -480,23 +482,26 @@ class VT7:
                 open_bar = open_line[:,0].max()
             bars.append([x,high_bar,low_bar,open_bar,close_bar,volume_bar])
         bars = pd.DataFrame(bars,columns=['x','high','low','open','close','volume'])
-        bars = self._clear_bars(bars)
+        bars = self._clear_bars(bars,symbol,idx)
         return bars
     
-    def _get_profit(self,img):
-        _,p_max = self._color_search(img,ColorsBtnBGR.profit_glass,self.glass_region,reverse=True)
-        _,p_min = self._color_search(img,ColorsBtnBGR.profit_glass,self.glass_region,reverse=False)
+    def _get_profit(self,img,symbol,idx):
+        glass_region = self.glass_region[symbol][idx]
+        _,p_max = self._color_search(img,ColorsBtnBGR.profit_glass,glass_region,reverse=True)
+        _,p_min = self._color_search(img,ColorsBtnBGR.profit_glass,glass_region,reverse=False)
         return p_max,p_min
     
-    def _get_loss(self,img):
-        _,l_max = self._color_search(img,ColorsBtnBGR.loss_glass,self.glass_region,reverse=True)
-        _,l_min = self._color_search(img,ColorsBtnBGR.loss_glass,self.glass_region,reverse=False)
+    def _get_loss(self,img,symbol,idx):
+        glass_region = self.glass_region[symbol][idx]
+        _,l_max = self._color_search(img,ColorsBtnBGR.loss_glass,glass_region,reverse=True)
+        _,l_min = self._color_search(img,ColorsBtnBGR.loss_glass,glass_region,reverse=False)
         return l_max,l_min
     
-    def _get_best_ask(self,img):
-        _,y_max = self._color_search(img,ColorsBtnBGR.best_ask,self.glass_region,reverse=True)
-        _,y_max_level = self._color_search(img,ColorsBtnBGR.best_ask_level,self.glass_region,reverse=True)
-        _,y_test = self._color_search(img,ColorsBtnBGR.ask,self.glass_region,reverse=True)
+    def _get_best_ask(self,img,symbol,idx):
+        glass_region = self.glass_region[symbol][idx]
+        _,y_max = self._color_search(img,ColorsBtnBGR.best_ask,glass_region,reverse=True)
+        _,y_max_level = self._color_search(img,ColorsBtnBGR.best_ask_level,glass_region,reverse=True)
+        _,y_test = self._color_search(img,ColorsBtnBGR.ask,glass_region,reverse=True)
         if y_max_level >= 0:
             return y_max_level
         if y_max >= 0:
@@ -504,10 +509,11 @@ class VT7:
                 return y_max
         return y_test
             
-    def _get_best_bid(self,img):
-        _,y_min = self._color_search(img,ColorsBtnBGR.best_bid,self.glass_region)
-        _,y_min_level = self._color_search(img,ColorsBtnBGR.best_bid_level,self.glass_region)
-        _,y_test = self._color_search(img,ColorsBtnBGR.bid,self.glass_region)
+    def _get_best_bid(self,img,symbol,idx):
+        glass_region = self.glass_region[symbol][idx]
+        _,y_min = self._color_search(img,ColorsBtnBGR.best_bid,glass_region)
+        _,y_min_level = self._color_search(img,ColorsBtnBGR.best_bid_level,glass_region)
+        _,y_test = self._color_search(img,ColorsBtnBGR.bid,glass_region)
         if y_min_level >= 0:
             return y_min_level
         if y_min >= 0:
@@ -657,25 +663,13 @@ class VT7:
             # self._add_level(100,100)
         # else:
         #     print('None work')
-    def _get_params_for_ws(self,img,pos):
-        params = {}
-        if hasattr(self.ws, 'VT_need'):
-            if 'pos' in self.ws.VT_need:
-                params['pos'] = pos
-            if 'ybests' in self.ws.VT_need:
-                params['y_bbid'] = self._get_best_bid(img)
-                params['y_bask'] = self._get_best_ask(img)
-            if 'profit' in self.ws.VT_need:
-                p_max,p_min = self._get_profit(img)
-                params['p_max'] = p_max
-                params['p_min'] = p_min
-            if 'loss' in self.ws.VT_need:
-                l_max,l_min = self._get_loss(img)
-                params['l_max'] = l_max
-                params['l_min'] = l_min
-            if 'price_step' in self.ws.VT_need:
-                params['price_step'] = self.price_step
-        return params
+    def _get_params_for_ws(self,img,symbol):
+        tdata = {}
+        needs_info = self.wss[symbol].needs_info
+        if needs_info is not None:
+            if 'pos' in tdata:
+                ...
+        return tdata
 
 
     def run(self,img):
@@ -683,34 +677,35 @@ class VT7:
             time_mode = self._check_time()
             if time_mode == 0:
                 return
-            self._check_z_tape(img)
-            df = self._get_df(img)
-            row = self.ws.get_test_row(df)
-            pos = self._check_position(img)
-            # print(row)
-            level_vt_values = row[row.index.str.contains('level_vt')].values
-            if level_vt_values.size != 0:
-                self._remove_levels()
-                # print(level_vt_values)
-                for lvl in level_vt_values:
-                    self._add_level(10,int(-lvl+self.offset))
-            params = self._get_params_for_ws(img,pos)
-            action = self.ws(row,params)
-            # print(self.name,action)
-            if self.close_on_time:
-                    if time_mode == -1:
-                        action = 'close_all_pw'
-                    elif time_mode == -2:
-                        if action == 'long_pw':
-                            action = 'close_short_pw'
-                        elif action == 'short_pw':
-                            action = 'close_long_pw'
-                    elif time_mode == -3 and self.funding and self.close_ff:
-                        action = 'close_all_pw'
-            if action:
-                self._work_action(action,pos,img)
-            else:
-                self._reset_req()
+            for symbol in self.symbols:
+                self._check_z_tape(img,symbol)
+                tdata = self._get_params_for_ws(img,symbol)
+                pdata = self.wss[symbol].preprocessing(tdata)
+                action = self.wss[symbol](pdata)
+
+                pos = ... #fix it!
+                # print(row)
+                # level_vt_values = row[row.index.str.contains('level_vt')].values
+                # if level_vt_values.size != 0:
+                #     self._remove_levels()
+                #     # print(level_vt_values)
+                #     for lvl in level_vt_values:
+                #         self._add_level(10,int(-lvl+self.offset))
+                # print(self.name,action)
+                if self.close_on_time:
+                        if time_mode == -1:
+                            action = 'close_all'
+                        elif time_mode == -2:
+                            if action == 'open_long':
+                                action = 'close_short'
+                            elif action == 'open_short':
+                                action = 'close_long'
+                        elif time_mode == -3:
+                            action = 'close_all'
+                if action:
+                    self._work_action(action,pos,img)
+                else:
+                    self._reset_req()
 
         except Exception as err:
             self._reset_draw_chart()
