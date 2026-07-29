@@ -1,30 +1,26 @@
 from strategies.BaseEG import BaseEG
 
+# bot_on_ticker = (
+#     (
+#         (BaseEG,tuple()),
+#         ('VTBR1','ETLN1','MTLR1','SGZH1','FIXR1','VSEH1','PRMD1','MRKC1'),
+#      ),
+# )
 
-# wss_u = []
-# configs = generate_combinations((
-#     (6,11),
-#     (6,11),
-#     (30,60),
-#     (30,60),
-#     ('DC',),
-#     ("rsi",),
-#     (0,1),
-#     (0,1)
-# ))
-# for conf in configs:
-#     wss_u.append((PTA4_UNIVERSAL,conf))
-
-bot_on_ticker = (
-    ((BaseEG,tuple()),
-     ('VTBR1','ETLN1','MTLR1','SGZH1','FIXR1','VSEH1','PRMD1','MRKC1'),
-     ),
-)
-
+# A B C D E F G H I J K L M N O P Q R S T U V W X Y Z
+bot_on_ticker = {
+    'ETLN1':(BaseEG,tuple(),1),
+    'FIXR1':(BaseEG,tuple(),1),
+    'MRKC1':(BaseEG,tuple(),1),
+    'MTLR1':(BaseEG,tuple(),1),
+    'PRMD1':(BaseEG,tuple(),1),
+    'SGZH1':(BaseEG,tuple(),1),
+    'VSEH1':(BaseEG,tuple(),1),
+    'VTBR1':(BaseEG,tuple(),1),
+}
 # sleep_group = ()
 
 def init_trader(ticker):
-    for bt in  bot_on_ticker:
-        if ticker in bt[1]:
-            return bt[0]
-    return (BaseEG,tuple())
+    if ticker in bot_on_ticker:
+        return bot_on_ticker[ticker]
+    return (BaseEG,tuple(),1)

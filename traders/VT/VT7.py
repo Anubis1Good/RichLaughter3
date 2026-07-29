@@ -58,7 +58,7 @@ class VT7:
         self.wss: dict[str, BaseEG] = dict()
         for symbol in self.symbols:
             ws = init_trader(symbol)
-            self.wss[symbol] = ws[0](symbol,ws[1])
+            self.wss[symbol] = ws[0](symbol,self.price_step,ws[2],ws[1])
         now = datetime.now()
         cwd = now.weekday()
         self.close_on_time = close_on_time
