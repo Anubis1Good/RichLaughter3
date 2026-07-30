@@ -1,5 +1,5 @@
 from strategies.BaseEG import BaseEG
-
+from for_strategies.classic_indicators import add_donchan_channel
 
 class PEG2_BDDC_FIX(BaseEG):
     def __init__(self, symbol='Test', price_step=None, mult_ps=1, stop=None, take=None):
@@ -29,3 +29,25 @@ class PEG2_BDDC_FIX(BaseEG):
 #         if row['high'] > row['avarege']:
 #             return "close_short_pw"
 
+class PEG2_DDCrWork(BaseEG):
+    "stop=None, take=None,period=20"
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, stop=None, take=None,period=20):
+        super().__init__(symbol, price_step, mult_ps, stop, take)
+        self.needs_info = {'chart':self.symbol}
+        self.period = period
+
+    def preprocessing(self,tdata):
+        df = tdata['chart']
+        df = add_donchan_channel(df,self.period)
+        df = self.add_slice_df(df,self.period)
+        return df
+    
+    def get_raw_action(self,pdata):
+        row = self.get_test_row(pdata)
+        nearest_long = row['high'] - row['close'] > row['close'] - row['low'] 
+        if row['low'] <= row['min_hb']:
+            if nearest_long:
+                return 'open_long'
+        if row['high'] >= row['max_hb']:
+            return 'open_short'
+    

@@ -8,16 +8,34 @@ class BaseEG:
         self.mult_ps = mult_ps
         self.stop = stop
         self.take = take
-        self.needs_info = None # {'chart':(self.symbol,),'tape':(self.symbol,),'pos':(self.symbol,),}
-        self.levels = None # {self.symbol:(390,455)}
+        self.needs_info = None 
+        """self.needs_info = {
+        'chart':True,
+        'charts':(self.symbol,),
+        'tapes':(self.symbol,),
+        'poss':(self.symbol,),}
+        """
         self.can_long = True
         self.can_short = True
+        self.type_eg = 0 # 0 - D-ws, 1 - BD-ws,
 
     def add_slice_df(self, df:pd.DataFrame, period=20):
         df_slice = df.iloc[period+1:]
         df_slice = df_slice.reset_index(drop=True)
         return df_slice
     
+    def get_test_df(self,df):
+        df = self.preprocessing(df)
+        return df
+    
+    def get_test_row(self,df):
+        try:
+            df = self.preprocessing(df)
+            return df.iloc[-1]
+        except Exception:
+            # traceback.print_exc()
+            pass
+
     def check_stop(self,pos,delta):
         if self.stop is not None:
             if delta*self.mult_ps < -self.stop:
@@ -55,12 +73,29 @@ class BaseEG:
 
     # tdata - trading data
     def preprocessing(self,tdata):
+        '''Передаем все данные, что нужны датафреймы, списки уровней и т.д.'''
         pdata = {}
         return pdata
     
+    # pdata - processed data
     def get_raw_action(self,pdata):
         return None
     
     # pdata - processed data
-    def __call__(self, pdata, *args, **kwds):
-        return None # {self.symbol: 'close_all'}
+    def __call__(self, pdata,pos,delta, *args, **kwds):
+        action = self.get_raw_action(pdata)
+        if self.type_eg == 0:
+            action = self.check_valid_action(action,pos)
+        action = self.check_stop(pos,delta)
+        action = self.check_take(delta)
+        return action # {self.symbol: 'close_all'}
+    
+        # Вариант 1: Для одного инструмента (основной, 99% случаев)
+        # return 'open_long'  # строка
+        
+        # # Вариант 2: Для нескольких инструментов (арбитраж, хедж)
+        # return {self.symbol: 'open_long', self.symbol2: 'close_short'}
+        
+        # # Вариант 3: Сложные действия для одного инструмента
+        # return {self.symbol: ['open_long', 'set_stop_loss']}
+        # _____________________[ стакан 1 ⬆ ,  стакан 2  ⬆  ]

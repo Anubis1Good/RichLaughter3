@@ -69,7 +69,7 @@ class VT7:
             os.makedirs(folder_error)
         self.error_log = dict()
         for symbol in self.symbols:
-            self.error_log[symbol] = os.path.join(folder_error,self.trader_name + '_' + symbols + '.txt')
+            self.error_log[symbol] = os.path.join(folder_error,self.trader_name + '_' + symbol + '.txt')
         self.time_mode = None
 
 
@@ -140,8 +140,6 @@ class VT7:
         chour = now.hour
         cminute = now.minute
         if chour >= 7:
-            if chour == 18 and cminute > 20:
-                return -3
             if chour >= self.close_time[0] - 1:
                 if cminute > self.close_time[1]:
                     if chour >= self.close_time[0]:
@@ -178,9 +176,12 @@ class VT7:
                     pdi.moveTo(glass_region[0]+11,glass_region[1]+11)
                     pdi.press('z')
                     break
-
+    #TODO MUST HAVE
+    def _check_price_limit(self,img,symbol,idx):
+        ...
     
-    def _send_open(self,direction,glass_region):
+    def _send_open(self,direction,symbol,idx):
+        glass_region = self.glass_region[symbol][idx]
         pdi.moveTo(glass_region[0]+11,glass_region[1]+11)
         pdi.press('f')
         if direction == 'long':
@@ -191,14 +192,16 @@ class VT7:
             button = 'f'
         pdi.press(button)
 
-    def _send_close(self,direction,glass_region):
+    def _send_close(self,direction,symbol,idx):
         rev_direction = 'long' if direction == 'short' else 'short'
+        glass_region = self.glass_region[symbol][idx]
         pdi.moveTo(glass_region[0]+11,glass_region[1]+11)
         pdi.press('z')
-        self._send_open(rev_direction,glass_region)
+        self._send_open(rev_direction,symbol,idx)
         pdi.press('z')
 
-    def _reverse_pos(self,direction,glass_region):
+    def _reverse_pos(self,direction,symbol,idx):
+        glass_region = self.glass_region[symbol][idx]
         pdi.moveTo(glass_region[0]+11,glass_region[1]+11)
         pdi.press('f')
         if direction == 'long':
@@ -212,7 +215,8 @@ class VT7:
         pdi.press('z')
         pdi.press(button)
 
-    def _reset_req(self,glass_region):
+    def _reset_req(self,symbol,idx):
+        glass_region = self.glass_region[symbol][idx]
         pdi.moveTo(glass_region[0]+11,glass_region[1]+11)
         pdi.press('f')
 
@@ -223,9 +227,22 @@ class VT7:
         pdi.moveTo(chart_region[0]+dx,chart_region[1]+dy)
         pdi.click()
 
-    def _remove_levels(self,glass_region):
+    def _remove_levels(self,symbol,idx):
+        glass_region = self.glass_region[symbol][idx]
         pdi.moveTo(glass_region[0]+11,glass_region[1]+11)
         pdi.press('o')
+
+    def _add_run_levels(self,pdata,symbol):
+        if 'levels' in pdata:
+            levels = pdata['levels']
+            if isinstance(levels,list):
+                chart_region = self.chart_region[symbol][0]
+                self._remove_levels(symbol,0)
+                offset = self.offset[symbol][0]
+                for lvl in levels:
+                    self._add_level(10,int(-lvl+offset),chart_region)
+            if isinstance(levels,dict):
+                ...
 
     def _reset_draw_chart(self,chart_region):
         pdi.moveTo(chart_region[0]+50,chart_region[1]+50)
@@ -286,26 +303,26 @@ class VT7:
         else:
             self._send_open_level(img,rev_direction,n)
 
-    def _get_region_large(self,img,direction,large_open,large_close):
+    def _get_region_large(self,img,direction,large_open,large_close,symbol,idx):
         level_colors_1= (ColorsBtnBGR.large_value_1,ColorsBtnBGR.large_value_1_level)
         level_colors_2 = (ColorsBtnBGR.large_value_2,ColorsBtnBGR.large_value_2_level)
-        y_max = self._get_best_ask(img)
-        y_min = self._get_best_bid(img)
+        y_max = self._get_best_ask(img,symbol,idx)
+        y_min = self._get_best_bid(img,symbol,idx)
         regions_open,regions_close = [],[]
         regions_colors_1 = []
         regions_colors_2 = []
         if direction == 'short':
             reverse_sort = True
             for level_color in level_colors_1:
-                regions_colors_1 += self._colorarea_search(img,level_color,self.glass_region,y_min=None,y_max=y_max,reverse_sort=reverse_sort)
+                regions_colors_1 += self._colorarea_search(img,level_color,self.glass_region[symbol][idx],y_min=None,y_max=y_max,reverse_sort=reverse_sort)
             for level_color in level_colors_2:
-                regions_colors_2 += self._colorarea_search(img,level_color,self.glass_region,y_min=None,y_max=y_max,reverse_sort=reverse_sort)
+                regions_colors_2 += self._colorarea_search(img,level_color,self.glass_region[symbol][idx],y_min=None,y_max=y_max,reverse_sort=reverse_sort)
         else:
             reverse_sort = False
             for level_color in level_colors_1:
-                regions_colors_1 += self._colorarea_search(img,level_color,self.glass_region,y_min=y_min,y_max=None,reverse_sort=reverse_sort)
+                regions_colors_1 += self._colorarea_search(img,level_color,self.glass_region[symbol][idx],y_min=y_min,y_max=None,reverse_sort=reverse_sort)
             for level_color in level_colors_2:
-                regions_colors_2 += self._colorarea_search(img,level_color,self.glass_region,y_min=y_min,y_max=None,reverse_sort=reverse_sort)
+                regions_colors_2 += self._colorarea_search(img,level_color,self.glass_region[symbol][idx],y_min=y_min,y_max=None,reverse_sort=reverse_sort)
         if '1' in large_open:
             regions_open += regions_colors_1
         if '2' in large_open:
@@ -337,11 +354,11 @@ class VT7:
                 pdi.press('a')
                 # print(self.name,'btn')
 
-    def _send_open_large(self,img,direction,n=1,reverse_pos=False,press_f=True,large_open='',large_close='',main_large_open=True):
-        pdi.moveTo(self.glass_region[0]+11,self.glass_region[1]+11)
+    def _send_open_large(self,img,direction,symbol,idx,n=1,reverse_pos=False,press_f=True,large_open='',large_close='',main_large_open=True):
+        pdi.moveTo(self.glass_region[symbol][idx][0]+11,self.glass_region[symbol][idx][1]+11)
         if press_f:
             pdi.press('f')
-        regions_open,regions_close,y_min,y_max = self._get_region_large(img,direction,large_open,large_close)
+        regions_open,regions_close,y_min,y_max = self._get_region_large(img,direction,large_open,large_close,symbol,idx)
         if main_large_open:
             n_req = min(n,len(regions_open))
             main_region = regions_open
@@ -362,19 +379,19 @@ class VT7:
                 traceback.print_exc()
                 pass
 
-    def _send_open_all_large(self,img,n=1,large_open='',large_close=''):
-        self._send_open_large(img,'long',n,press_f=True,large_open=large_open,large_close=large_close)
-        self._send_open_large(img,'short',n,press_f=False,large_open=large_open,large_close=large_close)
+    def _send_open_all_large(self,img,symbol,idx,n=1,large_open='',large_close=''):
+        self._send_open_large(img,'long',symbol,idx,n,press_f=True,large_open=large_open,large_close=large_close)
+        self._send_open_large(img,'short',symbol,idx,n,press_f=False,large_open=large_open,large_close=large_close)
 
-    def _send_close_large(self,img,direction,n=1,use_z=True,large_open='',large_close=''):
-        pdi.moveTo(self.glass_region[0]+11,self.glass_region[1]+11)
+    def _send_close_large(self,img,direction,symbol,idx,n=1,use_z=True,large_open='',large_close=''):
+        pdi.moveTo(self.glass_region[symbol][idx][0]+11,self.glass_region[symbol][idx][1]+11)
         rev_direction = 'long' if direction == 'short' else 'short'
         if use_z:
             pdi.press('z')
-            self._send_open_large(img,rev_direction,1,large_open=large_open,large_close=large_close,main_large_open=False)
+            self._send_open_large(img,rev_direction,symbol,idx,1,large_open=large_open,large_close=large_close,main_large_open=False)
             pdi.press('z')
         else:
-            self._send_open_large(img,rev_direction,n,large_open=large_open,large_close=large_close,main_large_open=False)
+            self._send_open_large(img,rev_direction,symbol,idx,n,large_open=large_open,large_close=large_close,main_large_open=False)
 
 
     def _get_region(self,img,region):
@@ -521,6 +538,40 @@ class VT7:
                 return y_min
         return y_test
     
+    def _get_delta_p(self,img,symbol,idx,poss):
+        ps = self.price_step
+        pos = poss[symbol][idx]
+        y_bask = self._get_best_ask(img,symbol,idx)
+        y_bbid = self._get_best_bid(img,symbol,idx)
+        p_max,p_min = self._get_profit(img,symbol,idx)
+        l_max,l_min = self._get_loss(img,symbol,idx)
+        if pos == 1: #long
+            if y_bask > 0:
+                if p_max != -1:
+                    enter_price = p_max
+                elif l_min != -1:
+                    enter_price = l_min
+                else:
+                    return None
+                delta_p = (enter_price - y_bask) // ps
+                return delta_p
+            else:
+                return None
+        elif pos == -1: #short
+            if y_bbid > 0:
+                if p_min != -1:
+                    enter_price = p_min
+                elif l_max != -1:
+                    enter_price = l_max
+                else:
+                    return None
+                delta_p = (y_bbid - enter_price) // ps
+                return delta_p
+            else:
+                return None
+        else:
+            return None
+    
     def _large_init(self,action:str):
         # sample 'all_spred_large_o2_c12_2'
         n = action.split('_')[-1]
@@ -540,50 +591,51 @@ class VT7:
             n = None
         return n,large_open,large_close
 
-    def _work_large_action(self,action,pos,img):
+    #TODO Отрефакторить
+    def _work_large_action(self,action,pos,img,symbol,idx):
         n,large_open,large_close = self._large_init(action)
         # print(self.name,n,large_open,large_close)
         if n is not None:
             use_z = False if 'danger' in action else True
             if 'close' in action:
                 if 'long' in action or 'all' in action and pos == 1:
-                    self._send_close_large(img,'long',n,use_z,large_open=large_open,large_close=large_close)
+                    self._send_close_large(img,'long',symbol,idx,n,use_z,large_open=large_open,large_close=large_close)
                 elif 'short' in action or 'all' in action and pos == -1:
-                    self._send_close_large(img,'short',n,use_z,large_open=large_open,large_close=large_close)
+                    self._send_close_large(img,'short',symbol,idx,n,use_z,large_open=large_open,large_close=large_close)
                 else:
-                    self._reset_req()
+                    self._reset_req(symbol,idx)
             elif 'spred' in action:
                 if 'long' in action:
                     if pos == -1:
-                        self._send_open_large(img,'long',n,True,large_open=large_open,large_close=large_close)
+                        self._send_open_large(img,'long',symbol,idx,n,True,large_open=large_open,large_close=large_close)
                     elif pos == 0:
-                        self._send_open_large(img,'long',n,large_open=large_open,large_close=large_close)
+                        self._send_open_large(img,'long',symbol,idx,n,large_open=large_open,large_close=large_close)
                     else:
-                        self._send_close_large(img,'long',n,use_z,large_open=large_open,large_close=large_close)
+                        self._send_close_large(img,'long',symbol,idx,n,use_z,large_open=large_open,large_close=large_close)
                 if 'short' in action:
                     if pos == 1:
-                        self._send_open_large(img,'short',n,True,large_open=large_open,large_close=large_close)
+                        self._send_open_large(img,'short',symbol,idx,n,True,large_open=large_open,large_close=large_close)
                     elif pos == 0:
-                        self._send_open_large(img,'short',n,large_open=large_open,large_close=large_close)
+                        self._send_open_large(img,'short',symbol,idx,n,large_open=large_open,large_close=large_close)
                     else:
-                        self._send_close_large(img,'short',n,use_z,large_open=large_open,large_close=large_close)
+                        self._send_close_large(img,'short',symbol,idx,n,use_z,large_open=large_open,large_close=large_close)
             elif 'long' in action:
                 if pos == -1:
-                    self._send_open_large(img,'long',n,True,large_open=large_open,large_close=large_close)
+                    self._send_open_large(img,'long',symbol,idx,n,True,large_open=large_open,large_close=large_close)
                 if pos == 0:
-                    self._send_open_large(img,'long',n,large_open=large_open,large_close=large_close)
+                    self._send_open_large(img,'long',symbol,idx,n,large_open=large_open,large_close=large_close)
             elif 'short' in action:
                 if pos == 1:
-                    self._send_open_large(img,'short',n,True,large_open=large_open,large_close=large_close)
+                    self._send_open_large(img,'short',symbol,idx,n,True,large_open=large_open,large_close=large_close)
                 if pos == 0:
-                    self._send_open_large(img,'short',n,large_open=large_open,large_close=large_close)
+                    self._send_open_large(img,'short',symbol,idx,n,large_open=large_open,large_close=large_close)
             elif 'all' in action:
                 if pos == -1:
-                    self._send_open_large(img,'long',n,True,large_open=large_open,large_close=large_close)
+                    self._send_open_large(img,'long',symbol,idx,n,True,large_open=large_open,large_close=large_close)
                 elif pos == 1:
-                    self._send_open_large(img,'short',n,True,large_open=large_open,large_close=large_close)
+                    self._send_open_large(img,'short',symbol,idx,n,True,large_open=large_open,large_close=large_close)
                 else:
-                    self._send_open_all_large(img,n,large_open=large_open,large_close=large_close)
+                    self._send_open_all_large(img,symbol,idx,n,large_open=large_open,large_close=large_close)
 
     def _work_level_action(self,action,pos,img):
         n = action.split('_')[-1]
@@ -619,39 +671,40 @@ class VT7:
                     self._send_open_all_level(img,n)
             print(self.name,pos,action)
 
-    def _work_action(self,action,pos,img):
+    def _work_action(self,action,pos,img,symbol,idx):
         # print(self.name,pos,action)
         if 'large' in action:
-            self._work_large_action(action,pos,img)
+            self._work_large_action(action,pos,img,symbol,idx)
         elif 'level' in action:
-            self._work_level_action(action,pos,img)
+            # self._work_level_action(action,pos,img)
+            self._reset_req(symbol,idx)
         elif 'close_long' in action:
             if pos == 1:
-                self._send_close('long')
+                self._send_close('long',symbol,idx)
             else:
-                self._reset_req()
+                self._reset_req(symbol,idx)
         elif 'close_short' in action:
             if pos == -1:
-                self._send_close('short')
+                self._send_close('short',symbol,idx)
             else:
-                self._reset_req()
-        elif 'long' in action:
+                self._reset_req(symbol,idx)
+        elif 'open_long' in action:
             if pos == -1:
-                self._reverse_pos('long')
+                self._reverse_pos('long',symbol,idx)
             if pos == 0:
-                self._send_open('long')
-        elif 'short' in action:
+                self._send_open('long',symbol,idx)
+        elif 'open_short' in action:
             if pos == 1:
-                self._reverse_pos('short')
+                self._reverse_pos('short',symbol,idx)
             if pos == 0:
-                self._send_open('short')
+                self._send_open('short',symbol,idx)
         elif 'close_all' in action:
             if pos == -1:
-                self._send_close('short')
+                self._send_close('short',symbol,idx)
             elif pos == 1:
-                self._send_close('long')
+                self._send_close('long',symbol,idx)
             else:
-                self._reset_req()
+                self._reset_req(symbol,idx)
         elif 'test' in action:
             ...
             # print(self.glass_region)
@@ -663,55 +716,75 @@ class VT7:
             # self._add_level(100,100)
         # else:
         #     print('None work')
-    def _get_params_for_ws(self,img,symbol):
+    def _get_params_for_ws(self,img,symbol,poss,delta_p):
         tdata = {}
         needs_info = self.wss[symbol].needs_info
         if needs_info is not None:
-            if 'pos' in tdata:
-                ...
+            if 'chart' in needs_info:
+                tdata['chart'] = self._get_df(img,symbol,0)
+            if 'charts' in needs_info:
+                tdata['charts'] = {}
+                for s in needs_info['charts']:
+                    tdata['charts'][s] = []
+                    for i in range(len(self.chart_region[s])):
+                        df = self._get_df(img,s,i)
+                        tdata['charts'][s].append(df)         
         return tdata
 
+    def _check_close_on_time(self,action,time_mode):
+        if self.close_on_time:
+            if time_mode == -1:
+                action = 'close_all'
+            elif time_mode == -2:
+                if action == 'open_long':
+                    action = 'close_short'
+                elif action == 'open_short':
+                    action = 'close_long'
+            elif time_mode == -3:
+                action = 'close_all'
+        return action
 
     def run(self,img):
+        symbol = None
         try:
             time_mode = self._check_time()
             if time_mode == 0:
                 return
+            
+            poss = {symbol: [self._check_position(img, region) for region in regions] 
+                for symbol, regions in self.position_region.items()}
+            delta_p = {symbol: [self._get_delta_p(img, symbol, idx, poss) 
+                                for idx in range(len(regions))]
+                for symbol, regions in self.position_region.items()}
+            
             for symbol in self.symbols:
                 self._check_z_tape(img,symbol)
-                tdata = self._get_params_for_ws(img,symbol)
-                pdata = self.wss[symbol].preprocessing(tdata)
-                action = self.wss[symbol](pdata)
 
-                pos = ... #fix it!
-                # print(row)
-                # level_vt_values = row[row.index.str.contains('level_vt')].values
-                # if level_vt_values.size != 0:
-                #     self._remove_levels()
-                #     # print(level_vt_values)
-                #     for lvl in level_vt_values:
-                #         self._add_level(10,int(-lvl+self.offset))
-                # print(self.name,action)
-                if self.close_on_time:
-                        if time_mode == -1:
-                            action = 'close_all'
-                        elif time_mode == -2:
-                            if action == 'open_long':
-                                action = 'close_short'
-                            elif action == 'open_short':
-                                action = 'close_long'
-                        elif time_mode == -3:
-                            action = 'close_all'
-                if action:
-                    self._work_action(action,pos,img)
-                else:
-                    self._reset_req()
+                tdata = self._get_params_for_ws(img,symbol,poss,delta_p)
+                pdata = self.wss[symbol].preprocessing(tdata)
+                self._add_run_levels(pdata,symbol)
+
+                pos = poss[symbol][0]
+                delta = delta_p[symbol][0]
+                action = self.wss[symbol](pdata,pos,delta)
+                if isinstance(action, str):
+                    action = self._check_close_on_time(action,time_mode)
+                    if action:
+                        self._work_action(action,pos,img,symbol,0)
+                    else:
+                        self._reset_req(self.glass_region[symbol][0])
+
+                elif isinstance(action,dict):
+                    ...
 
         except Exception as err:
-            self._reset_draw_chart()
-            print(self.name)
+            print(self.symbols)
             print(f"!!!! {type(err).__name__}: {err} !!!!")
-            with open(self.error_log,'a',encoding="utf-8") as f:
-                f.write(str(datetime.now()) + "\n")
-                f.write('\n')
-                f.write(traceback.format_exc() + "\n")
+            if symbol is not None:
+                print(symbol)
+                for chart_region in self.chart_region[symbol]:
+                    self._reset_draw_chart(chart_region)
+                with open(self.error_log[symbol],'a',encoding="utf-8") as f:
+                    f.write(str(datetime.now()) + "\n")
+                    f.write('\n')
+                    f.write(traceback.format_exc() + "\n")
