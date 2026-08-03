@@ -30,15 +30,15 @@ class BaseEG:
     
     def get_test_row(self,df):
         try:
-            df = self.preprocessing(df)
             return df.iloc[-1]
         except Exception:
             # traceback.print_exc()
             pass
 
     def check_stop(self,pos,delta,action):
+        # delta положительная, если мы в плюсе и отрицательная, если в минусе.
         if self.stop is not None and delta is not None:
-            if delta*self.mult_ps < -self.stop:
+            if delta*self.mult_ps <= -self.stop:
                 if pos > 0:
                     self.can_long = False
                     return 'close_long'
@@ -49,7 +49,7 @@ class BaseEG:
 
     def check_take(self,delta,action):
         if self.take is not None and delta is not None:
-            if delta > self.take:
+            if delta >= self.take:
                 return 'close_all'
         return action
 

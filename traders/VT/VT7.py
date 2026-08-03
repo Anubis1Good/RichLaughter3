@@ -178,7 +178,7 @@ class VT7:
                     pdi.moveTo(glass_region[0]+11,glass_region[1]+11)
                     pdi.press('z')
                     break
-    #TODO MUST HAVE
+
     def _check_price_limit(self,img,symbol,idx):
         glass_region = self.glass_region[symbol][idx]
         x,y = self._color_search(img,ColorsBtnBGR.price_limit_bid,glass_region)
@@ -725,8 +725,24 @@ class VT7:
             else:
                 self._send_open('all',symbol,idx)
         elif 'test' == action:
-            print(self.symbols)
-            print(symbol)
+            # print(self.symbols)
+            # print(symbol,pos)
+            ...
+    # TODO Исправить проблемы large для tm == -2
+    def _check_close_on_time(self,action,time_mode):
+        if self.close_on_time:
+            if time_mode == -1:
+                action = 'close_all'
+            elif time_mode == -2:
+                if action == 'open_long':
+                    action = 'close_short'
+                elif action == 'open_short':
+                    action = 'close_long'
+                elif 'large' in action: #TODO протестировать, как large себя ведет в ситуации с о0
+                    action = re.sub(r'o\d+', 'o0', action)
+            elif time_mode == -3:
+                action = 'close_all'
+        return action
 
     def _get_params_for_ws(self,img,symbol,poss,delta_p):
         tdata = {}
@@ -742,19 +758,7 @@ class VT7:
                         df = self._get_df(img,s,i)
                         tdata['charts'][s].append(df)         
         return tdata
-
-    def _check_close_on_time(self,action,time_mode):
-        if self.close_on_time:
-            if time_mode == -1:
-                action = 'close_all'
-            elif time_mode == -2:
-                if action == 'open_long':
-                    action = 'close_short'
-                elif action == 'open_short':
-                    action = 'close_long'
-            elif time_mode == -3:
-                action = 'close_all'
-        return action
+    
 
     def run(self,img):
         if not self.can_work:
@@ -780,16 +784,17 @@ class VT7:
                 pos = poss[symbol][0]
                 delta = delta_p[symbol][0]
                 action = self.wss[symbol](pdata,pos,delta)
-                print(symbol,action) #None?
-                if isinstance(action, str):
+                print(symbol,action)    
+                if isinstance(action, str) or action is None:
                     action = self._check_close_on_time(action,time_mode)
                     price_limit = self._check_price_limit(img,symbol,0)
                     if price_limit != 0:
                         action = 'close_all'
+                        print(symbol,price_limit)
                     if action:
                         self._work_action(action,pos,img,symbol,0)
                     else:
-                        self._reset_req(self.glass_region[symbol][0])
+                        self._reset_req(symbol,0)
                     print(symbol,action)
                 elif isinstance(action,dict):
                     ...

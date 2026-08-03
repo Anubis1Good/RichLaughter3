@@ -37,17 +37,18 @@ class PEG2_DDCrWork(BaseEG):
         self.period = period
 
     def preprocessing(self,tdata):
+        pdata = {}
         df = tdata['chart']
         df = add_donchan_channel(df,self.period)
         df = self.add_slice_df(df,self.period)
-        return df
+        pdata['chart'] = df
+        return pdata
     
     def get_raw_action(self,pdata):
-        row = self.get_test_row(pdata)
-        nearest_long = row['high'] - row['close'] > row['close'] - row['low'] 
-        if row['low'] <= row['min_hb']:
-            if nearest_long:
-                return 'open_long'
-        if row['high'] >= row['max_hb']:
+        row = self.get_test_row(pdata['chart'])
+        nearest_long = row['high'] - row['close'] > row['close'] - row['low']
+        if row['low'] <= row['min_hb'] and nearest_long:
+            return 'open_long'
+        if row['high'] >= row['max_hb'] and not nearest_long:
             return 'open_short'
     

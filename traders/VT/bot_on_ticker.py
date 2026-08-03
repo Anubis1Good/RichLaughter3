@@ -1,11 +1,14 @@
 from strategies.BaseEG import BaseEG
 from strategies.helpEGs.helpEG import TestEG
 from strategies.PEGs.PEG1_9 import PEG2_DDCrWork
+from strategies.PEGs.PEG30_39 import PEG30_RAYNOR
 
 # A B C D E F G H I J K L M N O P Q R S T U V W X Y Z
 bot_on_ticker = {
-    'ETLN1':(TestEG,tuple(),1),
-    'FIXR1':(TestEG,tuple(),1),
+    # 'ETLN1':(TestEG,tuple(),1),
+    'ETLN1':(PEG30_RAYNOR,(5,1),1),
+    # 'FIXR1':(TestEG,tuple(),1),
+    'FIXR1':(PEG2_DDCrWork,(3,3,7),1),
     'MRKC1':(TestEG,tuple(),1),
     # 'MTLR1':(PEG2_DDCrWork,(30,25,20),2),
     'MTLR1':(TestEG,tuple(),1),
