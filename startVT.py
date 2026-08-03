@@ -3,7 +3,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPainter, QPen, QColor
 from PyQt5.QtWidgets import QApplication,QWidget,QListWidget,QPushButton,QHBoxLayout,QVBoxLayout,QLabel
 
-from traders.VT.utils import get_pages,get_configuration_traiders
+from traders.VT.utils import get_pages,get_configuration_traiders,open_configuration_traiders
 from traders.VT.sgs import stock_groups
 from traders.VT.tradeVTs import TradeWorker
 
@@ -165,9 +165,7 @@ class MainWindow(QWidget):
             pass
         else:
             file = os.path.join(self.config_folder, self.cur_config)
-            lines,price_step= get_configuration_traiders(file)
-
-            self.worker = TradeWorker(self.cur_sg, lines,False,price_step)
+            self.worker = TradeWorker(self.cur_sg, file)
 
             self.worker.finished.connect(self.on_worker_finished)
             self.worker.start()
@@ -221,7 +219,8 @@ class MainWindow(QWidget):
 
     def show_overlay(self):
         file = os.path.join(self.config_folder,self.cur_config)
-        conf_data = get_configuration_traiders(file,self.cur_page)
+        data = open_configuration_traiders(file)
+        conf_data = get_configuration_traiders(data,self.cur_page)
             
         if not self.overlay:
             self.draw_btn.setText('StopDraw')

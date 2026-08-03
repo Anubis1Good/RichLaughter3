@@ -1,0 +1,22 @@
+{
+    "base":{
+        "doms":[
+            {
+                "direction": "row",
+                "dom_field_xyxy":[1,55,1917,516],
+                "f_cluster_e_x":106,
+                "f_tape_se_xx":[110,355],
+                "f_glass_s_x":360
+        }
+    ],
+        "charts":[
+            {
+                "direction":"row",
+                "field":[1,551,1917,1000]
+        }
+    ],
+        "amount": 4,
+        "price_step":12,
+        "pos_offset":25
+    }
+}

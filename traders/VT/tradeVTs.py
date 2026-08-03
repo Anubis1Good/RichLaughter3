@@ -1,67 +1,63 @@
 import shutil
-# import os
-# import sys
 import keyboard
 import cv2
 import pyautogui as pag
 import numpy as np
-# from time import sleep
+import json
 from PyQt5.QtCore import QThread, pyqtSignal,QMutex
-# from Traders.VT.VT5 import VT5
 from traders.VT.VT7 import VT7 as VT
-from traders.VT.bot_on_ticker import init_trader
 from traders.VT.sgs import stock_groups
+from traders.VT.utils import get_pages,get_configuration_traiders
 
 error_folder = '_logs\error_logsVT'
 
 
 class TradeWorker(QThread):
     update_signal = pyqtSignal(str)
-    def __init__(self, sg_key,param_bots,file_istxt,price_step):
+    def __init__(self, sg_key,file):
         super().__init__()
         self.sg_key = sg_key  # Сохраняем параметры
-        self.price_step = price_step
-        self.param_bots = param_bots
-        self.grid = not file_istxt
+        self.file  = file
         self._active = True  # Дополнительный флаг контроля
         self._lock = QMutex()  # Для thread-safe операций
+
     def stop(self):
         self._lock.lock()
         self._active = False
         self._lock.unlock()
         self.requestInterruption()
 
+    def get_full_config(self):
+        with open(self.file, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            raw_pages = {}
+            unique_pages = {}
+            for raw_page in data:
+                raw_pages[raw_page] = get_configuration_traiders(data, raw_page)
+                if raw_page != 'base':
+                    pages = raw_page.split('_')
+                    for page in pages:
+                        unique_pages[int(page)] = raw_page
+            return raw_pages,unique_pages
+
     def run(self,):
         try:
             shutil.rmtree(error_folder)
         except Exception as e:
             pass
-        if self.grid:
-            self.work_traders:list[list[VT]]=[]
-        else:
-            self.work_traders:list[VT] = []
+        self.work_traders:list[VT] = []
         sg = stock_groups[self.sg_key]
-            
-        for s in sg:
-            if self.grid:
-                traders = []
-                for i in range(len(s)):
-                    ws,close18 = init_trader(s[i])
-                    glass:tuple = self.param_bots[0+5*i]
-                    chart:tuple = self.param_bots[1+5*i]
-                    position:tuple = self.param_bots[2+5*i]
-                    tape:tuple = self.param_bots[3+5*i]
-                    cluster:tuple = self.param_bots[4+5*i]
-                    price_step = self.price_step
-                    trader = VT(glass,chart,position,tape,cluster,price_step,s[i],ws)
-                    traders.append(trader)
-                self.work_traders.append(traders)
+        raw_pages,unique_pages = self.get_full_config()
+        # print(raw_pages)
+        # print(unique_pages)
+        for idx,s in enumerate(sg):
+            if idx in unique_pages:
+                conf_data = raw_pages[unique_pages[idx]]
             else:
-                ws,close18 = init_trader(s)
-                # if self.sg_key == 'TS':
-                #     s = s[:-1]
-                trader = VT(*self.param_bots,s,ws)
-                self.work_traders.append(trader)
+                conf_data = raw_pages['base']
+            trader = VT(conf_data,s)
+            self.work_traders.append(trader)
+
         self.msleep(3000)
         while not self.isInterruptionRequested():
             self._lock.lock()
@@ -84,23 +80,11 @@ class TradeWorker(QThread):
             keyboard.send('shift')
             if self.isInterruptionRequested():
                 return
-            # pag.screenshot('Traders\VT\Screen.png')
-            # img = cv2.imread('Traders\VT\Screen.png')
-            # if self.grid:
-            #     for _wt in wt:
-            #         _wt._reset_draw_chart()
-            # else:
-            #     wt._reset_draw_chart()
+
             img = np.array(pag.screenshot()) 
             img = cv2.cvtColor(img,cv2.COLOR_RGB2BGR)
             # cv2.imwrite('test.png',img)
-            if self.grid:
-                for _wt in wt:
-                    _wt.run(img)
-                    pag.moveTo(_wt.glass_region[0]+10,_wt.glass_region[1]+10)
-            else:
-                wt.run(img)
-                pag.moveTo(wt.glass_region[0]+10,wt.glass_region[1]+10)
+            wt.run(img)
             if keyboard.is_pressed('Esc'):
                 print("\nyou pressed Esc, so exiting...")
                 self.requestInterruption()  # Устанавливаем флаг прерывания

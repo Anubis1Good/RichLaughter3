@@ -11,7 +11,7 @@ stock_groups= {
     #     'QIWI',
     #     'LSRG',
     # ),
-    'GRID_test': (
+    'MAIN_PC_TEST': (
         ['VTBR1','ETLN1','MTLR1','SGZH1'],
         ['FIXR1','VSEH1','PRMD1','MRKC1'],
     )

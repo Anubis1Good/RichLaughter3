@@ -5,6 +5,7 @@ apimoex
 opencv-python
 optuna
 PyDirectInput
+pyautogui
 keyboard
 openpyxl
 xlsxwriter

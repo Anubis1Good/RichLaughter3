@@ -8,8 +8,8 @@ action = (
     'close_short',
     'close_all',
 
-    'stop_long',
-    'stop_short',
+    # 'stop_long',
+    # 'stop_short',
 
     'open_long_large',
     'open_short_large',

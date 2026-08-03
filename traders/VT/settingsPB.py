@@ -7,6 +7,9 @@ class ColorsBtnBGR:
     best_bid = (100, 117, 66) #and long pos
     best_ask_level = (136,80,162)
     best_bid_level = (135,103,96)
+
+    price_limit_ask = (77,68,111) #верхняя планка
+    price_limit_bid = (77,85,60) #нижняя планка
     
     large_value_1 = (198, 140, 48)
     large_value_2 = (178, 201, 45)

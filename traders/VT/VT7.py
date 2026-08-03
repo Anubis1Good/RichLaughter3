@@ -6,7 +6,6 @@ import cv2
 import pandas as pd
 import numpy as np
 import numpy.typing as npt
-from time import time
 from datetime import datetime
 import pydirectinput as pdi
 from traders.VT.settingsPB import ColorsBtnBGR,TemplateCandle
@@ -58,7 +57,7 @@ class VT7:
         self.wss: dict[str, BaseEG] = dict()
         for symbol in self.symbols:
             ws = init_trader(symbol)
-            self.wss[symbol] = ws[0](symbol,self.price_step,ws[2],ws[1])
+            self.wss[symbol] = ws[0](symbol,self.price_step,ws[2],*ws[1])
         now = datetime.now()
         cwd = now.weekday()
         self.close_on_time = close_on_time
@@ -72,14 +71,17 @@ class VT7:
             self.error_log[symbol] = os.path.join(folder_error,self.trader_name + '_' + symbol + '.txt')
         self.time_mode = None
 
-
+    # Переделал, надо проверить!
     def _color_search(self,img:npt.ArrayLike,color:tuple[int],region:tuple[int]=(None,None,None,None),reverse:bool=False):
         try:
+            roi = img[region[1]:region[3], region[0]:region[2]]
             result = np.argwhere(
-                (img[region[1]:region[3],region[0]:region[2],0] == color[0])& 
-                (img[region[1]:region[3],region[0]:region[2],1] == color[1])& 
-                (img[region[1]:region[3],region[0]:region[2],2] == color[2])
+                (roi[:,:,0] == color[0]) & (roi[:,:,1] == color[1]) & (roi[:,:,2] == color[2])
             )
+
+            if len(result) == 0:
+                return -1, -1
+            
             y = -1 if reverse else 0
             if region[0]:
                 return result[y,1]+region[0], result[y,0]+region[1]
@@ -178,7 +180,14 @@ class VT7:
                     break
     #TODO MUST HAVE
     def _check_price_limit(self,img,symbol,idx):
-        ...
+        glass_region = self.glass_region[symbol][idx]
+        x,y = self._color_search(img,ColorsBtnBGR.price_limit_bid,glass_region)
+        if x >= 0:
+            return 1
+        x,y = self._color_search(img,ColorsBtnBGR.price_limit_ask,glass_region)
+        if x >= 0:
+            return -1
+        return 0
     
     def _send_open(self,direction,symbol,idx):
         glass_region = self.glass_region[symbol][idx]
@@ -187,6 +196,9 @@ class VT7:
         if direction == 'long':
             button = 'a'
         elif direction == 'short':
+            button = 's'
+        elif direction == 'all':
+            pdi.press('a')
             button = 's'
         else:
             button = 'f'
@@ -678,44 +690,44 @@ class VT7:
         elif 'level' in action:
             # self._work_level_action(action,pos,img)
             self._reset_req(symbol,idx)
-        elif 'close_long' in action:
+        elif 'close_long' == action:
             if pos == 1:
                 self._send_close('long',symbol,idx)
             else:
                 self._reset_req(symbol,idx)
-        elif 'close_short' in action:
+        elif 'close_short' == action:
             if pos == -1:
                 self._send_close('short',symbol,idx)
             else:
                 self._reset_req(symbol,idx)
-        elif 'open_long' in action:
+        elif 'open_long' == action:
             if pos == -1:
                 self._reverse_pos('long',symbol,idx)
-            if pos == 0:
+            elif pos == 0:
                 self._send_open('long',symbol,idx)
-        elif 'open_short' in action:
+        elif 'open_short' == action:
             if pos == 1:
                 self._reverse_pos('short',symbol,idx)
-            if pos == 0:
+            elif pos == 0:
                 self._send_open('short',symbol,idx)
-        elif 'close_all' in action:
+        elif 'close_all' == action:
             if pos == -1:
                 self._send_close('short',symbol,idx)
             elif pos == 1:
                 self._send_close('long',symbol,idx)
             else:
                 self._reset_req(symbol,idx)
-        elif 'test' in action:
-            ...
-            # print(self.glass_region)
-            # print(self.chart_region)
-            # print(self.position_region)
-            # print(self.name)
-            # print(self.ws)
-            # self._remove_levels()
-            # self._add_level(100,100)
-        # else:
-        #     print('None work')
+        elif 'open_all' == action: #NEED TEST
+            if pos == -1:
+                self._reverse_pos('long',symbol,idx)
+            elif pos == 1:
+                self._reverse_pos('short',symbol,idx)
+            else:
+                self._send_open('all',symbol,idx)
+        elif 'test' == action:
+            print(self.symbols)
+            print(symbol)
+
     def _get_params_for_ws(self,img,symbol,poss,delta_p):
         tdata = {}
         needs_info = self.wss[symbol].needs_info
@@ -745,6 +757,8 @@ class VT7:
         return action
 
     def run(self,img):
+        if not self.can_work:
+            return
         symbol = None
         try:
             time_mode = self._check_time()
@@ -759,7 +773,6 @@ class VT7:
             
             for symbol in self.symbols:
                 self._check_z_tape(img,symbol)
-
                 tdata = self._get_params_for_ws(img,symbol,poss,delta_p)
                 pdata = self.wss[symbol].preprocessing(tdata)
                 self._add_run_levels(pdata,symbol)
@@ -767,13 +780,17 @@ class VT7:
                 pos = poss[symbol][0]
                 delta = delta_p[symbol][0]
                 action = self.wss[symbol](pdata,pos,delta)
+                print(symbol,action) #None?
                 if isinstance(action, str):
                     action = self._check_close_on_time(action,time_mode)
+                    price_limit = self._check_price_limit(img,symbol,0)
+                    if price_limit != 0:
+                        action = 'close_all'
                     if action:
                         self._work_action(action,pos,img,symbol,0)
                     else:
                         self._reset_req(self.glass_region[symbol][0])
-
+                    print(symbol,action)
                 elif isinstance(action,dict):
                     ...
 

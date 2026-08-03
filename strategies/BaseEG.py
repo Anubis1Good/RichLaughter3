@@ -36,20 +36,22 @@ class BaseEG:
             # traceback.print_exc()
             pass
 
-    def check_stop(self,pos,delta):
-        if self.stop is not None:
+    def check_stop(self,pos,delta,action):
+        if self.stop is not None and delta is not None:
             if delta*self.mult_ps < -self.stop:
                 if pos > 0:
                     self.can_long = False
-                    return 'stop_long'
+                    return 'close_long'
                 elif pos < 0:
                     self.can_short = False
-                    return 'stop_short'
+                    return 'close_short'
+        return action
 
-    def check_take(self,delta):
-        if self.take is not None:
+    def check_take(self,delta,action):
+        if self.take is not None and delta is not None:
             if delta > self.take:
                 return 'close_all'
+        return action
 
     def check_valid_action(self,action:str,pos:int):
         if action is not None:
@@ -86,8 +88,8 @@ class BaseEG:
         action = self.get_raw_action(pdata)
         if self.type_eg == 0:
             action = self.check_valid_action(action,pos)
-        action = self.check_stop(pos,delta)
-        action = self.check_take(delta)
+        action = self.check_stop(pos,delta,action)
+        action = self.check_take(delta,action)
         return action # {self.symbol: 'close_all'}
     
         # Вариант 1: Для одного инструмента (основной, 99% случаев)
