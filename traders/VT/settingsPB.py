@@ -16,9 +16,10 @@ class ColorsBtnBGR:
     large_value_1_level = (199,118,84)
     large_value_2_level = (186,158,82)
 
-    color_x = (9,0,255)
-    color_x_shadow = (11,11,175)
-    color_x_bb = (0,0,255)
+    color_x = (0,0,255)
+    color_x_shadow = (11,11,177)
+
+    vacuum_glass = (54,54,54)
 
     cur_price_1 = (96,118,50)
     cur_price_2 = (75,75,173)
