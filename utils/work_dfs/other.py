@@ -1,28 +1,7 @@
-# import cv2
-# from traders.VT.settingsPB import ColorsBtnBGR
-
-# img = cv2.imread('_data_for_tests\screens\Screenshot_52.png')
-# color = ColorsBtnBGR.color_x_shadow
-# # color = (0,0,255)
-# mask = cv2.inRange(img,color,color)
-
-# cv2.imshow('mask',mask)
-# cv2.waitKey(0)
-
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-from utils.work_dfs.load_df import simple_load_df
-# from for_strategies.zigzag_indicators import add_dzz_peaks
-
-
-df = simple_load_df('_data_for_tests\data_stock_1m\MTLR_1_1785876346.parquet')
-
-df.info()
-print(df.tail())
-
 from math import gcd
 from functools import reduce
+import pandas as pd
+import numpy as np
 
 def get_price_step(df, price_cols=['open', 'close', 'high', 'low']):
     """
@@ -85,7 +64,3 @@ def get_price_step(df, price_cols=['open', 'close', 'high', 'low']):
     
     # Возвращаем шаг в исходном масштабе
     return gcd_val / scale
-
-# Использование
-step = get_price_step(df)
-print(f"Минимальный шаг цены: {step}")  # 0.01

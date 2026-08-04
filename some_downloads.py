@@ -15,6 +15,7 @@ for ticker in tickers:
     # loader = ApiMoexLoader(ticker,'RFUD','forts','futures')
     loader = ApiMoexLoader(ticker)
     loader.save_df(start_date,timeframe=1,sformat='parquet',folder_save=folder_save)
+    # loader.save_df(start_date,timeframe=1,sformat='csv',folder_save=folder_save)
 
 
 
