@@ -19,6 +19,7 @@ cegt = CheckEGTrader(
 )
 
 cegt.check_strategy_fast()
+cegt.check_strategy_window()
 # cegt.check_strategy_fast_debug()
 # result_row = cegt.get_statistics()
 # print(result_row)

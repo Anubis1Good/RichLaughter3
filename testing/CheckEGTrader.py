@@ -176,6 +176,11 @@ class CheckEGTrader:
     # CHECKS_FUNCS
     @duration_time
     def check_strategy_fast(self, history_bars=100):
+        """
+        Быстрый тест для оптимизации.
+        Индикаторы рассчитываются один раз на всех данных.
+        Подходит для быстрой проверки множества параметров.
+        """
         self.reload_data()
         
         # Подготавливаем данные через preprocessing
@@ -226,144 +231,68 @@ class CheckEGTrader:
             self.update_step_data(price)
 
     @duration_time
-    def check_strategy_fast_debug(self, history_bars=100, debug_interval=100):
+    def check_strategy_window(self, window=60, normalization=True):
+        """
+        Честный оконный тест для проверки стратегии.
+        Индикаторы пересчитываются на каждом окне независимо.
+        Исключает возможность заглядывания в будущее.
+        """
         self.reload_data()
         
-        # Подготавливаем данные через preprocessing
-        pdata = self.ws.preprocessing(self.tdata)
-        df = pdata['chart']
-        
-        print(f"Total bars in df: {len(df)}")
-        print(f"Columns: {df.columns.tolist()}")
-        print(f"First bar: {df.iloc[0].to_dict()}")
-        print(f"Last bar: {df.iloc[-1].to_dict()}")
-        
-        if self.close_on_time:
-            mask = (df['hour'] >= df['weekday'].map(lambda wd: self.close_map[wd][0])) & \
-                (df['minute'] >= df['weekday'].map(lambda wd: self.close_map[wd][1]))
-            mask_values = mask.values
-            print(f"Close on time mask: {mask.sum()} bars will be closed")
-        else:
-            mask_values = None
-        
-        prices = df['close'].values
-        row_names = df['x'].values
-        
-        # Статистика
-        actions_stats = {}
-        positions_history = []
-        
-        for i in self.get_iterator(range(len(df))):
-            price = prices[i]
-            row_name = row_names[i]
+        for i in self.get_iterator(range(len(self.df))):
+            # Пропускаем первые window баров (нужно для расчета индикаторов)
+            if i < window:
+                self.update_step_data(self.df.iloc[i]['close'])
+                continue
+            
+            # Берем срез окна
+            df_slice = self.df.iloc[i-window:i+1].copy()
+            price = df_slice.iloc[-1]['close']
+            row_name = df_slice.iloc[-1]['x']
             
             # Проверка времени закрытия
-            if self.close_on_time and mask_values is not None and mask_values[i]:
-                signal = self.actions_dict['close_all']
-                action = 'close_all (time)'
-            else:
-                # Берем срез до текущего индекса (не более history_bars)
-                start_idx = max(0, i - history_bars + 1)
-                current_df = df.iloc[start_idx:i+1]
-                
-                current_pdata = {'chart': current_df}
-                
-                # Вычисляем delta только если есть позиция
-                pos = self.trade_data['pos']
-                open_price = self.trade_data['open_price']
-                
-                delta = None
-                if pos != 0 and open_price != 0:
-                    if pos > 0:
-                        delta = (price - open_price) // self.price_step
-                    else:
-                        delta = (open_price - price) // self.price_step
-                
-                action = self.ws(current_pdata, pos, delta)
-                signal = self.actions_dict.get(action, 0)
+            if self.close_on_time:
+                last_row = df_slice.iloc[-1]
+                time_close = self.close_map[last_row['weekday']]
+                if last_row['hour'] >= time_close[0] and last_row['minute'] >= time_close[1]:
+                    signal = self.actions_dict['close_all']
+                    self.work_action(signal, price, row_name)
+                    self.update_step_data(price)
+                    continue
+
+            # Нормализация если нужно
+            if normalization:
+                candle_max = df_slice['high'].max()
+                if candle_max > 0:
+                    df_slice['volume'] = df_slice['volume'] / df_slice['volume'].max() if df_slice['volume'].max() > 0 else 0
+                    df_slice['close'] = df_slice['close'] / candle_max
+                    df_slice['open'] = df_slice['open'] / candle_max
+                    df_slice['low'] = df_slice['low'] / candle_max
+                    df_slice['high'] = df_slice['high'] / candle_max
             
-            # Логируем каждые debug_interval баров
-            if i % debug_interval == 0 or i == len(df) - 1:
-                pos_before = self.trade_data['pos']
-                open_price_before = self.trade_data['open_price']
-                
-                print(f"\n=== Bar {i} ===")
-                print('can long/short:',self.ws.can_long,self.ws.can_short)
-                print(f"  Price: {price}")
-                print(f"  Action: {action}")
-                print(f"  Signal: {signal}")
-                print(f"  Pos before: {pos_before}")
-                print(f"  Open price before: {open_price_before}")
-                print(f"  Delta: {delta}")
-                
-                # Покажем последние значения индикаторов
-                if i > 0 and 'min_hb' in df.columns:
-                    print(f"  min_hb: {df.iloc[i]['min_hb']:.2f}, max_hb: {df.iloc[i]['max_hb']:.2f}")
-                    print(f"  low: {df.iloc[i]['low']:.2f}, high: {df.iloc[i]['high']:.2f}")
-                    print(f"  close: {df.iloc[i]['close']:.2f}")
-                    if 'min_hb' in df.columns and i > 0:
-                        print(f"  Conditions: low <= min_hb? {df.iloc[i]['low'] <= df.iloc[i]['min_hb']}")
-                        print(f"  Conditions: high >= max_hb? {df.iloc[i]['high'] >= df.iloc[i]['max_hb']}")
+            
+            # Подготавливаем данные через preprocessing стратегии
+            tdata = {'chart': df_slice}
+            pdata = self.ws.preprocessing(tdata)
+            
+            
+            # Вычисляем delta
+            pos = self.trade_data['pos']
+            open_price = self.trade_data['open_price']
+            
+            delta = None
+            if pos != 0 and open_price != 0:
+                if pos > 0:
+                    delta = (price - open_price) // self.price_step
+                else:
+                    delta = (open_price - price) // self.price_step
+            
+            # Получаем action от стратегии
+            action = self.ws(pdata, pos, delta)
+            signal = self.actions_dict.get(action, 0)
             
             # Выполняем действие
             self.work_action(signal, price, row_name)
-            self.update_step_data(price)
-            
-            # Сохраняем состояние позиции
-            if self.trade_data['pos'] != 0:
-                positions_history.append((i, self.trade_data['pos'], price))
-            
-            # Собираем статистику по действиям
-            if action not in actions_stats:
-                actions_stats[action] = 0
-            actions_stats[action] += 1
-        
-        print("\n" + "="*50)
-        print("=== FINAL STATISTICS ===")
-        print(f"Total bars processed: {len(df)}")
-        print(f"Total trades: {self.trade_data['count']}")
-        print(f"Final position: {self.trade_data['pos']}")
-        print(f"Positions history (first 20): {positions_history[:20]}")
-        print(f"Positions history (last 20): {positions_history[-20:] if len(positions_history) > 20 else positions_history}")
-        print("\nActions statistics:")
-        for action, count in sorted(actions_stats.items(), key=lambda x: x[1], reverse=True):
-            print(f"  {action}: {count}")
-        print("="*50)
-        
-    #TODO
-    @duration_time
-    def check_strategy_window(self,window=150, normalization=False,vtb=True):
-        """
-        оконная версия
-        """
-        self.reload_data()
-        price = None
-        for i in self.get_iterator(range(len(self.df))):
-            if i > window:
-                df_slice = self.df.iloc[i-window:i].copy()
-                row = df_slice.iloc[-1]
-                price = row['close']
-                row_name = row['x']
-                
-                if normalization:
-                    candel_max = df_slice['high'].max()
-                    df_norm = df_slice.copy()
-                    df_norm['volume'] = df_norm['volume'] / df_norm['volume'].max()
-                    df_norm['close'] = df_norm['close'] / candel_max
-                    df_norm['open'] = df_norm['open'] / candel_max
-                    df_norm['low'] = df_norm['low'] / candel_max
-                    df_norm['high'] = df_norm['high'] / candel_max
-                    row = self.ws.get_test_row(df_norm)
-                else:
-                    row = self.ws.get_test_row(df_slice)
-                action = self.ws(row)
-                if self.close_on_time:
-                    time_close = self.close_map[row['weekday']]
-                    if row['hour'] >= time_close[0] and row['minute'] >= time_close[1]:
-                        action = 'close_all_pw'
-                action = action if self.check_risk(row['weekday'],row_name,price,vtb) else 'close_all_pw'
-                signal = self.actions_dict.get(action, None)
-                self.work_action(signal, price, row_name)
             self.update_step_data(price)
 
     # POST_PROCESS_RESULT_FUNCS
@@ -441,9 +370,9 @@ class CheckEGTrader:
         print(f"Открыто лонгов: {len(td['o_longs'])}")
         print(f"Открыто шортов: {len(td['o_shorts'])}")
 
-    #TODO
     def get_statistics(self):
         td = self.trade_data
+        # Расчет максимальной просадки и подъема
         pick_profit = 0
         dropdown = 0
         pick_loss = 0
@@ -455,53 +384,63 @@ class CheckEGTrader:
                 delta = pick_profit - p
                 if delta > dropdown:
                     dropdown = delta
+            
             if p < pick_loss:
                 pick_loss = p
             elif p > pick_loss:
                 delta = p - pick_loss
                 if delta > dropup:
                     dropup = delta
+        
+        # Базовая статистика
         statistics = {
-            'total':td['total'],
-            'total_wfee': self.trade_data['equity_fee'][-1],
-            'twf_per': round(self.trade_data['total_wfees_per'],2),
-            'total_vtb': td['step_eq_vtb'][-1],
-            'count':td['count'],
+            'total': td['total'],
+            'total_wfee': td['equity_fee'][-1],
+            'twf_per': round(td['total_wfees_per'], 2),
+            'count': td['count'],
             'fees': td['fees'],
-            'count_risk': len(td['c_risks']),
             'max_profit': max(td['unclosed_fee']),
             'min_profit': min(td['unclosed_fee']),
-            'max_dropdown':dropdown,
-            'max_dropup':dropup,
-            'days':self.days,
-            'eq_day':td['total'] / self.days,
-            'vtb_day':td['step_eq_vtb'][-1] / self.days
+            'max_dropdown': dropdown,
+            'max_dropup': dropup,
+            'days': self.days,
+            'eq_day': td['total'] / self.days if self.days > 0 else 0
         }
-        df_eq = pd.DataFrame({'eq':self.trade_data['equity']})
+        
+        # Расчет win_rate и статистики по сделкам
+        df_eq = pd.DataFrame({'eq': td['equity']})
         mean_eq = 0
         median_eq = 0
         min_eq = 0
         max_eq = 0
         win_rate = 0
-        if not df_eq.empty:
+        
+        if not df_eq.empty and len(df_eq) > 1:
             df_eq['diff_eq'] = df_eq['eq'].diff()
-            mean_eq = df_eq['diff_eq'].mean()
-            median_eq = df_eq['diff_eq'].median()
-            min_eq = df_eq['diff_eq'].min()
-            max_eq = df_eq['diff_eq'].max()
-            wins = len(df_eq[df_eq['diff_eq'] > 0].index)
-            loss = len(df_eq[df_eq['diff_eq'] < 0].index)
-            if loss > 0:
-                win_rate = round((wins / (wins + loss)) * 100,2)
+            diff_eq = df_eq['diff_eq'].dropna()
+            
+            if not diff_eq.empty:
+                mean_eq = diff_eq.mean()
+                median_eq = diff_eq.median()
+                min_eq = diff_eq.min()
+                max_eq = diff_eq.max()
+                
+                wins = len(diff_eq[diff_eq > 0])
+                loss = len(diff_eq[diff_eq < 0])
+                total = wins + loss
+                if total > 0:
+                    win_rate = round((wins / total) * 100, 2)
+        
         statistics.update({
-            'win_rate':win_rate,
-            'mean_eq':mean_eq,
-            'median_eq':median_eq,
-            'min_eq':min_eq,
-            'max_eq':max_eq
+            'win_rate': win_rate,
+            'mean_eq': mean_eq,
+            'median_eq': median_eq,
+            'min_eq': min_eq,
+            'max_eq': max_eq
         })
+        
         return statistics
-
+    
     def plot_transaction(self):
         td = self.trade_data
         td['o_longs'] = np.array(td['o_longs'])
@@ -566,7 +505,7 @@ class CheckEGTrader:
         
         # Добавляем подписи для удобства
         ax1.set_title(f'Chart for {self.symbol} days {self.days}')
-        ax2.set_title('Sequity: ' + str(total_wfee) + ' MDS: ' + str(total_wfee/self.days))
+        ax2.set_title('Sequity: ' + str(total_wfee) + ' MDS: ' + str(total_wfee/self.days if self.days > 0 else 0))
         risk_lbl = 'Count_trades: ' + str(self.trade_data['count']) + '| Mean_profit: ' + str(total_wfee/self.trade_data['count'])
         ax2.set_xlabel(risk_lbl)
         
