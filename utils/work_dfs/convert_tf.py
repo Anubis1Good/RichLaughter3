@@ -110,16 +110,40 @@ def convert_timeframe(df, timeframe, agg_rules=None, datetime_col='ms', recalc_d
     if 'x' in df_resampled:
         df_resampled['x'] = df_resampled.index
     
+    # ========== ИСПРАВЛЕННАЯ ОПТИМИЗАЦИЯ ТИПОВ ==========
+    # Ценовые колонки должны оставаться float64 для сохранения точности
+    price_cols = ['open', 'close', 'high', 'low', 'middle']
+    # Целочисленные колонки
+    int_cols = ['weekday', 'hour', 'minute', 'direction', 'x']
+    # Float колонки (можно сжать до float32, т.к. точность не критична)
+    float_cols = ['vol_coin', 'volume']
+    
     for col in df_resampled.select_dtypes(include=[np.number]).columns:
-        # Пропускаем булевы колонки и колонки с категориальными данными
+        # 1. Ценовые колонки - только float64 (максимальная точность)
+        if col in price_cols and col in df_resampled.columns:
+            df_resampled[col] = df_resampled[col].astype('float64')
+            continue
+        
+        # 2. Целочисленные колонки - downcast до минимального целого
+        if col in int_cols and col in df_resampled.columns:
+            df_resampled[col] = pd.to_numeric(df_resampled[col], downcast='integer')
+            continue
+        
+        # 3. Float колонки (объемы) - можно сжать до float32
+        if col in float_cols and col in df_resampled.columns:
+            df_resampled[col] = pd.to_numeric(df_resampled[col], downcast='float')
+            continue
+        
+        # 4. Для остальных колонок - определяем автоматически
         if pd.api.types.is_bool_dtype(df_resampled[col]):
             continue
-            
-        # Проверяем, содержит ли колонка только целые числа
+        
         if pd.api.types.is_integer_dtype(df_resampled[col]) or (df_resampled[col] % 1 == 0).all():
             df_resampled[col] = pd.to_numeric(df_resampled[col], downcast='integer')
         else:
-            df_resampled[col] = pd.to_numeric(df_resampled[col], downcast='float')
+            # Для неизвестных float колонок - лучше оставить float64
+            df_resampled[col] = df_resampled[col].astype('float64')
+    # ========== КОНЕЦ ИСПРАВЛЕНИЯ ==========
     
     return df_resampled
 
@@ -139,7 +163,10 @@ if __name__ == "__main__":
         else:
             df = pd.read_csv(filepath)
         df = convert_timeframe(df,'5min')
-        new_path = os.path.join(output_folder,'_5'+f)
+        filename = f.split('_')
+        filename[1] = '5'
+        filename = '_'.join(filename)
+        new_path = os.path.join(output_folder,filename)
         if save_format == '.csv':
             new_path = new_path.replace('.parquet','.csv')
             df.to_csv(new_path)

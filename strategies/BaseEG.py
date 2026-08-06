@@ -18,6 +18,7 @@ class BaseEG:
         self.can_long = True
         self.can_short = True
         self.type_eg = 0 # 0 - D-ws, 1 - BD-ws,
+        self.block_type_egs = (0,)
 
     def add_slice_df(self, df:pd.DataFrame, period=20):
         df_slice = df.iloc[period+1:]
@@ -40,10 +41,12 @@ class BaseEG:
         if self.stop is not None and delta is not None:
             if delta*self.mult_ps <= -self.stop:
                 if pos > 0:
-                    self.can_long = False
+                    if self.type_eg in self.block_type_egs:
+                        self.can_long = False
                     return 'close_long'
                 elif pos < 0:
-                    self.can_short = False
+                    if self.type_eg in self.block_type_egs:
+                        self.can_short = False
                     return 'close_short'
         return action
 
@@ -54,18 +57,18 @@ class BaseEG:
         return action
 
     def check_valid_action(self,action:str,pos:int):
+        if pos < 0:
+            self.can_long = True
+        elif pos > 0:
+            self.can_short = True
         if action is not None:
             if not self.can_long:
-                if pos < 0:
-                    self.can_long = True
-                elif 'open' in action:
+                if 'open' in action:
                     if 'long' in action:
                         return None
                     if 'all' in action:
                         return action.replace('all','short')
             if not self.can_short:
-                if pos > 0:
-                    self.can_short = True
                 if 'open' in action:
                     if 'short' in action:
                         return None
@@ -86,7 +89,7 @@ class BaseEG:
     # pdata - processed data
     def __call__(self, pdata,pos,delta, *args, **kwds):
         action = self.get_raw_action(pdata)
-        if self.type_eg == 0:
+        if self.type_eg in self.block_type_egs:
             action = self.check_valid_action(action,pos)
         action = self.check_stop(pos,delta,action)
         action = self.check_take(delta,action)

@@ -22,13 +22,12 @@ def duration_time(func):
     return wrapper
 
 #добавить учет риск-менеджмента
-class CheckWSTrader:
+class CheckEGTrader:
     def __init__(self,
                  df:pd.DataFrame | str, 
                  ws:list|tuple|BaseEG,
                  fee:float = 0.001,
                  symbol:str = 'Test',
-                 tf:str = '5m',
                  close_on_time:bool=True,
                  close_map:tuple|list=(
                      (22,30),(22,30),(22,30),(22,30),(22,30),(17,30),(17,30),),
@@ -36,14 +35,15 @@ class CheckWSTrader:
                  use_tqdm:bool=False
                  ):
         self.symbol = symbol
-        self.tf = tf
-        self.reload_data()
         if isinstance(df,str):
             path_df = df
             self.df = simple_load_df(path_df)
         else:
             self.df = df.copy()
+        self.reload_data()
         self.price_step = get_price_step(self.df)
+        # print(self.price_step)
+        # print(self.df.tail())
         if isinstance(ws,tuple) or isinstance(ws,list):
             # self.ws = ws[0](self.symbol,self.tf,'e',1,*ws[1])
             self.ws = ws[0](self.symbol,self.price_step,1,*ws[1])
@@ -58,7 +58,8 @@ class CheckWSTrader:
         self.measure_time = measure_time
         self.use_tqdm = use_tqdm
         self.df = self.add_time_features(self.df)
-        self.days = 0
+        self.days = self.df['ms'].dt.date.nunique()
+
 
     def reload_data(self):
         self.trade_data = {
@@ -70,8 +71,6 @@ class CheckWSTrader:
             'equity_fee':[0], #динамика дохода с комиссией
             'step_eq_fee':[0], #equity каждый шаг
             'unclosed_fee':[0], #equity незакрытый каждый шаг
-            'step_eq_vtb':[0], #equity каждый шаг
-            'unclosed_vtb':[0], #equity незакрытый каждый шаг
             'pos':0, #текущая позиция
             'hist_pos':[0],
             'open_price':0, #текущая цена
@@ -79,14 +78,12 @@ class CheckWSTrader:
             'o_shorts':[], #входы в шорт
             'c_longs':[], #закрытие лонгов
             'c_shorts':[], #закрытие шортов 
-            'c_risks':[], #закрытие по риск менеджменту
+
         }
         self.open_fee = 0
-        self.cur_wday = None
         self.cur_eq = None
-        self.first_risk = True
-        self.last_c_risk = None
-        self.days = 0
+        self.tdata = {}
+        self.tdata['chart'] = self.df.copy()
 
     def get_iterator(self,data):
         if self.use_tqdm:
@@ -157,7 +154,7 @@ class CheckWSTrader:
             elif self.trade_data['pos'] == -1:
                 self.close_short(price,feei,row_name)
 
-    def add_time_features(self,df):
+    def add_time_features(self,df:pd.DataFrame):
         df = df.copy()
         df['ms'] = pd.to_datetime(df['ms'], format='%Y-%m-%d %H:%M:%S')
         df['hour'] = df['ms'].dt.hour
@@ -167,8 +164,6 @@ class CheckWSTrader:
 
     def update_step_data(self,price):
         self.trade_data['step_eq_fee'].append(self.trade_data['equity_fee'][-1])
-        # self.trade_data['step_eq_vtb'].append(self.vtb_fee_func(self.trade_data['equity'][-1],0)-self.trade_data['count']*2)
-        self.trade_data['step_eq_vtb'].append(self.vtb_fee_func(self.trade_data['equity'][-1],self.trade_data['count']))
         self.trade_data['hist_pos'].append(self.trade_data['pos'])
         if self.trade_data['pos'] > 0:
             unclosed_profit = price - self.trade_data['open_price']
@@ -177,69 +172,165 @@ class CheckWSTrader:
         else:
             unclosed_profit = 0
         self.trade_data['unclosed_fee'].append(self.trade_data['step_eq_fee'][-1] + unclosed_profit)
-        self.trade_data['unclosed_vtb'].append(self.trade_data['step_eq_vtb'][-1] + self.vtb_fee_func(unclosed_profit,0))
-
-    def check_risk(self,weekday,row_name,price,vtb=True):
-        if self.cur_wday != weekday:
-            self.days += 1
-            self.cur_wday = weekday
-        if self.stop_risk:
-            eq = self.trade_data['unclosed_vtb'][-1] if vtb else self.trade_data['unclosed_fee'][-1]
-            if self.cur_wday != weekday:
-                self.cur_wday = weekday
-                self.cur_eq = eq
-                if not self.first_risk:
-                    self.trade_data['c_risks'][-1] += self.last_c_risk
-                    self.last_c_risk = None
-                    self.first_risk = True
-            else:
-                if self.first_risk:
-                    delta = eq - self.cur_eq
-                    if delta < self.stop_risk:
-                        self.first_risk = False
-                        self.trade_data['c_risks'].append([row_name,price])
-                        self.last_c_risk = [row_name,price]
-                        return False
-                else:
-                    self.last_c_risk = [row_name,price]
-                    return False
-        return True
     
     # CHECKS_FUNCS
     @duration_time
-    def check_strategy_fast(self, vtb=True):
+    def check_strategy_fast(self, history_bars=100):
         self.reload_data()
-        df = self.ws.preprocessing(self.df.copy())
         
-        # ПРЕДВЫЧИСЛИТЬ все сигналы разом
-        df['action'] = df.apply(lambda row: self.ws(row), axis=1)
+        # Подготавливаем данные через preprocessing
+        pdata = self.ws.preprocessing(self.tdata)
+        df = pdata['chart']
         
         if self.close_on_time:
-            # Оптимизированная проверка времени
             mask = (df['hour'] >= df['weekday'].map(lambda wd: self.close_map[wd][0])) & \
                 (df['minute'] >= df['weekday'].map(lambda wd: self.close_map[wd][1]))
-            df.loc[mask, 'action'] = 'close_all_pw'
+            mask_values = mask.values
+        else:
+            mask_values = None
         
-        # Преобразуем в массив индексов
-        signals = df['action'].map(self.actions_dict).values
         prices = df['close'].values
         row_names = df['x'].values
-        weekdays = df['weekday'].values if 'weekday' in df.columns else None
         
-        # Основной цикл - теперь быстрый
+
         for i in self.get_iterator(range(len(df))):
-            signal = signals[i]
             price = prices[i]
             row_name = row_names[i]
             
-            # check_risk тоже нужно предвычислить или оптимизировать
-            if not self.check_risk(weekdays[i] if weekdays is not None else 0, 
-                                row_name, price, vtb):
-                signal = self.actions_dict['close_all_pw']
+            # Проверка времени закрытия
+            if self.close_on_time and mask_values is not None and mask_values[i]:
+                signal = self.actions_dict['close_all']
+            else:
+                # Берем срез до текущего индекса (не более history_bars)
+                start_idx = max(0, i - history_bars + 1)
+                current_df = df.iloc[start_idx:i+1]  # без .copy()!
+                
+                current_pdata = {'chart': current_df}
+                
+                # Вычисляем delta только если есть позиция
+                pos = self.trade_data['pos']
+                open_price = self.trade_data['open_price']
+                
+                delta = None
+                if pos != 0 and open_price != 0:
+                    if pos > 0:
+                        delta = (price - open_price) // self.price_step
+                    else:
+                        delta = (open_price - price) // self.price_step
+                
+                action = self.ws(current_pdata, pos, delta)
+                signal = self.actions_dict.get(action, 0)
             
+            # Выполняем действие
             self.work_action(signal, price, row_name)
             self.update_step_data(price)
 
+    @duration_time
+    def check_strategy_fast_debug(self, history_bars=100, debug_interval=100):
+        self.reload_data()
+        
+        # Подготавливаем данные через preprocessing
+        pdata = self.ws.preprocessing(self.tdata)
+        df = pdata['chart']
+        
+        print(f"Total bars in df: {len(df)}")
+        print(f"Columns: {df.columns.tolist()}")
+        print(f"First bar: {df.iloc[0].to_dict()}")
+        print(f"Last bar: {df.iloc[-1].to_dict()}")
+        
+        if self.close_on_time:
+            mask = (df['hour'] >= df['weekday'].map(lambda wd: self.close_map[wd][0])) & \
+                (df['minute'] >= df['weekday'].map(lambda wd: self.close_map[wd][1]))
+            mask_values = mask.values
+            print(f"Close on time mask: {mask.sum()} bars will be closed")
+        else:
+            mask_values = None
+        
+        prices = df['close'].values
+        row_names = df['x'].values
+        
+        # Статистика
+        actions_stats = {}
+        positions_history = []
+        
+        for i in self.get_iterator(range(len(df))):
+            price = prices[i]
+            row_name = row_names[i]
+            
+            # Проверка времени закрытия
+            if self.close_on_time and mask_values is not None and mask_values[i]:
+                signal = self.actions_dict['close_all']
+                action = 'close_all (time)'
+            else:
+                # Берем срез до текущего индекса (не более history_bars)
+                start_idx = max(0, i - history_bars + 1)
+                current_df = df.iloc[start_idx:i+1]
+                
+                current_pdata = {'chart': current_df}
+                
+                # Вычисляем delta только если есть позиция
+                pos = self.trade_data['pos']
+                open_price = self.trade_data['open_price']
+                
+                delta = None
+                if pos != 0 and open_price != 0:
+                    if pos > 0:
+                        delta = (price - open_price) // self.price_step
+                    else:
+                        delta = (open_price - price) // self.price_step
+                
+                action = self.ws(current_pdata, pos, delta)
+                signal = self.actions_dict.get(action, 0)
+            
+            # Логируем каждые debug_interval баров
+            if i % debug_interval == 0 or i == len(df) - 1:
+                pos_before = self.trade_data['pos']
+                open_price_before = self.trade_data['open_price']
+                
+                print(f"\n=== Bar {i} ===")
+                print('can long/short:',self.ws.can_long,self.ws.can_short)
+                print(f"  Price: {price}")
+                print(f"  Action: {action}")
+                print(f"  Signal: {signal}")
+                print(f"  Pos before: {pos_before}")
+                print(f"  Open price before: {open_price_before}")
+                print(f"  Delta: {delta}")
+                
+                # Покажем последние значения индикаторов
+                if i > 0 and 'min_hb' in df.columns:
+                    print(f"  min_hb: {df.iloc[i]['min_hb']:.2f}, max_hb: {df.iloc[i]['max_hb']:.2f}")
+                    print(f"  low: {df.iloc[i]['low']:.2f}, high: {df.iloc[i]['high']:.2f}")
+                    print(f"  close: {df.iloc[i]['close']:.2f}")
+                    if 'min_hb' in df.columns and i > 0:
+                        print(f"  Conditions: low <= min_hb? {df.iloc[i]['low'] <= df.iloc[i]['min_hb']}")
+                        print(f"  Conditions: high >= max_hb? {df.iloc[i]['high'] >= df.iloc[i]['max_hb']}")
+            
+            # Выполняем действие
+            self.work_action(signal, price, row_name)
+            self.update_step_data(price)
+            
+            # Сохраняем состояние позиции
+            if self.trade_data['pos'] != 0:
+                positions_history.append((i, self.trade_data['pos'], price))
+            
+            # Собираем статистику по действиям
+            if action not in actions_stats:
+                actions_stats[action] = 0
+            actions_stats[action] += 1
+        
+        print("\n" + "="*50)
+        print("=== FINAL STATISTICS ===")
+        print(f"Total bars processed: {len(df)}")
+        print(f"Total trades: {self.trade_data['count']}")
+        print(f"Final position: {self.trade_data['pos']}")
+        print(f"Positions history (first 20): {positions_history[:20]}")
+        print(f"Positions history (last 20): {positions_history[-20:] if len(positions_history) > 20 else positions_history}")
+        print("\nActions statistics:")
+        for action, count in sorted(actions_stats.items(), key=lambda x: x[1], reverse=True):
+            print(f"  {action}: {count}")
+        print("="*50)
+        
+    #TODO
     @duration_time
     def check_strategy_window(self,window=150, normalization=False,vtb=True):
         """
@@ -336,35 +427,28 @@ class CheckWSTrader:
         equity_fee = np.array(self.trade_data['equity_fee'])
         return trades,equity,equity_fee,longs,shorts,closes
 
-    def print_statistics(self,vtb=True):
+    def print_statistics(self):
         """Печать статистики по торгам"""
         td = self.trade_data
         print(f"\n=== СТАТИСТИКА ДЛЯ {self.symbol} ===")
         print(f"Прибыль ABC без комисии: {td['equity'][-1]:.2f}")
-        if vtb:
-            print(f"Прибыль ВТБ: {td['step_eq_vtb'][-1]}")
-            print(f"Комиссия ВТБ: {td['count']*2}")
-            type_unclosed = 'unclosed_vtb'
-        else:
-            type_unclosed = 'unclosed_fee'
-            print(f"Прибыль ABC c комиссией: {td['equity_fee'][-1]:.2f}")
-            print(f"Комисии: {td['fees']:.2f}")
-            print(f"Прибыль PER c комиссией: {td['total_wfees_per']:.2f}")
+        print(f"Прибыль ABC c комиссией: {td['equity_fee'][-1]:.2f}")
+        print(f"Комисии: {td['fees']:.2f}")
+        print(f"Прибыль PER c комиссией: {td['total_wfees_per']:.2f}")
         print(f"Всего сделок: {td['count']}")
-        print(f"Максимальная прибыль: {max(td[type_unclosed]):.2f}")
-        print(f"Максимальная просадка: {min(td[type_unclosed]):.2f}")
+        print(f"Максимальная прибыль: {max(td['unclosed_fee']):.2f}")
+        print(f"Максимальная просадка: {min(td['unclosed_fee']):.2f}")
         print(f"Открыто лонгов: {len(td['o_longs'])}")
         print(f"Открыто шортов: {len(td['o_shorts'])}")
-        print(f"Превышений просадок: {len(td['c_risks'])}")
 
-    def get_statistics(self,vtb=True):
+    #TODO
+    def get_statistics(self):
         td = self.trade_data
-        type_unclosed = 'unclosed_vtb' if vtb else 'unclosed_fee'
         pick_profit = 0
         dropdown = 0
         pick_loss = 0
         dropup = 0
-        for p in td[type_unclosed]:
+        for p in td['unclosed_fee']:
             if p > pick_profit:
                 pick_profit = p
             elif p < pick_profit:
@@ -385,8 +469,8 @@ class CheckWSTrader:
             'count':td['count'],
             'fees': td['fees'],
             'count_risk': len(td['c_risks']),
-            'max_profit': max(td[type_unclosed]),
-            'min_profit': min(td[type_unclosed]),
+            'max_profit': max(td['unclosed_fee']),
+            'min_profit': min(td['unclosed_fee']),
             'max_dropdown':dropdown,
             'max_dropup':dropup,
             'days':self.days,
@@ -424,7 +508,6 @@ class CheckWSTrader:
         td['o_shorts'] = np.array(td['o_shorts'])
         td['c_longs'] = np.array(td['c_longs'])
         td['c_shorts'] = np.array(td['c_shorts'])
-        td['c_risks'] = np.array(td['c_risks'])
         if len(td['o_longs'].shape) > 1:
             plt.scatter(td['o_longs'][:,0],td['o_longs'][:,1],marker='^',color='blue')
         if len(td['o_shorts'].shape) > 1:
@@ -433,23 +516,7 @@ class CheckWSTrader:
             plt.scatter(td['c_longs'][:,0],td['c_longs'][:,1],marker='x',color='blue')
         if len(td['c_shorts'].shape) > 1:
             plt.scatter(td['c_shorts'][:,0],td['c_shorts'][:,1],marker='x',color='black')
-        if len(td['c_risks'].shape) > 1:
-            x_starts = td['c_risks'][:,0]
-            y_starts = td['c_risks'][:,1]
-            x_ends = td['c_risks'][:,2]
-            y_ends = td['c_risks'][:,3]
 
-            # Создаём массивы для plot (чередуем start-end)
-            x_lines = np.empty((len(td['c_risks']) * 3,))
-            y_lines = np.empty((len(td['c_risks']) * 3,))
-            x_lines[0::3] = x_starts
-            x_lines[1::3] = x_ends
-            x_lines[2::3] = np.nan
-            y_lines[0::3] = y_starts
-            y_lines[1::3] = y_ends
-            y_lines[2::3] = np.nan
-
-            plt.plot(x_lines, y_lines, color='black')
     
     def plot_equity(self,show=True):
         plt.plot(self.trade_data['equity'],color='r')
@@ -467,7 +534,7 @@ class CheckWSTrader:
         if show:
             plt.show()
     
-    def plot_chart_and_sequtity(self,convert_tf=None,vtb=True,help_info='complex',show=True):
+    def plot_chart_and_sequtity(self,convert_tf=None,help_info='complex',show=True):
         """Создаем фигуру с двумя subplot'ами
             Варианты:
             'step_equity'
@@ -483,15 +550,15 @@ class CheckWSTrader:
         # Второй график
         plt.sca(ax2)
         if help_info == 'step_equity':
-            sequity = self.trade_data['step_eq_vtb'] if vtb else self.trade_data['step_eq_fee']
+            sequity = self.trade_data['step_eq_fee']
         elif help_info == 'pos':
             sequity = self.trade_data['hist_pos']
         elif help_info == 'unclosed':
-            sequity = self.trade_data['unclosed_vtb'] if vtb else self.trade_data['unclosed_fee']
+            sequity = self.trade_data['unclosed_fee']
         elif help_info == 'complex':
-            sequity = self.trade_data['unclosed_vtb'] if vtb else self.trade_data['unclosed_fee']
+            sequity = self.trade_data['unclosed_fee']
             ax2.plot(sequity)
-            sequity = self.trade_data['step_eq_vtb'] if vtb else self.trade_data['step_eq_fee']
+            sequity = self.trade_data['step_eq_fee']
         else:
             sequity = np.array([0])
         ax2.plot(sequity)
@@ -500,7 +567,7 @@ class CheckWSTrader:
         # Добавляем подписи для удобства
         ax1.set_title(f'Chart for {self.symbol} days {self.days}')
         ax2.set_title('Sequity: ' + str(total_wfee) + ' MDS: ' + str(total_wfee/self.days))
-        risk_lbl = 'Count_risk ' + str(self.stop_risk) + ": " + str(len(self.trade_data['c_risks'])) + '| Count_trades: ' + str(self.trade_data['count']) + '| Mean_profit: ' + str(total_wfee/self.trade_data['count'])
+        risk_lbl = 'Count_trades: ' + str(self.trade_data['count']) + '| Mean_profit: ' + str(total_wfee/self.trade_data['count'])
         ax2.set_xlabel(risk_lbl)
         
         # Автоматическая регулировка layout'а
