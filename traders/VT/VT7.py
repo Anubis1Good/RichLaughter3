@@ -195,7 +195,6 @@ class VT7:
             return 1
         return 0
     
-    #TODO думаю можно реализовать метод для проверки, стоит ли моя заявка в стакане, но пока не уверен, что мне это нужно. С одной стороны, можно было бы проверять, что у нашей заявки хорошая цена, с другой, это может и мешать в том, случае, если стакан позади нее опустеет
     def _check_order(self,img,symbol,idx):
         glass_region = self.glass_region[symbol][idx]
         _,y = self._color_search(img,ColorsBtnBGR.color_x,glass_region)
@@ -783,12 +782,13 @@ class VT7:
             if time_mode == -1:
                 action = 'close_all'
             elif time_mode == -2:
-                if action == 'open_long':
-                    action = 'close_short'
-                elif action == 'open_short':
-                    action = 'close_long'
-                elif 'large' in action:
-                    action = re.sub(r'o\d+', 'o0', action)
+                if action is not None:
+                    if action == 'open_long':
+                        action = 'close_short'
+                    elif action == 'open_short':
+                        action = 'close_long'
+                    elif 'large' in action:
+                        action = re.sub(r'o\d+', 'o0', action)
             elif time_mode == -3:
                 action = 'close_all'
         return action
@@ -813,6 +813,17 @@ class VT7:
                 tdata['spred'] = spred
         return tdata
     
+    def _error_processing(self,symbol,err):
+        print(self.symbols)
+        print(f"!!!! {type(err).__name__}: {err} !!!!")
+        if symbol is not None:
+            print(symbol)
+            for chart_region in self.chart_region[symbol]:
+                self._reset_draw_chart(chart_region)
+            with open(self.error_log[symbol],'a',encoding="utf-8") as f:
+                f.write(str(datetime.now()) + "\n")
+                f.write('\n')
+                f.write(traceback.format_exc() + "\n")
 
     def run(self,img):
         if not self.can_work:
@@ -830,37 +841,35 @@ class VT7:
                 for symbol, regions in self.position_region.items()}
             
             for symbol in self.symbols:
-                self._check_z_tape(img,symbol)
-                tdata = self._get_params_for_ws(img,symbol,poss,delta_p)
-                pdata = self.wss[symbol].preprocessing(tdata)
-                self._add_run_levels(pdata,symbol)
+                try:
+                    self._check_z_tape(img,symbol)
+                    tdata = self._get_params_for_ws(img,symbol,poss,delta_p)
+                    pdata = self.wss[symbol].preprocessing(tdata)
+                    self._add_run_levels(pdata,symbol)
 
-                pos = poss[symbol][0]
-                delta = delta_p[symbol][0]
-                action = self.wss[symbol](pdata,pos,delta)
-                print(symbol,action)    
-                if isinstance(action, str) or action is None:
-                    action = self._check_close_on_time(action,time_mode)
-                    price_limit = self._check_price_limit(img,symbol,0)
-                    if price_limit != 0:
-                        action = 'close_all'
-                        print(symbol,price_limit)
-                    if action:
-                        self._work_action(action,pos,img,symbol,0)
-                    else:
-                        self._reset_req(symbol,0)
-                    print(symbol,action)
-                elif isinstance(action,dict):
-                    ...
+                    pos = poss[symbol][0]
+                    delta = delta_p[symbol][0]
+                    action = self.wss[symbol](pdata,pos,delta)
+                    # print(symbol,action)    
+                    if isinstance(action, str) or action is None:
+                        action = self._check_close_on_time(action,time_mode)
+                        price_limit = self._check_price_limit(img,symbol,0)
+                        if price_limit != 0:
+                            if pos != 0:
+                                action = 'close_all'
+                            else:
+                                action = None
+                        if action:
+                            self._work_action(action,pos,img,symbol,0)
+                        else:
+                            self._reset_req(symbol,0)
+                        # print(symbol,action)
+                    elif isinstance(action,dict):
+                        ...
+                except Exception as err:
+                    print(symbol,'inner Error!')
+                    self._error_processing(symbol,err)
 
         except Exception as err:
-            print(self.symbols)
-            print(f"!!!! {type(err).__name__}: {err} !!!!")
-            if symbol is not None:
-                print(symbol)
-                for chart_region in self.chart_region[symbol]:
-                    self._reset_draw_chart(chart_region)
-                with open(self.error_log[symbol],'a',encoding="utf-8") as f:
-                    f.write(str(datetime.now()) + "\n")
-                    f.write('\n')
-                    f.write(traceback.format_exc() + "\n")
+            print(symbol,'outer Error!')
+            self._error_processing(symbol,err)
