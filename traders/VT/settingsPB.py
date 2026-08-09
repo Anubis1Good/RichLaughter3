@@ -10,6 +10,10 @@ class ColorsBtnBGR:
 
     price_limit_ask = (77,68,111) #верхняя планка
     price_limit_bid = (77,85,60) #нижняя планка
+
+    # price_limit_ask_active = (91,90,104) #верхняя планка
+    # price_limit_bid_active = (100,99,117) #верхняя планка
+
     
     large_value_1 = (198, 140, 48)
     large_value_2 = (178, 201, 45)

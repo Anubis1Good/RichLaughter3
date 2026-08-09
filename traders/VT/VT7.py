@@ -187,6 +187,12 @@ class VT7:
         x,y = self._color_search(img,ColorsBtnBGR.price_limit_ask,glass_region)
         if x >= 0:
             return -1
+        _,fbid = self._color_search(img,ColorsBtnBGR.bid,glass_region)
+        _,fask = self._color_search(img,ColorsBtnBGR.ask,glass_region,reverse=True)
+        if fbid == -1:
+            return -1
+        if fask == -1:
+            return 1
         return 0
     
     #TODO думаю можно реализовать метод для проверки, стоит ли моя заявка в стакане, но пока не уверен, что мне это нужно. С одной стороны, можно было бы проверять, что у нашей заявки хорошая цена, с другой, это может и мешать в том, случае, если стакан позади нее опустеет
