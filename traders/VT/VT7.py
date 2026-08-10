@@ -9,9 +9,10 @@ import numpy.typing as npt
 from datetime import datetime
 from time import time
 import pydirectinput as pdi
-from traders.VT.settingsPB import ColorsBtnBGR,TemplateCandle
+from traders.VT.settingsPB import ColorsBtnBGR,TemplateCandle,large_value_1_colors,large_value_2_colors
 from strategies.BaseEG import BaseEG
 from traders.VT.bot_on_ticker import init_trader
+from for_strategies.help_dtypes.actions_cls import OrderCords
 
 
 
@@ -280,6 +281,23 @@ class VT7:
         pdi.moveTo(glass_region[0]+11,glass_region[1]+11)
         pdi.press('f')
 
+    def _open_by_cords(self,symbol,idx,y:int,left_btn:bool,press_f=False,press_z=False):
+        glass_region = self.glass_region[symbol][idx]
+        pdi.moveTo(glass_region[0]+11,glass_region[1]+11)
+        if press_f:
+            pdi.press('f')
+        if press_z:
+            pdi.press('z')
+        btn = 'left' if left_btn else 'right'
+        pdi.click(glass_region[0]+10,y,button=btn)
+        if press_z:
+            pdi.press('z')
+    
+    def _reset_by_cords(self,symbol,idx,y:int,left_btn:bool):
+        glass_region = self.glass_region[symbol][idx]
+        btn = 'left' if left_btn else 'right'
+        pdi.click(glass_region[2]-5,y,button=btn)
+        
     # new_methods
     def _add_level(self,dx,dy,chart_region):
         pdi.moveTo(chart_region[0]+69,chart_region[1]+10)
@@ -564,21 +582,120 @@ class VT7:
         bars = self._clear_bars(bars,symbol,idx)
         return bars
     
+    def _get_combined_mask(self, roi, colors):
+        """Создает объединенную маску для списка цветов"""
+        combined_mask = np.zeros(roi.shape[:2], dtype=bool)
+        
+        for color in colors:
+            mask = (roi[:,:,0] == color[0]) & \
+                (roi[:,:,1] == color[1]) & \
+                (roi[:,:,2] == color[2])
+            combined_mask = combined_mask | mask
+        
+        return combined_mask
+
     def _get_full_glass(self,img,symbol,idx):
         glass_region = self.glass_region[symbol][idx]
+        start_tape = self.tape_region[symbol][idx][0]
+        end_tape = self.tape_region[symbol][idx][2]
         bbid = self._get_best_bid(img,symbol,idx)
         bask = self._get_best_ask(img,symbol,idx)
         if bbid == -1 or bask == -1:
             return
+        start_glass = glass_region[0]
+        end_glass,_ = self._color_search(img,ColorsBtnBGR.large_value_1,glass_region,reverse=True)
+        full_end_glass = glass_region[2]
+        if end_glass == -1:
+            return
+        width_glass = end_glass - start_glass
         high_glass = glass_region[1]
         low_glass = glass_region[3]
         bid_len = (low_glass - bbid) // self.price_step
         ask_len = (bask - high_glass) // self.price_step
+        spred_len = (bbid - bask) // self.price_step
         bids = [bbid + self.price_step * i for i in range(bid_len)]
         asks = [bask - self.price_step * i for i in range(ask_len)]
-        img_copy = img.copy()
-        path_img = '_logs/imgs/'
-        os.makedirs(path_img,exist_ok=True)
+        spreds = []
+        if spred_len > 0:
+            spreds = [bbid - self.price_step * i for i in range(spred_len)]
+        total_levels = bid_len + ask_len + spred_len
+        if total_levels == 0:
+            return
+        df = pd.DataFrame({
+            'type_cell': np.zeros(total_levels, dtype=object),
+            'top': np.zeros(total_levels, dtype=np.int16),
+            'bottom': np.zeros(total_levels, dtype=np.int16),
+            'vol_per': np.zeros(total_levels, dtype=np.uint8),
+        })
+        
+        # Заполняем биды
+        idx = 0
+        for bid_top in bids:
+            df.loc[idx, 'type_cell'] = 'bid'
+            df.loc[idx, 'top'] = bid_top
+            df.loc[idx, 'bottom'] = bid_top + self.price_step
+
+            idx += 1
+        for spred_bottom in spreds:
+            df.loc[idx, 'type_cell'] = 'spred'
+            df.loc[idx, 'top'] = spred_bottom - self.price_step
+            df.loc[idx, 'bottom'] = spred_bottom
+            idx += 1
+        # Заполняем аски
+        for ask_bottom in asks:
+            df.loc[idx, 'type_cell'] = 'ask'
+            df.loc[idx, 'top'] = ask_bottom - self.price_step
+            df.loc[idx, 'bottom'] = ask_bottom
+            idx += 1
+
+        df = df.sort_values('top').reset_index(drop=True)
+        vol_per = np.zeros(len(df), dtype=np.uint8)
+        have_order = np.full(len(df), False, dtype=bool)
+        have_level = np.full(len(df), False, dtype=bool)
+        
+        # Преобразуем DataFrame в numpy массивы для быстрого доступа
+        tops = df['top'].values.astype(int)
+        bottoms = df['bottom'].values.astype(int)
+        # Создаем массив всех ROI
+        # Вместо поиска в каждом ROI отдельно - ищем все сразу
+        for idx in range(len(df)):
+            # Используем срез изображения напрямую
+            top = tops[idx]+1
+            bottom = bottoms[idx]-1
+            roi = img[top:bottom, start_glass:end_glass]  
+            # print(roi.shape)
+            # Ищем цвет в ROI
+            mask = self._get_combined_mask(roi, large_value_1_colors)
+
+            if np.any(mask):
+                # Находим самую правую точку (reverse=True)
+                y_coords = np.where(mask)[1]  # колонки
+                if len(y_coords) > 0:
+                    x = y_coords[0] + start_glass  # самая левая
+                    vol_per[idx] = ((end_glass - x) * 100) // width_glass
+            
+            mask = self._get_combined_mask(roi,large_value_2_colors)
+            if np.any(mask):
+                # Если есть цвет из группы 2 - ставим 100%
+                vol_per[idx] = 100
+
+            roi = img[top:bottom, end_glass:full_end_glass]
+            mask = self._get_combined_mask(roi,(ColorsBtnBGR.color_x,ColorsBtnBGR.color_x_shadow))
+            if np.any(mask):
+                have_order[idx] = True
+
+            roi = img[top:bottom, start_tape:end_tape]
+            mask = self._get_combined_mask(roi,(ColorsBtnBGR.level_shift_1,))
+            if np.any(mask):
+                have_level[idx] = True
+
+        df['vol_per'] = vol_per
+        df['have_order'] = have_order
+        df['have_level'] = have_level
+        df['large2'] = df['vol_per'] > 99
+        df['middle'] = (df['bottom'] + df['top']) // 2
+        return df
+  
     
     def _get_profit(self,img,symbol,idx):
         glass_region = self.glass_region[symbol][idx]
@@ -885,6 +1002,8 @@ class VT7:
                             self._reset_req(symbol,0)
                         # print(symbol,action,pos)
                     elif isinstance(action,dict):
+                        ...
+                    elif isinstance(action,tuple) or isinstance(action,list):
                         ...
                 except Exception as err:
                     print(symbol,'inner Error!')

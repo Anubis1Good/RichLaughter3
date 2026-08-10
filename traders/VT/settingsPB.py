@@ -14,10 +14,18 @@ class ColorsBtnBGR:
     # price_limit_ask_active = (91,90,104) #верхняя планка
     # price_limit_bid_active = (100,99,117) #верхняя планка
 
-    
+    large_value_1_order_ask = (160,122,83)
+    large_value_1_order_level_ask = (161,108,107)
+    large_value_1_order_bid = (163,131,54)
+    large_value_1_order_level_bid = (164,117,78)
     large_value_1 = (198, 140, 48)
-    large_value_2 = (178, 201, 45)
     large_value_1_level = (199,118,84)
+
+    large_value_2_order_ask = (147,162,81)
+    large_value_2_order_level_ask = (152,134,105)
+    large_value_2_order_bid = (150,171,52)
+    large_value_2_order_level_bid = (155,143,76)
+    large_value_2 = (178, 201, 45)
     large_value_2_level = (186,158,82)
 
     color_x = (0,0,255)
@@ -44,6 +52,26 @@ class ColorsBtnBGR:
     pos_price = (103,74,50)
 
     z_tape = (118,118,118)
+
+
+large_value_1_colors = [
+    ColorsBtnBGR.large_value_1_order_ask,
+    ColorsBtnBGR.large_value_1_order_level_ask,
+    ColorsBtnBGR.large_value_1_order_bid,
+    ColorsBtnBGR.large_value_1_order_level_bid,
+    ColorsBtnBGR.large_value_1,
+    ColorsBtnBGR.large_value_1_level
+]
+
+# Группа 2: Крупные заявки (если есть - ставим 100%)
+large_value_2_colors = [
+    ColorsBtnBGR.large_value_2_order_ask,
+    ColorsBtnBGR.large_value_2_order_level_ask,
+    ColorsBtnBGR.large_value_2_order_bid,
+    ColorsBtnBGR.large_value_2_order_level_bid,
+    ColorsBtnBGR.large_value_2,
+    ColorsBtnBGR.large_value_2_level
+]
 
 
 class TemplateCandle:

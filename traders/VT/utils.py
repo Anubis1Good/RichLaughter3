@@ -79,7 +79,7 @@ def get_configuration_traiders(data,page):
         'price_step':data["price_step"],
         'amount':amount
     }
-    print(conf_data['doms'])
+    # print(conf_data['doms'])
     return conf_data
 
 def only_close(action,hour,minute):
