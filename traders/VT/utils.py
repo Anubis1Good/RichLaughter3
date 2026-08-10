@@ -44,12 +44,12 @@ def get_configuration_traiders(data,page):
             low_dom = dom_field[1] + heigh_dom - pos_offset
             for i in range(amount):
                 y1 = high_dom+heigh_dom*i
-                y2 = low_dom+high_dom*i
+                y2 = low_dom+heigh_dom*i 
                 dom['clusters'].append((start_dom,y1,end_cluster,y2))
                 dom['tapes'].append((start_tape,y1,end_tape,y2))
                 dom['glasses'].append((start_glass,y1,end_glass,y2))
 
-                dom['poses'].append((start_pos,y2+1,end_pos,y2+pos_offset))
+                dom['poses'].append((start_pos,y2+pos_offset-6,end_pos,y2+pos_offset-1))
         else:
             low_dom = dom_field[3] - pos_offset
             for i in range(amount):
@@ -57,7 +57,7 @@ def get_configuration_traiders(data,page):
                 dom['clusters'].append((start_dom+offset_x1,high_dom,end_cluster+offset_x1,low_dom))
                 dom['tapes'].append((start_tape+offset_x1,high_dom,end_tape+offset_x1,low_dom))
                 dom['glasses'].append((start_glass+offset_x1,high_dom,end_glass+offset_x1,low_dom))
-                dom['poses'].append((start_pos+offset_x1,low_dom+1,end_pos+offset_x1,low_dom+pos_offset))
+                dom['poses'].append((start_pos+offset_x1,dom_field[3]-1,end_pos+offset_x1,dom_field[3]-6))
         doms.append(dom)
     for raw_charts in data['charts']:
         field = raw_charts['field']

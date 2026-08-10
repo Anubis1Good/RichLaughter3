@@ -18,6 +18,7 @@ class PEG30_RAYNOR(BaseEG):
         self.large_close = large_close
         self.n_large = n_large
         self.large_config = 'large_o'+large_open+'_c'+large_close+'_'+n_large
+        self.type_eg = 2
     
     def preprocessing(self, tdata):
         pdata = {}
@@ -64,7 +65,7 @@ class PEG30_MURKY(BaseEG):
         self.min_spred = min_spred
         self.use_long = use_long
         self.use_short = use_short
-
+        self.type_eg = 2
     
     def preprocessing(self, tdata):
         pdata = {}

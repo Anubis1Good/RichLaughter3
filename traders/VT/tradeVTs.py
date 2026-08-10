@@ -7,7 +7,7 @@ import json
 from PyQt5.QtCore import QThread, pyqtSignal,QMutex
 from traders.VT.VT7 import VT7 as VT
 from traders.VT.sgs import stock_groups
-from traders.VT.utils import get_pages,get_configuration_traiders
+from traders.VT.utils import get_configuration_traiders
 
 error_folder = '_logs\error_logsVT'
 

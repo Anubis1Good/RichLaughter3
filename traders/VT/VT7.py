@@ -563,6 +563,22 @@ class VT7:
         bars = self._clear_bars(bars,symbol,idx)
         return bars
     
+    def _get_full_glass(self,img,symbol,idx):
+        glass_region = self.glass_region[symbol][idx]
+        bbid = self._get_best_bid(img,symbol,idx)
+        bask = self._get_best_ask(img,symbol,idx)
+        if bbid == -1 or bask == -1:
+            return
+        high_glass = glass_region[1]
+        low_glass = glass_region[3]
+        bid_len = (low_glass - bbid) // self.price_step
+        ask_len = (bask - high_glass) // self.price_step
+        bids = [bbid + self.price_step * i for i in range(bid_len)]
+        asks = [bask - self.price_step * i for i in range(ask_len)]
+        img_copy = img.copy()
+        path_img = '_logs/imgs/'
+        os.makedirs(path_img,exist_ok=True)
+    
     def _get_profit(self,img,symbol,idx):
         glass_region = self.glass_region[symbol][idx]
         _,p_max = self._color_search(img,ColorsBtnBGR.profit_glass,glass_region,reverse=True)
@@ -811,6 +827,9 @@ class VT7:
                 bask = self._get_best_ask(img,symbol,0)
                 spred = (bbid - bask)// self.price_step
                 tdata['spred'] = spred
+            if 'full_glass' in needs_info:
+                fg = self._get_full_glass(img,symbol,0)
+                tdata['fg'] = fg
         return tdata
     
     def _error_processing(self,symbol,err):

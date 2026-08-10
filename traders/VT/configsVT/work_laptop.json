@@ -4,8 +4,8 @@
             {
                 "direction": "row",
                 "dom_field_xyxy":[1,57,1917,517],
-                "f_cluster_e_x":194,
-                "f_tape_se_xx":[196,345],
+                "f_cluster_e_x":150,
+                "f_tape_se_xx":[155,345],
                 "f_glass_s_x":350
         }
     ],

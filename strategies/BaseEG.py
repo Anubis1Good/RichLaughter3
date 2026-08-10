@@ -17,7 +17,7 @@ class BaseEG:
         """
         self.can_long = True
         self.can_short = True
-        self.type_eg = 0 # 0 - D-ws, 1 - BD-ws,
+        self.type_eg = 0 # 0 - D-ws, 1 - BD-ws, 2 - spred_glass
         self.block_type_egs = (0,)
 
     def add_slice_df(self, df:pd.DataFrame, period=20):
