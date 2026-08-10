@@ -57,7 +57,7 @@ def get_configuration_traiders(data,page):
                 dom['clusters'].append((start_dom+offset_x1,high_dom,end_cluster+offset_x1,low_dom))
                 dom['tapes'].append((start_tape+offset_x1,high_dom,end_tape+offset_x1,low_dom))
                 dom['glasses'].append((start_glass+offset_x1,high_dom,end_glass+offset_x1,low_dom))
-                dom['poses'].append((start_pos+offset_x1,dom_field[3]-1,end_pos+offset_x1,dom_field[3]-6))
+                dom['poses'].append((start_pos+offset_x1,dom_field[3]-6,end_pos+offset_x1,dom_field[3]-1))
         doms.append(dom)
     for raw_charts in data['charts']:
         field = raw_charts['field']
@@ -79,6 +79,7 @@ def get_configuration_traiders(data,page):
         'price_step':data["price_step"],
         'amount':amount
     }
+    print(conf_data['doms'])
     return conf_data
 
 def only_close(action,hour,minute):

@@ -7,6 +7,7 @@ import pandas as pd
 import numpy as np
 import numpy.typing as npt
 from datetime import datetime
+from time import time
 import pydirectinput as pdi
 from traders.VT.settingsPB import ColorsBtnBGR,TemplateCandle
 from strategies.BaseEG import BaseEG
@@ -74,7 +75,7 @@ class VT7:
     # Переделал, надо проверить!
     def _color_search(self,img:npt.ArrayLike,color:tuple[int],region:tuple[int]=(None,None,None,None),reverse:bool=False):
         try:
-            roi = img[region[1]:region[3], region[0]:region[2]]
+            roi = img[region[1]:region[3], region[0]:region[2]] #roi == [] ?
             result = np.argwhere(
                 (roi[:,:,0] == color[0]) & (roi[:,:,1] == color[1]) & (roi[:,:,2] == color[2])
             )
@@ -88,7 +89,7 @@ class VT7:
             return result[y,1],result[y,0]
 
         except Exception:
-            # traceback.print_exc()
+            traceback.print_exc()
             return -1,-1
         
     def _colorarea_search(self,img:npt.ArrayLike, color:tuple[int],region:tuple[int]=(None,None,None,None), y_min=None, y_max=None, reverse_sort=False, skip_m1=True):
@@ -882,7 +883,7 @@ class VT7:
                             self._work_action(action,pos,img,symbol,0)
                         else:
                             self._reset_req(symbol,0)
-                        # print(symbol,action)
+                        # print(symbol,action,pos)
                     elif isinstance(action,dict):
                         ...
                 except Exception as err:
