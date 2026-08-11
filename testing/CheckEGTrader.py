@@ -45,8 +45,7 @@ class CheckEGTrader:
         # print(self.price_step)
         # print(self.df.tail())
         if isinstance(ws,tuple) or isinstance(ws,list):
-            # self.ws = ws[0](self.symbol,self.tf,'e',1,*ws[1])
-            self.ws = ws[0](self.symbol,self.price_step,1,*ws[1])
+            self.ws = ws[0](self.symbol,self.price_step,1,0,*ws[1])
         else:
             self.ws = ws
         self.fee = fee

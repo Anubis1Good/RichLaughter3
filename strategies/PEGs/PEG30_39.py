@@ -4,8 +4,8 @@ from for_strategies.classic_indicators import add_adx,add_chop
 
 class PEG30_RAYNOR(BaseEG):
     """stop=None,take=None,period_adx=14,period_chop=14,period_sma_l=30,period_sma_s=15,thr_adx=25,thr_chop=40,work_trend=True,large_open='2',large_close='12',n_large='2'"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, stop=None, take=None,period_adx=14,period_chop=14,period_sma_l=30,period_sma_s=15,thr_adx=25,thr_chop=40,work_trend=True,large_open='2',large_close='12',n_large='2'):
-        super().__init__(symbol, price_step, mult_ps, stop, take)
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=0, stop=None, take=None,period_adx=14,period_chop=14,period_sma_l=30,period_sma_s=15,thr_adx=25,thr_chop=40,work_trend=True,large_open='2',large_close='12',n_large='2'):
+        super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart':self.symbol}
         self.period_adx = period_adx
         self.period_chop = period_chop
@@ -52,8 +52,8 @@ class PEG30_RAYNOR(BaseEG):
             
 class PEG30_MURKY(BaseEG):
     """stop=None, take=None, work_trend=True,min_spred=3,use_long=True,use_short=True,period_adx=14,period_chop=14,period_sma_l=30,period_sma_s=15,thr_adx=25,thr_chop=40"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, stop=None, take=None, work_trend=True,min_spred=3,use_long=True,use_short=True,period_adx=14,period_chop=14,period_sma_l=30,period_sma_s=15,thr_adx=25,thr_chop=40):
-        super().__init__(symbol, price_step, mult_ps, stop, take)
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=0, stop=None, take=None, work_trend=True,min_spred=3,use_long=True,use_short=True,period_adx=14,period_chop=14,period_sma_l=30,period_sma_s=15,thr_adx=25,thr_chop=40):
+        super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart':self.symbol,'spred':self.symbol}
         self.period_adx = period_adx
         self.period_chop = period_chop

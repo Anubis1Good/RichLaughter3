@@ -13,7 +13,7 @@ from traders.VT.settingsPB import ColorsBtnBGR,TemplateCandle,large_value_1_colo
 from strategies.BaseEG import BaseEG
 from traders.VT.bot_on_ticker import init_trader
 from for_strategies.help_dtypes.actions_cls import OrderCords
-
+# from utils.drawing.chart import draw_bars_chart
 
 
 class VT7:
@@ -59,7 +59,7 @@ class VT7:
         self.wss: dict[str, BaseEG] = dict()
         for symbol in self.symbols:
             ws = init_trader(symbol)
-            self.wss[symbol] = ws[0](symbol,self.price_step,ws[2],*ws[1])
+            self.wss[symbol] = ws[0](symbol,self.price_step,ws[2],ws[3],*ws[1])
         now = datetime.now()
         cwd = now.weekday()
         self.close_on_time = close_on_time
@@ -73,10 +73,9 @@ class VT7:
             self.error_log[symbol] = os.path.join(folder_error,self.trader_name + '_' + symbol + '.txt')
         self.time_mode = None
 
-    # Переделал, надо проверить!
     def _color_search(self,img:npt.ArrayLike,color:tuple[int],region:tuple[int]=(None,None,None,None),reverse:bool=False):
         try:
-            roi = img[region[1]:region[3], region[0]:region[2]] #roi == [] ?
+            roi = img[region[1]:region[3], region[0]:region[2]] #смотри не перепутай координаты региона 1 < 3 && 0 < 2, иначе будет пусть roi
             result = np.argwhere(
                 (roi[:,:,0] == color[0]) & (roi[:,:,1] == color[1]) & (roi[:,:,2] == color[2])
             )
@@ -92,53 +91,7 @@ class VT7:
         except Exception:
             traceback.print_exc()
             return -1,-1
-        
-    def _colorarea_search(self,img:npt.ArrayLike, color:tuple[int],region:tuple[int]=(None,None,None,None), y_min=None, y_max=None, reverse_sort=False, skip_m1=True):
-        if skip_m1:
-            if y_min == -1 or y_max == -1:
-                return []
-        mask = cv2.inRange(img, color, color)
-        contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        # 3. Фильтруем и собираем информацию
-        regions_f = []
-        used_y_positions = []
-        for contour in contours:
-            area = cv2.contourArea(contour)
-            # Фильтр по площади
-            if area < 20:
-                continue
-            # Вычисляем bounding box
-            x, y, w, h = cv2.boundingRect(contour)
-            # Центр области
-            cx = x + w // 2
-            cy = y + h // 2
-            if region is not None and region[0] is not None:
-                if not region[0] < cx < region[2]:
-                    continue
-            if y_max is not None:
-                if cy > y_max:
-                    continue
-            if y_min is not None:
-                if cy < y_min:
-                    continue
-            is_duplicate = False
-            for used_y in used_y_positions:
-                if abs(cy - used_y) <= 10:
-                    is_duplicate = True
-                    break
-            if is_duplicate:
-                continue  # Пропускаем дубликат
-            # Добавляем новую уникальную область
-            used_y_positions.append(cy)
-            # Сохраняем информацию
-            regions_f.append({
-                'cx': cx,
-                'cy': cy,
-            })
-        # 4. Сортируем
-        regions_f.sort(key=lambda r: r['cy'],reverse=reverse_sort)
-        return regions_f
-        
+             
     def _check_time(self):
         now = datetime.now()
         chour = now.hour
@@ -330,150 +283,6 @@ class VT7:
         pdi.moveTo(chart_region[0]+150,chart_region[1]+10)
         pdi.click()
 
-
-    #TODO можно подумать над btn возле bests, а так же об сохранении заявок, если их не нужно менять
-    def _send_open_level(self,img,direction,symbol,idx,n=1,reverse_pos=False,press_f=True):
-        glass_region = self.glass_region[symbol][idx]
-        x = glass_region[0] + 11
-        pdi.moveTo(x,glass_region[1]+11)
-        if press_f:
-            pdi.press('f')
-        level_color = ColorsBtnBGR.level_shift_1
-        y_min,y_max = None,None
-        if direction == 'short':
-            y_max = self._get_best_ask(img,symbol,idx)
-            reverse_sort = True
-        else:
-            y_min = self._get_best_bid(img,symbol,idx)
-            reverse_sort = False
-        regions = self._colorarea_search(img,level_color,self.tape_region[symbol][idx],y_min=y_min,y_max=y_max,reverse_sort=reverse_sort)
-        n_req = min(n,len(regions))
-        print(symbol,regions)
-        for i in range(n_req):
-            try:
-                cx,cy = x,regions[i]['cy']
-                if direction == 'short':
-                    if reverse_pos and i == 0:
-                        pdi.press('z')
-                        pdi.rightClick(cx,cy)
-                        pdi.press('z')
-                    pdi.rightClick(cx,cy)
-                else:
-                    if reverse_pos and i == 0:
-                        pdi.press('z')
-                        pdi.click(cx,cy)
-                        pdi.press('z')
-                    pdi.click(cx,cy)
-            except Exception as err:
-                traceback.print_exc()
-                pass
-
-    def _send_open_all_level(self,img,symbol,idx,n=1):
-        self._send_open_level(img,'long',symbol,idx,n,press_f=True)
-        self._send_open_level(img,'short',symbol,idx,n,press_f=False)
-
-    def _send_close_level(self,img,direction,symbol,idx,n=1,use_z=True):
-        glass_region = self.glass_region[symbol][idx]
-        pdi.moveTo(glass_region+11,glass_region+11)
-        rev_direction = 'long' if direction == 'short' else 'short'
-        if use_z:
-            pdi.press('z')
-            self._send_open_level(img,rev_direction,symbol,idx,1)
-            pdi.press('z')
-        else:
-            self._send_open_level(img,rev_direction,symbol,idx,n)
-
-    def _get_region_large(self,img,direction,large_open,large_close,symbol,idx):
-        level_colors_1= (ColorsBtnBGR.large_value_1,ColorsBtnBGR.large_value_1_level)
-        level_colors_2 = (ColorsBtnBGR.large_value_2,ColorsBtnBGR.large_value_2_level)
-        y_max = self._get_best_ask(img,symbol,idx)
-        y_min = self._get_best_bid(img,symbol,idx)
-        regions_open,regions_close = [],[]
-        regions_colors_1 = []
-        regions_colors_2 = []
-        if direction == 'short':
-            reverse_sort = True
-            for level_color in level_colors_1:
-                regions_colors_1 += self._colorarea_search(img,level_color,self.glass_region[symbol][idx],y_min=None,y_max=y_max,reverse_sort=reverse_sort)
-            for level_color in level_colors_2:
-                regions_colors_2 += self._colorarea_search(img,level_color,self.glass_region[symbol][idx],y_min=None,y_max=y_max,reverse_sort=reverse_sort)
-        else:
-            reverse_sort = False
-            for level_color in level_colors_1:
-                regions_colors_1 += self._colorarea_search(img,level_color,self.glass_region[symbol][idx],y_min=y_min,y_max=None,reverse_sort=reverse_sort)
-            for level_color in level_colors_2:
-                regions_colors_2 += self._colorarea_search(img,level_color,self.glass_region[symbol][idx],y_min=y_min,y_max=None,reverse_sort=reverse_sort)
-        if '1' in large_open:
-            regions_open += regions_colors_1
-        if '2' in large_open:
-            regions_open += regions_colors_2    
-        if '1' in large_close:
-            regions_close += regions_colors_1
-        if '2' in large_close:
-            regions_close += regions_colors_2 
-
-        regions_open.sort(key=lambda r: r['cy'],reverse=reverse_sort)
-        regions_close.sort(key=lambda r: r['cy'],reverse=reverse_sort)
-        return regions_open,regions_close,y_min,y_max
-
-    def _enter_large(self,direction,y_min,y_max,cx,cy):
-        if direction == 'short':
-            if y_min - cy > self.price_step*2:
-                cy += self.price_step
-                pdi.rightClick(cx,cy)
-                # print(self.name,'mouse')
-            else:
-                pdi.press('s')
-                # print(self.name,'btn')
-        else:
-            if cy - y_max > self.price_step*2:
-                cy -= self.price_step
-                # print(self.name,'mouse')
-                pdi.click(cx,cy)
-            else:
-                pdi.press('a')
-                # print(self.name,'btn')
-
-    def _send_open_large(self,img,direction,symbol,idx,n=1,reverse_pos=False,press_f=True,large_open='',large_close='',main_large_open=True):
-        pdi.moveTo(self.glass_region[symbol][idx][0]+11,self.glass_region[symbol][idx][1]+11)
-        if press_f:
-            pdi.press('f')
-        regions_open,regions_close,y_min,y_max = self._get_region_large(img,direction,large_open,large_close,symbol,idx)
-        if main_large_open:
-            n_req = min(n,len(regions_open))
-            main_region = regions_open
-        else:
-            n_req = min(n,len(regions_close))
-            main_region = regions_close
-        if reverse_pos:
-            cx,cy = regions_close[0]['cx'],regions_close[0]['cy']
-            pdi.press('z')
-            self._enter_large(direction,y_min,y_max,cx,cy)
-            pdi.press('z')
-        # print(self.name,regions,y_max,y_min)
-        for i in range(n_req):
-            try:
-                cx,cy = main_region[i]['cx'],main_region[i]['cy']
-                self._enter_large(direction,y_min,y_max,cx,cy)
-            except Exception as err:
-                traceback.print_exc()
-                pass
-
-    def _send_open_all_large(self,img,symbol,idx,n=1,large_open='',large_close=''):
-        self._send_open_large(img,'long',symbol,idx,n,press_f=True,large_open=large_open,large_close=large_close)
-        self._send_open_large(img,'short',symbol,idx,n,press_f=False,large_open=large_open,large_close=large_close)
-
-    def _send_close_large(self,img,direction,symbol,idx,n=1,use_z=True,large_open='',large_close=''):
-        pdi.moveTo(self.glass_region[symbol][idx][0]+11,self.glass_region[symbol][idx][1]+11)
-        rev_direction = 'long' if direction == 'short' else 'short'
-        if use_z:
-            pdi.press('z')
-            self._send_open_large(img,rev_direction,symbol,idx,1,large_open=large_open,large_close=large_close,main_large_open=False)
-            pdi.press('z')
-        else:
-            self._send_open_large(img,rev_direction,symbol,idx,n,large_open=large_open,large_close=large_close,main_large_open=False)
-
-
     def _get_region(self,img,region):
         chart = img[
         region[1]:region[3],
@@ -544,6 +353,7 @@ class VT7:
         self.offset[symbol][idx] = bars['volume'].max()
         for k in ('high','low','volume','middle','open','close'):
             bars[k] = -bars[k] + self.offset[symbol][idx]
+        bars['volume'] = bars['volume'] + 1
         return bars
     
     def _get_df(self,img,symbol,idx) -> pd.DataFrame:
@@ -767,112 +577,9 @@ class VT7:
         else:
             return None
     
-    def _large_init(self,action:str):
-        # sample 'all_spred_large_o2_c12_2'
-        n = action.split('_')[-1]
-        match = re.search(r'o(\d+)', action)
-        if match:
-            large_open = match.group(1)
-        else:
-            large_open = ''
-        match = re.search(r'c(\d+)', action)
-        if match:
-            large_close = match.group(1)
-        else:
-            large_close = ''
-        if n.isdigit():
-            n = int(n)
-        else:
-            n = None
-        return n,large_open,large_close
-
-    #TODO Отрефакторить
-    def _work_large_action(self,action,pos,img,symbol,idx):
-        n,large_open,large_close = self._large_init(action)
-        # print(self.name,n,large_open,large_close)
-        if n is not None:
-            use_z = False if 'danger' in action else True
-            if 'close' in action:
-                if 'long' in action or 'all' in action and pos == 1:
-                    self._send_close_large(img,'long',symbol,idx,n,use_z,large_open=large_open,large_close=large_close)
-                elif 'short' in action or 'all' in action and pos == -1:
-                    self._send_close_large(img,'short',symbol,idx,n,use_z,large_open=large_open,large_close=large_close)
-                else:
-                    self._reset_req(symbol,idx)
-            elif 'spred' in action:
-                if 'long' in action:
-                    if pos == -1:
-                        self._send_open_large(img,'long',symbol,idx,n,True,large_open=large_open,large_close=large_close)
-                    elif pos == 0:
-                        self._send_open_large(img,'long',symbol,idx,n,large_open=large_open,large_close=large_close)
-                    else:
-                        self._send_close_large(img,'long',symbol,idx,n,use_z,large_open=large_open,large_close=large_close)
-                if 'short' in action:
-                    if pos == 1:
-                        self._send_open_large(img,'short',symbol,idx,n,True,large_open=large_open,large_close=large_close)
-                    elif pos == 0:
-                        self._send_open_large(img,'short',symbol,idx,n,large_open=large_open,large_close=large_close)
-                    else:
-                        self._send_close_large(img,'short',symbol,idx,n,use_z,large_open=large_open,large_close=large_close)
-            elif 'long' in action:
-                if pos == -1:
-                    self._send_open_large(img,'long',symbol,idx,n,True,large_open=large_open,large_close=large_close)
-                if pos == 0:
-                    self._send_open_large(img,'long',symbol,idx,n,large_open=large_open,large_close=large_close)
-            elif 'short' in action:
-                if pos == 1:
-                    self._send_open_large(img,'short',symbol,idx,n,True,large_open=large_open,large_close=large_close)
-                if pos == 0:
-                    self._send_open_large(img,'short',symbol,idx,n,large_open=large_open,large_close=large_close)
-            elif 'all' in action:
-                if pos == -1:
-                    self._send_open_large(img,'long',symbol,idx,n,True,large_open=large_open,large_close=large_close)
-                elif pos == 1:
-                    self._send_open_large(img,'short',symbol,idx,n,True,large_open=large_open,large_close=large_close)
-                else:
-                    self._send_open_all_large(img,symbol,idx,n,large_open=large_open,large_close=large_close)
-
-    def _work_level_action(self,action:str,pos,img,symbol,idx):
-        n = action.split('_')[-1]
-        if n.isdigit():
-            n = int(n)
-        else:
-            n = None
-        if n is not None:
-            if 'close' in action: #закрытие на уровне
-                use_z = False if 'danger' in action else True
-                if 'long' in action or 'all' in action and pos == 1:
-                    self._send_close_level(img,'long',symbol,idx,n,use_z)
-                elif 'short' in action or 'all' in action and pos == -1:
-                    self._send_close_level(img,'short',symbol,idx,n,use_z)
-                else:
-                    self._reset_req(symbol,idx)
-            elif 'long' in action: #открытие на уровне
-                if pos == -1:
-                    self._send_open_level(img,'long',symbol,idx,n,True)
-                if pos == 0:
-                    self._send_open_level(img,'long',symbol,idx,n)
-            elif 'short' in action:
-                if pos == 1:
-                    self._send_open_level(img,'short',symbol,idx,n,True)
-                if pos == 0:
-                    self._send_open_level(img,'short',symbol,idx,n)
-            elif 'all' in action:
-                if pos == -1:
-                    self._send_open_level(img,'long',symbol,idx,n,True)
-                elif pos == 1:
-                    self._send_open_level(img,'short',symbol,idx,n,True)
-                else:
-                    self._send_open_all_level(img,symbol,idx,n)
-            print(symbol,pos,action)
-
     def _work_action(self,action,pos,img,symbol,idx):
-        # print(self.name,pos,action)
-        if 'large' in action:
-            self._work_large_action(action,pos,img,symbol,idx)
-        elif 'level' in action:
-            self._work_level_action(action,pos,img,symbol,idx)
-        elif 'close_long' == action:
+        # print(self.name,pos,action) 
+        if 'close_long' == action:
             if pos == 1:
                 self._send_close('long',symbol,idx,img)
             else:
@@ -921,8 +628,6 @@ class VT7:
                         action = 'close_short'
                     elif action == 'open_short':
                         action = 'close_long'
-                    elif 'large' in action:
-                        action = re.sub(r'o\d+', 'o0', action)
             elif time_mode == -3:
                 action = 'close_all'
         return action

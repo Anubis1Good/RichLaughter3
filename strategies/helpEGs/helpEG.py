@@ -2,8 +2,8 @@ from strategies.BaseEG import BaseEG
 
 
 class TestEG(BaseEG):
-    def __init__(self, symbol='Test',price_step=None,mult_ps=1, stop=None, take=None):
-        super().__init__(symbol, price_step, mult_ps, stop, take)
+    def __init__(self, symbol='Test',price_step=None,mult_ps=1, mode=0, stop=None, take=None):
+        super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart':True,'full_glass':True}
         self.type_eg = 2
         # tdata - trading data

@@ -2,10 +2,11 @@ import pandas as pd
 
 # EG - Execution Governor — Управляющий исполнением
 class BaseEG:
-    def __init__(self,symbol='Test',price_step=None,mult_ps=1,stop=None,take=None):
+    def __init__(self,symbol='Test',price_step=None,mult_ps=1,mode=0,stop=None,take=None):
         self.symbol = symbol
         self.price_step = price_step
         self.mult_ps = mult_ps
+        self.mode = mode
         self.stop = stop
         self.take = take
         self.needs_info = None 
