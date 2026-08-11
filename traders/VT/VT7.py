@@ -510,6 +510,8 @@ class VT7:
         df['have_level'] = have_level
         df['large2'] = df['vol_per'] > 99
         df['middle'] = (df['bottom'] + df['top']) // 2
+        df.loc[df[df['type_cell'] == 'ask'].index[-1], 'type_cell'] = 'bask'
+        df.loc[df[df['type_cell'] == 'bid'].index[0], 'type_cell'] = 'bbid'
         return df
   
     
@@ -672,7 +674,7 @@ class VT7:
                 tdata['fg'] = fg.copy()
         return tdata
     
-    def _processing_str_action(self,img,symbol,pos,time_mode):
+    def _processing_str_action(self,img,symbol,pos,time_mode,action):
         action = self._check_close_on_time(action,time_mode)
         price_limit = self._check_price_limit(img,symbol,0)
         if price_limit != 0:
@@ -686,7 +688,7 @@ class VT7:
             self._reset_req(symbol,0)
         return action
 
-    def _processing_OC_action(self,img,symbol,pos,time_mode):
+    def _processing_OC_action(self,img,symbol,pos,time_mode,action):
         action = self._check_close_on_time_OC(action,time_mode)
         price_limit = self._check_price_limit(img,symbol,0)
         if price_limit != 0:
@@ -737,13 +739,13 @@ class VT7:
                     action = self.wss[symbol](pdata,pos,delta)
                     # print(symbol,action)    
                     if isinstance(action, str) or action is None:
-                        action = self._processing_str_action(img,symbol,pos,time_mode)
+                        action = self._processing_str_action(img,symbol,pos,time_mode,action)
                     elif isinstance(action,dict):
                         ...
                     elif isinstance(action, (tuple, list)):
                         for act in action:
                             if isinstance(act, OrderCords):
-                                action = self._processing_OC_action(img,symbol,pos,time_mode)
+                                action = self._processing_OC_action(img,symbol,pos,time_mode,action)
                     # print(symbol,action,pos)
 
                 except Exception as err:
