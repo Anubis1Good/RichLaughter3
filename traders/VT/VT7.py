@@ -37,6 +37,9 @@ class VT7:
         self.position_region = {symbol: [] for symbol in symbols}
         self.tape_region = {symbol: [] for symbol in symbols}
         self.cluster_region = {symbol: [] for symbol in symbols}
+
+        self.fgs = {symbol: [] for symbol in symbols}
+
         for dom in conf_data['doms']:
             for i, symbol in enumerate(symbols):
                 if i < len(dom['glasses']):
@@ -44,6 +47,8 @@ class VT7:
                     self.position_region[symbol].append(dom['poses'][i])
                     self.tape_region[symbol].append(dom['tapes'][i])
                     self.cluster_region[symbol].append(dom['clusters'][i])
+
+                    self.fgs[symbol].append(None)
         
         # Распаковка charts
         self.chart_region = {symbol: [] for symbol in symbols}
@@ -72,6 +77,7 @@ class VT7:
         for symbol in self.symbols:
             self.error_log[symbol] = os.path.join(folder_error,self.trader_name + '_' + symbol + '.txt')
         self.time_mode = None
+
 
     def _color_search(self,img:npt.ArrayLike,color:tuple[int],region:tuple[int]=(None,None,None,None),reverse:bool=False):
         try:
@@ -617,6 +623,8 @@ class VT7:
             # print(self.symbols)
             # print(symbol,pos)
             ...
+    def _work_action_OC(self,action,pos,img,symbol,idx):
+        ...
 
     def _check_close_on_time(self,action,time_mode):
         if self.close_on_time:
@@ -628,8 +636,16 @@ class VT7:
                         action = 'close_short'
                     elif action == 'open_short':
                         action = 'close_long'
-            elif time_mode == -3:
-                action = 'close_all'
+        return action
+    
+    def _check_close_on_time_OC(self,action:OrderCords,time_mode):
+        if self.close_on_time:
+            if time_mode == -1:
+                action = OrderCords('close_all_simple')
+            elif time_mode == -2:
+                if action is not None:
+                    if action.is_open: 
+                        action = OrderCords('close_all_smart')
         return action
 
     def _get_params_for_ws(self,img,symbol,poss,delta_p):
@@ -652,8 +668,35 @@ class VT7:
                 tdata['spred'] = spred
             if 'full_glass' in needs_info:
                 fg = self._get_full_glass(img,symbol,0)
-                tdata['fg'] = fg
+                self.fgs[symbol][0] = fg
+                tdata['fg'] = fg.copy()
         return tdata
+    
+    def _processing_str_action(self,img,symbol,pos,time_mode):
+        action = self._check_close_on_time(action,time_mode)
+        price_limit = self._check_price_limit(img,symbol,0)
+        if price_limit != 0:
+            if pos != 0:
+                action = 'close_all'
+            else:
+                action = None
+        if action:
+            self._work_action(action,pos,img,symbol,0)
+        else:
+            self._reset_req(symbol,0)
+        return action
+
+    def _processing_OC_action(self,img,symbol,pos,time_mode):
+        action = self._check_close_on_time_OC(action,time_mode)
+        price_limit = self._check_price_limit(img,symbol,0)
+        if price_limit != 0:
+            if pos != 0:
+                action = OrderCords('close_all_simple')
+            else:
+                action = None
+        if action:
+            self._work_action_OC(action,pos,img,symbol,0)
+        return action
     
     def _error_processing(self,symbol,err):
         print(self.symbols)
@@ -694,22 +737,15 @@ class VT7:
                     action = self.wss[symbol](pdata,pos,delta)
                     # print(symbol,action)    
                     if isinstance(action, str) or action is None:
-                        action = self._check_close_on_time(action,time_mode)
-                        price_limit = self._check_price_limit(img,symbol,0)
-                        if price_limit != 0:
-                            if pos != 0:
-                                action = 'close_all'
-                            else:
-                                action = None
-                        if action:
-                            self._work_action(action,pos,img,symbol,0)
-                        else:
-                            self._reset_req(symbol,0)
-                        # print(symbol,action,pos)
+                        action = self._processing_str_action(img,symbol,pos,time_mode)
                     elif isinstance(action,dict):
                         ...
-                    elif isinstance(action,tuple) or isinstance(action,list):
-                        ...
+                    elif isinstance(action, (tuple, list)):
+                        for act in action:
+                            if isinstance(act, OrderCords):
+                                action = self._processing_OC_action(img,symbol,pos,time_mode)
+                    # print(symbol,action,pos)
+
                 except Exception as err:
                     print(symbol,'inner Error!')
                     self._error_processing(symbol,err)
