@@ -1,8 +1,9 @@
 import pandas as pd
+from for_strategies.help_dtypes.actions_cls import OrderManager
 
 # EG - Execution Governor — Управляющий исполнением
 class BaseEG:
-    def __init__(self,symbol='Test',price_step=None,mult_ps=1,mode=0,stop=None,take=None):
+    def __init__(self,symbol='Test',price_step=None,mult_ps=1,mode=None,stop=None,take=None):
         self.symbol = symbol
         self.price_step = price_step
         self.mult_ps = mult_ps
@@ -20,6 +21,7 @@ class BaseEG:
         self.can_short = True
         self.type_eg = 0 # 0 - D-ws, 1 - BD-ws, 2 - spred_glass
         self.block_type_egs = (0,)
+        self.order_manager = OrderManager()
 
     def add_slice_df(self, df:pd.DataFrame, period=20):
         df_slice = df.iloc[period+1:]

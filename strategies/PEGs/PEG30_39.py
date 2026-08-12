@@ -1,6 +1,7 @@
 
 from strategies.BaseEG import BaseEG
 from for_strategies.classic_indicators import add_adx,add_chop
+from for_strategies.help_dtypes.actions_cls import OrderCords
 
 #action large больше не поддерживается VT7
 # class PEG30_RAYNOR(BaseEG):
@@ -53,7 +54,7 @@ from for_strategies.classic_indicators import add_adx,add_chop
             
 class PEG30_MURKY(BaseEG):
     """stop=None, take=None, work_trend=True,min_spred=3,use_long=True,use_short=True,period_adx=14,period_chop=14,period_sma_l=30,period_sma_s=15,thr_adx=25,thr_chop=40"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=0, stop=None, take=None, work_trend=True,min_spred=3,use_long=True,use_short=True,period_adx=14,period_chop=14,period_sma_l=30,period_sma_s=15,thr_adx=25,thr_chop=40):
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, work_trend=True,min_spred=3,use_long=True,use_short=True,period_adx=14,period_chop=14,period_sma_l=30,period_sma_s=15,thr_adx=25,thr_chop=40):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart':self.symbol,'spred':self.symbol}
         self.period_adx = period_adx
@@ -107,8 +108,8 @@ class PEG30_MURKY(BaseEG):
                     return 'close_all'
 
 class PEG31_HYPERION(BaseEG):
-    """stop=None, take=None,work_trend=True,large_open=100,large_close=50,n_large=2,period_adx=14,period_chop=14,period_sma_l=30,period_sma_s=15,thr_adx=25,thr_chop=40"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=0, stop=None, take=None,work_trend=True,large_open=100,large_close=50,n_order=2,period_adx=14,period_chop=14,period_sma_l=30,period_sma_s=15,thr_adx=25,thr_chop=40):
+    """stop=None, take=None, min_spred=3, work_direction = 0, work_trend=True, large_open=100,large_close=50, n_order=1, min_step=3, period_adx=14, period_chop=14, period_sma_l=30, period_sma_s=15, thr_adx=25, thr_chop=40"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, min_spred=3, work_direction = 0, work_trend=True, large_open=100,large_close=50, n_order=1, min_step=3, period_adx=14, period_chop=14, period_sma_l=30, period_sma_s=15, thr_adx=25, thr_chop=40):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart':True,'full_glass':True}
         self.period_adx = period_adx
@@ -121,7 +122,10 @@ class PEG31_HYPERION(BaseEG):
         self.large_open = large_open
         self.large_close = large_close
         self.n_order = n_order
+        self.min_spred = min_spred
+        self.min_step = min_step
         self.type_eg = 2
+        self.work_direction = work_direction
     
     def preprocessing(self, tdata):
         pdata = {}
@@ -138,28 +142,35 @@ class PEG31_HYPERION(BaseEG):
     def get_raw_action(self,pdata):
         row = self.get_test_row(pdata['chart'])
         fg = pdata['fg']
-        print(self.symbol,fg)
+        # print(self.symbol,fg)
         actions = []
+        direction = None
         # range
         if row['adx'] < self.thr_adx and row['chop'] > self.thr_chop:
-            # print('range')
-            for i in range(self.n_order):
-                ...
+            print('range')
+            direction = 0
         # trend
         else:
             if self.work_trend:
                 # long
                 if row['sma_s'] > row['sma_l']:
-                    # print('long')
-                    # return 'spred_long_'+self.large_config
-                    ...
+                    print('long')
+                    direction = 1
                 # short
                 else:
-                    # print('short')
-                    # return 'spred_short_'+self.large_config
-                    ...
-            else:
-                # return 'close_all_pw'
-                ...    
+                    print('short')
+                    direction = -1
+        if self.work_direction != 0:
+            if direction != self.work_direction:
+                if direction == 0:
+                    direction = self.work_direction
+                else:
+                    direction = None
+        
+        print(self.symbol,direction)
+        if direction is not None:
+            actions = self.order_manager.get_spred_orders(fg,direction,self.min_spred,self.large_open,self.large_close,self.n_order,self.min_step)
+        else:
+            actions = [OrderCords(type_order='close_all_smart', is_open=False,smart_per=self.large_close)]
         return actions
 

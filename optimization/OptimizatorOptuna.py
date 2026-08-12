@@ -98,7 +98,7 @@ class OptimizatorOptuna:
             trader.symbol, 
             trader.price_step,
             1,
-            0, 
+            None, 
             *params
         )
         
@@ -144,7 +144,7 @@ class OptimizatorOptuna:
                 params.append(param_value)
                 param_values.append(str(param_value))
             
-            strategy = strategy_class(ticker, trader.price_step, 1, 0, *params)
+            strategy = strategy_class(ticker, trader.price_step, 1, None, *params)
             
             trader.ws = strategy
             trader.reload_data()

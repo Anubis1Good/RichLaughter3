@@ -240,7 +240,19 @@ class VT7:
         pdi.moveTo(glass_region[0]+11,glass_region[1]+11)
         pdi.press('f')
 
-    def _open_by_cords(self,symbol,idx,y:int,left_btn:bool,press_f=False,press_z=False):
+    def _send_by_simple(self,symbol,idx,left_btn:bool,press_f=False,press_z=False):
+        glass_region = self.glass_region[symbol][idx]
+        pdi.moveTo(glass_region[0]+11,glass_region[1]+11)
+        if press_f:
+            pdi.press('f')
+        if press_z:
+            pdi.press('z')
+        btn = 'a' if left_btn else 's'
+        pdi.press(btn)
+        if press_z:
+            pdi.press('z')
+
+    def _send_by_cords(self,symbol,idx,y:int,left_btn:bool,press_f=False,press_z=False):
         glass_region = self.glass_region[symbol][idx]
         pdi.moveTo(glass_region[0]+11,glass_region[1]+11)
         if press_f:
@@ -251,6 +263,27 @@ class VT7:
         pdi.click(glass_region[0]+10,y,button=btn)
         if press_z:
             pdi.press('z')
+    
+    def _send_by_smart(self,symbol,idx,left_btn:bool,press_f=False,press_z=False,smart_per=30):
+        fg = self.fgs[symbol][idx]
+        if left_btn:
+            bid_large_mask = (fg['type_cell'].isin(['bid', 'bbid'])) & (fg['vol_per'] >= smart_per)
+            bid_large_indices = fg[bid_large_mask].index.tolist()[:1]
+            if bid_large_indices:
+                smart_bid = fg.iloc[bid_large_indices[0]]
+                if smart_bid['type_cell'] == 'bbid':
+                    self._send_by_simple(symbol,idx,left_btn,press_f,press_z)
+                else:
+                    self._send_by_cords(symbol,idx,smart_bid['middle'],left_btn,press_f,press_z)
+        else:
+            ask_large_mask = (fg['type_cell'].isin(['ask', 'bask'])) & (fg['vol_per'] >= smart_per)
+            ask_large_indices = fg[ask_large_mask].index.tolist()[-1:]
+            if ask_large_indices:
+                smart_ask = fg.iloc[ask_large_indices[0]]
+                if smart_ask['type_cell'] == 'bask':
+                    self._send_by_simple(symbol,idx,left_btn,press_f,press_z)
+                else:
+                    self._send_by_cords(symbol,idx,smart_ask['middle'],left_btn,press_f,press_z)
     
     def _reset_by_cords(self,symbol,idx,y:int,left_btn:bool):
         glass_region = self.glass_region[symbol][idx]
@@ -614,7 +647,7 @@ class VT7:
                 self._send_close('long',symbol,idx,img)
             else:
                 self._reset_req(symbol,idx)
-        elif 'open_all' == action: #NEED TEST
+        elif 'open_all' == action:
             if pos == -1:
                 self._reverse_pos('long',symbol,idx)
             elif pos == 1:
@@ -625,8 +658,37 @@ class VT7:
             # print(self.symbols)
             # print(symbol,pos)
             ...
-    def _work_action_OC(self,action,pos,img,symbol,idx):
-        ...
+
+    def _work_action_OC(self,action:OrderCords,pos,img,symbol,idx):
+        type_order = action.type_order
+        left_btn = action.left_btn
+        if type_order == 'send_cords':
+            if (pos <= 0 and left_btn) or (pos >= 0 and not left_btn):
+                self._send_by_cords(symbol,idx,action.y,left_btn,action.press_f,action.press_z)
+        elif type_order == 'send_simple':
+            if (pos <= 0 and left_btn) or (pos >= 0 and not left_btn):
+                self._send_by_simple(symbol,idx,left_btn,action.press_f,action.press_z)
+        elif type_order == 'send_smart':
+            if (pos <= 0 and left_btn) or (pos >= 0 and not left_btn):
+                self._send_by_smart(symbol,idx,left_btn,action.press_f,action.press_z,action.smart_per)
+        elif type_order == 'reset_cords':
+            self._reset_by_cords(symbol,idx,action.y,left_btn)
+        elif type_order == 'reset_simple':
+            self._reset_req(symbol,idx)
+        elif type_order == 'close_all_simple':
+            if pos > 0:
+                # Закрываем лонг - продажа
+                self._send_by_simple(symbol, idx, False, True, True)
+            elif pos < 0:
+                # Закрываем шорт - покупка
+                self._send_by_simple(symbol, idx, True, True, True)
+        elif type_order == 'close_all_smart':
+            if pos > 0:
+                self._send_by_smart(symbol, idx, False, True, True)
+            elif pos < 0:
+                self._send_by_smart(symbol, idx, True, True, True)
+        
+
 
     def _check_close_on_time(self,action,time_mode):
         if self.close_on_time:
@@ -652,6 +714,7 @@ class VT7:
 
     def _get_params_for_ws(self,img,symbol,poss,delta_p):
         tdata = {}
+        fg = None
         needs_info = self.wss[symbol].needs_info
         if needs_info is not None:
             if 'chart' in needs_info:
@@ -672,6 +735,13 @@ class VT7:
                 fg = self._get_full_glass(img,symbol,0)
                 self.fgs[symbol][0] = fg
                 tdata['fg'] = fg.copy()
+        if fg is None and self.wss[symbol].mode is not None:
+            mode = self.wss[symbol].mode
+            if isinstance(mode,str):
+                if 'fg' in mode:
+                    fg = self._get_full_glass(img,symbol,0)
+                    self.fgs[symbol][0] = fg
+        
         return tdata
     
     def _processing_str_action(self,img,symbol,pos,time_mode,action):
@@ -737,16 +807,19 @@ class VT7:
                     pos = poss[symbol][0]
                     delta = delta_p[symbol][0]
                     action = self.wss[symbol](pdata,pos,delta)
-                    # print(symbol,action)    
+                    print(symbol,action)    
                     if isinstance(action, str) or action is None:
                         action = self._processing_str_action(img,symbol,pos,time_mode,action)
                     elif isinstance(action,dict):
                         ...
                     elif isinstance(action, (tuple, list)):
+                        new_action = []
                         for act in action:
                             if isinstance(act, OrderCords):
-                                action = self._processing_OC_action(img,symbol,pos,time_mode,action)
-                    # print(symbol,action,pos)
+                                act = self._processing_OC_action(img,symbol,pos,time_mode,act)
+                                new_action.append(act)
+                        action = new_action
+                    print(symbol,action,pos)
 
                 except Exception as err:
                     print(symbol,'inner Error!')

@@ -3,7 +3,7 @@ from for_strategies.classic_indicators import add_donchan_channel
         
 class PEG2_DDCrWork(BaseEG):
     "stop=None, take=None,period=20"
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=0, stop=None, take=None,period=20):
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None,period=20):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart':self.symbol}
         self.period = period
