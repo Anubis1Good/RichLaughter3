@@ -13,42 +13,43 @@ bot_on_ticker = {
     'SGZH1':(TestEG,tuple(),1,None),
     'VSEH1':(TestEG,tuple(),1,None),
     'VTBR1':(TestEG,tuple(),1,None),
-    """stop=None, take=None, min_spred=3, work_direction = 0, work_trend=True, large_open=100,large_close=50, n_order=1, min_step=3, period_adx=14, period_chop=14, period_sma_l=30, period_sma_s=15, thr_adx=25, thr_chop=40"""
-    'ETLN1':(PEG31_HYPERION,(3,1,0,0,True,100,20,2,10),1,None),
-    'FIXR1':(PEG31_HYPERION,(4,2,2,0,True,30,10,1),1,None),
-    'VSEH1':(PEG31_HYPERION,(5,3,3,1,True,40,10,1),1,None),
-    'PRMD1':(PEG31_HYPERION,(5,5,5,1,True,30,10,1),1,None),
-    'MRKC1':(PEG31_HYPERION,(3,2,2,0,True,20,5,1),1,None),
+    # 'ETLN1':(PEG31_HYPERION,(3,1,0,0,True,100,20,2,10),1,None),
+    # 'FIXR1':(PEG31_HYPERION,(4,2,2,0,True,30,10,1),1,None),
+    # 'VSEH1':(PEG31_HYPERION,(5,3,3,1,True,40,10,1),1,None),
+    # 'PRMD1':(PEG31_HYPERION,(5,5,5,1,True,30,10,1),1,None),
+    # 'MRKC1':(PEG31_HYPERION,(3,2,2,0,True,20,5,1),1,None),
     # 'FIXR1':(PEG30_MURKY,(5,1),1,0),
     # 'MRKC1':(PEG30_MURKY,(5,1),1,0),
     # # 'MTLR1':(PEG2_DDCrWork,(30,25,20),2,0),
     # 'PRMD1':(PEG30_MURKY,(5,1),1,0),
     # 'SGZH1':(PEG30_RAYNOR,(5,1),1,0),
     # 'VSEH1':(PEG30_MURKY,(5,1,True,3,True,False),1,0),
-    # 'NKNCP':(PEG30_MURKY,(3,1,True,2,True,True),1,0), #-
-    # 'APTK':(PEG30_MURKY,(3,2,True,3,True,True),1,0), #-
-    # 'PRMD':(PEG30_MURKY,(5,4,True,4,True,True),1,0), #-
-    # 'ROLO':(PEG30_MURKY,(3,1,True,2,True,True),1,0), #-
-    # 'OGKB':(PEG30_MURKY,(3,1,True,2,True,True),1,0), #+
-    # 'GLRX':(PEG30_MURKY,(5,3,True,3,True,False),1,0), #+
-    # 'ENPG':(PEG30_MURKY,(5,3,True,3,True,True),1,0), #-
-    # 'TGKA':(PEG30_MURKY,(4,2,True,2,True,True),1,0), #0
-    # 'VSEH':(PEG30_MURKY,(5,3,True,3,True,True),1,0), #+
-    # 'BTBR':(PEG30_MURKY,(4,2,True,2,True,False),5,0), #-
-    # 'MGKL':(PEG30_MURKY,(4,3,True,3,True,True),1,0), #-
-    # 'GECO':(PEG30_MURKY,(3,1,True,2,True,True),1,0), #-
-    # 'FIXR':(PEG30_MURKY,(5,3,True,3,True,True),1,0), #+
-    # 'MRKC':(PEG30_MURKY,(4,2,True,2,True,True),1,0), #+
-    # 'GEMC':(PEG30_MURKY,(5,3,True,3,True,True),2,0), #+
-    # 'ELFV':(PEG30_MURKY,(3,1,True,2,True,True),1,0), #-
-    # 'ETLN':(PEG30_RAYNOR,(3,1),1,0), #-
-    # 'HYDR':(PEG30_RAYNOR,(6,2),1,0), #-
-    # 'SVAV':(PEG30_RAYNOR,(3,1),1,0), #-
-    # 'DATA':(PEG30_RAYNOR,(6,2),2,0), #0
-    # 'DELI':(PEG30_RAYNOR,(3,1),1,0), #-
-    # 'MVID':(PEG30_RAYNOR,(3,1),1,0), #+
-    # 'ABIO':(PEG30_RAYNOR,(6,2),1,0), #0
-    # 'RTKMP':(PEG30_RAYNOR,(3,1),1,0), #+
+    # """stop=None, take=None, min_spred=3, work_direction = 0, work_trend=True, large_open=100,large_close=50, n_order=1, min_step=3, period_adx=14, period_chop=14, period_sma_l=30, period_sma_s=15, thr_adx=25, thr_chop=40"""
+    'NKNCP':(PEG31_HYPERION,(2,2,2,0,True,10,5,1),1,None), #-
+    'APTK':(PEG31_HYPERION,(3,2,2,0,True,50,10,1),1,None), #-
+    'PRMD':(PEG31_HYPERION,(4,4,4,0,True,30,5,1),1,None), #-
+    'ROLO':(PEG31_HYPERION,(2,2,2,0,True,30,5,1),1,None), #-
+    'OGKB':(PEG31_HYPERION,(2,2,2,0,True,30,5,1),1,None), #+
+    'GLRX':(PEG31_HYPERION,(3,2,2,1,True,1,1,1),1,None), #+
+    'ENPG':(PEG31_HYPERION,(3,3,3,0,True,50,8,1),1,None), #-
+    'TGKA':(PEG31_HYPERION,(2,2,2,0,True,10,5,1),1,None), #0
+    'VSEH':(PEG31_HYPERION,(3,3,3,0,True,10,1,1),1,None), #+
+    'BTBR':(PEG31_HYPERION,(2,2,2,1,True,10,5,1),1,None), #-
+    'MGKL':(PEG31_HYPERION,(2,2,2,0,True,10,2,1),1,None), #-
+    'GECO':(PEG31_HYPERION,(2,2,2,0,True,30,10,1),1,None), #-
+    'FIXR':(PEG31_HYPERION,(2,2,2,0,True,10,1,1),1,None), #+
+    'MRKC':(PEG31_HYPERION,(3,2,2,0,True,20,1,1),1,None), #+
+    'GEMC':(PEG31_HYPERION,(3,3,3,0,True,10,1,1),1,None), #+
+    'ELFV':(PEG31_HYPERION,(2,2,2,0,True,10,5,1),1,None), #-
+
+    'ETLN':(PEG31_HYPERION,(2,1,2,0,True,30,10,2,5),1,None), #-
+    'HYDR':(PEG31_HYPERION,(3,2,2,0,True,100,20,1),1,None), #-
+    'SVAV':(PEG31_HYPERION,(2,1,2,0,True,30,10,1),1,None), #-
+    'DATA':(PEG31_HYPERION,(3,2,3,0,True,50,10,1),1,None), #0
+    'DELI':(PEG31_HYPERION,(2,1,2,0,True,30,1,2,5),1,None), #-
+    'MVID':(PEG31_HYPERION,(2,1,2,0,True,10,1,2,5),1,None), #+
+    'ABIO':(PEG31_HYPERION,(2,1,2,0,True,20,1,1),1,None), #0
+    'RTKMP':(PEG31_HYPERION,(2,1,2,0,True,30,5,1),1,None), #+
 }
 # sleep_group = ()
 

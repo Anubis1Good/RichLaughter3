@@ -662,14 +662,17 @@ class VT7:
     def _work_action_OC(self,action:OrderCords,pos,img,symbol,idx):
         type_order = action.type_order
         left_btn = action.left_btn
+        # Общее условие для отправки заявок
+        # Разрешаем: открытие при пустой позиции, закрытие лонга, закрытие шорта
+        can_send = (pos == 0 and action.is_open) or (pos == 1 and not left_btn) or (pos == -1 and left_btn)
         if type_order == 'send_cords':
-            if (pos <= 0 and left_btn) or (pos >= 0 and not left_btn):
-                self._send_by_cords(symbol,idx,action.y,left_btn,action.press_f,action.press_z)
+            if can_send:
+                self._send_by_cords(symbol, idx, action.y, left_btn, action.press_f, action.press_z)
         elif type_order == 'send_simple':
-            if (pos <= 0 and left_btn) or (pos >= 0 and not left_btn):
+            if can_send:
                 self._send_by_simple(symbol,idx,left_btn,action.press_f,action.press_z)
         elif type_order == 'send_smart':
-            if (pos <= 0 and left_btn) or (pos >= 0 and not left_btn):
+            if can_send:
                 self._send_by_smart(symbol,idx,left_btn,action.press_f,action.press_z,action.smart_per)
         elif type_order == 'reset_cords':
             self._reset_by_cords(symbol,idx,action.y,left_btn)
@@ -684,9 +687,9 @@ class VT7:
                 self._send_by_simple(symbol, idx, True, True, True)
         elif type_order == 'close_all_smart':
             if pos > 0:
-                self._send_by_smart(symbol, idx, False, True, True)
+                self._send_by_smart(symbol, idx, False, True, True, action.smart_per)
             elif pos < 0:
-                self._send_by_smart(symbol, idx, True, True, True)
+                self._send_by_smart(symbol, idx, True, True, True, action.smart_per)
         
 
 
@@ -703,14 +706,17 @@ class VT7:
         return action
     
     def _check_close_on_time_OC(self,action:OrderCords,time_mode):
+        change_action = False
         if self.close_on_time:
             if time_mode == -1:
                 action = OrderCords('close_all_simple')
+                change_action = True
             elif time_mode == -2:
                 if action is not None:
                     if action.is_open: 
                         action = OrderCords('close_all_smart')
-        return action
+                        change_action = True
+        return action, change_action
 
     def _get_params_for_ws(self,img,symbol,poss,delta_p):
         tdata = {}
@@ -759,16 +765,20 @@ class VT7:
         return action
 
     def _processing_OC_action(self,img,symbol,pos,time_mode,action):
-        action = self._check_close_on_time_OC(action,time_mode)
+        go_next = True
+        action, change_action = self._check_close_on_time_OC(action,time_mode)
+        if change_action:
+            go_next = False
         price_limit = self._check_price_limit(img,symbol,0)
         if price_limit != 0:
+            go_next = False
             if pos != 0:
                 action = OrderCords('close_all_simple')
             else:
                 action = None
         if action:
             self._work_action_OC(action,pos,img,symbol,0)
-        return action
+        return action, go_next
     
     def _error_processing(self,symbol,err):
         print(self.symbols)
@@ -807,7 +817,7 @@ class VT7:
                     pos = poss[symbol][0]
                     delta = delta_p[symbol][0]
                     action = self.wss[symbol](pdata,pos,delta)
-                    print(symbol,action)    
+                    # print(symbol,action)    
                     if isinstance(action, str) or action is None:
                         action = self._processing_str_action(img,symbol,pos,time_mode,action)
                     elif isinstance(action,dict):
@@ -816,10 +826,12 @@ class VT7:
                         new_action = []
                         for act in action:
                             if isinstance(act, OrderCords):
-                                act = self._processing_OC_action(img,symbol,pos,time_mode,act)
+                                act,go_next = self._processing_OC_action(img,symbol,pos,time_mode,act)
                                 new_action.append(act)
+                                if not go_next:
+                                    break
                         action = new_action
-                    print(symbol,action,pos)
+                    # print(symbol,action,pos)
 
                 except Exception as err:
                     print(symbol,'inner Error!')

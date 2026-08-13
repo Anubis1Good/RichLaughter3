@@ -147,18 +147,18 @@ class PEG31_HYPERION(BaseEG):
         direction = None
         # range
         if row['adx'] < self.thr_adx and row['chop'] > self.thr_chop:
-            print('range')
+            # print('range')
             direction = 0
         # trend
         else:
             if self.work_trend:
                 # long
                 if row['sma_s'] > row['sma_l']:
-                    print('long')
+                    # print('long')
                     direction = 1
                 # short
                 else:
-                    print('short')
+                    # print('short')
                     direction = -1
         if self.work_direction != 0:
             if direction != self.work_direction:
@@ -167,7 +167,7 @@ class PEG31_HYPERION(BaseEG):
                 else:
                     direction = None
         
-        print(self.symbol,direction)
+        # print(self.symbol,'d:',direction)
         if direction is not None:
             actions = self.order_manager.get_spred_orders(fg,direction,self.min_spred,self.large_open,self.large_close,self.n_order,self.min_step)
         else:
