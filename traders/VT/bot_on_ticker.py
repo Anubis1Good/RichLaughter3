@@ -25,31 +25,31 @@ bot_on_ticker = {
     # 'SGZH1':(PEG30_RAYNOR,(5,1),1,0),
     # 'VSEH1':(PEG30_MURKY,(5,1,True,3,True,False),1,0),
     # """stop=None, take=None, min_spred=3, work_direction = 0, work_trend=True, large_open=100,large_close=50, n_order=1, min_step=3, period_adx=14, period_chop=14, period_sma_l=30, period_sma_s=15, thr_adx=25, thr_chop=40"""
-    'NKNCP':(PEG31_HYPERION,(2,2,2,0,True,10,5,1),1,None), #-
-    'APTK':(PEG31_HYPERION,(3,2,2,0,True,50,10,1),1,None), #-
-    'PRMD':(PEG31_HYPERION,(4,4,4,0,True,30,5,1),1,None), #-
-    'ROLO':(PEG31_HYPERION,(2,2,2,0,True,30,5,1),1,None), #-
-    'OGKB':(PEG31_HYPERION,(2,2,2,0,True,30,5,1),1,None), #+
-    'GLRX':(PEG31_HYPERION,(3,2,2,1,True,1,1,1),1,None), #+
-    'ENPG':(PEG31_HYPERION,(3,3,3,0,True,50,8,1),1,None), #-
-    'TGKA':(PEG31_HYPERION,(2,2,2,0,True,10,5,1),1,None), #0
-    'VSEH':(PEG31_HYPERION,(3,3,3,0,True,10,1,1),1,None), #+
-    'BTBR':(PEG31_HYPERION,(2,2,2,1,True,10,5,1),1,None), #-
-    'MGKL':(PEG31_HYPERION,(2,2,2,0,True,10,2,1),1,None), #-
-    'GECO':(PEG31_HYPERION,(2,2,2,0,True,30,10,1),1,None), #-
-    'FIXR':(PEG31_HYPERION,(2,2,2,0,True,10,1,1),1,None), #+
-    'MRKC':(PEG31_HYPERION,(3,2,2,0,True,20,1,1),1,None), #+
-    'GEMC':(PEG31_HYPERION,(3,3,3,0,True,10,1,1),1,None), #+
-    'ELFV':(PEG31_HYPERION,(2,2,2,0,True,10,5,1),1,None), #-
+    'NKNCP':(PEG31_HYPERION,(10,2,2,0,True,10,5,1),1,None), #-
+    'APTK':(PEG31_HYPERION,(10,2,2,0,True,50,10,1),1,None), #-
+    'PRMD':(PEG31_HYPERION,(10,4,4,0,True,30,5,1),1,None), #-
+    'ROLO':(PEG31_HYPERION,(10,2,2,0,True,30,5,1),1,None), #-
+    'OGKB':(PEG31_HYPERION,(10,2,2,0,True,30,5,1),1,None), #+
+    'GLRX':(PEG31_HYPERION,(10,2,2,1,True,1,1,1),1,None), #+
+    'ENPG':(PEG31_HYPERION,(10,3,3,0,True,50,8,1),1,None), #-
+    'TGKA':(PEG31_HYPERION,(10,2,2,0,True,10,5,1),1,None), #0
+    'VSEH':(PEG31_HYPERION,(10,3,3,0,True,10,1,1),1,None), #+
+    'BTBR':(PEG31_HYPERION,(10,2,2,1,True,10,5,1),1,None), #-
+    'MGKL':(PEG31_HYPERION,(10,2,2,0,True,10,2,1),1,None), #-
+    'GECO':(PEG31_HYPERION,(10,2,2,0,True,30,10,1),1,None), #-
+    'FIXR':(PEG31_HYPERION,(10,2,2,0,True,10,1,1),1,None), #+
+    'MRKC':(PEG31_HYPERION,(10,2,2,0,True,20,1,1),1,None), #+
+    'GEMC':(PEG31_HYPERION,(10,3,3,0,True,10,1,1),1,None), #+
+    'ELFV':(PEG31_HYPERION,(10,2,2,0,True,10,5,1),1,None), #-
 
-    'ETLN':(PEG31_HYPERION,(2,1,2,0,True,30,10,2,5),1,None), #-
-    'HYDR':(PEG31_HYPERION,(3,2,2,0,True,100,20,1),1,None), #-
-    'SVAV':(PEG31_HYPERION,(2,1,2,0,True,30,10,1),1,None), #-
-    'DATA':(PEG31_HYPERION,(3,2,3,0,True,50,10,1),1,None), #0
-    'DELI':(PEG31_HYPERION,(2,1,2,0,True,30,1,2,5),1,None), #-
-    'MVID':(PEG31_HYPERION,(2,1,2,0,True,10,1,2,5),1,None), #+
-    'ABIO':(PEG31_HYPERION,(2,1,2,0,True,20,1,1),1,None), #0
-    'RTKMP':(PEG31_HYPERION,(2,1,2,0,True,30,5,1),1,None), #+
+    'ETLN':(PEG31_HYPERION,(10,1,2,0,True,30,10,2,5),1,None), #-
+    'HYDR':(PEG31_HYPERION,(10,2,2,0,True,100,20,1),1,None), #-
+    'SVAV':(PEG31_HYPERION,(10,1,2,0,True,30,10,1),1,None), #-
+    'DATA':(PEG31_HYPERION,(10,2,3,0,True,50,10,1),1,None), #0
+    'DELI':(PEG31_HYPERION,(10,1,2,0,True,30,1,2,5),1,None), #-
+    'MVID':(PEG31_HYPERION,(10,1,2,0,True,10,1,2,5),1,None), #+
+    'ABIO':(PEG31_HYPERION,(10,1,2,0,True,20,1,1),1,None), #0
+    'RTKMP':(PEG31_HYPERION,(10,1,2,0,True,30,5,1),1,None), #+
 }
 # sleep_group = ()
 
