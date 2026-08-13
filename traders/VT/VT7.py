@@ -253,6 +253,7 @@ class VT7:
             pdi.press('z')
 
     def _send_by_cords(self,symbol,idx,y:int,left_btn:bool,press_f=False,press_z=False):
+        y = int(y)
         glass_region = self.glass_region[symbol][idx]
         pdi.moveTo(glass_region[0]+11,glass_region[1]+11)
         if press_f:
@@ -286,6 +287,7 @@ class VT7:
                     self._send_by_cords(symbol,idx,smart_ask['middle'],left_btn,press_f,press_z)
     
     def _reset_by_cords(self,symbol,idx,y:int,left_btn:bool):
+        y = int(y)
         glass_region = self.glass_region[symbol][idx]
         btn = 'left' if left_btn else 'right'
         pdi.click(glass_region[2]-5,y,button=btn)
@@ -450,12 +452,12 @@ class VT7:
         bbid = self._get_best_bid(img,symbol,idx)
         bask = self._get_best_ask(img,symbol,idx)
         if bbid == -1 or bask == -1:
-            return
+            return pd.DataFrame(columns=['type_cell', 'top', 'bottom', 'vol_per', 'have_order', 'have_level', 'large2', 'middle'])
         start_glass = glass_region[0]
         end_glass,_ = self._color_search(img,ColorsBtnBGR.large_value_1,glass_region,reverse=True)
         full_end_glass = glass_region[2]
         if end_glass == -1:
-            return
+            return pd.DataFrame(columns=['type_cell', 'top', 'bottom', 'vol_per', 'have_order', 'have_level', 'large2', 'middle'])
         width_glass = end_glass - start_glass
         high_glass = glass_region[1]
         low_glass = glass_region[3]
@@ -469,7 +471,7 @@ class VT7:
             spreds = [bbid - self.price_step * i for i in range(spred_len)]
         total_levels = bid_len + ask_len + spred_len
         if total_levels == 0:
-            return
+            return pd.DataFrame(columns=['type_cell', 'top', 'bottom', 'vol_per', 'have_order', 'have_level', 'large2', 'middle'])
         df = pd.DataFrame({
             'type_cell': np.zeros(total_levels, dtype=object),
             'top': np.zeros(total_levels, dtype=np.int16),
