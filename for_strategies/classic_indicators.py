@@ -797,3 +797,90 @@ def add_chaikin_volatility(df: pd.DataFrame, ema_period=10, change_period=10):
     df['chaikin_volatility'] = (df['ema_range'] - df['ema_range'].shift(change_period)) / df['ema_range'].shift(change_period) * 100
     
     return df
+
+def add_supertrend(df: pd.DataFrame, period: int = 10, multiplier: float = 3.0) -> pd.DataFrame:
+    """
+    Оптимизированный расчет индикатора SuperTrend.
+    Использует списки вместо .iloc для максимальной скорости.
+    
+    Parameters:
+    -----------
+    df : pd.DataFrame
+        DataFrame с колонками 'high', 'low', 'close'
+    period : int
+        Период для расчета ATR (по умолчанию 10)
+    multiplier : float
+        Множитель для ATR (по умолчанию 3.0)
+    
+    Returns:
+    --------
+    pd.DataFrame
+        DataFrame с добавленными колонками:
+        - 'atr': Average True Range
+        - 'supertrend': значения индикатора
+        - 'in_uptrend': булевый флаг (True - восходящий тренд)
+        - 'upper_band': верхняя полоса
+        - 'lower_band': нижняя полоса
+    """
+    # 1. Рассчитываем ATR
+    df = add_atr(df, period)
+    
+    # 2. Конвертируем в списки для быстрого доступа
+    high = df['high'].tolist()
+    low = df['low'].tolist()
+    close = df['close'].tolist()
+    atr = df['atr'].tolist()
+    n = len(df)
+    
+    # 3. Инициализируем списки для результатов
+    upper_band = [0.0] * n
+    lower_band = [0.0] * n
+    supertrend = [0.0] * n
+    in_uptrend = [True] * n
+    
+    # 4. Первая итерация (базовые значения)
+    upper_band[0] = (high[0] + low[0]) / 2 + multiplier * atr[0]
+    lower_band[0] = (high[0] + low[0]) / 2 - multiplier * atr[0]
+    supertrend[0] = lower_band[0]  # Начинаем с бычьего тренда
+    
+    # 5. Основной цикл
+    for i in range(1, n):
+        # Текущие значения
+        high_i = high[i]
+        low_i = low[i]
+        close_i = close[i]
+        atr_i = atr[i]
+        
+        # Средняя точка (HL2)
+        hl2 = (high_i + low_i) / 2
+        basic_upper = hl2 + multiplier * atr_i
+        basic_lower = hl2 - multiplier * atr_i
+        
+        # Пересчет полос в зависимости от предыдущего тренда
+        if in_uptrend[i-1]:
+            # Восходящий тренд
+            upper_band[i] = basic_upper
+            lower_band[i] = max(basic_lower, lower_band[i-1])
+        else:
+            # Нисходящий тренд
+            lower_band[i] = basic_lower
+            upper_band[i] = min(basic_upper, upper_band[i-1])
+        
+        # Определение тренда
+        if close_i > upper_band[i-1]:
+            in_uptrend[i] = True
+        elif close_i < lower_band[i-1]:
+            in_uptrend[i] = False
+        else:
+            in_uptrend[i] = in_uptrend[i-1]
+        
+        # Значение SuperTrend
+        supertrend[i] = lower_band[i] if in_uptrend[i] else upper_band[i]
+    
+    # 6. Записываем результаты в DataFrame (быстрое присвоение)
+    df['upper_band'] = upper_band
+    df['lower_band'] = lower_band
+    df['supertrend'] = supertrend
+    df['in_uptrend'] = in_uptrend
+    
+    return df

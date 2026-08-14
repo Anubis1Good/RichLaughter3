@@ -1,5 +1,7 @@
 from strategies.BaseEG import BaseEG
-from for_strategies.classic_indicators import add_bollinger,add_rsi
+from for_strategies.classic_indicators import add_bollinger,add_rsi,add_donchan_channel,add_fractals,add_chop,add_adx,add_ema
+from for_strategies.pva_indicators import add_mean_on_fractals,add_ext_on_fractals,add_smooth_channel,add_integrity_index,add_stable_ma_direction
+from for_strategies.zigzag_indicators import add_dzz_peaks,add_analys_dzz,add_percent_zz_peaks,add_pattern18_dzz_czd,add_stop_loss_p18czd
 
 class PEG20_HOGGER(BaseEG):
     """stop=None, take=None, period=100, period2=5, mult_big=2, mult_small=0.5, threshold_enter=40, threshold_exit=20"""
@@ -51,3 +53,477 @@ class PEG20_HOGGER(BaseEG):
                     return 'open_short'
             if row['sma'] < row['smab']:
                 return 'close_long'
+
+class PEG21_WHITEMANE(BaseEG):
+    '''
+    stop=None, take=None, period=20, period_rsi=20, period_fractal=10, period_mean=5, n_std=1.5, period_sma=3, threshold_trend=0.5, use_stop=0
+    '''
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=20, period_rsi=20, period_fractal=10, period_mean=5, n_std=1.5, period_sma=3, threshold_trend=0.5, use_stop=0):
+        super().__init__(symbol, price_step, mult_ps, mode, stop, take)
+        self.needs_info = {'chart': self.symbol}
+        self.period = period
+        self.period_fractal = period_fractal
+        self.period_mean = period_mean
+        self.period_rsi = period_rsi
+        self.period_sma = period_sma
+        self.n_std = n_std
+        self.threshold_trend = threshold_trend
+        self.use_stop = use_stop
+
+    def preprocessing(self, tdata):
+        pdata = {}
+        df = tdata['chart']
+        df = add_donchan_channel(df, self.period)
+        df = add_rsi(df, self.period_rsi)
+        df = add_fractals(df, self.period_fractal)
+        df = add_mean_on_fractals(df, self.period_mean, 'rsi')
+        df['oversold'] = df['rsi'] < df['bottom_mean']
+        df['overbought'] = df['rsi'] > df['top_mean']
+        df = add_dzz_peaks(df, n_std=self.n_std)
+        df = add_analys_dzz(df, self.period_sma)
+        df = self.add_slice_df(df, period=self.period)
+        pdata['chart'] = df
+        return pdata
+    
+    def get_raw_action(self, pdata):
+        row = self.get_test_row(pdata['chart'])
+        if row['low'] <= row['min_hb'] and row['oversold']:
+            if row['trend_sma'] >= -self.threshold_trend:
+                return 'open_long'
+            else:
+                return 'close_short'
+        if row['high'] >= row['max_hb'] and row['overbought']:
+            if row['trend_sma'] <= self.threshold_trend:
+                return 'open_short'
+            else:
+                return 'close_long'
+        if self.use_stop:
+            if row['trend_sma'] < -0.8:
+                return 'close_long'
+            if row['trend_sma'] > 0.8:
+                return 'close_short'
+
+class PEG21_AURIEL(BaseEG):
+    '''
+    stop=None, take=None, period=20, period_fractal=10, period_mean=5, n_std=1.5, period_sma=3, threshold_trend=0.5
+    '''
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=20, period_fractal=10, period_mean=5, n_std=1.5, period_sma=3, threshold_trend=0.5):
+        super().__init__(symbol, price_step, mult_ps, mode, stop, take)
+        self.needs_info = {'chart': self.symbol}
+        self.period = period
+        self.period_fractal = period_fractal
+        self.period_mean = period_mean
+        self.period_sma = period_sma
+        self.n_std = n_std
+        self.threshold_trend = threshold_trend
+
+    def preprocessing(self, tdata):
+        pdata = {}
+        df = tdata['chart']
+        df = add_rsi(df, self.period)
+        df = add_fractals(df, self.period_fractal)
+        df = add_mean_on_fractals(df, self.period_mean, 'rsi')
+        df['oversold'] = df['rsi'] < df['bottom_mean']
+        df['overbought'] = df['rsi'] > df['top_mean']
+        df = add_dzz_peaks(df, n_std=self.n_std)
+        df = add_analys_dzz(df, self.period_sma)
+        df = self.add_slice_df(df, period=self.period)
+        pdata['chart'] = df
+        return pdata
+    
+    def get_raw_action(self, pdata):
+        row = self.get_test_row(pdata['chart'])
+        if row['oversold']:
+            if row['trend_sma'] >= -self.threshold_trend:
+                return 'open_long'
+            else:
+                return 'close_short'
+        if row['overbought']:
+            if row['trend_sma'] <= self.threshold_trend:
+                return 'open_short'
+            else:
+                return 'close_long'
+
+class PEG21_MALTHAEL(BaseEG):
+    '''
+    stop=None, take=None, period=20, period_fractal=10, period_mean=5, percent_threshold=0.5, use_stop=0
+    '''
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=20, period_fractal=10, period_mean=5, percent_threshold=0.5, use_stop=0):
+        super().__init__(symbol, price_step, mult_ps, mode, stop, take)
+        self.needs_info = {'chart': self.symbol}
+        self.period = period
+        self.period_fractal = period_fractal
+        self.period_mean = period_mean
+        self.percent_threshold = percent_threshold
+        self.use_stop = use_stop
+
+    def preprocessing(self, tdata):
+        pdata = {}
+        df = tdata['chart']
+        df = add_rsi(df, self.period)
+        df = add_fractals(df, self.period_fractal)
+        df = add_mean_on_fractals(df, self.period_mean, 'rsi')
+        df['oversold'] = df['rsi'] < df['bottom_mean']
+        df['overbought'] = df['rsi'] > df['top_mean']
+        df = add_percent_zz_peaks(df, percent_threshold=self.percent_threshold)
+        df = self.add_slice_df(df, period=self.period)
+        pdata['chart'] = df
+        return pdata
+    
+    def get_raw_action(self, pdata):
+        row = self.get_test_row(pdata['chart'])
+        if row['oversold']:
+            if row['zigzag_direction'] == 1:
+                return 'open_long'
+            elif self.use_stop:
+                return 'close_all'
+            else:
+                return 'close_short'
+        if row['overbought']:
+            if row['zigzag_direction'] == -1:
+                return 'open_short'
+            elif self.use_stop:
+                return 'close_all'
+            else:
+                return 'close_long'
+        if self.use_stop:
+            if row['zigzag_direction'] == 1:
+                return 'close_short'
+            if row['zigzag_direction'] == -1:
+                return 'close_long'
+
+class PEG22_BERSERK(BaseEG):
+    """stop=None, take=None, period=100, period_fractal=10, period_mean=5, n_std=1.5, period_sma=3, threshold_trend=0.5, period2=100, period3=20, threshold_chop=60, threshold_adx=30"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=100, period_fractal=10, period_mean=5, n_std=1.5, period_sma=3, threshold_trend=0.5, period2=100, period3=20, threshold_chop=60, threshold_adx=30):
+        super().__init__(symbol, price_step, mult_ps, mode, stop, take)
+        self.needs_info = {'chart': self.symbol}
+        self.period = period
+        self.period_fractal = period_fractal
+        self.period_mean = period_mean
+        self.period_sma = period_sma
+        self.n_std = n_std
+        self.threshold_trend = threshold_trend
+        self.threshold_chop = threshold_chop
+        self.threshold_adx = threshold_adx
+        self.period2 = period2
+        self.period3 = period3
+
+    def preprocessing(self, tdata):
+        pdata = {}
+        df = tdata['chart']
+        df = add_donchan_channel(df, self.period3)
+        df = add_rsi(df, self.period3)
+        df = add_chop(df, self.period2)
+        df = add_adx(df, self.period)
+        df = add_fractals(df, self.period_fractal)
+        df = add_mean_on_fractals(df, self.period_mean, 'rsi')
+        df['oversold'] = df['rsi'] < df['bottom_mean']
+        df['overbought'] = df['rsi'] > df['top_mean']
+        df = add_dzz_peaks(df, n_std=self.n_std)
+        df = add_analys_dzz(df, self.period_sma)
+        df = self.add_slice_df(df, period=self.period)
+        pdata['chart'] = df
+        return pdata
+    
+    def get_raw_action(self, pdata):
+        row = self.get_test_row(pdata['chart'])
+        ranger = row['chop'] > self.threshold_chop and row['adx'] < self.threshold_adx
+        if ranger: 
+            if row['low'] <= row['min_hb']:
+                if row['oversold']:
+                    return 'open_long'
+            if row['high'] >= row['max_hb']:
+                if row['overbought']:
+                    return 'open_short'
+        else:
+            if row['oversold']:
+                if row['trend_sma'] >= -self.threshold_trend:
+                    return 'open_long'
+                else:
+                    return 'close_short'
+            if row['overbought']:
+                if row['trend_sma'] <= self.threshold_trend:
+                    return 'open_short'
+                else:
+                    return 'close_long'
+
+class PEG23_ULTIMATUM(BaseEG):
+    """stop=None, take=None, period=100, period_dc=20, period_sdc=20, period_rsi=20, period_fractal=10, type_treshold=0, period_mean=5, n_std=1.5, period_sma=3, threshold_trend=0.5, allowance=0.1, use_stop=0"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=100, period_dc=20, period_sdc=20, period_rsi=20, period_fractal=10, type_treshold=0, period_mean=5, n_std=1.5, period_sma=3, threshold_trend=0.5, allowance=0.1, use_stop=0):
+        super().__init__(symbol, price_step, mult_ps, mode, stop, take)
+        self.needs_info = {'chart': self.symbol}
+        self.period = period
+        self.period_fractal = period_fractal
+        self.type_treshold = type_treshold
+        self.period_mean = period_mean
+        self.period_sma = period_sma
+        self.n_std = n_std
+        self.threshold_trend = threshold_trend
+        self.period_dc = period_dc
+        self.period_sdc = period_sdc
+        self.period_rsi = period_rsi
+        self.allowance = allowance
+        self.use_stop = use_stop
+
+    def add_threshold(self, df):
+        if self.type_treshold == 0:
+            df = add_mean_on_fractals(df, self.period_mean, 'rsi')
+            df['oversold'] = df['rsi'] < df['bottom_mean']
+            df['overbought'] = df['rsi'] > df['top_mean']
+        else:
+            df = add_ext_on_fractals(df, self.period_mean, 'rsi')
+            df['oversold'] = df['rsi'] < df['bottom_ext']
+            df['overbought'] = df['rsi'] > df['top_ext']
+        return df
+
+    def preprocessing(self, tdata):
+        pdata = {}
+        df = tdata['chart']
+        df = add_donchan_channel(df, self.period_dc)
+        df = add_smooth_channel(df, self.period_sdc)
+        df['dc_diff_percent'] = ((df["max_hb"] - df["min_hb"]) / df["min_hb"]) * 100
+        df['allowance'] = df['dc_diff_percent'] > self.allowance
+        df = add_rsi(df, self.period_rsi)
+        df = add_fractals(df, self.period_fractal)
+        df = self.add_threshold(df)
+        df = add_dzz_peaks(df, n_std=self.n_std)
+        df = add_analys_dzz(df, self.period_sma)
+        df = self.add_slice_df(df, period=self.period)
+        pdata['chart'] = df
+        return pdata
+    
+    def get_raw_action(self, pdata):
+        row = self.get_test_row(pdata['chart'])
+        if row['allowance']:
+            if row['low'] <= row['min_hb'] and row['oversold']:
+                if row['trend_sma'] >= -self.threshold_trend:
+                    return 'open_long'
+                else:
+                    return 'close_short'
+            if row['high'] >= row['max_hb'] and row['overbought']:
+                if row['trend_sma'] <= self.threshold_trend:
+                    return 'open_short'
+                else:
+                    return 'close_long'
+        if self.use_stop:
+            if row['trend_sma'] < -0.8:
+                return 'close_long'
+            if row['trend_sma'] > 0.8:
+                return 'close_short'
+
+class PEG24_BRIGHTWING(BaseEG):
+    '''
+    stop=None, take=None, period=20, period_fractal=10, period_mean=5, percent_threshold=0.2, threshold_dzz=0.2, buff=0.1, divider=2, use_stop=1
+    '''
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=20, period_fractal=10, period_mean=5, percent_threshold=0.2, threshold_dzz=0.2, buff=0.1, divider=2, use_stop=1):
+        super().__init__(symbol, price_step, mult_ps, mode, stop, take)
+        self.needs_info = {'chart': self.symbol}
+        self.period = period
+        self.period_fractal = period_fractal
+        self.period_mean = period_mean
+        self.percent_threshold = percent_threshold
+        self.threshold_dzz = threshold_dzz
+        self.buff = buff
+        self.divider = divider
+        self.use_stop = use_stop
+
+    def preprocessing(self, tdata):
+        pdata = {}
+        df = tdata['chart']
+        df = add_rsi(df, self.period)
+        df = add_fractals(df, self.period_fractal)
+        df = add_mean_on_fractals(df, self.period_mean, 'rsi')
+        df['oversold'] = df['rsi'] < df['bottom_mean']
+        df['overbought'] = df['rsi'] > df['top_mean']
+        df = add_percent_zz_peaks(df, percent_threshold=self.percent_threshold)
+        df = add_pattern18_dzz_czd(df, self.threshold_dzz, self.buff)
+        df = add_stop_loss_p18czd(df, self.divider)
+        df = self.add_slice_df(df, period=self.period)
+        pdata['chart'] = df
+        return pdata
+    
+    def get_raw_action(self, pdata):
+        row = self.get_test_row(pdata['chart'])
+        try:
+            if row['oversold']:
+                if row['pattern18'] in ('btc', 'bui', 'bottom_range', 'double_bottom', 'weak_short', 'narrowing_up', 'upthrust', 'sow'):
+                    return 'open_long'
+                elif self.use_stop and row['close'] < row['lsl']:
+                    return 'close_all'
+                else:
+                    return 'close_short'
+            if row['overbought']:
+                if row['pattern18'] in ('bti', 'joc', 'top_range', 'double_top', 'weak_long', 'narrowing_down', 'spring', 'sos'):
+                    return 'open_short'
+                elif self.use_stop and row['close'] < row['ssl']:
+                    return 'close_all'
+                else:
+                    return 'close_long'
+            if self.use_stop:
+                if row['close'] > row['ssl']:
+                    return 'close_short'
+                if row['close'] < row['lsl']:
+                    return 'close_long'
+        except:
+            return None
+
+class PEG24_DEATHWING(BaseEG):
+    '''
+    stop=None, take=None, period=20, period_fractal=10, period_mean=5, percent_threshold=0.2, threshold_dzz=0.2, buff=0.1, divider=2, use_stop=1
+    '''
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=20, period_fractal=10, period_mean=5, percent_threshold=0.2, threshold_dzz=0.2, buff=0.1, divider=2, use_stop=1):
+        super().__init__(symbol, price_step, mult_ps, mode, stop, take)
+        self.needs_info = {'chart': self.symbol}
+        self.period = period
+        self.period_fractal = period_fractal
+        self.period_mean = period_mean
+        self.percent_threshold = percent_threshold
+        self.threshold_dzz = threshold_dzz
+        self.buff = buff
+        self.divider = divider
+        self.use_stop = use_stop
+
+    def preprocessing(self, tdata):
+        pdata = {}
+        df = tdata['chart']
+        df = add_rsi(df, self.period)
+        df = add_fractals(df, self.period_fractal)
+        df = add_mean_on_fractals(df, self.period_mean, 'rsi')
+        df['oversold'] = df['rsi'] < df['bottom_mean']
+        df['overbought'] = df['rsi'] > df['top_mean']
+        df = add_percent_zz_peaks(df, percent_threshold=self.percent_threshold)
+        df = add_pattern18_dzz_czd(df, self.threshold_dzz, self.buff)
+        df = add_stop_loss_p18czd(df, self.divider)
+        df = self.add_slice_df(df, period=self.period)
+        pdata['chart'] = df
+        return pdata
+    
+    def get_raw_action(self, pdata):
+        row = self.get_test_row(pdata['chart'])
+        if row['oversold']:
+            if row['pattern18'] in ('bti', 'joc', 'top_range', 'double_top', 'weak_long', 'narrowing_down', 'spring', 'sos'):
+                return 'open_long'
+            elif self.use_stop and row['close'] < row['lsl']:
+                return 'close_all'
+            else:
+                return 'close_short'
+        if row['overbought']:
+            if row['pattern18'] in ('btc', 'bui', 'bottom_range', 'double_bottom', 'weak_short', 'narrowing_up', 'upthrust', 'sow'):
+                return 'open_short'
+            elif self.use_stop and row['close'] < row['ssl']:
+                return 'close_all'
+            else:
+                return 'close_long'
+        if self.use_stop:
+            if row['close'] > row['ssl']:
+                return 'close_short'
+            if row['close'] < row['lsl']:
+                return 'close_long'
+
+class PEG25_TASSADAR(BaseEG):
+    '''
+    stop=None, take=None, period=20, period_fractal=10, period_mean=5, percent_threshold=0.2, threshold_dzz=0.2, buff=0.1, divider=2, threshold_over=10, use_stop=0
+    '''
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=20, period_fractal=10, period_mean=5, percent_threshold=0.2, threshold_dzz=0.2, buff=0.1, divider=2, threshold_over=10, use_stop=0):
+        super().__init__(symbol, price_step, mult_ps, mode, stop, take)
+        self.needs_info = {'chart': self.symbol}
+        self.period = period
+        self.period_fractal = period_fractal
+        self.period_mean = period_mean
+        self.threshold_over = threshold_over
+        self.percent_threshold = percent_threshold
+        self.threshold_dzz = threshold_dzz
+        self.buff = buff
+        self.divider = divider
+        self.use_stop = use_stop
+
+    def preprocessing(self, tdata):
+        pdata = {}
+        df = tdata['chart']
+        df = add_rsi(df, self.period)
+        df = add_fractals(df, self.period_fractal)
+        df = add_mean_on_fractals(df, self.period_mean, 'rsi')
+        df['oversold'] = df['rsi'] < df['bottom_mean']
+        df['overbought'] = df['rsi'] > df['top_mean']
+        df['overlimit'] = (df['top_mean'] - df['bottom_mean']) > self.threshold_over
+        df = add_percent_zz_peaks(df, percent_threshold=self.percent_threshold)
+        df = add_pattern18_dzz_czd(df, self.threshold_dzz, self.buff)
+        df = add_stop_loss_p18czd(df, self.divider)
+        df = self.add_slice_df(df, period=self.period)
+        pdata['chart'] = df
+        return pdata
+    
+    def get_raw_action(self, pdata):
+        row = self.get_test_row(pdata['chart'])
+        can_long, can_short = None, None
+        if row['pattern18'] in ('bti', 'joc', 'top_range', 'double_top', 'weak_long', 'narrowing_down', 'spring', 'sos'):
+            can_long = row['close'] >= row['zp3']
+            can_short = row['close'] <= row['zp2']
+        if row['pattern18'] in ('btc', 'bui', 'bottom_range', 'double_bottom', 'weak_short', 'narrowing_up', 'upthrust', 'sow'):
+            can_long = row['close'] >= row['zp2']
+            can_short = row['close'] <= row['zp3']
+        if row['oversold'] and row['overlimit']:
+            if can_long:
+                return 'open_long'
+            elif self.use_stop and row['close'] < row['lsl']:
+                return 'close_all'
+            else:
+                return 'close_short'
+        if row['overbought'] and row['overlimit']:
+            if can_short:
+                return 'open_short'
+            elif self.use_stop and row['close'] < row['ssl']:
+                return 'close_all'
+            else:
+                return 'close_long'
+        if self.use_stop:
+            if row['close'] > row['ssl']:
+                return 'close_short'
+            if row['close'] < row['lsl']:
+                return 'close_long'
+
+class PEG26_UNKNOWN(BaseEG):
+    """stop=None, take=None, period=100, n_stairs=3, period2=10, threshold=30, threshold_ii=25"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=100, n_stairs=3, period2=10, threshold=30, threshold_ii=25):
+        super().__init__(symbol, price_step, mult_ps, mode, stop, take)
+        self.needs_info = {'chart': self.symbol}
+        self.period = period
+        self.n_stairs = n_stairs
+        self.period2 = period2
+        self.threshold = threshold
+        self.threshold_ii = threshold_ii
+
+    def preprocessing(self, tdata):
+        pdata = {}
+        df = tdata['chart']
+        df = add_ema(df, self.period)
+        df = add_stable_ma_direction(df, self.period, 'ema')
+        df = add_donchan_channel(df, self.period2)
+        df = add_rsi(df, self.period2)
+        df = add_integrity_index(df, self.period2 * 2)
+        df = self.add_slice_df(df, self.period)
+        pdata['chart'] = df
+        return pdata
+    
+    def get_raw_action(self, pdata):
+        row = self.get_test_row(pdata['chart'])
+        can_long = row['dir_ma'] > 0
+        nearest_long = row['high'] - row['close'] > row['close'] - row['low'] 
+        if nearest_long and can_long:
+            if row['close'] <= row['avarege'] and row['ii'] > self.threshold_ii:
+                return 'open_long'
+            if row['low'] <= row['min_hb']:
+                return 'open_long'
+        if not nearest_long and not can_long:
+            if row['close'] >= row['avarege'] and row['ii'] < -self.threshold_ii:
+                return 'open_short'
+            if row['high'] >= row['max_hb']:
+                return 'open_short'
+        if row['rsi'] < self.threshold and row['low'] <= row['min_hb']:
+            return 'close_short'
+        if row['rsi'] > 100 - self.threshold and row['high'] >= row['max_hb']:
+            return 'close_long'
+        if can_long:
+            return 'close_short'
+        else:
+            return 'close_long'

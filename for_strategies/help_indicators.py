@@ -42,3 +42,41 @@ def add_big_volume(df:pd.DataFrame,period=20,multiplier=1):
     df['sma_volume'] = df['volume'].rolling(period).mean()
     df['is_big'] = df['volume']*multiplier > df['sma_volume']
     return df
+
+def add_sc_and_buffer(df:pd.DataFrame,top='max_hb',bottom='min_hb',divider=10):
+    """add 'spred_channel','buffer'"""
+    df['spred_channel'] = df[top] - df[bottom]
+    df['buffer'] = df['spred_channel']/divider
+    return df
+
+def add_buffer_add(df:pd.DataFrame,top='max_hb',bottom='min_hb',divider=10):
+    '''add top_buff, bottom_buff\n
+    append outside butter
+    '''
+    df = add_sc_and_buffer(df,top,bottom,divider)
+    df['top_buff'] = df[top]+df['buffer']
+    df['bottom_buff'] = df[bottom]-df['buffer']
+    return df
+
+def add_buffer_sub(df:pd.DataFrame,top='max_hb',bottom='min_hb',divider=10):
+    '''add top_buff, bottom_buff\n
+    'append inside butter'
+    '''
+    df = add_sc_and_buffer(df,top,bottom,divider)
+    df['top_buff'] = df[top]-df['buffer']
+    df['bottom_buff'] = df[bottom]+df['buffer']
+    return df
+
+def add_ideal_pos(df:pd.DataFrame):
+    """add 'ideal_enter','ideal_pos' \n
+    !!!require add_dzz_peaks!!! \n
+    actions = (None,'long_pw','short_pw','close_long_pw','close_short_pw','close_all_pw')
+    """
+    ideal_pos = df[~pd.isna(df['zigzag_peaks'])]
+    ideal_pos = ideal_pos.copy()
+    ideal_pos['ideal_enter']= np.where(ideal_pos['zigzag_direction'] == -1,1,2)
+
+    df['ideal_enter'] = ideal_pos['ideal_enter']
+    df['ideal_pos'] = df['ideal_enter'].ffill()
+    df['ideal_enter'] = df['ideal_enter'].fillna(0)
+    return df

@@ -510,3 +510,128 @@ def add_bbi(df:pd.DataFrame,period=20,kind='close',multiplier=2):
     df['mult_bb'] = (df['top_bb']-df['bottom_bb']) / 100
     df['bbi'] = (df['close']-df['bottom_bb']) / df['mult_bb']
     return df
+
+def add_benefit(df, all_starts, all_ends, id, period=60):
+    """
+    Максимально быстрая версия без создания промежуточных колонок.
+    """
+    # Конвертируем в numpy
+    if not isinstance(all_starts, np.ndarray):
+        all_starts = np.array(all_starts)
+    if not isinstance(all_ends, np.ndarray):
+        all_ends = np.array(all_ends)
+    
+    prices = df['close'].values
+    n = len(df)
+    
+    # Создаем сигналы
+    signals = np.full(n, np.nan)
+    signals[~np.isnan(all_starts)] = 1
+    signals[~np.isnan(all_ends)] = -1
+    
+    # Фильтруем чередование
+    signal_idx = np.where(~np.isnan(signals))[0]
+    
+    if len(signal_idx) < 2:
+        df[f'bl_{id}'] = 0
+        df[f'bs_{id}'] = 0
+        return df
+    
+    sig_values = signals[signal_idx]
+    mask = np.concatenate([[True], sig_values[1:] != sig_values[:-1]])
+    signal_idx = signal_idx[mask]
+    sig_values = sig_values[mask]
+    
+    # Расчет изменений
+    long_changes = np.zeros(n)
+    short_changes = np.zeros(n)
+    
+    entries = signal_idx[::2]
+    exits = signal_idx[1::2]
+    min_len = min(len(entries), len(exits))
+    
+    if min_len > 0:
+        entries = entries[:min_len]
+        exits = exits[:min_len]
+        entry_signals = sig_values[::2][:min_len]
+        
+        # LONG
+        long_mask = entry_signals == 1
+        if np.any(long_mask):
+            le = entries[long_mask]
+            lx = exits[long_mask]
+            long_changes[lx] = prices[lx] - prices[le]
+        
+        # SHORT
+        short_mask = entry_signals == -1
+        if np.any(short_mask):
+            se = entries[short_mask]
+            sx = exits[short_mask]
+            short_changes[sx] = prices[se] - prices[sx]
+        
+        # Незакрытые позиции
+        if len(signal_idx) % 2 == 1:
+            last_idx = signal_idx[-1]
+            last_signal = sig_values[-1]
+            if last_signal == 1:
+                long_changes[-1] = prices[-1] - prices[last_idx]
+            elif last_signal == -1:
+                short_changes[-1] = prices[last_idx] - prices[-1]
+    
+    # Рассчитываем скользящее среднее
+    df[f'bl_{id}'] = pd.Series(long_changes).rolling(period, min_periods=1).mean().fillna(0).values
+    df[f'bs_{id}'] = pd.Series(short_changes).rolling(period, min_periods=1).mean().fillna(0).values
+    
+    return df
+
+def get_all_enter_exit_DC(df, kind_top, kind_bottom):
+    """all_starts,all_ends"""
+    # 1. Находим ВСЕ возможные точки входа и выхода (как в оригинале)
+    all_starts = np.where(
+        (df['high'] >= df[kind_top].shift(1)) & 
+        (df['high'].shift(1) < df[kind_top].shift(2)),
+        df[kind_top].shift(1), 
+        np.nan
+    )
+    
+    all_ends = np.where(
+        (df['low'] <= df[kind_bottom].shift(1)) & 
+        (df['low'].shift(1) > df[kind_bottom].shift(2)),
+        df[kind_bottom].shift(1), 
+        np.nan
+    )
+    return all_starts,all_ends
+
+def get_all_lup(df,kind_top,kind_bottom):
+    all_starts = np.where((df['high'].shift(1) >= df[kind_top].shift(1))&(df['high'] < df[kind_top]), df['high'], np.nan)
+    all_ends = np.where((df['low'].shift(1) <= df[kind_bottom].shift(1))&(df['low'] > df[kind_bottom]), df['low'], np.nan)
+    return all_starts,all_ends
+
+def add_simple_dynamics_ma(df: pd.DataFrame, period: int = 20, 
+                           kind: str = 'sma', divider_period: int = 1) -> pd.DataFrame:
+    """
+    Супер-быстрая версия без создания промежуточных колонок.
+    """
+    values = df[kind].values
+    n = len(values)
+    
+    # Вычисляем sdiff (разница между соседними значениями)
+    sdiff = np.zeros(n)
+    if n > 1:
+        sdiff[1:] = np.where(values[1:] > values[:-1], 1, 
+                            np.where(values[1:] < values[:-1], -1, 0))
+    
+    # Вычисляем скользящее среднее
+    window = period // divider_period
+    
+    # Используем cumsum для быстрого расчета среднего
+    cumsum = np.concatenate([[0], np.cumsum(sdiff)])
+    if n >= window:
+        # Векторизованный расчет среднего для всех окон
+        sdm = np.full(n, -1.0)
+        sdm[window-1:] = (cumsum[window:] - cumsum[:-window]) / window
+    else:
+        sdm = np.full(n, -1.0)
+    
+    df['sdm'] = sdm
+    return df
