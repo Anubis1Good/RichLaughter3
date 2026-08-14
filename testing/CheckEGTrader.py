@@ -42,7 +42,10 @@ class CheckEGTrader:
             self.df = df.copy()
         self.reload_data()
         self.price_step = get_price_step(self.df)
+        self.mean_price = self.df['close'].mean()
+        self.price_step_per = (self.price_step / self.mean_price)*100
         # print(self.price_step)
+        # print(self.price_step_per)
         # print(self.df.tail())
         if isinstance(ws,tuple) or isinstance(ws,list):
             self.ws = ws[0](self.symbol,self.price_step,1,None,*ws[1])
@@ -77,6 +80,8 @@ class CheckEGTrader:
             'o_shorts':[], #входы в шорт
             'c_longs':[], #закрытие лонгов
             'c_shorts':[], #закрытие шортов 
+            'takes':[0], #тейков
+            'stops':[0], #стопов
 
         }
         self.open_fee = 0
@@ -171,7 +176,16 @@ class CheckEGTrader:
         else:
             unclosed_profit = 0
         self.trade_data['unclosed_fee'].append(self.trade_data['step_eq_fee'][-1] + unclosed_profit)
+        self.trade_data['stops'].append(self.ws.amount_sl)
+        self.trade_data['takes'].append(self.ws.amount_tp)
     
+    def sync_step_data(self,df_processed):
+        price = 0
+        empty_test = len(self.df) - len(df_processed)
+        if empty_test > 0:
+            for i in range(empty_test - 1):
+                self.update_step_data(price)
+
     # CHECKS_FUNCS
     @duration_time
     def check_strategy_fast(self, history_bars=100):
@@ -185,6 +199,8 @@ class CheckEGTrader:
         # Подготавливаем данные через preprocessing
         pdata = self.ws.preprocessing(self.tdata)
         df = pdata['chart']
+
+        self.sync_step_data(df)
         
         if self.close_on_time:
             mask = (df['hour'] >= df['weekday'].map(lambda wd: self.close_map[wd][0])) & \
@@ -368,6 +384,8 @@ class CheckEGTrader:
         print(f"Максимальная просадка: {min(td['unclosed_fee']):.2f}")
         print(f"Открыто лонгов: {len(td['o_longs'])}")
         print(f"Открыто шортов: {len(td['o_shorts'])}")
+        print(f"Тейков: {td['takes'][-1]}")
+        print(f"Стопов: {td['stops'][-1]}")
 
     def get_statistics(self):
         td = self.trade_data
@@ -497,6 +515,10 @@ class CheckEGTrader:
             sequity = self.trade_data['unclosed_fee']
             ax2.plot(sequity)
             sequity = self.trade_data['step_eq_fee']
+        elif help_info == 'sltp':
+            sequity = self.trade_data['stops']
+            ax2.plot(sequity,color='red')
+            sequity = self.trade_data['takes']
         else:
             sequity = np.array([0])
         ax2.plot(sequity)

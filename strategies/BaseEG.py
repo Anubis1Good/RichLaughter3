@@ -22,6 +22,10 @@ class BaseEG:
         self.type_eg = 0 # 0 - D-ws, 1 - BD-ws, 2 - spred_glass
         self.block_type_egs = (0,)
         self.order_manager = OrderManager()
+        self.amount_sl = 0
+        self.amount_tp = 0
+        self.last_action = None
+
 
     def add_slice_df(self, df:pd.DataFrame, period=20):
         df_slice = df.iloc[period+1:]
@@ -46,16 +50,22 @@ class BaseEG:
                 if pos > 0:
                     if self.type_eg in self.block_type_egs:
                         self.can_long = False
+                    if self.last_action != 'close_long':
+                        self.amount_sl += 1
                     return 'close_long'
                 elif pos < 0:
                     if self.type_eg in self.block_type_egs:
                         self.can_short = False
+                    if self.last_action != 'close_short':
+                        self.amount_sl += 1
                     return 'close_short'
         return action
 
     def check_take(self,delta,action):
         if self.take is not None and delta is not None:
             if delta >= self.take:
+                if self.last_action != 'close_all':
+                    self.amount_tp += 1
                 return 'close_all'
         return action
 
@@ -92,10 +102,12 @@ class BaseEG:
     # pdata - processed data
     def __call__(self, pdata,pos,delta, *args, **kwds):
         action = self.get_raw_action(pdata)
+
         if self.type_eg in self.block_type_egs:
             action = self.check_valid_action(action,pos)
         action = self.check_stop(pos,delta,action)
         action = self.check_take(delta,action)
+        self.last_action = action
         return action # {self.symbol: 'close_all'}
     
         # Вариант 1: Для одного инструмента (основной, 99% случаев)

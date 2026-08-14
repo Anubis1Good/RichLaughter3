@@ -1,13 +1,12 @@
 from strategies.PEGs.PEG1_9 import *
 
+# (min, max, step)
 max_period = 55
 group = (
     (
         PEG2_DDCrWork, 
         [
-            (1,3,1000),
-            (1,3,1000),
-            (2,3,max_period),
+            (2,max_period,1),
         ]
     ),
 )

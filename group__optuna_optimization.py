@@ -9,7 +9,7 @@ if __name__ == '__main__':
         max_period=max_period,
         bottom_limit=100,
         top_limit=1000,
-        n_trials=10,
+        n_trials=100,
         need_plot=True
     )
     

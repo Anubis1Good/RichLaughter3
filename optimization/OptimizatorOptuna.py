@@ -24,7 +24,13 @@ class OptimizatorOptuna:
                  n_jobs: int = 1,
                  need_plot: bool = False,
                  save_cores: int = 1,
-                 measure_time: bool = False):
+                 measure_time: bool = False,
+                # Параметры SL/TP в процентах
+                 sl_min_pct: float = 0.1,
+                 sl_max_pct: float = 1.0,
+                 tp_min_pct: float = 0.1,
+                 tp_max_pct: float = 2.0
+                 ):
         
         self.test_folder = test_folder
         self.main_folder = main_folder
@@ -40,7 +46,11 @@ class OptimizatorOptuna:
         self.save_cores = save_cores
         self.measure_time = measure_time
         self.phys_cores = psutil.cpu_count(logical=False)
-        
+        # Параметры SL/TP
+        self.sl_min_pct = sl_min_pct
+        self.sl_max_pct = sl_max_pct
+        self.tp_min_pct = tp_min_pct
+        self.tp_max_pct = tp_max_pct
         self.traders = []
         
         if not os.path.exists(main_folder):
@@ -70,35 +80,97 @@ class OptimizatorOptuna:
             self.traders.append(trader)
         
         print(f"Loaded {len(self.traders)} traders")
+
+    def get_sl_tp_params(self, trader):
+        """
+        Рассчитывает параметры SL/TP для конкретного инструмента.
+        Шаг всегда = 1 (один шаг цены)
+        """
+        price_step_per = trader.price_step_per  # уже в процентах!
+        
+        # Минимальное и максимальное количество шагов для SL
+        min_steps_sl = int(self.sl_min_pct / price_step_per)
+        max_steps_sl = int(self.sl_max_pct / price_step_per)
+        
+        # Минимальное и максимальное количество шагов для TP
+        min_steps_tp = int(self.tp_min_pct / price_step_per)
+        max_steps_tp = int(self.tp_max_pct / price_step_per)
+        
+        # Гарантируем минимум 1 шаг
+        min_steps_sl = max(1, min_steps_sl)
+        min_steps_tp = max(1, min_steps_tp)
+        
+        # Если максимум меньше минимума - корректируем
+        max_steps_sl = max(min_steps_sl, max_steps_sl)
+        max_steps_tp = max(min_steps_tp, max_steps_tp)
+        
+        return {
+            'sl': (min_steps_sl, max_steps_sl),  # шаг всегда 1
+            'tp': (min_steps_tp, max_steps_tp)   # шаг всегда 1
+        }
     
     def objective(self, trial, trader, strategy_class, param_options):
+        # Получаем параметры SL/TP для этого инструмента
+        sl_tp_params = self.get_sl_tp_params(trader)
+        
+        # Стратегические параметры
         params = []
         for i, options in enumerate(param_options):
             param_name = f"param_{i}"
             
+            # Категориальные параметры (строки)
             if isinstance(options[0], str):
                 params.append(trial.suggest_categorical(param_name, options))
                 continue
             
-            unique_steps = {options[j+1] - options[j] for j in range(len(options)-1)}
-            
-            if len(unique_steps) == 1:
-                step = unique_steps.pop()
-                if isinstance(step, int):
-                    params.append(trial.suggest_int(param_name, min(options), max(options), step=step))
+            # Формат: (min, max, step)
+            if len(options) == 3:
+                min_val, max_val, step_val = options
+                
+                # Проверяем валидность
+                if min_val >= max_val:
+                    raise ValueError(f"min ({min_val}) must be less than max ({max_val}) for param_{i}")
+                if step_val <= 0:
+                    raise ValueError(f"step ({step_val}) must be positive for param_{i}")
+                
+                # Определяем тип и предлагаем
+                if isinstance(step_val, int) and all(isinstance(x, int) for x in [min_val, max_val]):
+                    params.append(trial.suggest_int(param_name, min_val, max_val, step=step_val))
                 else:
-                    params.append(trial.suggest_float(param_name, min(options), max(options), step=step))
+                    params.append(trial.suggest_float(param_name, min_val, max_val, step=step_val))
+            
+            # Формат: (min, max) - шаг по умолчанию 1
+            elif len(options) == 2:
+                min_val, max_val = options
+                
+                if min_val >= max_val:
+                    raise ValueError(f"min ({min_val}) must be less than max ({max_val}) for param_{i}")
+                
+                if all(isinstance(x, int) for x in [min_val, max_val]):
+                    params.append(trial.suggest_int(param_name, min_val, max_val))
+                else:
+                    params.append(trial.suggest_float(param_name, min_val, max_val))
+            
+            # Список значений
             else:
                 if all(isinstance(x, int) for x in options):
                     params.append(trial.suggest_int(param_name, min(options), max(options)))
                 else:
                     params.append(trial.suggest_float(param_name, min(options), max(options)))
+                # SL и TP - шаг всегда 1
+        sl_min, sl_max = sl_tp_params['sl']
+        tp_min, tp_max = sl_tp_params['tp']
         
+        sl_value = trial.suggest_int('sl', sl_min, sl_max, step=1)
+        tp_value = trial.suggest_int('tp', tp_min, tp_max, step=1)
+
         strategy = strategy_class(
             trader.symbol, 
             trader.price_step,
             1,
-            None, 
+            None,
+            sl_value,
+            tp_value, 
             *params
         )
         
@@ -143,8 +215,15 @@ class OptimizatorOptuna:
                     param_value = round(param_value, 2)
                 params.append(param_value)
                 param_values.append(str(param_value))
+                        # SL и TP
+            sl_value = trial.params['sl']
+            tp_value = trial.params['tp']
             
-            strategy = strategy_class(ticker, trader.price_step, 1, None, *params)
+            # Все параметры
+            all_params = [sl_value, tp_value] + params
+            all_param_values = [str(sl_value), str(tp_value)] + param_values
+
+            strategy = strategy_class(ticker, trader.price_step, 1, None, *all_params)
             
             trader.ws = strategy
             trader.reload_data()
@@ -153,12 +232,17 @@ class OptimizatorOptuna:
             trades, eq, eq_f, _, _, _ = trader.process_old_type_result()
             
             name_doc = f"{ticker}_{name_bot}"
-            name_file = f"{name_doc}_{'_'.join(param_values)}"
-            params_tuple = f"({name_bot},({','.join(param_values)},)),"
-            
+            name_file = f"{name_doc}_{'_'.join(all_param_values)}"
+            params_tuple = f"({name_bot},({','.join(all_param_values)},)),"
+            price_step_per = trader.price_step_per  # в процентах
             result_row = {
                 "name": name_file,
                 "ws": params_tuple,
+                "amount_sl": trader.ws.amount_sl,
+                "amount_tp": trader.ws.amount_tp,
+                "sl/tp": round(sl_value / tp_value,2),
+                "sl_pct": round(sl_value * price_step_per, 2),   # SL в процентах
+                "tp_pct": round(tp_value * price_step_per, 2),   # TP в процентах
             }
             result_row = result_row | trades
             
