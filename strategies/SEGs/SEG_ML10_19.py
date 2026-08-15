@@ -1,3 +1,4 @@
+import numpy as np
 from strategies.BaseEG import BaseEG
 from for_strategies.classic_indicators import add_rsi,add_chop,add_adx,add_donchan_channel
 from for_strategies.zigzag_indicators import add_dzz_peaks,add_analys_dzz
@@ -158,25 +159,44 @@ class SEGML2b_RAPTOR(BaseEG):
         df['c_max_hb'] = df['close'] >= df['max_hb']
         df['c_min_hb'] = df['close'] <= df['min_hb']
         df['c_avarege'] = df['close'] >= df['min_hb']
-        # Инициализируем сигнал нулями
         df['signal'] = 0
         train_set = ['trend', 'trend_sma', 'c_max_hb', 'c_min_hb', 'c_avarege', 'rsi', 'chop', 'adx']
 
-        # Убедимся, что нет пропущенных значений
+        # ==========================================
+        #  FIX: Очистка данных перед обучением
+        # ==========================================
         df_train = df.copy()
         df_train = df_train.dropna(subset=train_set + [self.mode_ideal]).copy()
+
         if not df_train.empty:
             y_train = df_train[self.mode_ideal]
             X_train = df_train[train_set]
 
+            # === НОВЫЙ КОД ===
+            # Заменяем inf на очень большие числа (или на NaN)
+            X_train = X_train.replace([np.inf, -np.inf], np.nan)
+            # Удаляем строки с NaN
+            X_train = X_train.dropna()
+            y_train = y_train.loc[X_train.index]  # синхронизируем y
+
+            # Приводим к float64 (безопаснее)
+            X_train = X_train.astype(np.float64)
+
+            # === ДОПОЛНИТЕЛЬНАЯ ПРОВЕРКА ===
+            if np.isinf(X_train.values).any() or np.isnan(X_train.values).any():
+                print(f"⚠️ ВНИМАНИЕ: В X_train остались inf/NaN!")
+                print(f"   inf: {np.isinf(X_train.values).sum()}")
+                print(f"   nan: {np.isnan(X_train.values).sum()}")
+                # Заменяем всё, что осталось
+                X_train = np.nan_to_num(X_train, nan=0.0, posinf=1e10, neginf=-1e10)
+
             # Обучаем модель
             self.get_model(X_train, y_train)
-            # Получаем предсказания и присваиваем их обратно в исходный DataFrame
             df.loc[X_train.index, 'signal'] = self.model.predict(X_train)
+
         df = self.add_slice_df(df, period=self.period)
         pdata['chart'] = df
         return pdata
-
     def _get_action_from_row(self, row):
         if row['signal'] == self.enters[0]:
             return 'open_long'

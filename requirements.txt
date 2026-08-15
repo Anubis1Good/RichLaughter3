@@ -19,4 +19,5 @@ torch
 pytz
 plotly
 PyQt5
+scikit-learn
 

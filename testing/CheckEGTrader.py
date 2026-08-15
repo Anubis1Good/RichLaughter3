@@ -88,10 +88,11 @@ class CheckEGTrader:
         self.cur_eq = None
         self.tdata = {}
         self.tdata['chart'] = self.df.copy()
-        self.ws.amount_sl = 0
-        self.ws.amount_tp = 0
-        self.ws.can_long = True
-        self.ws.can_short = True
+        if self.ws is not None:
+            self.ws.amount_sl = 0
+            self.ws.amount_tp = 0
+            self.ws.can_long = True
+            self.ws.can_short = True
 
     def get_iterator(self,data):
         if self.use_tqdm:
@@ -192,7 +193,7 @@ class CheckEGTrader:
 
     # CHECKS_FUNCS
     @duration_time
-    def check_strategy_fast(self, history_bars=100):
+    def check_strategy_fast(self, history_bars=60):
         """
         Быстрый тест для оптимизации.
         Индикаторы рассчитываются один раз на всех данных.
@@ -250,7 +251,7 @@ class CheckEGTrader:
             self.update_step_data(price)
 
     @duration_time
-    def check_strategy_faster(self, history_bars=100):
+    def check_strategy_faster(self, history_bars=60):
         """
         Быстрый тест для оптимизации.
         """
@@ -259,10 +260,6 @@ class CheckEGTrader:
         # Подготавливаем данные через preprocessing
         pdata = self.ws.preprocessing(self.tdata)
         df = pdata['chart']
-        
-        # Очищаем кеш стратегии
-        if hasattr(self.ws, 'clear_cache'):
-            self.ws.clear_cache()
         
         self.sync_step_data(df)
         
@@ -375,7 +372,7 @@ class CheckEGTrader:
     def process_old_type_result(self):
         df_eq = pd.DataFrame({'eq':self.trade_data['equity'],'eq_fee':self.trade_data['equity_fee']})
         trades = {'total': self.trade_data['total'], 'count': self.trade_data['count'], 'total_fee_per': self.trade_data['total_wfees_per']}
-        if df_eq.empty:
+        if df_eq.empty or len(df_eq) < 2:
             trades.update({
             'total_abs_fee': 0,
             'win_rate_wf': 0,
@@ -394,24 +391,38 @@ class CheckEGTrader:
         else:
             df_eq['diff_eq'] = df_eq['eq'].diff()
             df_eq['diff_eq_fee'] = df_eq['eq_fee'].diff()
-            mean_eq = df_eq['diff_eq'].mean()
-            median_eq = df_eq['diff_eq'].median()
-            min_eq = df_eq['diff_eq'].min()
-            max_eq = df_eq['diff_eq'].max()
-            mean_eqf = df_eq['diff_eq_fee'].mean()
-            median_eqf = df_eq['diff_eq_fee'].median()
-            min_eqf = df_eq['diff_eq_fee'].min()
-            max_eqf = df_eq['diff_eq_fee'].max()
-            wins = len(df_eq[df_eq['diff_eq'] > 0].index)
-            loss = len(df_eq[df_eq['diff_eq'] < 0].index)
-            if loss > 0:
-                win_rate = round((wins / (wins + loss)) * 100,2)
-            else:
+            
+            # ==========================================
+            # УБИРАЕМ NaN ИЗ diff (первая строка всегда NaN)
+            # ==========================================
+            diff_eq = df_eq['diff_eq'].dropna()
+            diff_eq_fee = df_eq['diff_eq_fee'].dropna()
+            
+            # ==========================================
+            # ПРОВЕРЯЕМ, ЧТО ЕСТЬ ДАННЫЕ ДЛЯ СТАТИСТИКИ
+            # ==========================================
+            if len(diff_eq) == 0:
+                mean_eq = median_eq = min_eq = max_eq = 0
+                mean_eqf = median_eqf = min_eqf = max_eqf = 0
                 win_rate = 0
+            else:
+                mean_eq = diff_eq.mean()
+                median_eq = diff_eq.median()
+                min_eq = diff_eq.min()
+                max_eq = diff_eq.max()
+                
+                mean_eqf = diff_eq_fee.mean()
+                median_eqf = diff_eq_fee.median()
+                min_eqf = diff_eq_fee.min()
+                max_eqf = diff_eq_fee.max()
+                
+                wins = len(diff_eq[diff_eq > 0])
+                loss = len(diff_eq[diff_eq < 0])
+                win_rate = round((wins / (wins + loss)) * 100, 2) if loss > 0 else 0
 
             trades['total_fee_per'] = round(self.trade_data['total_wfees_per'],2)
             trades.update({
-                'total_abs_fee': self.trade_data['equity_fee'][-1],
+                'total_abs_fee': self.trade_data['equity_fee'][-1] if self.trade_data['equity_fee'] else 0,
                 'win_rate_wf': win_rate,
                 'total_fee': self.trade_data['fees'],
                 'mean_eq':mean_eq,
@@ -425,9 +436,9 @@ class CheckEGTrader:
                 'min_eqf':min_eqf,
                 'balance_eqf':max_eqf+min_eqf
             })
-        longs = np.array(self.trade_data['o_longs'])
-        shorts = np.array(self.trade_data['o_shorts'])
-        closes = np.array(self.trade_data['c_longs'] + self.trade_data['c_shorts'])
+        longs = np.array(self.trade_data['o_longs']) if self.trade_data['o_longs'] else np.array([])
+        shorts = np.array(self.trade_data['o_shorts']) if self.trade_data['o_shorts'] else np.array([])
+        closes = np.array(self.trade_data['c_longs'] + self.trade_data['c_shorts']) if (self.trade_data['c_longs'] or self.trade_data['c_shorts']) else np.array([])
         equity = np.array(self.trade_data['equity'])
         equity_fee = np.array(self.trade_data['equity_fee'])
         return trades,equity,equity_fee,longs,shorts,closes

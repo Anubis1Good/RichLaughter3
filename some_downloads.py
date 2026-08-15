@@ -5,11 +5,11 @@ from loaders.ApiMoexLoader import ApiMoexLoader
 from datetime import date,timedelta
 
 today = date.today()
-start_date = str(today - timedelta(days=10))
+start_date = str(today - timedelta(days=30))
 # # start_date = '2025-02-01'
 
 # tickers = ('MTLR','IVAT','SGZH','EUTR','VTBR','RNFT','DATA','RAGR','SPBE','MAGN','VKCO','ASTR','ALRS','RUAL','IRAO','SMLT','T','ENPG','SBER','HYDR','SBERP','SELG','AQUA','AFLT','SFIN','ROSN')
-tickers = ('MTLR','IVAT','SGZH','EUTR','VTBR')
+tickers = ('MTLR','MAGN','RUAL','ALRS','VTBR')
 # tickers = ('MTLR',)
 folder_save = '_data_for_tests\data_stock_1m'
 for ticker in tickers:

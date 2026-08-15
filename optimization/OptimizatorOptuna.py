@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import optuna
 import psutil
+from time import time
 from multiprocessing import Pool
 from functools import partial
 from testing.CheckEGTrader import CheckEGTrader
@@ -52,7 +53,8 @@ class OptimizatorOptuna:
         self.tp_min_pct = tp_min_pct
         self.tp_max_pct = tp_max_pct
         self.traders = []
-        
+        self.results_cache = {}
+
         if not os.path.exists(main_folder):
             os.makedirs(main_folder)
         
@@ -183,6 +185,21 @@ class OptimizatorOptuna:
         if not self.bottom_limit <= trades['count'] <= self.top_limit:
             raise optuna.TrialPruned()
         
+        # ==========================================
+        # СОХРАНЯЕМ В КЕШ ПО СИМВОЛУ
+        # ==========================================
+        symbol = trader.symbol
+        
+        if symbol not in self.results_cache:
+            self.results_cache[symbol] = {}
+        
+        self.results_cache[symbol][trial.number] = {
+            'trades': trades,
+            'eq': eq,
+            'eq_f': eq_f,
+            'params': trial.params.copy()
+        }
+
         return trades['total_abs_fee']
     
     def get_results_table(self, study, trader, strategy_class, param_options):
@@ -199,37 +216,64 @@ class OptimizatorOptuna:
             os.makedirs(file_folder)
         
         completed_trials = [t for t in study.trials if t.state == optuna.trial.TrialState.COMPLETE]
-        n_top = min(25, len(completed_trials))
+        n_top = min(5, len(completed_trials))
         top_trials = sorted(completed_trials, key=lambda x: x.value, reverse=True)[:n_top]
         
         if not top_trials:
             return pd.DataFrame()
         
+        symbol = trader.symbol
+
         for trial in top_trials:
             params = []
             param_values = []
-            for i, options in enumerate(param_options):
+            for i, _ in enumerate(param_options):
                 param_name = f"param_{i}"
                 param_value = trial.params[param_name]
-                if isinstance(param_value, float):
-                    param_value = round(param_value, 2)
+                if isinstance(param_value, str):
+                    # Строку - в кавычки
+                    param_value_str = f"'{param_value}'"
+                elif isinstance(param_value, float):
+                    # Число с плавающей точкой - округляем
+                    param_value_str = str(round(param_value, 2))
+                else:
+                    # Целое число или другое
+                    param_value_str = str(param_value)
                 params.append(param_value)
-                param_values.append(str(param_value))
+                param_values.append(param_value_str)
                         # SL и TP
             sl_value = trial.params['sl']
             tp_value = trial.params['tp']
             
             # Все параметры
-            all_params = [sl_value, tp_value] + params
+            # all_params = [sl_value, tp_value] + params
             all_param_values = [str(sl_value), str(tp_value)] + param_values
 
-            strategy = strategy_class(ticker, trader.price_step, 1, None, *all_params)
+            # ==========================================
+            # БЕРЕМ ИЗ КЕША ПО СИМВОЛУ И НОМЕРУ ТРИАЛА
+            # ==========================================
             
-            trader.ws = strategy
-            trader.reload_data()
-            trader.check_strategy_faster(history_bars=self.max_period)
-            
-            trades, eq, eq_f, _, _, _ = trader.process_old_type_result()
+            if symbol in self.results_cache and trial.number in self.results_cache[symbol]:
+                cached = self.results_cache[symbol][trial.number]
+                trades = cached['trades']
+                eq = cached['eq']
+                eq_f = cached['eq_f']
+            else:
+                # Страховка
+                continue
+            #     # Страховка - если вдруг нет в кеше, делаем прогон
+            #     strategy = strategy_class(
+            #         ticker, 
+            #         trader.price_step, 
+            #         1, 
+            #         None, 
+            #         *all_params
+            #     )
+                
+            #     trader.ws = strategy
+            #     trader.reload_data()
+            #     trader.check_strategy_faster(history_bars=self.max_period)
+            #     trades, eq, eq_f, _, _, _ = trader.process_old_type_result()
             
             name_doc = f"{ticker}_{name_bot}"
             name_file = f"{name_doc}_{'_'.join(all_param_values)}"
@@ -299,6 +343,8 @@ class OptimizatorOptuna:
         return results
     
     def process_group(self, strategy_config, n_trials=None, n_jobs=None, need_plot=None):
+        start_time = time()
+        self.results_cache = {}
         if n_trials is not None:
             self.n_trials = n_trials
         if n_jobs is not None:
@@ -328,11 +374,19 @@ class OptimizatorOptuna:
         
         success_count = sum(1 for r in results if r is not None and not r.empty)
         
+        elapsed = time() - start_time
+        hours = int(elapsed // 3600)
+        minutes = int((elapsed % 3600) // 60)
+        seconds = int(elapsed % 60)  
         print("-" * 50)
         print(f"Completed: {success_count}/{len(self.traders)}")
+        print(f"⏱ Group time: {hours}h {minutes}m {seconds}s")
+
         return success_count
     
     def optimize_multiple_groups(self, groups):
+        start_time = time()
+
         total_success = 0
         for i, group in enumerate(groups):
             success = self.process_group(group)
@@ -341,3 +395,9 @@ class OptimizatorOptuna:
         print(f"\n{'='*50}")
         print(f"Total: {total_success} successful")
         print(f"{'='*50}")
+        elapsed = time() - start_time
+        hours = int(elapsed // 3600)
+        minutes = int((elapsed % 3600) // 60)  # ← Здесь // вместо /
+        seconds = int(elapsed % 60)            # ← Добавь секунды
+
+        print(f"⏱ Total time: {hours}h {minutes}m {seconds}s")

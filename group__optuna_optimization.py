@@ -1,6 +1,7 @@
 # run_optimization.py
 from optimization.OptimizatorOptuna import OptimizatorOptuna
-from optimization.optuna_grops.main_groups import group, max_period
+# from optimization.optuna_grops.main_groups import group, max_period
+from optimization.optuna_grops.exp_groups import group, max_period
 
 if __name__ == '__main__':
     optimizer = OptimizatorOptuna(
@@ -10,7 +11,7 @@ if __name__ == '__main__':
         bottom_limit=100,
         top_limit=1000,
         n_trials=100,
-        need_plot=True
+        need_plot=False
     )
     
     optimizer.optimize_multiple_groups(group)

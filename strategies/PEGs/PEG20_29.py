@@ -25,7 +25,7 @@ class PEG20_HOGGER(BaseEG):
         df['bbdb'] = df['smab'] - (self.mult_big * std_dev)
         df['mub'] = (df['bbub'] + df['smab']) / 2
         df['mdb'] = (df['bbdb'] + df['smab']) / 2
-        df = add_bollinger(df, self.period2)
+        df = add_bollinger(df, self.period2,self.mult_small)
         df = add_rsi(df, self.period2)
         df = self.add_slice_df(df, self.period)
         pdata['chart'] = df

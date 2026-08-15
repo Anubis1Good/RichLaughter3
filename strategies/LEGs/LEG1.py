@@ -365,24 +365,21 @@ class LEG1_PHOGA(BaseEG):
         return None
         
 class LEG1_BORSCH(BaseEG):
-    """stop=None, take=None, period=20, momentum_period=14"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=20, momentum_period=14):
+    """stop=None, take=None, period=20"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=20):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
         self.period = period
-        self.momentum_period = momentum_period
-        self.lookback_period = period
         self.type_eg = 1
 
     def preprocessing(self, tdata):
         pdata = {}
         df = tdata['chart']
         # Расчёт момента (momentum)
-        # df['momentum'] = df['close'].pct_change(periods=self.momentum_period) * 100
 
         # Добавление уровней недавних максимумов и минимумов
-        df['recent_max'] = df['high'].rolling(window=self.lookback_period).max()
-        df['recent_min'] = df['low'].rolling(window=self.lookback_period).min()
+        df['recent_max'] = df['high'].rolling(window=self.period).max()
+        df['recent_min'] = df['low'].rolling(window=self.period).min()
 
         # Фильтр по объёму
         mean_volume = df['volume'].mean()
