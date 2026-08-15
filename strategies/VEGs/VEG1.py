@@ -33,12 +33,12 @@ class VEG1_MERCURY(BaseEG):
                 return 'close_long'
         return None
 
-    def get_raw_action(self, pdata):
-        row = self.get_test_row(pdata['chart'])
+    def _get_action_from_row(self, row):
         # long
         if row['pattern18'] == 'joc':
             if row['bzp3'] < row['close'] <= row['bzp2']:
                 return 'open_long'
+        
         if row['pattern18'] == 'btc':
             if self.use_target:
                 if row['target'] >= row['close'] >= row['btarget']:
@@ -47,10 +47,12 @@ class VEG1_MERCURY(BaseEG):
                 return 'open_long'
             if self.hard_stop:
                 return 'close_short'
+        
         # short
         if row['pattern18'] == 'bui':
             if row['bzp3'] > row['close'] >= row['bzp2']:
                 return 'open_short'
+        
         if row['pattern18'] == 'bti':
             if self.use_target:
                 if row['target'] <= row['close'] <= row['btarget']:
@@ -59,29 +61,32 @@ class VEG1_MERCURY(BaseEG):
                 return 'open_short'
             if self.hard_stop:
                 return 'close_long'
+        
         # range
         if row['pattern18'] in ('top_range', 'double_top', 'weak_long'):
             if row['bzp1'] <= row['close'] <= row['bzp3']:
                 return 'open_long'
             if row['bzp2'] >= row['close'] >= row['bzp4']:
                 return 'open_short'
+        
         if row['pattern18'] in ('bottom_range', 'double_bottom', 'weak_short'):
             if row['bzp1'] >= row['close'] >= row['bzp3']:
                 return 'open_short'
             if row['bzp2'] <= row['close'] <= row['bzp4']:
                 return 'open_long'
-
+        
         if row['pattern18'] == 'narrowing_up':
             if row['bzp1'] >= row['close'] >= row['bzp3']:
                 return 'close_long'
             if row['bzp2'] <= row['close'] <= row['zp2']:
                 return 'close_short'
+        
         if row['pattern18'] == 'narrowing_down':
             if row['bzp1'] <= row['close'] <= row['bzp3']:
                 return 'close_short'
             if row['bzp2'] >= row['close'] >= row['zp2']:
                 return 'close_long'
-
+        
         if row['pattern18'] == 'upthrust':
             if row['zp3'] >= row['close'] >= row['bzp3']:
                 return 'open_short'
@@ -89,6 +94,7 @@ class VEG1_MERCURY(BaseEG):
                 return 'open_long'
             if row['bzp3'] > row['close'] >= row['mzp']:
                 return 'close_long'
+        
         if row['pattern18'] == 'spring':
             if row['zp3'] <= row['close'] <= row['bzp3']:
                 return 'open_long'
@@ -96,14 +102,15 @@ class VEG1_MERCURY(BaseEG):
                 return 'open_short'
             if row['bzp3'] < row['close'] <= row['mzp']:
                 return 'close_short'
-
+        
         if row['pattern18'] == 'sow':
             if row['bzp3'] > row['close'] >= row['bzp2']:
                 return 'open_short'
+        
         if row['pattern18'] == 'sos':
             if row['bzp3'] < row['close'] <= row['bzp2']:
                 return 'open_long'
-
+        
         return self.stop_loss_action(row)
 
 class VEG1_VENUS(BaseEG):
@@ -138,12 +145,12 @@ class VEG1_VENUS(BaseEG):
                 return 'close_long'
         return None
 
-    def get_raw_action(self, pdata):
-        row = self.get_test_row(pdata['chart'])
+    def _get_action_from_row(self, row):
         # long
         if row['pattern18'] == 'joc':
             if row['bzp3'] < row['close'] <= row['bzp2']:
                 return 'open_long'
+        
         if row['pattern18'] == 'btc':
             if self.use_target:
                 if row['target'] >= row['close'] >= row['btarget']:
@@ -152,10 +159,12 @@ class VEG1_VENUS(BaseEG):
                 return 'open_long'
             if self.hard_stop:
                 return 'close_short'
+        
         # short
         if row['pattern18'] == 'bui':
             if row['bzp3'] > row['close'] >= row['bzp2']:
                 return 'open_short'
+        
         if row['pattern18'] == 'bti':
             if self.use_target:
                 if row['target'] <= row['close'] <= row['btarget']:
@@ -164,29 +173,32 @@ class VEG1_VENUS(BaseEG):
                 return 'open_short'
             if self.hard_stop:
                 return 'close_long'
+        
         # range
         if row['pattern18'] in ('top_range', 'double_top', 'weak_long'):
             if row['bzp1'] <= row['close'] <= row['bzp3']:
                 return 'open_long'
             if row['bzp2'] >= row['close'] >= row['bzp4']:
                 return 'open_short'
+        
         if row['pattern18'] in ('bottom_range', 'double_bottom', 'weak_short'):
             if row['bzp1'] >= row['close'] >= row['bzp3']:
                 return 'open_short'
             if row['bzp2'] <= row['close'] <= row['bzp4']:
                 return 'open_long'
-
+        
         if row['pattern18'] == 'narrowing_up':
             if row['bzp1'] >= row['close'] >= row['bzp3']:
                 return 'close_long'
             if row['bzp2'] <= row['close'] <= row['zp2']:
                 return 'close_short'
+        
         if row['pattern18'] == 'narrowing_down':
             if row['bzp1'] <= row['close'] <= row['bzp3']:
                 return 'close_short'
             if row['bzp2'] >= row['close'] >= row['zp2']:
                 return 'close_long'
-
+        
         if row['pattern18'] == 'upthrust':
             if row['zp3'] >= row['close'] >= row['bzp3']:
                 return 'open_short'
@@ -194,6 +206,7 @@ class VEG1_VENUS(BaseEG):
                 return 'open_long'
             if row['bzp3'] > row['close'] >= row['mzp']:
                 return 'close_long'
+        
         if row['pattern18'] == 'spring':
             if row['zp3'] <= row['close'] <= row['bzp3']:
                 return 'open_long'
@@ -201,12 +214,13 @@ class VEG1_VENUS(BaseEG):
                 return 'open_short'
             if row['bzp3'] < row['close'] <= row['mzp']:
                 return 'close_short'
-
+        
         if row['pattern18'] == 'sow':
             if row['bzp3'] > row['close'] >= row['bzp2']:
                 return 'open_short'
+        
         if row['pattern18'] == 'sos':
             if row['bzp3'] < row['close'] <= row['bzp2']:
                 return 'open_long'
-
+        
         return self.stop_loss_action(row)

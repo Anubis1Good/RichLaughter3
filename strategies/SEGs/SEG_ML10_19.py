@@ -24,14 +24,13 @@ class SEGML2_NEWAVE(BaseEG):
         pdata['chart'] = df
         return pdata
     
-    def get_raw_action(self, pdata):
-        row = self.get_test_row(pdata['chart'])
-        if row['upper_channel'] < row['close']:
-            if row['rsi'] > 100 - self.threshold:
-                return 'open_short'
-        if row['lower_channel'] > row['close']:
-            if row['rsi'] < self.threshold:
-                return 'open_long'
+    def _get_action_from_row(self, row):
+        if row['upper_channel'] < row['close'] and row['rsi'] > 100 - self.threshold:
+            return 'open_short'
+        if row['lower_channel'] > row['close'] and row['rsi'] < self.threshold:
+            return 'open_long'
+        
+        return None
 
 #TODO Переделать
 class SEGML2_SID(BaseEG):
@@ -56,21 +55,25 @@ class SEGML2_SID(BaseEG):
         pdata['chart'] = df
         return pdata
 
-    def get_raw_action(self, pdata):
-        row = self.get_test_row(pdata['chart'])
+    def _get_action_from_row(self, row):
         if row is None:
             return None
+        
         delta_fc = (row['forecast_high'] - row['forecast_low']) / 10
+        
         if row['close'] > row['forecast_high'] - delta_fc:
             if row['per_fs'] > self.percent_threshold and row['rsi'] > 100 - self.threshold:
                 return 'open_short'
             else:
                 return 'close_long'
+        
         if row['close'] < row['forecast_low'] + delta_fc:
             if row['per_fs'] > self.percent_threshold and row['rsi'] < self.threshold:
                 return 'open_long'
             else:
                 return 'close_short'
+        
+        return None
             
 #что-то интересное         
 class SEGML2_TRENDWAVE(BaseEG):
@@ -93,18 +96,20 @@ class SEGML2_TRENDWAVE(BaseEG):
         pdata['chart'] = df
         return pdata
 
-    def get_raw_action(self, pdata):
-        row = self.get_test_row(pdata['chart'])
+    def _get_action_from_row(self, row):
         if row['upper_channel'] < row['close']:
             if row['rsi'] > 100 - self.threshold_enter and row['regression_slope'] < 0:
                 return 'open_short'
             if row['rsi'] > 100 - self.threshold_exit:
                 return 'close_long'
+        
         if row['lower_channel'] > row['close']:
             if row['rsi'] < self.threshold_enter and row['regression_slope'] > 0:
                 return 'open_long'
             if row['rsi'] < self.threshold_exit:
                 return 'close_short'
+        
+        return None
             
 #хз хз тут даже не очень понятно, на какой сигнал открыть что
 class SEGML2b_RAPTOR(BaseEG):
@@ -172,10 +177,10 @@ class SEGML2b_RAPTOR(BaseEG):
         pdata['chart'] = df
         return pdata
 
-    def get_raw_action(self, pdata):
-        row = self.get_test_row(pdata['chart'])
+    def _get_action_from_row(self, row):
         if row['signal'] == self.enters[0]:
             return 'open_long'
         if row['signal'] == self.enters[1]:
             return 'open_short'
+        
         return None

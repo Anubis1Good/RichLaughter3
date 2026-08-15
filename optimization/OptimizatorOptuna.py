@@ -176,7 +176,7 @@ class OptimizatorOptuna:
         
         trader.ws = strategy
         trader.reload_data()
-        trader.check_strategy_fast(history_bars=self.max_period)
+        trader.check_strategy_faster(history_bars=self.max_period)
         
         trades, eq, eq_f, _, _, _ = trader.process_old_type_result()
         
@@ -227,7 +227,7 @@ class OptimizatorOptuna:
             
             trader.ws = strategy
             trader.reload_data()
-            trader.check_strategy_fast(history_bars=self.max_period)
+            trader.check_strategy_faster(history_bars=self.max_period)
             
             trades, eq, eq_f, _, _, _ = trader.process_old_type_result()
             

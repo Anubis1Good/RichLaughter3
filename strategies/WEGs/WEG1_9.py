@@ -20,8 +20,7 @@ class WEG4_DOG(BaseEG):
         pdata['chart'] = df
         return pdata
     
-    def get_raw_action(self, pdata):
-        row = self.get_test_row(pdata['chart'])
+    def _get_action_from_row(self, row):
         if row['rsi'] < self.threshold:  
             return 'open_long'
         if row['rsi'] > 100 - self.threshold:  
@@ -45,8 +44,7 @@ class WEG4_PUPPY(BaseEG):
         pdata['chart'] = df
         return pdata
     
-    def get_raw_action(self, pdata):
-        row = self.get_test_row(pdata['chart'])
+    def _get_action_from_row(self, row):
         if row['rsi'] < self.threshold_enter:  
             return 'open_long'
         if row['rsi'] > 100 - self.threshold_enter:  
@@ -79,8 +77,7 @@ class WEG4_RAT(BaseEG):
         pdata['chart'] = df
         return pdata
     
-    def get_raw_action(self, pdata):
-        row = self.get_test_row(pdata['chart'])
+    def _get_action_from_row(self, row):
         if row['oversold']:  
             return 'open_long'
         if row['overbought']:  
@@ -102,8 +99,7 @@ class WEG7_PARADOX(BaseEG):
         pdata['chart'] = df
         return pdata
     
-    def get_raw_action(self, pdata):
-        row = self.get_test_row(pdata['chart'])
+    def _get_action_from_row(self, row):
         if row['dvsai'] < row['dvsaid']:  
             return 'open_long'
         if row['dvsai'] > row['dvsaiu']:  
@@ -133,8 +129,7 @@ class WEG3_DS(BaseEG):
         pdata['chart'] = df
         return pdata
     
-    def get_raw_action(self, pdata):
-        row = self.get_test_row(pdata['chart'])
+    def _get_action_from_row(self, row):
         if row['signal'] == 1:
             return 'open_long'
         if row['signal'] == -1:

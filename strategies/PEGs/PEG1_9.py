@@ -19,14 +19,16 @@ class PEG2_DDCrWork(BaseEG):
         pdata['chart'] = df
         return pdata
     
-    def get_raw_action(self,pdata):
-        row = self.get_test_row(pdata['chart'])
+    def _get_action_from_row(self, row):
+        """Только логика!"""
         nearest_long = row['high'] - row['close'] > row['close'] - row['low']
+        
         if row['low'] <= row['min_hb'] and nearest_long:
             return 'open_long'
         if row['high'] >= row['max_hb'] and not nearest_long:
             return 'open_short'
-
+        return None
+    
 class PEG2_SDDCr(BaseEG):
     """stop=None, take=None, period=20, period2=20"""
     def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=20, period2=20):
@@ -44,14 +46,14 @@ class PEG2_SDDCr(BaseEG):
         pdata['chart'] = df
         return pdata
     
-    def get_raw_action(self, pdata):
-        row = self.get_test_row(pdata['chart'])
-        nearest_long = row['high'] - row['close'] > row['close'] - row['low'] 
-        if row['low'] <= row['min_hb']:
-            if nearest_long:
-                return 'open_long'
+    def _get_action_from_row(self, row):
+        nearest_long = row['high'] - row['close'] > row['close'] - row['low']
+        
+        if row['low'] <= row['min_hb'] and nearest_long:
+            return 'open_long'
         if row['high'] >= row['max_hb']:
             return 'open_short'
+        return None
     
 class PEG4_UNIVERSAL(BaseEG):
     '''
@@ -118,9 +120,9 @@ class PEG4_UNIVERSAL(BaseEG):
         pdata['chart'] = df
         return pdata
     
-    def get_raw_action(self, pdata):
-        row = self.get_test_row(pdata['chart'])
-        nearest_long = row['high'] - row['close'] > row['close'] - row['low'] 
+    def _get_action_from_row(self, row):
+        nearest_long = row['high'] - row['close'] > row['close'] - row['low']
+        
         if row['low'] <= row[self.down]:
             if nearest_long:
                 if row['rsi'] < self.threshold_long:
@@ -128,12 +130,15 @@ class PEG4_UNIVERSAL(BaseEG):
                         return 'open_long'
                     else:
                         return 'close_short'
+        
         if row['high'] >= row[self.up]:
             if row['rsi'] > 100 - self.threshold_short:
                 if self.can_short:
                     return 'open_short'
                 else:
                     return 'close_long'
+        
+        return None
                 
 class PEG4_U3(BaseEG):
     '''
@@ -204,14 +209,12 @@ class PEG4_U3(BaseEG):
         pdata['chart'] = df
         return pdata
     
-    def get_raw_action(self, pdata):
-        row = self.get_test_row(pdata['chart'])
-        if row['low'] <= row[self.down]:
-            if row['oversold']:
-                return 'open_long'
-        if row['high'] >= row[self.up]:
-            if row['overbought']:
-                return 'open_short'
+    def _get_action_from_row(self, row):
+        if row['low'] <= row[self.down] and row['oversold']:
+            return 'open_long'
+        if row['high'] >= row[self.up] and row['overbought']:
+            return 'open_short'
+        return None
 
 class PEG8_DOBBY(BaseEG):
     """stop=None, take=None, period=20, multiplier=2"""
@@ -231,20 +234,20 @@ class PEG8_DOBBY(BaseEG):
         pdata['chart'] = df
         return pdata
     
-    def get_raw_action(self, pdata):
-        row = self.get_test_row(pdata['chart'])
-        if row['high'] > row['bbu']:
-            if row['is_big'] or row['over_bbu']:
-                return 'open_short'
-        if row['low'] < row['bbd']:
-            if row['is_big'] or row['over_bbd']:
-                return 'open_long'
-        if row['low'] < row['sma']:
-            if row['is_big']:
-                return 'close_short'
-        if row['high'] > row['sma']:
-            if row['is_big']:
-                return 'close_long'
+    def _get_action_from_row(self, row):
+        if row['high'] > row['bbu'] and (row['is_big'] or row['over_bbu']):
+            return 'open_short'
+        
+        if row['low'] < row['bbd'] and (row['is_big'] or row['over_bbd']):
+            return 'open_long'
+        
+        if row['low'] < row['sma'] and row['is_big']:
+            return 'close_short'
+        
+        if row['high'] > row['sma'] and row['is_big']:
+            return 'close_long'
+        
+        return None
 
 class PEG8_LOBSTER(BaseEG):
     """stop=None, take=None, period=20, multiplier=2"""
@@ -253,6 +256,7 @@ class PEG8_LOBSTER(BaseEG):
         self.needs_info = {'chart': self.symbol}
         self.period = period
         self.multiplier = multiplier
+        self.type_eg = 1
 
     def preprocessing(self, tdata):
         pdata = {}
@@ -264,25 +268,24 @@ class PEG8_LOBSTER(BaseEG):
         pdata['chart'] = df
         return pdata
     
-    def get_raw_action(self, pdata):
-        row = self.get_test_row(pdata['chart'])
+    def _get_action_from_row(self, row):
         # Приоритет: закрытие по экстремальным условиям
         if row['over_bbu']:
             return 'close_long'
         if row['over_bbd']:
             return 'close_short'
+        
         # Основные сигналы (когда цена внутри канала)
-        if row['high'] > row['bbu']:
-            if row['is_big']:
-                return 'open_long'
-        if row['low'] < row['bbd']:
-            if row['is_big']:
-                return 'open_short'
+        if row['high'] > row['bbu'] and row['is_big']:
+            return 'open_long'
+        if row['low'] < row['bbd'] and row['is_big']:
+            return 'open_short'
+        
         # Закрытие по SMA
-        if row['low'] < row['sma']:
-            if row['is_big']:
-                return 'close_long'
-        if row['high'] > row['sma']:
-            if row['is_big']:
-                return 'close_short'
+        if row['low'] < row['sma'] and row['is_big']:
+            return 'close_long'
+        if row['high'] > row['sma'] and row['is_big']:
+            return 'close_short'
+        
+        return None
             

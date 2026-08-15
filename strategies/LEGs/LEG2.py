@@ -29,28 +29,30 @@ class LEG2_HOTS(BaseEG):
         pdata['chart'] = df
         return pdata
     
-    def get_raw_action(self,pdata):
-        row = self.get_test_row(pdata['chart'])
+    def _get_action_from_row(self, row):
         can_long = row['close'] > row['bbd']
         can_short = row['close'] < row['bbu']
-        nearest_long = row['high'] - row['close'] > row['close'] - row['low'] 
-        if row['low'] <= row['min_hb']:
-            if nearest_long:
-                if can_long and row['rsi'] < self.threshold_enter:
-                    return 'open_long'
-                if row['rsi'] < self.threshold_exit:
-                    return 'close_short'
-        if row['high'] >= row['max_hb']:
-            if not nearest_long :
-                if can_short and row['rsi'] > 100-self.threshold_enter:
-                    return 'open_short'
-                if row['rsi'] > 100-self.threshold_exit:
-                    return 'close_long'
+        nearest_long = row['high'] - row['close'] > row['close'] - row['low']
+        
+        if row['low'] <= row['min_hb'] and nearest_long:
+            if can_long and row['rsi'] < self.threshold_enter:
+                return 'open_long'
+            if row['rsi'] < self.threshold_exit:
+                return 'close_short'
+        
+        if row['high'] >= row['max_hb'] and not nearest_long:
+            if can_short and row['rsi'] > 100 - self.threshold_enter:
+                return 'open_short'
+            if row['rsi'] > 100 - self.threshold_exit:
+                return 'close_long'
+        
         if self.use_stop:
             if not can_short:
                 return 'close_short'
             if not can_long:
                 return 'close_long'
+        
+        return None
             
 class LEG2_LOGAN(BaseEG):
     """stop=None, take=None, period=100, period2=50, threshold=50"""
@@ -70,8 +72,7 @@ class LEG2_LOGAN(BaseEG):
         pdata['chart'] = df
         return pdata
     
-    def get_raw_action(self, pdata):
-        row = self.get_test_row(pdata['chart'])
+    def _get_action_from_row(self, row):
         if row['chop'] > self.threshold:
             if row['top_line'] < row['close']:
                 return 'open_short'
@@ -83,6 +84,8 @@ class LEG2_LOGAN(BaseEG):
                 return 'close_long'
         else:
             return 'close_all'
+        
+        return None
         
 class LEG2_DRINKER(BaseEG):
     """stop=None, take=None, period=100, multiplier=2, period2=10, threshold_enter=40, threshold_exit=20, shift=10, use_stop=1"""
@@ -110,28 +113,30 @@ class LEG2_DRINKER(BaseEG):
         pdata['chart'] = df
         return pdata
     
-    def get_raw_action(self, pdata):
-        row = self.get_test_row(pdata['chart'])
+    def _get_action_from_row(self, row):
         can_long = row['close'] > row['bbd']
         can_short = row['close'] < row['bbu']
-        nearest_long = row['high'] - row['close'] > row['close'] - row['low'] 
-        if row['low'] <= row['bottom_mean']:
-            if nearest_long:
-                if can_long and row['rsi'] < self.threshold_enter:
-                    return 'open_long'
-                if row['rsi'] < self.threshold_exit:
-                    return 'close_short'
-        if row['high'] >= row['top_mean']:
-            if not nearest_long:
-                if can_short and row['rsi'] > 100 - self.threshold_enter:
-                    return 'open_short'
-                if row['rsi'] > 100 - self.threshold_exit:
-                    return 'close_long'
+        nearest_long = row['high'] - row['close'] > row['close'] - row['low']
+        
+        if row['low'] <= row['bottom_mean'] and nearest_long:
+            if can_long and row['rsi'] < self.threshold_enter:
+                return 'open_long'
+            if row['rsi'] < self.threshold_exit:
+                return 'close_short'
+        
+        if row['high'] >= row['top_mean'] and not nearest_long:
+            if can_short and row['rsi'] > 100 - self.threshold_enter:
+                return 'open_short'
+            if row['rsi'] > 100 - self.threshold_exit:
+                return 'close_long'
+        
         if self.use_stop:
             if not can_short:
                 return 'close_short'
             if not can_long:
                 return 'close_long'
+        
+        return None
 
 class LEG2_ALKASH(BaseEG):
     """stop=None, take=None, period=100, multiplier=2, period2=10, shift=10, use_stop=1"""
@@ -156,28 +161,30 @@ class LEG2_ALKASH(BaseEG):
         pdata['chart'] = df
         return pdata
     
-    def get_raw_action(self, pdata):
-        row = self.get_test_row(pdata['chart'])
+    def _get_action_from_row(self, row):
         can_long = row['close'] > row['bbd']
         can_short = row['close'] < row['bbu']
-        nearest_long = row['high'] - row['close'] > row['close'] - row['low'] 
-        if row['low'] <= row['bottom_mean']:
-            if nearest_long:
-                if can_long:
-                    return 'open_long'
-                else:
-                    return 'close_short'
-        if row['high'] >= row['top_mean']:
-            if not nearest_long:
-                if can_short:
-                    return 'open_short'
-                else:
-                    return 'close_long'
+        nearest_long = row['high'] - row['close'] > row['close'] - row['low']
+        
+        if row['low'] <= row['bottom_mean'] and nearest_long:
+            if can_long:
+                return 'open_long'
+            else:
+                return 'close_short'
+        
+        if row['high'] >= row['top_mean'] and not nearest_long:
+            if can_short:
+                return 'open_short'
+            else:
+                return 'close_long'
+        
         if self.use_stop:
             if not can_short:
                 return 'close_short'
             if not can_long:
                 return 'close_long'
+        
+        return None
 
 class LEG2_FENNEC(BaseEG):
     """stop=None, take=None, period=100, multiplier=2, period2=10, threshold_enter=40, threshold_exit=20, shift=10, divider=1, use_stop=1"""
@@ -207,28 +214,30 @@ class LEG2_FENNEC(BaseEG):
         pdata['chart'] = df
         return pdata
     
-    def get_raw_action(self, pdata):
-        row = self.get_test_row(pdata['chart'])
+    def _get_action_from_row(self, row):
         can_long = row['close'] > row['bbd']
         can_short = row['close'] < row['bbu']
-        nearest_long = row['high'] - row['close'] > row['close'] - row['low'] 
-        if row['low'] <= row['bottom_buff']:
-            if nearest_long:
-                if can_long and row['rsi'] < self.threshold_enter:
-                    return 'open_long'
-                if row['rsi'] < self.threshold_exit:
-                    return 'close_short'
-        if row['high'] >= row['top_buff']:
-            if not nearest_long:
-                if can_short and row['rsi'] > 100 - self.threshold_enter:
-                    return 'open_short'
-                if row['rsi'] > 100 - self.threshold_exit:
-                    return 'close_long'
+        nearest_long = row['high'] - row['close'] > row['close'] - row['low']
+        
+        if row['low'] <= row['bottom_buff'] and nearest_long:
+            if can_long and row['rsi'] < self.threshold_enter:
+                return 'open_long'
+            if row['rsi'] < self.threshold_exit:
+                return 'close_short'
+        
+        if row['high'] >= row['top_buff'] and not nearest_long:
+            if can_short and row['rsi'] > 100 - self.threshold_enter:
+                return 'open_short'
+            if row['rsi'] > 100 - self.threshold_exit:
+                return 'close_long'
+        
         if self.use_stop:
             if not can_short:
                 return 'close_short'
             if not can_long:
                 return 'close_long'
+        
+        return None
 
 class LEG2_LYNX(BaseEG):
     """stop=None, take=None, period=100, multiplier=2, period2=10, shift=10, divider=1, use_stop=1"""
@@ -255,28 +264,30 @@ class LEG2_LYNX(BaseEG):
         pdata['chart'] = df
         return pdata
     
-    def get_raw_action(self, pdata):
-        row = self.get_test_row(pdata['chart'])
+    def _get_action_from_row(self, row):
         can_long = row['close'] > row['bbd']
         can_short = row['close'] < row['bbu']
-        nearest_long = row['high'] - row['close'] > row['close'] - row['low'] 
-        if row['low'] <= row['bottom_buff']:
-            if nearest_long:
-                if can_long:
-                    return 'open_long'
-                else:
-                    return 'close_short'
-        if row['high'] >= row['top_buff']:
-            if not nearest_long:
-                if can_short:
-                    return 'open_short'
-                else:
-                    return 'close_long'
+        nearest_long = row['high'] - row['close'] > row['close'] - row['low']
+        
+        if row['low'] <= row['bottom_buff'] and nearest_long:
+            if can_long:
+                return 'open_long'
+            else:
+                return 'close_short'
+        
+        if row['high'] >= row['top_buff'] and not nearest_long:
+            if can_short:
+                return 'open_short'
+            else:
+                return 'close_long'
+        
         if self.use_stop:
             if not can_short:
                 return 'close_short'
             if not can_long:
                 return 'close_long'
+        
+        return None
 
 class LEG2_MONSTER(BaseEG):
     """stop=None, take=None, period=20, threshold=30, period2=10, shift=2, period_adx=30"""
@@ -288,6 +299,7 @@ class LEG2_MONSTER(BaseEG):
         self.period2 = period2
         self.shift = shift
         self.period_adx = period_adx
+        self.type_eg = 1
 
     def preprocessing(self, tdata):
         pdata = {}
@@ -301,8 +313,7 @@ class LEG2_MONSTER(BaseEG):
         pdata['chart'] = df
         return pdata
     
-    def get_raw_action(self, pdata):
-        row = self.get_test_row(pdata['chart'])
+    def _get_action_from_row(self, row):
         if self.threshold < row['adx'] > row['sma_adx']:
             if row['high'] == row['max_hb']:
                 return 'open_long'
@@ -312,6 +323,7 @@ class LEG2_MONSTER(BaseEG):
                 return 'close_long'
             if row['close'] > row['stop_short']:
                 return 'close_short'
+        
         return 'close_all'
 
 class LEG2_DRG(BaseEG):
@@ -340,35 +352,35 @@ class LEG2_DRG(BaseEG):
         pdata['chart'] = df
         return pdata
     
-    def get_raw_action(self, pdata):
-        row = self.get_test_row(pdata['chart'])
+    def _get_action_from_row(self, row):
         can_long = row['close'] > row['bbd']
         can_short = row['close'] < row['bbu']
-        nearest_long = row['high'] - row['close'] > row['close'] - row['low'] 
-        if can_long:
-            if can_short:
-                if row['low'] <= row['min_hb']:
-                    if nearest_long:
-                        if can_long and row['rsi'] < self.threshold_enter:
-                            return 'open_long'
-                    if row['rsi'] < self.threshold_exit:
-                        return 'close_short'
-            else:
-                if row['close'] <= row['avarege']:
+        nearest_long = row['high'] - row['close'] > row['close'] - row['low']
+        
+        if can_long and can_short:
+            if row['low'] <= row['min_hb'] and nearest_long:
+                if can_long and row['rsi'] < self.threshold_enter:
                     return 'open_long'
-        if can_short:
-            if can_long:
-                if row['high'] >= row['max_hb']:
-                    if not nearest_long:
-                        if can_short and row['rsi'] > 100 - self.threshold_enter:
-                            return 'open_short'
-                        if row['rsi'] > 100 - self.threshold_exit:
-                            return 'close_long'
-            else:
-                if row['close'] >= row['avarege']:
+                if row['rsi'] < self.threshold_exit:
+                    return 'close_short'
+        elif can_long and not can_short:
+            if row['close'] <= row['avarege']:
+                return 'open_long'
+        
+        if can_short and can_long:
+            if row['high'] >= row['max_hb'] and not nearest_long:
+                if can_short and row['rsi'] > 100 - self.threshold_enter:
                     return 'open_short'
+                if row['rsi'] > 100 - self.threshold_exit:
+                    return 'close_long'
+        elif can_short and not can_long:
+            if row['close'] >= row['avarege']:
+                return 'open_short'
+        
         if self.use_stop:
             if not can_short:
                 return 'close_short'
             if not can_long:
                 return 'close_long'
+        
+        return None

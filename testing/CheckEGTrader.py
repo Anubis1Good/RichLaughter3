@@ -40,7 +40,6 @@ class CheckEGTrader:
             self.df = simple_load_df(path_df)
         else:
             self.df = df.copy()
-        self.reload_data()
         self.price_step = get_price_step(self.df)
         self.mean_price = self.df['close'].mean()
         self.price_step_per = (self.price_step / self.mean_price)*100
@@ -61,6 +60,7 @@ class CheckEGTrader:
         self.use_tqdm = use_tqdm
         self.df = self.add_time_features(self.df)
         self.days = self.df['ms'].dt.date.nunique()
+        self.reload_data()
 
 
     def reload_data(self):
@@ -88,6 +88,10 @@ class CheckEGTrader:
         self.cur_eq = None
         self.tdata = {}
         self.tdata['chart'] = self.df.copy()
+        self.ws.amount_sl = 0
+        self.ws.amount_tp = 0
+        self.ws.can_long = True
+        self.ws.can_short = True
 
     def get_iterator(self,data):
         if self.use_tqdm:
@@ -245,6 +249,63 @@ class CheckEGTrader:
             self.work_action(signal, price, row_name)
             self.update_step_data(price)
 
+    @duration_time
+    def check_strategy_faster(self, history_bars=100):
+        """
+        Быстрый тест для оптимизации.
+        """
+        self.reload_data()
+        
+        # Подготавливаем данные через preprocessing
+        pdata = self.ws.preprocessing(self.tdata)
+        df = pdata['chart']
+        
+        # Очищаем кеш стратегии
+        if hasattr(self.ws, 'clear_cache'):
+            self.ws.clear_cache()
+        
+        self.sync_step_data(df)
+        
+        if self.close_on_time:
+            mask = (df['hour'] >= df['weekday'].map(lambda wd: self.close_map[wd][0])) & \
+                (df['minute'] >= df['weekday'].map(lambda wd: self.close_map[wd][1]))
+            mask_values = mask.values
+        else:
+            mask_values = None
+        
+        prices = df['close'].values
+        row_names = df['x'].values
+        
+        for i in self.get_iterator(range(len(df))):
+            price = prices[i]
+            row_name = row_names[i]
+            
+            if self.close_on_time and mask_values[i]:
+                signal = self.actions_dict['close_all']
+            else:
+                
+                pos = self.trade_data['pos']
+                open_price = self.trade_data['open_price']
+                
+                delta = None
+                if pos != 0 and open_price != 0:
+                    if pos > 0:
+                        delta = (price - open_price) // self.price_step
+                    else:
+                        delta = (open_price - price) // self.price_step
+                
+                # БЫСТРЫЙ РЕЖИМ: передаем индексы, а не копию
+                fast_pdata = {
+                    'chart': df,
+                    'idx': i,  # текущий индекс
+                    'fast_mode': True
+                }
+                
+                action = self.ws(fast_pdata, pos, delta)
+                signal = self.actions_dict.get(action, 0)
+            
+            self.work_action(signal, price, row_name)
+            self.update_step_data(price)
     @duration_time
     def check_strategy_window(self, window=60, normalization=True):
         """

@@ -21,12 +21,13 @@ class UEG2_GGD(BaseEG):
         pdata['chart'] = df
         return pdata
     
-    def get_raw_action(self, pdata):
-        row = self.get_test_row(pdata['chart'])
+    def _get_action_from_row(self, row):
         if row['close'] >= row['ave_up']:
             return 'open_short'
         if row['close'] <= row['ave_down']:
             return 'open_long'
+        
+        return None
 
 class UEG2_GOOSE(BaseEG):
     """stop=None, take=None, period=20, n_candles=5, n_fractals=3"""
@@ -46,12 +47,13 @@ class UEG2_GOOSE(BaseEG):
         pdata['chart'] = df
         return pdata
     
-    def get_raw_action(self, pdata):
-        row = self.get_test_row(pdata['chart'])
+    def _get_action_from_row(self, row):
         if row['close'] >= row['pdf_up']:
             return 'open_short'
         if row['close'] <= row['pdf_down']:
             return 'open_long'
+        
+        return None
         
 class UEG2_DUCK(BaseEG):
     """stop=None, take=None, period=20, n_candles=5, n_fractals=3"""
@@ -71,12 +73,13 @@ class UEG2_DUCK(BaseEG):
         pdata['chart'] = df
         return pdata
     
-    def get_raw_action(self, pdata):
-        row = self.get_test_row(pdata['chart'])
+    def _get_action_from_row(self, row):
         if row['close'] >= row['pdf_up']:
             return 'open_short'
         if row['close'] <= row['pdf_down']:
             return 'open_long'
+        
+        return None
         
 class UEG3_ZEUS(BaseEG):
     """stop=None, take=None, period=20, n_std=5, method='std'|'mean'"""
@@ -95,13 +98,13 @@ class UEG3_ZEUS(BaseEG):
         pdata['chart'] = df
         return pdata
     
-    def get_raw_action(self, pdata):
-        row = self.get_test_row(pdata['chart'])
-        if row['zigzag_direction']:
-            if row['zigzag_direction'] == -1:
-                return 'open_short'
-            if row['zigzag_direction'] == 1:
-                return 'open_long'
+    def _get_action_from_row(self, row):
+        if row['zigzag_direction'] == -1:
+            return 'open_short'
+        if row['zigzag_direction'] == 1:
+            return 'open_long'
+        
+        return None
             
 class UEG3_REVAN(BaseEG):
     """stop=None, take=None, period=60, n_std=5"""
@@ -119,12 +122,12 @@ class UEG3_REVAN(BaseEG):
         pdata['chart'] = df
         return pdata
     
-    def get_raw_action(self, pdata):
-        row = self.get_test_row(pdata['chart'])
+    def _get_action_from_row(self, row):
         if row['zigzag_direction'] == -1:
             return 'open_long'
         if row['zigzag_direction'] == 1:
             return 'open_short'
+        
         return None
     
 class UEG4_FALCON(BaseEG):
@@ -148,13 +151,14 @@ class UEG4_FALCON(BaseEG):
         pdata['chart'] = df
         return pdata
     
-    def get_raw_action(self, pdata):
-        row = self.get_test_row(pdata['chart'])
+    def _get_action_from_row(self, row):
         if row['allowance']:
             if row['close'] >= row['pdf_up']:
                 return 'open_short'
             if row['close'] <= row['pdf_down']:
                 return 'open_long'
+        
+        return None
 
 class UEG4_PELICAN(BaseEG):
     """stop=None, take=None, period=20, n_candles=5, n_fractals=3, allowance=0.1"""
@@ -177,13 +181,14 @@ class UEG4_PELICAN(BaseEG):
         pdata['chart'] = df
         return pdata
     
-    def get_raw_action(self, pdata):
-        row = self.get_test_row(pdata['chart'])
+    def _get_action_from_row(self, row):
         if row['allowance']:
             if row['close'] >= row['pdf_up']:
                 return 'open_short'
             if row['close'] <= row['pdf_down']:
                 return 'open_long'
+        
+        return None
             
 class UEG5_HAWK(BaseEG):
     """stop=None, take=None, period=100, n_candles=5, n_fractals=3, period_rsi=20, type_treshold=0, period_mean=5, n_std=1.5, period_sma=3, threshold_trend=0.5, allowance=0.1, use_stop=0"""
@@ -228,8 +233,7 @@ class UEG5_HAWK(BaseEG):
         pdata['chart'] = df
         return pdata
     
-    def get_raw_action(self, pdata):
-        row = self.get_test_row(pdata['chart'])
+    def _get_action_from_row(self, row):
         if row['allowance']:
             if row['low'] <= row['pdf_down'] and row['oversold']:
                 if row['trend_sma'] >= -self.threshold_trend:
@@ -241,11 +245,14 @@ class UEG5_HAWK(BaseEG):
                     return 'open_short'
                 else:
                     return 'close_long'
+        
         if self.use_stop:
             if row['trend_sma'] < -0.8:
                 return 'close_long'
             if row['trend_sma'] > 0.8:
                 return 'close_short'
+        
+        return None
             
 class UEG6_DODO(BaseEG):
     """stop=None, take=None, period=20, period_smas=2, adx_threshold=30, adx_stop=35
@@ -271,15 +278,17 @@ class UEG6_DODO(BaseEG):
         pdata['chart'] = df
         return pdata
     
-    def get_raw_action(self, pdata):
-        row = self.get_test_row(pdata['chart'])
+    def _get_action_from_row(self, row):
         if row['adx'] > self.adx_stop:
             return 'close_all'
+        
         if row['adx'] < self.adx_threshold:
             if row['close'] >= row['high_sma']:
                 return 'open_short'
             if row['close'] <= row['low_sma']:
                 return 'open_long'
+        
+        return None
 
 class UEG6_DUELDODO(BaseEG):
     """stop=None, take=None, period=20, period_smas=2, adx_threshold=30, period_sma=20, use_stop=0
@@ -306,8 +315,7 @@ class UEG6_DUELDODO(BaseEG):
         pdata['chart'] = df
         return pdata
     
-    def get_raw_action(self, pdata):
-        row = self.get_test_row(pdata['chart'])
+    def _get_action_from_row(self, row):
         if row['adx'] < self.adx_threshold:
             if row['close'] >= row['high_sma']:
                 return 'open_short'
@@ -328,6 +336,8 @@ class UEG6_DUELDODO(BaseEG):
                     if self.use_stop:
                         return 'close_all'
                     return 'close_short'
+        
+        return None
 
 class UEG6_VULTURE(BaseEG):
     """stop=None, take=None, period=20, period_smas=2, adx_threshold=30, period_sma=20, n_candles=5, n_fractals=3, allowance=0.1
@@ -360,8 +370,7 @@ class UEG6_VULTURE(BaseEG):
         pdata['chart'] = df
         return pdata
     
-    def get_raw_action(self, pdata):
-        row = self.get_test_row(pdata['chart'])
+    def _get_action_from_row(self, row):
         if row['adx'] < self.adx_threshold:
             if row['close'] >= row['high_sma']:
                 return 'open_short'
@@ -379,6 +388,8 @@ class UEG6_VULTURE(BaseEG):
                         return 'open_short'
                     if row['close'] <= row['pdf_down']:
                         return 'close_all'
+        
+        return None
 
 class UEG6_PIGEON(BaseEG):
     """stop=None, take=None, period=60, period_smas=2, period_sma=20, n_candles=5, n_fractals=3, allowance=0.1, mult_bb=1, use_stop=0
@@ -411,8 +422,7 @@ class UEG6_PIGEON(BaseEG):
         pdata['chart'] = df
         return pdata
     
-    def get_raw_action(self, pdata):
-        row = self.get_test_row(pdata['chart'])
+    def _get_action_from_row(self, row):
         if row['high'] < row['bbu'] and row['low'] > row['bbd']:
             if row['close'] >= row['high_sma']:
                 return 'open_short'
@@ -434,6 +444,8 @@ class UEG6_PIGEON(BaseEG):
                         return 'close_short'
                     if self.use_stop:
                         return 'close_long'
+        
+        return None
 
 class UEG6_ADVENTURE(BaseEG):
     """stop=None, take=None, period=60, period_smas=2, period_sma=20, mult_bb=1, use_stop=0
@@ -459,8 +471,7 @@ class UEG6_ADVENTURE(BaseEG):
         pdata['chart'] = df
         return pdata
     
-    def get_raw_action(self, pdata):
-        row = self.get_test_row(pdata['chart'])
+    def _get_action_from_row(self, row):
         if row['high'] < row['bbu'] and row['low'] > row['bbd']:
             if row['close'] >= row['high_sma']:
                 return 'open_short'
@@ -481,6 +492,8 @@ class UEG6_ADVENTURE(BaseEG):
                     return 'close_short'
                 if self.use_stop:
                     return 'close_long'
+        
+        return None
                 
 class UEG6_SHERIFF(BaseEG):
     """stop=None, take=None, period=60, period_smas=2, mult_bb=2
@@ -504,8 +517,7 @@ class UEG6_SHERIFF(BaseEG):
         pdata['chart'] = df
         return pdata
     
-    def get_raw_action(self, pdata):
-        row = self.get_test_row(pdata['chart'])
+    def _get_action_from_row(self, row):
         if row['high'] < row['bbu'] and row['low'] > row['bbd']:
             if row['close'] >= row['high_sma']:
                 return 'open_short'
@@ -516,6 +528,8 @@ class UEG6_SHERIFF(BaseEG):
                 return 'open_long'
             if row['high'] < row['bbd']:  # short
                 return 'open_short'
+        
+        return None
             
 class UEG7_DODO(BaseEG):
     """stop=None, take=None, period=20, n_candles=5, n_fractals=3, adx_threshold=30, adx_stop=35
@@ -541,15 +555,17 @@ class UEG7_DODO(BaseEG):
         pdata['chart'] = df
         return pdata
     
-    def get_raw_action(self, pdata):
-        row = self.get_test_row(pdata['chart'])
+    def _get_action_from_row(self, row):
         if row['adx'] > self.adx_stop:
             return 'close_all'
+        
         if row['adx'] < self.adx_threshold:
             if row['close'] >= row['ave_up']:
                 return 'open_short'
             if row['close'] <= row['ave_down']:
                 return 'open_long'
+        
+        return None
             
 class UEG7_DUELDODO(BaseEG):
     """stop=None, take=None, period=20, n_candles=5, n_fractals=3, adx_threshold=30, period_sma=20, use_stop=0
@@ -576,8 +592,7 @@ class UEG7_DUELDODO(BaseEG):
         pdata['chart'] = df
         return pdata
     
-    def get_raw_action(self, pdata):
-        row = self.get_test_row(pdata['chart'])
+    def _get_action_from_row(self, row):
         if row['adx'] < self.adx_threshold:
             if row['close'] >= row['ave_up']:
                 return 'open_short'
@@ -598,6 +613,8 @@ class UEG7_DUELDODO(BaseEG):
                     if self.use_stop:
                         return 'close_all'
                     return 'close_short'
+        
+        return None
 
 class UEG7_VULTURE(BaseEG):
     """stop=None, take=None, period=20, adx_threshold=30, period_sma=20, n_candles=7, n_fractals=5, n_candles2=5, n_fractals2=3, allowance=0.1
@@ -631,8 +648,7 @@ class UEG7_VULTURE(BaseEG):
         pdata['chart'] = df
         return pdata
     
-    def get_raw_action(self, pdata):
-        row = self.get_test_row(pdata['chart'])
+    def _get_action_from_row(self, row):
         if row['adx'] < self.adx_threshold:
             if row['close'] >= row['ave_up']:
                 return 'open_short'
@@ -650,6 +666,8 @@ class UEG7_VULTURE(BaseEG):
                         return 'open_short'
                     if row['close'] <= row['pdf_down']:
                         return 'close_all'
+        
+        return None
 
 class UEG7_PIGEON(BaseEG):
     """stop=None, take=None, period=60, n_candles=10, n_fractals=6, n_candles2=5, n_fractals2=3, allowance=0.1, mult_bb=1, use_stop=0
@@ -682,8 +700,7 @@ class UEG7_PIGEON(BaseEG):
         pdata['chart'] = df
         return pdata
     
-    def get_raw_action(self, pdata):
-        row = self.get_test_row(pdata['chart'])
+    def _get_action_from_row(self, row):
         if row['high'] < row['bbu'] and row['low'] > row['bbd']:
             if row['close'] >= row['ave_up']:
                 return 'open_short'
@@ -705,6 +722,8 @@ class UEG7_PIGEON(BaseEG):
                         return 'close_short'
                     if self.use_stop:
                         return 'close_long'
+        
+        return None
                     
 class UEG7_ADVENTURE(BaseEG):
     """stop=None, take=None, period=60, n_candles=5, n_fractals=3, mult_bb=1, use_stop=0
@@ -729,8 +748,7 @@ class UEG7_ADVENTURE(BaseEG):
         pdata['chart'] = df
         return pdata
     
-    def get_raw_action(self, pdata):
-        row = self.get_test_row(pdata['chart'])
+    def _get_action_from_row(self, row):
         if row['high'] < row['bbu'] and row['low'] > row['bbd']:
             if row['close'] >= row['ave_up']:
                 return 'open_short'
@@ -751,6 +769,8 @@ class UEG7_ADVENTURE(BaseEG):
                     return 'close_short'
                 if self.use_stop:
                     return 'close_long'
+        
+        return None
 
 class UEG7_SHERIFF(BaseEG):
     """stop=None, take=None, period=60, n_candles=5, n_fractals=3, mult_bb=2
@@ -774,8 +794,7 @@ class UEG7_SHERIFF(BaseEG):
         pdata['chart'] = df
         return pdata
     
-    def get_raw_action(self, pdata):
-        row = self.get_test_row(pdata['chart'])
+    def _get_action_from_row(self, row):
         if row['high'] < row['bbu'] and row['low'] > row['bbd']:
             if row['close'] >= row['ave_up']:
                 return 'open_short'
@@ -786,6 +805,8 @@ class UEG7_SHERIFF(BaseEG):
                 return 'open_long'
             if row['high'] < row['bbd']:  # short
                 return 'open_short'
+        
+        return None
             
 class UEG8_AVENGER(BaseEG):
     '''
@@ -819,24 +840,29 @@ class UEG8_AVENGER(BaseEG):
         pdata['chart'] = df
         return pdata
     
-    def get_raw_action(self, pdata):
-        row = self.get_test_row(pdata['chart'])
+    def _get_action_from_row(self, row):
         can_long, can_short = None, None
+        
         if row['pattern18'] in ('bti', 'joc', 'top_range', 'double_top', 'weak_long', 'narrowing_down', 'spring', 'sos'):
             can_long = row['pbzp3'] >= row['close'] >= row['mbzp3']
             can_short = row['mbzp2'] <= row['close'] <= row['pbzp2']
+        
         if row['pattern18'] in ('btc', 'bui', 'bottom_range', 'double_bottom', 'weak_short', 'narrowing_up', 'upthrust', 'sow'):
             can_short = row['pbzp3'] >= row['close'] >= row['mbzp3']
             can_long = row['mbzp2'] <= row['close'] <= row['pbzp2']
+        
         if can_long:
             return 'open_long'
         if can_short:
             return 'open_short'
+        
         if self.use_stop:
             if row['close'] > row['ssl']:
                 return 'close_short'
             if row['close'] < row['lsl']:
                 return 'close_long'
+        
+        return None
 
 class UEG9_BIRDWATCHER(BaseEG):
     '''
@@ -864,8 +890,7 @@ class UEG9_BIRDWATCHER(BaseEG):
         pdata['chart'] = df
         return pdata
     
-    def get_raw_action(self, pdata):
-        row = self.get_test_row(pdata['chart'])
+    def _get_action_from_row(self, row):
         try:
             if row['top_stop'] > row['close'] >= row['top_pd']:
                 return 'open_short'
@@ -878,6 +903,8 @@ class UEG9_BIRDWATCHER(BaseEG):
                     return 'close_long'
         except:
             return None
+        
+        return None
 
 class UEG9_GRAVY(BaseEG):
     '''
@@ -904,8 +931,7 @@ class UEG9_GRAVY(BaseEG):
         pdata['chart'] = df
         return pdata
     
-    def get_raw_action(self, pdata):
-        row = self.get_test_row(pdata['chart'])
+    def _get_action_from_row(self, row):
         if row['top_stop'] > row['close'] >= row['top_mean']:
             return 'open_short'
         if row['bottom_stop'] < row['close'] <= row['bottom_mean']:
@@ -915,3 +941,5 @@ class UEG9_GRAVY(BaseEG):
                 return 'close_short'
             if row['close'] < row['bottom_stop']:
                 return 'close_long'
+        
+        return None

@@ -27,8 +27,7 @@ class SEG1_LITE(BaseEG):
         pdata['chart'] = df
         return pdata
     
-    def get_raw_action(self, pdata):
-        row = self.get_test_row(pdata['chart'])
+    def _get_action_from_row(self, row):
         if row['sdm'] >= self.slope:
             if row['high'] > row['bbu'] and row['is_big']:
                 return 'close_long'
@@ -43,8 +42,8 @@ class SEG1_LITE(BaseEG):
                 return 'close_short'
             if row['high'] > row['sma'] and row['sma2'] < row['sma']:
                 return 'open_short'
-        else:
-            pass
+        
+        return None
 
 class SEG2(BaseEG):
     """stop=None, take=None, period=100, n_stairs=3, period2=20"""
@@ -69,23 +68,27 @@ class SEG2(BaseEG):
         pdata['chart'] = df
         return pdata
     
-    def get_raw_action(self, pdata):
-        row = self.get_test_row(pdata['chart'])
+    def _get_action_from_row(self, row):
         go_long = row['close'] > row['stair']
+        
         if go_long and row['dynamic_sma'] < -0.00001:
             return 'close_long'
         if not go_long and row['dynamic_sma'] > 0.00001:
             return 'close_short'
-        if row['high'] > row['bbu']:
-            if row['is_big'] or row['over_bbu'] or row['rsi'] > 85:
-                return 'close_long'
-        if row['low'] < row['bbd']:
-            if row['is_big'] or row['over_bbd'] or row['rsi'] < 15:
-                return 'close_short'
+        
+        if row['high'] > row['bbu'] and (row['is_big'] or row['over_bbu'] or row['rsi'] > 85):
+            return 'close_long'
+        
+        if row['low'] < row['bbd'] and (row['is_big'] or row['over_bbd'] or row['rsi'] < 15):
+            return 'close_short'
+        
         if row['low'] < row['sma'] and go_long and row['dynamic_sma'] > 0:
             return 'open_long'
+        
         if row['high'] > row['sma'] and not go_long and row['dynamic_sma'] < 0:
             return 'open_short'
+        
+        return None
         
 class SEG2_FAST(BaseEG):
     """stop=None, take=None, period=100, n_stairs=3, trend_period=20, adx_threshold=25"""
@@ -110,20 +113,22 @@ class SEG2_FAST(BaseEG):
         pdata['chart'] = df
         return pdata
     
-    def get_raw_action(self, pdata):
-        row = self.get_test_row(pdata['chart'])
+    def _get_action_from_row(self, row):
         go_long = row['close'] > row['stair']
+        
         if row['adx'] > self.adx_threshold:
             if row['low'] < row['ema'] and go_long:
                 return 'open_long'
             if row['high'] > row['ema'] and not go_long:
                 return 'open_short'
+        
         if go_long:
             if row['bbu_detach']:
                 return 'close_long'
         else:
             if row['bbd_detach']:
                 return 'close_short'
+        
         return None
 
 class SEG2_ULTRA(BaseEG):
@@ -153,30 +158,32 @@ class SEG2_ULTRA(BaseEG):
         pdata['chart'] = df
         return pdata
     
-    def get_raw_action(self, pdata):
-        row = self.get_test_row(pdata['chart'])
+    def _get_action_from_row(self, row):
         go_long = row['close'] > row['stair']
+        
         if go_long and row['dynamic_sma'] < -0.00001:
             return 'close_long'
         if not go_long and row['dynamic_sma'] > 0.00001:
             return 'close_short'
-        if row['high'] > row['bbu']:
-            if row['is_big'] or row['over_bbu'] or row['rsi'] > 90:
-                return 'close_long'
-        if row['low'] < row['bbd']:
-            if row['is_big'] or row['over_bbd'] or row['rsi'] < 10:
-                return 'close_short'
-        if go_long:
-            if row['bbu_detach']:
-                return 'close_long'
-        else:
-            if row['bbd_detach']:
-                return 'close_short'
+        
+        if row['high'] > row['bbu'] and (row['is_big'] or row['over_bbu'] or row['rsi'] > 90):
+            return 'close_long'
+        
+        if row['low'] < row['bbd'] and (row['is_big'] or row['over_bbd'] or row['rsi'] < 10):
+            return 'close_short'
+        
+        if go_long and row['bbu_detach']:
+            return 'close_long'
+        if not go_long and row['bbd_detach']:
+            return 'close_short'
+        
         if row['adx'] > self.adx_threshold:
             if row['low'] < row['sma'] and go_long and row['dynamic_sma'] > 0:
                 return 'open_long'
             if row['high'] > row['sma'] and not go_long and row['dynamic_sma'] < 0:
                 return 'open_short'
+        
+        return None
 
 class SEG3_FORCE(BaseEG):
     """stop=None, take=None, period=60, divider_percent=5, mult_bb=2, mult_bv=3, period_adx=30, threshold=30, period_sma=30"""
@@ -206,17 +213,19 @@ class SEG3_FORCE(BaseEG):
         pdata['chart'] = df
         return pdata
     
-    def get_raw_action(self, pdata):
-        row = self.get_test_row(pdata['chart'])
+    def _get_action_from_row(self, row):
         go_long = row['zigzag_direction'] == 1
-        if row['high'] > row['bbu']:
-            if row['is_big'] or row['over_bbu']:
-                return 'close_long'
-        if row['low'] < row['bbd']:
-            if row['is_big'] or row['over_bbd']:
-                return 'close_short'
+        
+        if row['high'] > row['bbu'] and (row['is_big'] or row['over_bbu']):
+            return 'close_long'
+        
+        if row['low'] < row['bbd'] and (row['is_big'] or row['over_bbd']):
+            return 'close_short'
+        
         if row['adx'] > self.threshold:
             if row['low'] < row['ma'] and go_long:
                 return 'open_long'
             if row['high'] > row['ma'] and not go_long:
                 return 'open_short'
+        
+        return None

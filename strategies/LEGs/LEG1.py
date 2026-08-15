@@ -57,18 +57,22 @@ class LEG1_CC(BaseEG):
         pdata['chart'] = df
         return pdata
 
-    def get_raw_action(self, pdata):
-        row = self.get_test_row(pdata['chart'])
-        if row['oversold'] > self.solution:  
+    def _get_action_from_row(self, row):
+        if row['oversold'] > self.solution:
             return 'open_long'
-        if row['overbought'] > self.solution:  
+        
+        if row['overbought'] > self.solution:
             return 'open_short'
+        
         if self.use_ps:
             sol = self.solution // 2
-            if row['oversold'] > sol or row['overbought'] > sol:  
-                return None 
+            if row['oversold'] > sol or row['overbought'] > sol:
+                return None
+        
         if self.use_stop:
             return 'close_all'
+        
+        return None
         
 class LEG1_OKROSHKA(BaseEG):
     """stop=None, take=None, period=15, period_chop=10"""
@@ -89,8 +93,7 @@ class LEG1_OKROSHKA(BaseEG):
         pdata['chart'] = df
         return pdata
     
-    def get_raw_action(self, pdata):
-        row = self.get_test_row(pdata['chart'])
+    def _get_action_from_row(self, row):
         threshold = 30
         if 60 > row['chop'] > 45:
             threshold = 30
@@ -100,10 +103,13 @@ class LEG1_OKROSHKA(BaseEG):
             threshold = 20
         else:
             threshold = 10
-        if row['rsi'] < threshold:  
+        
+        if row['rsi'] < threshold:
             return 'open_long'
-        if row['rsi'] > 100 - threshold:  
+        if row['rsi'] > 100 - threshold:
             return 'open_short'
+        
+        return None
         
 class LEG1_PIN(BaseEG):
     """stop=None, take=None, period=15, period2=3, threshold=30, solution=5"""
@@ -130,45 +136,49 @@ class LEG1_PIN(BaseEG):
         pdata['chart'] = df
         return pdata
     
-    def get_raw_action(self, pdata):
-        row = self.get_test_row(pdata['chart'])
+    def _get_action_from_row(self, row):
         pins_solution = 0
-        if row['rsi'] < self.threshold:  
+        
+        if row['rsi'] < self.threshold:
             pins_solution += 1
-        if row['rsi_tw'] < self.threshold:  
+        if row['rsi_tw'] < self.threshold:
             pins_solution += 1
-        if row['williams_r'] < -100 + self.threshold:  
+        if row['williams_r'] < -100 + self.threshold:
             pins_solution += 1
-        if row['mfi'] < self.threshold:  
+        if row['mfi'] < self.threshold:
             pins_solution += 1
-        if row['ultimate_oscillator'] < self.threshold + 10:  
+        if row['ultimate_oscillator'] < self.threshold + 10:
             pins_solution += 1
-        if row['cmo'] < -100 + self.threshold + 10:  
+        if row['cmo'] < -100 + self.threshold + 10:
             pins_solution += 1
-        if row['cci'] < -200 + self.threshold:  
+        if row['cci'] < -200 + self.threshold:
             pins_solution += 1
-        if row['%k'] > row['%d'] < self.threshold:  
+        if row['%k'] > row['%d'] < self.threshold:
             pins_solution += 1
-        if row['rsi'] > 100 - self.threshold:  
+        
+        if row['rsi'] > 100 - self.threshold:
             pins_solution -= 1
-        if row['rsi_tw'] > 100 - self.threshold:  
+        if row['rsi_tw'] > 100 - self.threshold:
             pins_solution -= 1
-        if row['williams_r'] > 0 - self.threshold:  
+        if row['williams_r'] > 0 - self.threshold:
             pins_solution -= 1
-        if row['mfi'] > 100 - self.threshold:  
+        if row['mfi'] > 100 - self.threshold:
             pins_solution -= 1
-        if row['ultimate_oscillator'] > 100 - self.threshold - 10:  
+        if row['ultimate_oscillator'] > 100 - self.threshold - 10:
             pins_solution -= 1
-        if row['cmo'] > 100 - self.threshold - 10:  
+        if row['cmo'] > 100 - self.threshold - 10:
             pins_solution -= 1
-        if row['cci'] > 200 - self.threshold:  
+        if row['cci'] > 200 - self.threshold:
             pins_solution -= 1
-        if row['%k'] < row['%d'] > 100 - self.threshold:  
+        if row['%k'] < row['%d'] > 100 - self.threshold:
             pins_solution -= 1
+        
         if pins_solution > self.solution:
             return 'open_long'
         if pins_solution < -self.solution:
             return 'open_short'
+        
+        return None
         
 class LEG1_BIBI(BaseEG):
     """stop=None, take=None, period=15, period_fractal=10, period_mean=5, kind='rsi'
@@ -209,18 +219,19 @@ class LEG1_BIBI(BaseEG):
         pdata['chart'] = df
         return pdata
     
-    def get_raw_action(self, pdata):
-        row = self.get_test_row(pdata['chart'])
+    def _get_action_from_row(self, row):
         if row['top_mean'] > row['bottom_mean']:
-            if row['oversold']:  
+            if row['oversold']:
                 return 'open_long'
-            if row['overbought']:  
+            if row['overbought']:
                 return 'open_short'
         else:
             if row['oversold']:
                 return 'close_short'
             if row['overbought']:
                 return 'close_long'
+        
+        return None
 
 class LEG1_IGOGOSHA(BaseEG):
     """stop=None, take=None, period=15, period_fractal=10, period_mean=5, kind='rsi'
@@ -264,17 +275,19 @@ class LEG1_IGOGOSHA(BaseEG):
         pdata['chart'] = df
         return pdata
     
-    def get_raw_action(self, pdata):
-        row = self.get_test_row(pdata['chart'])
+    def _get_action_from_row(self, row):
         if row['top_ext'] > row['bottom_ext']:
-            if row['oversold2']:  
+            if row['oversold2']:
                 return 'open_long'
-            if row['overbought2']:  
+            if row['overbought2']:
                 return 'open_short'
+        
         if row['oversold1']:
             return 'close_short'
         if row['overbought1']:
             return 'close_long'
+        
+        return None
         
 class LEG1_IRONANNY(BaseEG):
     """stop=None, take=None, period=15, period_fractal=10, period_mean=5, solution=5"""
@@ -309,12 +322,13 @@ class LEG1_IRONANNY(BaseEG):
         pdata['chart'] = df
         return pdata
     
-    def get_raw_action(self, pdata):
-        row = self.get_test_row(pdata['chart'])
-        if row['oversold'] > self.solution:  
+    def _get_action_from_row(self, row):
+        if row['oversold'] > self.solution:
             return 'open_long'
-        if row['overbought'] > self.solution:  
+        if row['overbought'] > self.solution:
             return 'open_short'
+        
+        return None
         
 #хз что за супертренд, надо проверять, но нейронка высоко оценила стратегию
 class LEG1_PHOGA(BaseEG):
@@ -324,6 +338,7 @@ class LEG1_PHOGA(BaseEG):
         self.needs_info = {'chart': self.symbol}
         self.period = period
         self.multiplier = multiplier
+        self.type_eg = 1
 
     def preprocessing(self, tdata):
         pdata = {}
@@ -341,12 +356,13 @@ class LEG1_PHOGA(BaseEG):
         pdata['chart'] = df
         return pdata
     
-    def get_raw_action(self, pdata):
-        row = self.get_test_row(pdata['chart'])
+    def _get_action_from_row(self, row):
         if row['signal'] == 1:
             return 'open_long'
         if row['signal'] == -1:
             return 'open_short'
+        
+        return None
         
 class LEG1_BORSCH(BaseEG):
     """stop=None, take=None, period=20, momentum_period=14"""
@@ -356,6 +372,7 @@ class LEG1_BORSCH(BaseEG):
         self.period = period
         self.momentum_period = momentum_period
         self.lookback_period = period
+        self.type_eg = 1
 
     def preprocessing(self, tdata):
         pdata = {}
@@ -385,12 +402,13 @@ class LEG1_BORSCH(BaseEG):
         pdata['chart'] = df
         return pdata
     
-    def get_raw_action(self, pdata):
-        row = self.get_test_row(pdata['chart'])
+    def _get_action_from_row(self, row):
         if row['signal'] == 1:
             return 'open_long'
         if row['signal'] == -1:
             return 'open_short'
+        
+        return None
     
 class LEG1_PHOBO(BaseEG):
     """stop=None, take=None, period=10, multiplier=3"""
@@ -399,6 +417,7 @@ class LEG1_PHOBO(BaseEG):
         self.needs_info = {'chart': self.symbol}
         self.period = period
         self.multiplier = multiplier
+        self.type_eg = 1
 
     def preprocessing(self, tdata):
         pdata = {}
@@ -415,12 +434,13 @@ class LEG1_PHOBO(BaseEG):
         pdata['chart'] = df
         return pdata
     
-    def get_raw_action(self, pdata):
-        row = self.get_test_row(pdata['chart'])
+    def _get_action_from_row(self, row):
         if row['signal'] == 1:
             return 'open_long'
         if row['signal'] == -1:
             return 'open_short'
+        
+        return None
         
 class LEG1_LAKSAe(BaseEG):
     """stop=None, take=None, period=20, period2=5"""
@@ -447,9 +467,10 @@ class LEG1_LAKSAe(BaseEG):
         pdata['chart'] = df
         return pdata
     
-    def get_raw_action(self, pdata):
-        row = self.get_test_row(pdata['chart'])
+    def _get_action_from_row(self, row):
         if row['signal'] == 1:
             return 'open_long'
         if row['signal'] == -1:
             return 'open_short'
+        
+        return None
