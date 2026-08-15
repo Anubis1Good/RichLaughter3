@@ -30,9 +30,15 @@ class OptimizatorOptuna:
                  sl_min_pct: float = 0.1,
                  sl_max_pct: float = 1.0,
                  tp_min_pct: float = 0.1,
-                 tp_max_pct: float = 2.0
+                 tp_max_pct: float = 2.0,
+                 use_window_test: bool = False,  # <-- ДОБАВЬ
+                 window_size: int = 60,          # <-- ДОБАВЬ
+                 normalization: bool = True      # <-- ДОБАВЬ
                  ):
         
+        self.use_window_test = use_window_test
+        self.window_size = window_size
+        self.normalization = normalization
         self.test_folder = test_folder
         self.main_folder = main_folder
         self.fee = fee
@@ -178,7 +184,12 @@ class OptimizatorOptuna:
         
         trader.ws = strategy
         trader.reload_data()
-        trader.check_strategy_faster(history_bars=self.max_period)
+        if self.use_window_test:
+            # Оконный тест (честный, без заглядывания)
+            trader.check_strategy_window(window=self.window_size, normalization=self.normalization)
+        else:
+            # Быстрый тест (для оптимизации)
+            trader.check_strategy_faster(history_bars=self.max_period)
         
         trades, eq, eq_f, _, _, _ = trader.process_old_type_result()
         
