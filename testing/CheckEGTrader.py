@@ -32,8 +32,10 @@ class CheckEGTrader:
                  close_map:tuple|list=(
                      (22,30),(22,30),(22,30),(22,30),(22,30),(17,30),(17,30),),
                  measure_time:bool=False,
-                 use_tqdm:bool=False
+                 use_tqdm:bool=False,
+                 window:int=60
                  ):
+        self.window = window
         self.symbol = symbol
         if isinstance(df,str):
             path_df = df
@@ -204,7 +206,7 @@ class CheckEGTrader:
         # Подготавливаем данные через preprocessing
         pdata = self.ws.preprocessing(self.tdata)
         df = pdata['chart']
-
+        window = self.window - (len(self.df) - len(df))
         self.sync_step_data(df)
         
         if self.close_on_time:
@@ -220,6 +222,9 @@ class CheckEGTrader:
 
         for i in self.get_iterator(range(len(df))):
             price = prices[i]
+            if i < window:
+                self.update_step_data(price)
+                continue
             row_name = row_names[i]
             
             # Проверка времени закрытия
@@ -260,7 +265,7 @@ class CheckEGTrader:
         # Подготавливаем данные через preprocessing
         pdata = self.ws.preprocessing(self.tdata)
         df = pdata['chart']
-        
+        window = self.window - (len(self.df) - len(df))
         self.sync_step_data(df)
         
         if self.close_on_time:
@@ -275,6 +280,9 @@ class CheckEGTrader:
         
         for i in self.get_iterator(range(len(df))):
             price = prices[i]
+            if i < window:
+                self.update_step_data(price)
+                continue
             row_name = row_names[i]
             
             if self.close_on_time and mask_values[i]:
@@ -304,7 +312,7 @@ class CheckEGTrader:
             self.work_action(signal, price, row_name)
             self.update_step_data(price)
     @duration_time
-    def check_strategy_window(self, window=60, normalization=True):
+    def check_strategy_window(self, normalization=True):
         """
         Честный оконный тест для проверки стратегии.
         Индикаторы пересчитываются на каждом окне независимо.
@@ -314,12 +322,12 @@ class CheckEGTrader:
         
         for i in self.get_iterator(range(len(self.df))):
             # Пропускаем первые window баров (нужно для расчета индикаторов)
-            if i < window:
+            if i < self.window:
                 self.update_step_data(self.df.iloc[i]['close'])
                 continue
             
             # Берем срез окна
-            df_slice = self.df.iloc[i-window:i+1].copy()
+            df_slice = self.df.iloc[i-self.window:i+1].copy()
             price = df_slice.iloc[-1]['close']
             row_name = df_slice.iloc[-1]['x']
             

@@ -21,7 +21,7 @@ class SEGML2_NEWAVE(BaseEG):
         df = tdata['chart']
         df = add_segmented_regression_from_end(df, self.period, self.multiplier, self.min_points)
         df = add_rsi(df, self.period)
-        df = self.add_slice_df(df, self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -52,7 +52,7 @@ class SEGML2_SID(BaseEG):
         df = tdata['chart']
         df = add_rsi(df, self.window)
         df = add_find_similar_pattern_lite(df, self.window, self.period, forecast_length=self.forecast_length)
-        df = self.add_slice_df(df, period=self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
 
@@ -93,7 +93,7 @@ class SEGML2_TRENDWAVE(BaseEG):
         df = tdata['chart']
         df = add_segmented_regression_from_end(df, self.period, self.multiplier, self.min_points)
         df = add_rsi(df, self.period)
-        df = self.add_slice_df(df, self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
 
@@ -194,7 +194,7 @@ class SEGML2b_RAPTOR(BaseEG):
             self.get_model(X_train, y_train)
             df.loc[X_train.index, 'signal'] = self.model.predict(X_train)
 
-        df = self.add_slice_df(df, period=self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     def _get_action_from_row(self, row):

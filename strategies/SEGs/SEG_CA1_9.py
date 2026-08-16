@@ -25,7 +25,7 @@ class SEG1_LITE(BaseEG):
         sdm_period = max(3, self.period2 // 3)
         df = add_simple_dynamics_ma(df, sdm_period)
         max_period = max(self.period,self.period2)
-        df = self.add_slice_df(df, max_period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -66,7 +66,7 @@ class SEG2(BaseEG):
         df = add_rsi(df, self.period2)
         df['sma_delta'] = df['sma'].pct_change()
         df['dynamic_sma'] = df['sma_delta'].rolling(self.period2).mean()
-        df = self.add_slice_df(df, self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -111,7 +111,7 @@ class SEG2_FAST(BaseEG):
         df = add_adx(df, self.trend_period)
         df['bbu_detach'] = (df['high'] < df['bbu']) & (df['high'].shift(1) < df['bbu'].shift(1)) & (df['high'].shift(2) > df['bbu'].shift(2))
         df['bbd_detach'] = (df['low'] > df['bbd']) & (df['low'].shift(1) > df['bbd'].shift(1)) & (df['low'].shift(2) < df['bbd'].shift(2))
-        df = self.add_slice_df(df, self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -156,7 +156,7 @@ class SEG2_ULTRA(BaseEG):
         df['dynamic_sma'] = df['sma_delta'].rolling(self.period2).mean()
         df['bbu_detach'] = (df['high'] < df['bbu']) & (df['high'].shift(1) < df['bbu'].shift(1)) & (df['high'].shift(2) > df['bbu'].shift(2))
         df['bbd_detach'] = (df['low'] > df['bbd']) & (df['low'].shift(1) > df['bbd'].shift(1)) & (df['low'].shift(2) < df['bbd'].shift(2))
-        df = self.add_slice_df(df, self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -211,7 +211,7 @@ class SEG3_FORCE(BaseEG):
         df = add_over_bb(df)
         df = add_adx(df, self.period_adx)
         df['ma'] = df['close'].rolling(self.period_sma).mean()
-        df = self.add_slice_df(df, self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     

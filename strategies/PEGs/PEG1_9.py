@@ -15,7 +15,7 @@ class PEG2_DDCrWork(BaseEG):
         pdata = {}
         df = tdata['chart']
         df = add_donchan_channel(df,self.period)
-        df = self.add_slice_df(df,self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -42,7 +42,7 @@ class PEG2_SDDCr(BaseEG):
         df = tdata['chart']
         df = add_donchan_channel(df, self.period)
         df = add_smooth_channel(df, self.period2)
-        df = self.add_slice_df(df, period=self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -116,7 +116,7 @@ class PEG4_UNIVERSAL(BaseEG):
         df = tdata['chart']
         df = self.add_channel(df)
         df = self.add_rsi(df)
-        df = self.add_slice_df(df, period=self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -205,7 +205,7 @@ class PEG4_U3(BaseEG):
         df = add_mean_on_fractals(df, self.period_mean, 'rsi')
         df['oversold'] = df['rsi'] < df['bottom_mean']
         df['overbought'] = df['rsi'] > df['top_mean']
-        df = self.add_slice_df(df, period=self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -230,7 +230,7 @@ class PEG8_DOBBY(BaseEG):
         df = add_bollinger(df, self.period, multiplier=self.multiplier)
         df = add_over_bb(df)
         df = add_big_volume(df, self.period)
-        df = self.add_slice_df(df, period=self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -264,7 +264,7 @@ class PEG8_LOBSTER(BaseEG):
         df = add_bollinger(df, self.period, multiplier=self.multiplier)
         df = add_over_bb(df)
         df = add_big_volume(df, self.period)
-        df = self.add_slice_df(df, period=self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     

@@ -21,7 +21,7 @@ class VEG1_MERCURY(BaseEG):
         df = add_dzz_peaks(df, period=self.period, n_std=self.n_std, drop_last=False)
         df = add_pattern18_dzz_czd(df, self.threshold_dzz, self.buff)
         df = add_stop_loss_p18czd(df, self.divider)
-        df = self.add_slice_df(df, self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
 
@@ -133,7 +133,7 @@ class VEG1_VENUS(BaseEG):
         df = add_percent_zz_peaks(df, percent_threshold=self.percent_threshold)
         df = add_pattern18_dzz_czd(df, self.threshold_dzz, self.buff)
         df = add_stop_loss_p18czd(df, self.divider)
-        df = self.add_slice_df(df, self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
 

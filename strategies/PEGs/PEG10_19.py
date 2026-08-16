@@ -464,7 +464,7 @@ class PEG17_PHOENIX(BaseEG):
         df = add_velcro_indicator(df, self.period_velcro)
         df = add_rsi(df, self.period_rsi)
         df = add_quantile_params(df, self.period)
-        df = self.add_slice_df(df, period=self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -508,7 +508,7 @@ class PEG18_REXXAR(BaseEG):
         df = add_donchan_channel(df, self.period2)
         df = add_rsi(df, self.period2)
         df['stair_s'] = df['stair'].rolling(self.period2).mean()
-        df = self.add_slice_df(df, self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -555,7 +555,7 @@ class PEG18_UTER(BaseEG):
         df = add_rsi(df, self.period2)
         df = add_adx(df, self.period3)
         df['stair_s'] = df['stair'].rolling(self.period2).mean()
-        df = self.add_slice_df(df, self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -606,7 +606,7 @@ class PEG18_DIABLO(BaseEG):
         df = add_donchan_channel(df, self.period2)
         df = add_rsi(df, self.period2)
         df['stair_s'] = df['stair'].rolling(self.period2).mean()
-        df = self.add_slice_df(df, self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -650,7 +650,7 @@ class PEG18_VARIAN(BaseEG):
         df = add_rsi(df, self.period2)
         df = add_integrity_index(df, self.period2 * 2)
         df['stair_s'] = df['stair'].rolling(self.period2).mean()
-        df = self.add_slice_df(df, self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -699,7 +699,7 @@ class PEG18_BLAZE(BaseEG):
         df = add_donchan_channel(df, self.period2)
         df = add_assessment_motion_index(df, self.period, self.period3)
         df = add_rsi(df, self.period2)
-        df = self.add_slice_df(df, self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -746,7 +746,7 @@ class PEG19_YREL(BaseEG):
         df = add_hope_channel(df, self.n_stairs, self.period2, self.shift)
         df = add_donchan_channel(df, self.period2)
         df = add_rsi(df, self.period2)
-        df = self.add_slice_df(df, self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -797,7 +797,7 @@ class PEG19_VALEERA(BaseEG):
         df = add_rsi(df, self.period2)
         df['end_up'] = np.where((df['high'].shift(1) >= df['max_hb'].shift(1)) & (df['close'] < df['max_vg']), df['high'], np.nan)
         df['end_down'] = np.where((df['low'].shift(1) <= df['min_hb'].shift(1)) & (df['close'] > df['min_vg']), df['low'], np.nan)
-        df = self.add_slice_df(df, self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -851,7 +851,7 @@ class PEG19_ZERATUL(BaseEG):
         df = add_rsi(df, self.period2)
         df['end_up'] = np.where((df['high'].shift(1) >= df['max_hb'].shift(1)) & (df['close'] < df['max_vg']), df['high'], np.nan)
         df['end_down'] = np.where((df['low'].shift(1) <= df['min_hb'].shift(1)) & (df['close'] > df['min_vg']), df['low'], np.nan)
-        df = self.add_slice_df(df, self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -903,7 +903,7 @@ class PEG19_CASSIA(BaseEG):
         df = add_cascade_channel(df, self.n_stairs, self.period2, self.period3)
         df = add_donchan_channel(df, self.period2)
         df = add_rsi(df, self.period2)
-        df = self.add_slice_df(df, self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -955,7 +955,7 @@ class PEG19_IMPERIUS(BaseEG):
         df = add_cascade_channel(df, self.n_stairs, self.period2, self.period3)
         df = add_donchan_channel(df, self.period2)
         df = add_rsi(df, self.period2)
-        df = self.add_slice_df(df, self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     

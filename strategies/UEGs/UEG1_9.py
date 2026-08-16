@@ -17,7 +17,7 @@ class UEG2_GGD(BaseEG):
         df = tdata['chart']
         df = add_fractals(df, self.n_candles)
         df = add_average_fractals(df, self.n_fractals)
-        df = self.add_slice_df(df, self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -43,7 +43,7 @@ class UEG2_GOOSE(BaseEG):
         df = tdata['chart']
         df = add_fractals(df, self.n_candles)
         df = add_exp_pdfc(df, self.n_fractals)
-        df = self.add_slice_df(df, self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -69,7 +69,7 @@ class UEG2_DUCK(BaseEG):
         df = tdata['chart']
         df = add_fractals(df, self.n_candles)
         df = add_plus_delta_fc(df, self.n_fractals)
-        df = self.add_slice_df(df, self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -94,7 +94,7 @@ class UEG3_ZEUS(BaseEG):
         pdata = {}
         df = tdata['chart']
         df = add_dynamic_zigzag(df, n_std=self.n_std, method=self.method, period=self.period)
-        df = self.add_slice_df(df, self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -118,7 +118,7 @@ class UEG3_REVAN(BaseEG):
         pdata = {}
         df = tdata['chart']
         df = add_dzz_peaks(df, n_std=self.n_std, period=self.period)
-        df = self.add_slice_df(df, period=self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -147,7 +147,7 @@ class UEG4_FALCON(BaseEG):
         df = add_plus_delta_fc(df, self.n_fractals)
         df['pdf_diff_percent'] = ((df['pdf_up'] - df['pdf_down']) / df['pdf_down']) * 100
         df['allowance'] = df['pdf_diff_percent'] > self.allowance
-        df = self.add_slice_df(df, self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -177,7 +177,7 @@ class UEG4_PELICAN(BaseEG):
         df = add_exp_pdfc(df, self.n_fractals)
         df['pdf_diff_percent'] = ((df['pdf_up'] - df['pdf_down']) / df['pdf_down']) * 100
         df['allowance'] = df['pdf_diff_percent'] > self.allowance
-        df = self.add_slice_df(df, self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -229,7 +229,7 @@ class UEG5_HAWK(BaseEG):
         df = self.add_threshold(df)
         df = add_dzz_peaks(df, n_std=self.n_std)
         df = add_analys_dzz(df, self.period_sma)
-        df = self.add_slice_df(df, period=self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -274,7 +274,7 @@ class UEG6_DODO(BaseEG):
         df = add_adx(df, self.period)
         df['high_sma'] = df['high'].rolling(self.period_smas).mean()
         df['low_sma'] = df['low'].rolling(self.period_smas).mean()
-        df = self.add_slice_df(df, self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -311,7 +311,7 @@ class UEG6_DUELDODO(BaseEG):
         df['sma'] = df['close'].rolling(self.period).mean()
         df['high_sma'] = df['high'].rolling(self.period_smas).mean()
         df['low_sma'] = df['low'].rolling(self.period_smas).mean()
-        df = self.add_slice_df(df, self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -366,7 +366,7 @@ class UEG6_VULTURE(BaseEG):
         df = add_exp_pdfc(df, self.n_fractals)
         df['pdf_diff_percent'] = ((df['pdf_up'] - df['pdf_down']) / df['pdf_down']) * 100
         df['allowance'] = df['pdf_diff_percent'] > self.allowance
-        df = self.add_slice_df(df, self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -418,7 +418,7 @@ class UEG6_PIGEON(BaseEG):
         df = add_exp_pdfc(df, self.n_fractals)
         df['pdf_diff_percent'] = ((df['pdf_up'] - df['pdf_down']) / df['pdf_down']) * 100
         df['allowance'] = df['pdf_diff_percent'] > self.allowance
-        df = self.add_slice_df(df, self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -467,7 +467,7 @@ class UEG6_ADVENTURE(BaseEG):
         df = add_bollinger(df, self.period, multiplier=self.mult_bb)
         df['high_sma'] = df['high'].rolling(self.period_smas).mean()
         df['low_sma'] = df['low'].rolling(self.period_smas).mean()
-        df = self.add_slice_df(df, self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -513,7 +513,7 @@ class UEG6_SHERIFF(BaseEG):
         df = add_bollinger(df, self.period, multiplier=self.mult_bb)
         df['high_sma'] = df['high'].rolling(self.period_smas).mean()
         df['low_sma'] = df['low'].rolling(self.period_smas).mean()
-        df = self.add_slice_df(df, self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -551,7 +551,7 @@ class UEG7_DODO(BaseEG):
         df = add_adx(df, self.period)
         df = add_fractals(df, self.n_candles)
         df = add_average_fractals(df, self.n_fractals)
-        df = self.add_slice_df(df, self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -588,7 +588,7 @@ class UEG7_DUELDODO(BaseEG):
         df['sma'] = df['close'].rolling(self.period).mean()
         df = add_fractals(df, self.n_candles)
         df = add_average_fractals(df, self.n_fractals)
-        df = self.add_slice_df(df, self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -644,7 +644,7 @@ class UEG7_VULTURE(BaseEG):
         df = add_exp_pdfc(df, self.n_fractals2)
         df['pdf_diff_percent'] = ((df['pdf_up'] - df['pdf_down']) / df['pdf_down']) * 100
         df['allowance'] = df['pdf_diff_percent'] > self.allowance
-        df = self.add_slice_df(df, self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -696,7 +696,7 @@ class UEG7_PIGEON(BaseEG):
         df = add_exp_pdfc(df, self.n_fractals2)
         df['pdf_diff_percent'] = ((df['pdf_up'] - df['pdf_down']) / df['pdf_down']) * 100
         df['allowance'] = df['pdf_diff_percent'] > self.allowance
-        df = self.add_slice_df(df, self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -744,7 +744,7 @@ class UEG7_ADVENTURE(BaseEG):
         df = add_bollinger(df, self.period, multiplier=self.mult_bb)
         df = add_fractals(df, self.n_candles)
         df = add_average_fractals(df, self.n_fractals)
-        df = self.add_slice_df(df, self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -790,7 +790,7 @@ class UEG7_SHERIFF(BaseEG):
         df = add_bollinger(df, self.period, multiplier=self.mult_bb)
         df = add_fractals(df, self.n_candles)
         df = add_average_fractals(df, self.n_fractals)
-        df = self.add_slice_df(df, self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -836,7 +836,7 @@ class UEG8_AVENGER(BaseEG):
         df['mbzp2'] = df['zp2'] - df['buffer']
         df['pbzp3'] = df['zp3'] + df['buffer']
         df['mbzp3'] = df['zp3'] - df['buffer']
-        df = self.add_slice_df(df, period=self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -886,7 +886,7 @@ class UEG9_BIRDWATCHER(BaseEG):
         df = self.plusdelta_func(df, self.period_pd, self.buffer_pd)
         df['top_stop'] = df['top_pd'] + df['delta_pd'] * self.mult_stop
         df['bottom_stop'] = df['bottom_pd'] - df['delta_pd'] * self.mult_stop
-        df = self.add_slice_df(df, period=self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -927,7 +927,7 @@ class UEG9_GRAVY(BaseEG):
         df = add_mean_dzz_peaks(df, self.period_mean, self.buffer_mean)
         df['top_stop'] = df['top_mean'] + df['delta_mean'] * self.mult_stop
         df['bottom_stop'] = df['bottom_mean'] - df['delta_mean'] * self.mult_stop
-        df = self.add_slice_df(df, period=self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     

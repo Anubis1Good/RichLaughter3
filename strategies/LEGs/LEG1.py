@@ -53,7 +53,7 @@ class LEG1_CC(BaseEG):
         df['oversold'] += df['rsi'] < df['bottom_mean']
         df['overbought'] += df['rsi'] > df['top_mean']
         
-        df = self.add_slice_df(df,self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
 
@@ -87,9 +87,7 @@ class LEG1_OKROSHKA(BaseEG):
         df = tdata['chart']
         df = add_rsi(df, self.period)
         df = add_chop(df, self.period_chop)
-        period = max(self.period, self.period_chop)
-        df = self.add_slice_df(df, period)
-        # df['signal'] = add_signal(df) # поиск какого-то сигнала
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -132,7 +130,7 @@ class LEG1_PIN(BaseEG):
         df = add_cmo(df, self.period)
         df = add_cci(df, self.period)
         df = add_stochastic(df, self.period, self.period2)
-        df = self.add_slice_df(df, self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -215,7 +213,7 @@ class LEG1_BIBI(BaseEG):
         df = add_mean_on_fractals(df, self.period_mean, self.kind)
         df['oversold'] = df[self.kind] < df['bottom_mean']
         df['overbought'] = df[self.kind] > df['top_mean']
-        df = self.add_slice_df(df, self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -271,7 +269,7 @@ class LEG1_IGOGOSHA(BaseEG):
         df['overbought1'] = df[self.kind] > df['top_mean']
         df['oversold2'] = df[self.kind] < df['bottom_ext']
         df['overbought2'] = df[self.kind] > df['top_ext']
-        df = self.add_slice_df(df, self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -318,7 +316,7 @@ class LEG1_IRONANNY(BaseEG):
             df = add_mean_on_fractals(df, self.period_mean, ind)
             df['oversold'] += df[ind] < df['bottom_mean']
             df['overbought'] += df[ind] > df['top_mean']
-        df = self.add_slice_df(df, self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -352,7 +350,7 @@ class LEG1_PHOGA(BaseEG):
                 df.loc[df.index[i], 'signal'] = 1  # Покупать
             elif not df['in_uptrend'].iloc[i] and df['in_uptrend'].iloc[i - 1] and df['volume'].iloc[i] > mean_volume:
                 df.loc[df.index[i], 'signal'] = -1  # Продавать
-        df = self.add_slice_df(df, self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -395,7 +393,7 @@ class LEG1_BORSCH(BaseEG):
             elif df['close'].iloc[i] < df['recent_min'].iloc[i-1] and df['above_avg_volume'].iloc[i]:
                 df.loc[df.index[i], 'signal'] = -1
 
-        df = self.add_slice_df(df, self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -427,7 +425,7 @@ class LEG1_PHOBO(BaseEG):
                 df.loc[df.index[i], 'signal'] = 1  # Покупать
             elif not df['in_uptrend'].iloc[i] and df['in_uptrend'].iloc[i - 1]:
                 df.loc[df.index[i], 'signal'] = -1  # Продавать
-        df = self.add_slice_df(df, self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -458,8 +456,7 @@ class LEG1_LAKSAe(BaseEG):
         df.loc[(df['low'] <= df['local_min']) & (df['close'] > df['ema']) & (df['nearest_long'] == True), 'signal'] = 1  # Покупка
         df.loc[(df['high'] >= df['local_max']) & (df['close'] < df['ema']) & (df['nearest_long'] == False), 'signal'] = -1  # Продажа
 
-        max_period = max(self.period, self.period2)
-        df = self.add_slice_df(df, max_period)
+        df = self.add_slice_df(df)
         # df[df['signal'] != 0].info()
         pdata['chart'] = df
         return pdata

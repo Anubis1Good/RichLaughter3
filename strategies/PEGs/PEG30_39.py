@@ -76,7 +76,7 @@ class PEG30_MURKY(BaseEG):
         df = add_chop(df,self.period_chop)
         df['sma_s'] = df['close'].rolling(self.period_sma_s).mean()
         df['sma_l'] = df['close'].rolling(self.period_sma_l).mean()
-        df = self.add_slice_df(df,self.period_adx)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         pdata['can_spred'] = tdata['spred'] > self.min_spred
         return pdata
@@ -134,7 +134,7 @@ class PEG31_HYPERION(BaseEG):
         df = add_chop(df,self.period_chop)
         df['sma_s'] = df['close'].rolling(self.period_sma_s).mean()
         df['sma_l'] = df['close'].rolling(self.period_sma_l).mean()
-        df = self.add_slice_df(df,self.period_adx)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         pdata['fg'] = tdata['fg']
         return pdata

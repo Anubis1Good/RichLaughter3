@@ -25,7 +25,7 @@ class LEG2_HOTS(BaseEG):
         df['sma'] = df['sma'].shift(self.shift)
         df = add_donchan_channel(df,self.period2)
         df = add_rsi(df,self.period2)
-        df = self.add_slice_df(df,self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -68,7 +68,7 @@ class LEG2_LOGAN(BaseEG):
         df = tdata['chart']
         df = add_static_channel(df, self.period)
         df = add_chop(df, self.period2)
-        df = self.add_slice_df(df, period=self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -109,7 +109,7 @@ class LEG2_DRINKER(BaseEG):
         df['sma'] = df['sma'].shift(self.shift)
         df = add_vodka_channel(df, self.period2)
         df = add_rsi(df, self.period2)
-        df = self.add_slice_df(df, self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -157,7 +157,7 @@ class LEG2_ALKASH(BaseEG):
         df['bbd'] = df['bbd'].shift(self.shift)
         df['sma'] = df['sma'].shift(self.shift)
         df = add_vodka_channel(df, self.period2)
-        df = self.add_slice_df(df, self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -210,7 +210,7 @@ class LEG2_FENNEC(BaseEG):
         df = add_vodka_channel(df, self.period2)
         df = add_buffer_add(df, 'top_mean', 'bottom_mean', self.divider)
         df = add_rsi(df, self.period2)
-        df = self.add_slice_df(df, self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -260,7 +260,7 @@ class LEG2_LYNX(BaseEG):
         df['sma'] = df['sma'].shift(self.shift)
         df = add_vodka_channel(df, self.period2)
         df = add_buffer_add(df, 'top_mean', 'bottom_mean', self.divider)
-        df = self.add_slice_df(df, self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -309,7 +309,7 @@ class LEG2_MONSTER(BaseEG):
         df = add_donchan_channel(df, self.period2)
         df['stop_long'] = df['low'].shift(self.shift)
         df['stop_short'] = df['high'].shift(self.shift)
-        df = self.add_slice_df(df, self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -348,7 +348,7 @@ class LEG2_DRG(BaseEG):
         df['sma'] = df['sma'].shift(self.shift)
         df = add_donchan_channel(df, self.period2)
         df = add_rsi(df, self.period2)
-        df = self.add_slice_df(df, self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     

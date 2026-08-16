@@ -16,7 +16,7 @@ class WEG4_DOG(BaseEG):
         df = tdata['chart']
         df = add_CDV(df)
         df = add_rsi(df, self.period, 'cdv')
-        df = self.add_slice_df(df, self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -40,7 +40,7 @@ class WEG4_PUPPY(BaseEG):
         df = tdata['chart']
         df = add_CDV(df)
         df = add_rsi(df, self.period, 'cdv')
-        df = self.add_slice_df(df, self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -72,7 +72,7 @@ class WEG4_RAT(BaseEG):
         df = add_mean_on_fractals(df, self.period_mean, 'rsi')
         df['oversold'] = df['rsi'] < df['bottom_mean']
         df['overbought'] = df['rsi'] > df['top_mean']
-        df = self.add_slice_df(df, self.period)
+        df = self.add_slice_df(df)
         # df['signal'] = add_signal(df) # поиск какого-то сигнала
         pdata['chart'] = df
         return pdata
@@ -95,7 +95,7 @@ class WEG7_PARADOX(BaseEG):
         pdata = {}
         df = tdata['chart']
         df = add_dvsai(df, self.period, self.mult)
-        df = self.add_slice_df(df, self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -125,7 +125,7 @@ class WEG3_DS(BaseEG):
         df['signal'] = 0  # 0 = нет сигнала, 1 = покупка, -1 = продажа
         df.loc[(df['volume'] > df['avg_volume']) & (df['spread'] < 1 * df['avg_spread']) & (df['close'] > df['open']), 'signal'] = 1  # Покупка
         df.loc[(df['volume'] > df['avg_volume']) & (df['spread'] < 1 * df['avg_spread']) & (df['close'] < df['open']), 'signal'] = -1  # Продажа
-        df = self.add_slice_df(df, self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     

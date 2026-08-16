@@ -145,10 +145,48 @@ class BaseEG:
         self.amount_sl = 0
         self.amount_tp = 0
         self.last_action = None
+        self._slice_period = None
+        self._first_slice = True
+    
+    def _find_max_period(self):
+        """Находит максимальное значение period среди всех атрибутов объекта"""
+        period_values = []
+        for attr_name in dir(self):
+            if 'period' in attr_name.lower():
+                try:
+                    value = getattr(self, attr_name)
+                    if isinstance(value, (int, float)) and value > 0:
+                        period_values.append(value)
+                except:
+                    pass
         
+        return max(period_values) if period_values else None
 
-    def add_slice_df(self, df: pd.DataFrame, period=20):
-        df_slice = df.iloc[period+1:]
+    # def add_slice_df(self, df: pd.DataFrame, period=20):
+    #     df_slice = df.iloc[period+1:]
+    #     df_slice = df_slice.reset_index(drop=True)
+    #     return df_slice
+    
+    def add_slice_df(self, df: pd.DataFrame, period=None):
+        """
+        Обрезает датафрейм, удаляя первые N строк.
+        """
+        # Если period явно указан, используем его
+        if period is not None:
+            period_to_use = period
+        else:
+            # Используем найденный при инициализации период
+            if self._first_slice:
+                self._slice_period = self._find_max_period()
+                self._first_slice = False
+            period_to_use = self._slice_period
+            
+            # Если период не найден, возвращаем df без изменений
+            if period_to_use is None:
+                return df
+        
+        # Обрезаем датафрейм
+        df_slice = df.iloc[period_to_use + 1:]
         df_slice = df_slice.reset_index(drop=True)
         return df_slice
     

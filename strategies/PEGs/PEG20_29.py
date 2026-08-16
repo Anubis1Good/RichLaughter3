@@ -27,7 +27,7 @@ class PEG20_HOGGER(BaseEG):
         df['mdb'] = (df['bbdb'] + df['smab']) / 2
         df = add_bollinger(df, self.period2,multiplier=self.mult_small)
         df = add_rsi(df, self.period2)
-        df = self.add_slice_df(df, self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -82,7 +82,7 @@ class PEG21_WHITEMANE(BaseEG):
         df['overbought'] = df['rsi'] > df['top_mean']
         df = add_dzz_peaks(df, n_std=self.n_std)
         df = add_analys_dzz(df, self.period_sma)
-        df = self.add_slice_df(df, period=self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -131,7 +131,7 @@ class PEG21_AURIEL(BaseEG):
         df['overbought'] = df['rsi'] > df['top_mean']
         df = add_dzz_peaks(df, n_std=self.n_std)
         df = add_analys_dzz(df, self.period_sma)
-        df = self.add_slice_df(df, period=self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -172,7 +172,7 @@ class PEG21_MALTHAEL(BaseEG):
         df['oversold'] = df['rsi'] < df['bottom_mean']
         df['overbought'] = df['rsi'] > df['top_mean']
         df = add_percent_zz_peaks(df, percent_threshold=self.percent_threshold)
-        df = self.add_slice_df(df, period=self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -230,7 +230,7 @@ class PEG22_BERSERK(BaseEG):
         df['overbought'] = df['rsi'] > df['top_mean']
         df = add_dzz_peaks(df, n_std=self.n_std)
         df = add_analys_dzz(df, self.period_sma)
-        df = self.add_slice_df(df, period=self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -297,7 +297,7 @@ class PEG23_ULTIMATUM(BaseEG):
         df = self.add_threshold(df)
         df = add_dzz_peaks(df, n_std=self.n_std)
         df = add_analys_dzz(df, self.period_sma)
-        df = self.add_slice_df(df, period=self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -349,7 +349,7 @@ class PEG24_BRIGHTWING(BaseEG):
         df = add_percent_zz_peaks(df, percent_threshold=self.percent_threshold)
         df = add_pattern18_dzz_czd(df, self.threshold_dzz, self.buff)
         df = add_stop_loss_p18czd(df, self.divider)
-        df = self.add_slice_df(df, period=self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -408,7 +408,7 @@ class PEG24_DEATHWING(BaseEG):
         df = add_percent_zz_peaks(df, percent_threshold=self.percent_threshold)
         df = add_pattern18_dzz_czd(df, self.threshold_dzz, self.buff)
         df = add_stop_loss_p18czd(df, self.divider)
-        df = self.add_slice_df(df, period=self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -466,7 +466,7 @@ class PEG25_TASSADAR(BaseEG):
         df = add_percent_zz_peaks(df, percent_threshold=self.percent_threshold)
         df = add_pattern18_dzz_czd(df, self.threshold_dzz, self.buff)
         df = add_stop_loss_p18czd(df, self.divider)
-        df = self.add_slice_df(df, period=self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -524,7 +524,7 @@ class PEG26_UNKNOWN(BaseEG):
         df = add_donchan_channel(df, self.period2)
         df = add_rsi(df, self.period2)
         df = add_integrity_index(df, self.period2 * 2)
-        df = self.add_slice_df(df, self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
