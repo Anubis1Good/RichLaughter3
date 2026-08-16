@@ -317,9 +317,9 @@ class OptimizatorOptuna:
                 plt.legend()
                 plt.savefig(full_name_img, bbox_inches='tight')
                 plt.close()
-        
+        df_results = pd.DataFrame(results)
         df_results = df_results.drop_duplicates()
-        df_results = pd.DataFrame(results).sort_values(self.metric, ascending=False)
+        df_results = df_results.sort_values(self.metric, ascending=False)
         df_results = df_results.reset_index(drop=True)
         
         full_name_doc = os.path.join(file_folder, name_doc + '.xlsx')
@@ -401,8 +401,8 @@ class OptimizatorOptuna:
         start_time = time()
         total_groups = len(groups)
         total_success = 0
-        for i, group in enumerate(groups,1):
-            print(f"\n📊 GROUP {i}/{total_groups}")
+        for i, group in enumerate(groups):
+            print(f"\n📊 GROUP {i+1}/{total_groups}")
             success = self.process_group(group)
             total_success += success
         
