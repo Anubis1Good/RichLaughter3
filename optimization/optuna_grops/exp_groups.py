@@ -12,16 +12,16 @@ from strategies.VEGs.VEG1 import *
 max_period = 55
 group = (    
     (
-        SEGML2b_RAPTOR, 
+        VEG1_VENUS, 
         [
             (2, max_period, 1),
-            (1,15,1),
-            (2, max_period, 1),
-            (2, max_period, 1),
-            (2, max_period, 1),
-            (0, 1),
-            (0, 1),
-            (1,30,1),
+            (0.1,1,0.1),
+            (0,1,0.1),
+            (0.1,0.5,0.1),
+            (0.5,2,0.1),
+            (0,1),
+            (0,1),
+            (0,1),
         ]
     ),
 )
