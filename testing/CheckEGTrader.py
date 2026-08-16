@@ -251,7 +251,7 @@ class CheckEGTrader:
             self.update_step_data(price)
 
     @duration_time
-    def check_strategy_faster(self, history_bars=60):
+    def check_strategy_faster(self, history_bars=None):
         """
         Быстрый тест для оптимизации.
         """

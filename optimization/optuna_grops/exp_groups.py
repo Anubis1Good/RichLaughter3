@@ -12,16 +12,14 @@ from strategies.VEGs.VEG1 import *
 max_period = 55
 group = (    
     (
-        VEG1_VENUS, 
+        PEG4_UNIVERSAL, 
         [
-            (2, max_period, 1),
-            (0.1,1,0.1),
-            (0,1,0.1),
-            (0.1,0.5,0.1),
-            (0.5,2,0.1),
-            (0,1),
-            (0,1),
-            (0,1),
+            (2,max_period,1),
+            (2,max_period,1),
+            (5,95,1),
+            (5,95,1),
+            ["DC","VG","BB","VC","WC"],
+            ["rsi","rsi_tw","mfi","s","uo"],      
         ]
     ),
 )

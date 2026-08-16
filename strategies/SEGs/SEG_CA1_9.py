@@ -22,8 +22,10 @@ class SEG1_LITE(BaseEG):
         df = add_bollinger(df, self.period, multiplier=self.multiplier)
         df = add_big_volume(df, self.period)
         df = add_over_bb(df)
-        df = add_simple_dynamics_ma(df, self.period2)
-        df = self.add_slice_df(df, self.period)
+        sdm_period = max(3, self.period2 // 3)
+        df = add_simple_dynamics_ma(df, sdm_period)
+        max_period = max(self.period,self.period2)
+        df = self.add_slice_df(df, max_period)
         pdata['chart'] = df
         return pdata
     

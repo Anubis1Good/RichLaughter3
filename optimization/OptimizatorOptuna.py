@@ -31,11 +31,13 @@ class OptimizatorOptuna:
                  sl_max_pct: float = 1.0,
                  tp_min_pct: float = 0.1,
                  tp_max_pct: float = 2.0,
-                 use_window_test: bool = False,  # <-- ДОБАВЬ
-                 window_size: int = 60,          # <-- ДОБАВЬ
-                 normalization: bool = True      # <-- ДОБАВЬ
+                 use_window_test: bool = False,  
+                 window_size: int = 60,          
+                 normalization: bool = True,
+                 metric:str = 'total_fee_per'      
                  ):
         
+        self.metric = metric
         self.use_window_test = use_window_test
         self.window_size = window_size
         self.normalization = normalization
@@ -211,7 +213,7 @@ class OptimizatorOptuna:
             'params': trial.params.copy()
         }
 
-        return trades['total_abs_fee']
+        return trades[self.metric]
     
     def get_results_table(self, study, trader, strategy_class, param_options):
         results = []
@@ -316,8 +318,8 @@ class OptimizatorOptuna:
                 plt.savefig(full_name_img, bbox_inches='tight')
                 plt.close()
         
-        df_results = pd.DataFrame(results).sort_values('total_abs_fee', ascending=False)
-        df_results = df_results.drop_duplicates(subset=['total_abs_fee'])
+        df_results = df_results.drop_duplicates()
+        df_results = pd.DataFrame(results).sort_values(self.metric, ascending=False)
         df_results = df_results.reset_index(drop=True)
         
         full_name_doc = os.path.join(file_folder, name_doc + '.xlsx')
@@ -334,7 +336,7 @@ class OptimizatorOptuna:
         ticker = trader.symbol
         strategy_class, param_options = strategy_config
         
-        print(f"  {ticker}...", end=" ", flush=True)
+        # print(f"  {ticker}...", end=" ", flush=True)
         
         study = optuna.create_study(direction="maximize")
         study.optimize(
@@ -347,9 +349,9 @@ class OptimizatorOptuna:
         
         if results is not None and not results.empty:
             best_result = results.iloc[0]
-            print(f"✓ (best: {best_result['total_abs_fee']:.2f}, trades: {best_result['count']})")
+            print(f"{ticker} - Y (best: {best_result[self.metric]:.2f}, trades: {best_result['count']})")
         else:
-            print("✗")
+            print(f"{ticker} - N")
         
         return results
     
@@ -397,9 +399,10 @@ class OptimizatorOptuna:
     
     def optimize_multiple_groups(self, groups):
         start_time = time()
-
+        total_groups = len(groups)
         total_success = 0
-        for i, group in enumerate(groups):
+        for i, group in enumerate(groups,1):
+            print(f"\n📊 GROUP {i}/{total_groups}")
             success = self.process_group(group)
             total_success += success
         

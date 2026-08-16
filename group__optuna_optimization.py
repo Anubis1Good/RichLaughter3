@@ -8,8 +8,8 @@ from optimization.optuna_grops.main_groups import group, max_period
 use_window = False
 # ⏱ Total time: 1h 3m 37s - 50 trials
 # use_window = True
-trials = 500
-# trials = 200
+# trials = 500
+trials = 200
 # trials = 100
 # trials = 50
 save_cores = 0
