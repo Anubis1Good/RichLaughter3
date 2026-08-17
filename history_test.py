@@ -23,7 +23,7 @@ cegt = CheckEGTrader(
     measure_time=True,
     use_tqdm=True
 )
-
+cegt.df = cegt.df.iloc[-500:]
 # cegt.check_strategy_fast()
 # cegt.print_statistics()
 cegt.check_strategy_faster()

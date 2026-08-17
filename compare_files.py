@@ -42,11 +42,11 @@ def compare_files_verbose(file1_path, file2_path, round_decimals=3):
     differences = []
     total_diffs = 0
     
-    for idx in range(len(df1)):
+    for i in range(len(df1)):
         row_diffs = []
         for col in df1.columns:
-            val1 = df1.iloc[idx][col]
-            val2 = df2.iloc[idx][col]
+            val1 = df1.iloc[i][col]
+            val2 = df2.iloc[i][col]
             
             # Проверяем на равенство с учетом NaN
             if pd.isna(val1) and pd.isna(val2):
@@ -59,7 +59,7 @@ def compare_files_verbose(file1_path, file2_path, round_decimals=3):
                 total_diffs += 1
         
         if row_diffs:
-            differences.append((idx + 1, row_diffs))
+            differences.append((i, row_diffs))
     
     # Выводим результаты
     if not differences:
@@ -76,8 +76,35 @@ def compare_files_verbose(file1_path, file2_path, round_decimals=3):
     print("=" * 80)
     
     # Выводим все несовпадения
-    for row_num, row_diffs in differences:
-        print(f"\n📌 СТРОКА {row_num}:")
+    for i, row_diffs in differences:
+        print(f"\n📌 СТРОКА {i} (позиция в датафрейме):")
+        
+        # Выводим last_confirmed_up
+        if 'last_confirmed_up' in df1.columns and 'last_confirmed_up' in df2.columns:
+            val1 = df1.iloc[i]['last_confirmed_up']
+            val2 = df2.iloc[i]['last_confirmed_up']
+            print(f"\n   last_confirmed_up:")
+            print(f"      Файл 1: {val1}")
+            print(f"      Файл 2: {val2}")
+            if val1 == val2:
+                print(f"      ✅ СОВПАДАЕТ")
+            else:
+                print(f"      ❌ НЕ СОВПАДАЕТ")
+        
+        # Выводим last_confirmed_down
+        if 'last_confirmed_down' in df1.columns and 'last_confirmed_down' in df2.columns:
+            val1 = df1.iloc[i]['last_confirmed_down']
+            val2 = df2.iloc[i]['last_confirmed_down']
+            print(f"\n   last_confirmed_down:")
+            print(f"      Файл 1: {val1}")
+            print(f"      Файл 2: {val2}")
+            if val1 == val2:
+                print(f"      ✅ СОВПАДАЕТ")
+            else:
+                print(f"      ❌ НЕ СОВПАДАЕТ")
+        
+        # Выводим все несовпадения
+        print(f"\n   📋 НЕСОВПАДЕНИЯ В ЯЧЕЙКАХ:")
         for col, val1, val2 in row_diffs:
             # Определяем тип различия
             if pd.isna(val1):
@@ -87,7 +114,7 @@ def compare_files_verbose(file1_path, file2_path, round_decimals=3):
             else:
                 diff_type = f"разница = {abs(val1 - val2):.3f}" if isinstance(val1, (int, float)) else "разные значения"
             
-            print(f"   {col}: '{val1}' != '{val2}'  [{diff_type}]")
+            print(f"      {col}: '{val1}' != '{val2}'  [{diff_type}]")
     
     print("\n" + "=" * 80)
     print(f"📊 ИТОГО: {len(differences)} строк с ошибками, {total_diffs} несовпадений")

@@ -34,14 +34,14 @@ class debugEG(BaseEG):
 class DebugMean(BaseEG):
     """Дебажная стратегия для проверки add_mean_on_fractals"""
     def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, 
-                 period=15, period_fractal=10, period_mean=5, kind='rsi', max_period_for_mean=55):
+                 period=15, period_fractal=10, period_mean=5, kind='rsi', period_winmean=55):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
         self.period = period
         self.kind = kind
         self.period_fractal = period_fractal
         self.period_mean = period_mean
-        self.max_period_for_mean = max_period_for_mean
+        self.period_winmean = period_winmean
         
         # Для сбора данных
         self.debug_data = []
@@ -56,11 +56,12 @@ class DebugMean(BaseEG):
         # ... добавь другие варианты если нужно (cmo, williams_r и т.д.)
         
         # Добавляем фракталы
-        df = add_fractals(df, self.period_fractal, self.max_period_for_mean)
+        df = add_fractals(df, self.period_fractal, self.period_winmean)
         
         # Добавляем средние по фракталам
-        df = add_mean_on_fractals(df, self.period_mean, self.kind, self.max_period_for_mean)
-        
+        shift = (self.period_fractal - 1) // 2
+        # df = add_mean_on_fractals(df, self.period_winmean, self.kind,shift)
+        df = add_mean_on_fractals(df, self.period,  self.kind,self.period_winmean,shift)
         # Обрезаем
         df = self.add_slice_df(df)
         

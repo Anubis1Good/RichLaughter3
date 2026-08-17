@@ -265,6 +265,7 @@ class CheckEGTrader:
         # Подготавливаем данные через preprocessing
         pdata = self.ws.preprocessing(self.tdata)
         df = pdata['chart']
+        # print(df)
         window = self.window - (len(self.df) - len(df))
         self.sync_step_data(df)
         
