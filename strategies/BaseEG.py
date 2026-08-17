@@ -147,6 +147,7 @@ class BaseEG:
         self.last_action = None
         self._slice_period = None
         self._first_slice = True
+        self.problems = None
     
     def _find_max_period(self):
         """Находит максимальное значение period среди всех атрибутов объекта"""

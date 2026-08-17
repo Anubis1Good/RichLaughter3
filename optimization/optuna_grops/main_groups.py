@@ -12,175 +12,175 @@ from strategies.VEGs.VEG1 import *
 # (min, max, step)
 max_period = 55
 group = (
-    # (
-    #     PEG2_SDDCr, 
-    #     [
-    #         (2,max_period,1),
-    #         (2,max_period,1),
-    #     ]
-    # ),
-    # (
-    #     PEG4_UNIVERSAL, 
-    #     [
-    #         (2,max_period,1),
-    #         (2,max_period,1),
-    #         (5,95,1),
-    #         (5,95,1),
-    #         ["DC","VG","BB","VC","WC"],
-    #         ["rsi","rsi_tw","mfi","s","uo"],      
-    #     ]
-    # ),
-    # (
-    #     PEG4_U3, 
-    #     [
-    #         (2,max_period,1),
-    #         (2,max_period,1),
-    #         (2,15,1),
-    #         (2,15,1),
-    #         ("DC","VG","BB","VC","WC"),
-    #         ("rsi","rsi_tw","mfi","s","uo"),    
-    #     ]
-    # ),
-    # (
-    #     PEG8_DOBBY, 
-    #     [
-    #         (2,max_period,1),
-    #         (0.5,3,0.1),   
-    #     ]
-    # ),
-    # (
-    #     PEG8_LOBSTER, 
-    #     [
-    #         (2,max_period,1),
-    #         (0.5,3,0.1),   
-    #     ]
-    # ),
-    # (
-    #     PEG11_KUSURUKEN, 
-    #     [
-    #         (5, max_period, 1),
-    #         (2, max_period, 1),
-    #         (2, max_period, 1),
-    #         (5, 40, 1),    
-    #         ('c', 'hl'),    
-    #     ]
-    # ),
-    # (
-    #     PEG13_DWDDCr, 
-    #     [
-    #         (2, max_period, 1),
-    #         (5, 40, 1),
-    #         (2, max_period, 1),
-    #     ]
-    # ),
-    # (
-    #     PEG14_RANGER, 
-    #     [
-    #         (2, max_period, 1),
-    #         (5, 40, 1),
-    #         (2, max_period, 1),
-    #         (2, max_period, 1),
-    #         (5, 100, 1),
-    #         (5, 100, 1),
-    #     ]
-    # ),
-    # (
-    #     PEG14_RENEGADE, 
-    #     [
-    #         (2, max_period, 1),
-    #         (5, 40, 1),
-    #         (2, max_period, 1),
-    #         (2, max_period, 1),
-    #         (5, 100, 1),
-    #         (5, 100, 1),
-    #     ]
-    # ),
-    # (
-    #     PEG14_RWDDCr, 
-    #     [
-    #         (2, max_period, 1),
-    #         (5, 40, 1),
-    #         (2, max_period, 1),
-    #         (2, max_period, 1),
-    #     ]
-    # ),
-    # (
-    #     PEG15_ANNA, 
-    #     [
-    #         (2, max_period, 1),
-    #         (5, 40, 1),
-    #     ]
-    # ),
-    # (
-    #     PEG15_SILVANA, 
-    #     [
-    #         (2, max_period, 1),
-    #         (5, 40, 1),
-    #         (2, max_period, 1),
-    #     ]
-    # ),
-    # (
-    #     PEG16_LEORIC, 
-    #     [
-    #         (2, max_period, 1),
-    #         (2, max_period, 1),
-    #     ]
-    # ),
-    # (
-    #     PEG16_CHEN, 
-    #     [
-    #         (2, max_period, 1),
-    #         (2, max_period, 1),
-    #     ]
-    # ),
-    # (
-    #     PEG16_ARTANIS, 
-    #     [
-    #         (2, max_period, 1),
-    #         (2, max_period, 1),
-    #     ]
-    # ),
-    # (
-    #     PEG17_PHOENIX, 
-    #     [
-    #         (2, max_period, 1),
-    #         (2, max_period, 1),
-    #         (2, max_period, 1),
-    #         (2, max_period, 1),
-    #         (5, 40, 1),
-    #         (0, 1),
-    #     ]
-    # ),
-    # (
-    #     PEG18_BLAZE, 
-    #     [
-    #         (2, max_period, 1),
-    #         (2, max_period, 1),
-    #         (2, max_period, 1),
-    #         (5, 40, 1),
-    #         (5, 40, 1),
-    #         (0, 1),
-    #     ]
-    # ),
-    # (
-    #     PEG18_DIABLO, 
-    #     [
-    #         (2, max_period, 1),
-    #         (3,10,1),
-    #         (2, max_period, 1),
-    #         (5, 40, 1),
-    #     ]
-    # ),
-    # (
-    #     PEG18_REXXAR, 
-    #     [
-    #         (2, max_period, 1),
-    #         (3,10,1),
-    #         (2, max_period, 1),
-    #         (5, 40, 1),
-    #         (5, 40, 1),
-    #     ]
-    # ),
+    (
+        PEG2_SDDCr, 
+        [
+            (2,max_period,1),
+            (2,max_period,1),
+        ]
+    ),
+    (
+        PEG4_UNIVERSAL, 
+        [
+            (2,max_period,1),
+            (2,max_period,1),
+            (5,95,1),
+            (5,95,1),
+            ["DC","VG","BB","VC","WC"],
+            ["rsi","rsi_tw","mfi","s","uo"],      
+        ]
+    ),
+    (
+        PEG4_U3, 
+        [
+            (2,max_period,1),
+            (2,max_period,1),
+            (2,15,1),
+            (2,15,1),
+            ("DC","VG","BB","VC","WC"),
+            ("rsi","rsi_tw","mfi","s","uo"),    
+        ]
+    ),
+    (
+        PEG8_DOBBY, 
+        [
+            (2,max_period,1),
+            (0.5,3,0.1),   
+        ]
+    ),
+    (
+        PEG8_LOBSTER, 
+        [
+            (2,max_period,1),
+            (0.5,3,0.1),   
+        ]
+    ),
+    (
+        PEG11_KUSURUKEN, 
+        [
+            (5, max_period, 1),
+            (2, max_period, 1),
+            (2, max_period, 1),
+            (5, 40, 1),    
+            ('c', 'hl'),    
+        ]
+    ),
+    (
+        PEG13_DWDDCr, 
+        [
+            (2, max_period, 1),
+            (5, 40, 1),
+            (2, max_period, 1),
+        ]
+    ),
+    (
+        PEG14_RANGER, 
+        [
+            (2, max_period, 1),
+            (5, 40, 1),
+            (2, max_period, 1),
+            (2, max_period, 1),
+            (5, 100, 1),
+            (5, 100, 1),
+        ]
+    ),
+    (
+        PEG14_RENEGADE, 
+        [
+            (2, max_period, 1),
+            (5, 40, 1),
+            (2, max_period, 1),
+            (2, max_period, 1),
+            (5, 100, 1),
+            (5, 100, 1),
+        ]
+    ),
+    (
+        PEG14_RWDDCr, 
+        [
+            (2, max_period, 1),
+            (5, 40, 1),
+            (2, max_period, 1),
+            (2, max_period, 1),
+        ]
+    ),
+    (
+        PEG15_ANNA, 
+        [
+            (2, max_period, 1),
+            (5, 40, 1),
+        ]
+    ),
+    (
+        PEG15_SILVANA, 
+        [
+            (2, max_period, 1),
+            (5, 40, 1),
+            (2, max_period, 1),
+        ]
+    ),
+    (
+        PEG16_LEORIC, 
+        [
+            (2, max_period, 1),
+            (2, max_period, 1),
+        ]
+    ),
+    (
+        PEG16_CHEN, 
+        [
+            (2, max_period, 1),
+            (2, max_period, 1),
+        ]
+    ),
+    (
+        PEG16_ARTANIS, 
+        [
+            (2, max_period, 1),
+            (2, max_period, 1),
+        ]
+    ),
+    (
+        PEG17_PHOENIX, 
+        [
+            (2, max_period, 1),
+            (2, max_period, 1),
+            (2, max_period, 1),
+            (2, max_period, 1),
+            (5, 40, 1),
+            (0, 1),
+        ]
+    ),
+    (
+        PEG18_BLAZE, 
+        [
+            (2, max_period, 1),
+            (2, max_period, 1),
+            (2, max_period, 1),
+            (5, 40, 1),
+            (5, 40, 1),
+            (0, 1),
+        ]
+    ),
+    (
+        PEG18_DIABLO, 
+        [
+            (2, max_period, 1),
+            (3,10,1),
+            (2, max_period, 1),
+            (5, 40, 1),
+        ]
+    ),
+    (
+        PEG18_REXXAR, 
+        [
+            (2, max_period, 1),
+            (3,10,1),
+            (2, max_period, 1),
+            (5, 40, 1),
+            (5, 40, 1),
+        ]
+    ),
     (
         PEG18_UTER, 
         [
@@ -325,13 +325,14 @@ group = (
         [
             (2, max_period, 1),
             (3,15,1),
-            (2,30,1),
             ('cmo','rsi','rsi_tw','williams_r','mfi','ultimate_oscillator','cci','%d')
+            (2, max_period, 1),
         ]
     ),
     (
         LEG1_BORSCH, 
         [
+            (2, max_period, 1),
             (2, max_period, 1),
         ]
     ),
@@ -340,9 +341,9 @@ group = (
         [
             (2, max_period, 1),
             (2, 20, 1),
-            (2, 20, 1),
+            (2, max_period, 1),
             (2, 14, 1),
-            (2, 10, 1),
+            (2, max_period, 1),
             (0.5, 3, 0.1),
             (0, 1),
             (0, 1),
@@ -353,7 +354,7 @@ group = (
         [
             (2, max_period, 1),
             (4,15,1),
-            (2,30,1),
+            (2, max_period, 1),
             ('cmo','rsi','rsi_tw','williams_r','mfi','ultimate_oscillator','cci','%d')
         ]
     ),
@@ -362,7 +363,7 @@ group = (
         [
             (2, max_period, 1),
             (4,15,1),
-            (2,30,1),
+            (2, max_period, 1),
             (2,7,1)
         ]
     ),
@@ -392,6 +393,7 @@ group = (
         [
             (2, max_period, 1),
             (0.5,3,0.1),
+            (2, max_period, 1),
         ]
     ),
     (

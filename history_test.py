@@ -8,12 +8,14 @@ path_df = '_data_for_tests\_before_opt\ALRS_5_1786793061.parquet'
 # path_df = '_data_for_tests\data_stock_5m\MTLR_5_1785977685.parquet'
 symbol = path_df.split('\\')[-1].split('_')[0]
 fee = 0.001
+window = 60
+# window = 110
 # ws = [EG,[]]
 # ws = [EG,(100,30,20)]
 # ws = [UEG4_FALCON,],
 
-# ws = (LEG1_BIBI,(3,27,27,13,7,'rsi_tw',))
-ws = (LEG1_BIBI,[])
+# ws = (LEG1_PHOGA,(9,34,15,1.4,))
+ws = (LEG1_CC,[])
 # ws = (DebugMean,[])
 cegt = CheckEGTrader(
     path_df,
@@ -21,7 +23,8 @@ cegt = CheckEGTrader(
     fee,
     symbol,
     measure_time=True,
-    use_tqdm=True
+    use_tqdm=True,
+    window=window
 )
 cegt.df = cegt.df.iloc[-500:]
 # cegt.check_strategy_fast()

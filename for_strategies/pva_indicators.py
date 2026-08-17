@@ -30,14 +30,34 @@ def add_kusuruken_channel(df:pd.DataFrame, period=20,period2=40):
     
     return df
 
-def add_average_fractals(df:pd.DataFrame, period=5):
+# def add_average_fractals(df:pd.DataFrame, period=5):
+#     """add 'ave_up', 'ave_down'"""
+#     up_points = df[df['fractal_up']]
+#     df['ave_up'] = up_points['high'].rolling(window=period).mean()
+#     df['ave_up'] = df['ave_up'].ffill()
+#     down_points = df[df['fractal_down']]
+#     df['ave_down'] = down_points['low'].rolling(window=period).mean()
+#     df['ave_down'] = df['ave_down'].ffill()
+#     return df
+def add_average_fractals(df: pd.DataFrame, period=30, period_fractal=5):
     """add 'ave_up', 'ave_down'"""
+    df = df.copy()
+    
+    shift = (period_fractal - 1) // 2
+    window = period - shift
+
+    # Верхние фракталы
     up_points = df[df['fractal_up']]
-    df['ave_up'] = up_points['high'].rolling(window=period).mean()
-    df['ave_up'] = df['ave_up'].ffill()
+    df['ave_up'] = up_points['high']
+    df['ave_up'] = df['ave_up'].shift(shift)
+    df['ave_up'] = df['ave_up'].rolling(window, min_periods=1).mean().round(2)
+
+    # Нижние фракталы
     down_points = df[df['fractal_down']]
-    df['ave_down'] = down_points['low'].rolling(window=period).mean()
-    df['ave_down'] = df['ave_down'].ffill()
+    df['ave_down'] = down_points['low']
+    df['ave_down'] = df['ave_down'].shift(shift)
+    df['ave_down'] = df['ave_down'].rolling(window, min_periods=1).mean().round(2)
+    
     return df
 
 def add_extremes_fractals(df:pd.DataFrame, period=5):
@@ -449,13 +469,13 @@ def add_mean_on_fractals(df:pd.DataFrame, max_period=55, kind='rsi', period_frac
     ups = df[df['fractal_up']]
     df['top_mean'] = ups[kind]
     df['top_mean'] = df['top_mean'].shift(shift)
-    df['top_mean'] = df['top_mean'].rolling(window=window, min_periods=1).mean()
+    df['top_mean'] = df['top_mean'].rolling(window=window, min_periods=1).mean().round(2)
     
     # Нижние фракталы
     downs = df[df['fractal_down']]
     df['bottom_mean'] = downs[kind]
     df['bottom_mean'] = df['bottom_mean'].shift(shift)
-    df['bottom_mean'] = df['bottom_mean'].rolling(window=window, min_periods=1).mean()
+    df['bottom_mean'] = df['bottom_mean'].rolling(window=window, min_periods=1).mean().round(2)
     
     return df
 
@@ -515,14 +535,39 @@ def add_sdiffmean_fractals_channel(df,period=2,kind='sma',period_smooth=20):
     return df
 
 #good indicator
-def add_ext_on_fractals(df,period=5,kind='rsi'):
-    """add 'top_ext', bottom_ext'"""
+# def add_ext_on_fractals(df,period=5,kind='rsi'):
+#     """add 'top_ext', bottom_ext'"""
+#     ups = df[df['fractal_up']]
+#     df['top_ext'] = ups[kind].rolling(period).max()
+#     df['top_ext'] = df['top_ext'].ffill()
+#     downs = df[df['fractal_down']]
+#     df['bottom_ext'] = downs[kind].rolling(period).min()
+#     df['bottom_ext'] = df['bottom_ext'].ffill()
+#     return df
+
+def add_ext_on_fractals(df:pd.DataFrame, max_period=55, kind='rsi', period_fractal=5):
+    """add 'top_ext', 'bottom_ext'"""
+    shift = (period_fractal - 1) // 2
+    window = max_period - shift
+    
+    # Если window < 1, создаём пустые колонки
+    if window < 1:
+        df['top_ext'] = np.nan
+        df['bottom_ext'] = np.nan
+        return df
+    
+    # Верхние фракталы - максимум
     ups = df[df['fractal_up']]
-    df['top_ext'] = ups[kind].rolling(period).max()
-    df['top_ext'] = df['top_ext'].ffill()
+    df['top_ext'] = ups[kind]
+    df['top_ext'] = df['top_ext'].shift(shift)
+    df['top_ext'] = df['top_ext'].rolling(window=window, min_periods=1).max()
+    
+    # Нижние фракталы - минимум
     downs = df[df['fractal_down']]
-    df['bottom_ext'] = downs[kind].rolling(period).min()
-    df['bottom_ext'] = df['bottom_ext'].ffill()
+    df['bottom_ext'] = downs[kind]
+    df['bottom_ext'] = df['bottom_ext'].shift(shift)
+    df['bottom_ext'] = df['bottom_ext'].rolling(window=window, min_periods=1).min()
+    
     return df
 
 def add_smooth_channel(df:pd.DataFrame,period=20,smooth_features=('max_hb', 'min_hb', 'avarege'),variant_smooth='mean'):

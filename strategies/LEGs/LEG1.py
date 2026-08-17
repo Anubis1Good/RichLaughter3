@@ -1,22 +1,25 @@
+import numpy as np
 from strategies.BaseEG import BaseEG
 from for_strategies.classic_indicators import add_rsi,add_rsi_tw,add_williams_r,add_mfi,add_ultimate_oscillator,add_cmo,add_cci,add_stochastic,add_roc,add_fractals,add_bollinger,add_chop,add_supertrend,add_ema
 from for_strategies.pva_indicators import add_integrity_index,add_mean_on_fractals,add_average_fractals,add_ext_on_fractals
 from for_strategies.vsa_indicators import add_dvsai,add_cdvsai
 
 class LEG1_CC(BaseEG):
-    """stop=None, take=None, period=15, period_fractal=10, period_mean=5, solution=8,n_fractals=3,mult=2,use_stop=1,use_ps=1 \n
+    """stop=None, take=None, period=15, period_fractal=10, period_max=55, solution=8,period_avfr=30,mult=2,use_stop=1,use_ps=1 \n
     Crisis Counter 15 features"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=15, period_fractal=10, period_mean=5, solution=8,n_fractals=3,mult=2,use_stop=1,use_ps=1):
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=15, period_fractal=10, period_max=55, solution=8,period_avfr=30,mult=2,use_stop=1,use_ps=1):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart':self.symbol}
         self.period = period
         self.solution = solution
         self.period_fractal = period_fractal
-        self.period_mean = period_mean
-        self.n_fractals = n_fractals
+        self.period_max = period_max
         self.mult = mult
         self.use_stop = use_stop
         self.use_ps = use_ps
+        self.period_avfr = period_avfr
+        self.problems = 'Mcfly'
+
     def preprocessing(self, tdata):
         pdata = {}
         df = tdata['chart']
@@ -35,13 +38,13 @@ class LEG1_CC(BaseEG):
         df['oversold'] = 0
         df['overbought'] = 0
         for i, ind in enumerate(inds):
-            df = add_mean_on_fractals(df,self.period_mean,ind)
+            df = add_mean_on_fractals(df,self.period_max,ind,self.period_fractal)
             df['oversold'] += df[ind] < df['bottom_mean']
             df['overbought'] += df[ind] > df['top_mean']
         df = add_bollinger(df,self.period)
         df['oversold'] += df['close'] < df['bbd']
         df['overbought'] += df['close'] > df['bbu']
-        df = add_average_fractals(df,self.n_fractals)
+        df = add_average_fractals(df,self.period_avfr,self.period_fractal)
         df['oversold'] += df['close'] <= df['ave_down']
         df['overbought'] += df['close'] >= df['ave_up']
         df = add_dvsai(df,self.period,self.mult)
@@ -49,7 +52,7 @@ class LEG1_CC(BaseEG):
         df['overbought'] += df['dvsai'] > df['dvsaiu']
         df = add_cdvsai(df,self.period)
         df = add_rsi(df,self.period,'cum_dvsai')
-        df = add_mean_on_fractals(df,self.period_mean,'rsi')
+        df = add_mean_on_fractals(df,self.period_max,'rsi',self.period_fractal)
         df['oversold'] += df['rsi'] < df['bottom_mean']
         df['overbought'] += df['rsi'] > df['top_mean']
         
@@ -182,7 +185,7 @@ class LEG1_PIN(BaseEG):
 
 # Mcfly problem
 class LEG1_BIBI(BaseEG):
-    """stop=None, take=None, period=15, period_fractal=10, kind='rsi',period_winmean=55
+    """stop=None, take=None, period=15, period_fractal=10, kind='rsi',period_winmean=55 \n
     'cmo','rsi','rsi_tw','williams_r','mfi','ultimate_oscillator','cci','%d'
     """
     def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=15, period_fractal=10, kind='rsi',period_winmean=55):
@@ -192,6 +195,7 @@ class LEG1_BIBI(BaseEG):
         self.kind = kind
         self.period_fractal = period_fractal
         self.period_winmean = period_winmean
+        self.problems = 'Mcfly'
 
     def preprocessing(self, tdata):
         pdata = {}
@@ -234,17 +238,19 @@ class LEG1_BIBI(BaseEG):
         
         return None
 
+# Mcfly problem
 class LEG1_IGOGOSHA(BaseEG):
-    """stop=None, take=None, period=15, period_fractal=10, period_mean=5, kind='rsi'
+    """stop=None, take=None, period=15, period_fractal=10, period_max=55, kind='rsi' \n
     'cmo','rsi','rsi_tw','williams_r','mfi','ultimate_oscillator','cci','%d'
     """
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=15, period_fractal=10, period_mean=5, kind='rsi'):
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=15, period_fractal=10, period_max=55, kind='rsi'):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
         self.period = period
         self.kind = kind
         self.period_fractal = period_fractal
-        self.period_mean = period_mean
+        self.period_max = period_max
+        self.problems = 'Mcfly'
 
     def preprocessing(self, tdata):
         pdata = {}
@@ -266,8 +272,8 @@ class LEG1_IGOGOSHA(BaseEG):
         if self.kind == '%d':
             df = add_stochastic(df, self.period, self.period // 2)
         df = add_fractals(df, self.period_fractal)
-        df = add_ext_on_fractals(df, self.period_mean, self.kind)
-        df = add_mean_on_fractals(df, self.period_mean, self.kind)
+        df = add_ext_on_fractals(df, self.period_max, self.kind, self.period_fractal)
+        df = add_mean_on_fractals(df, self.period_max,self.kind,self.period_fractal)
         df['oversold1'] = df[self.kind] < df['bottom_mean']
         df['overbought1'] = df[self.kind] > df['top_mean']
         df['oversold2'] = df[self.kind] < df['bottom_ext']
@@ -291,14 +297,15 @@ class LEG1_IGOGOSHA(BaseEG):
         return None
         
 class LEG1_IRONANNY(BaseEG):
-    """stop=None, take=None, period=15, period_fractal=10, period_mean=5, solution=5"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=15, period_fractal=10, period_mean=5, solution=5):
+    """stop=None, take=None, period=15, period_fractal=10, period_max=5, solution=5"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=15, period_fractal=10, period_max=55, solution=5):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
         self.period = period
         self.solution = solution
         self.period_fractal = period_fractal
-        self.period_mean = period_mean
+        self.period_max = period_max
+        self.problems = 'Mcfly'
 
     def preprocessing(self, tdata):
         pdata = {}
@@ -316,7 +323,7 @@ class LEG1_IRONANNY(BaseEG):
         df['oversold'] = 0
         df['overbought'] = 0
         for i, ind in enumerate(inds):
-            df = add_mean_on_fractals(df, self.period_mean, ind)
+            df = add_mean_on_fractals(df, self.period_max, ind,self.period_fractal)
             df['oversold'] += df[ind] < df['bottom_mean']
             df['overbought'] += df[ind] > df['top_mean']
         df = self.add_slice_df(df)
@@ -331,28 +338,42 @@ class LEG1_IRONANNY(BaseEG):
         
         return None
         
-#хз что за супертренд, надо проверять, но нейронка высоко оценила стратегию
+#хз что за супертренд, надо проверять, но нейронка высоко оценила стратегию 
 class LEG1_PHOGA(BaseEG):
-    """stop=None, take=None, period=10, multiplier=3"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=10, multiplier=3):
+    """stop=None, take=None, period=10, multiplier=3, period_mvol=10"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=10, multiplier=3, period_mvol=10):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
         self.period = period
         self.multiplier = multiplier
+        self.period_mvol = period_mvol
         self.type_eg = 1
+        self.problems = 'Mcfly'
 
     def preprocessing(self, tdata):
         pdata = {}
-        df = tdata['chart']
+        df = tdata['chart'].copy()
+        
         df = add_supertrend(df, self.period, self.multiplier)
-        mean_volume = df['volume'].mean()
-        df['signal'] = 0
-
-        for i in range(1, len(df)):
-            if df['in_uptrend'].iloc[i] and not df['in_uptrend'].iloc[i - 1] and df['volume'].iloc[i] > mean_volume:
-                df.loc[df.index[i], 'signal'] = 1  # Покупать
-            elif not df['in_uptrend'].iloc[i] and df['in_uptrend'].iloc[i - 1] and df['volume'].iloc[i] > mean_volume:
-                df.loc[df.index[i], 'signal'] = -1  # Продавать
+        df['mean_volume'] = df['volume'].rolling(self.period_mvol).mean()
+        
+        # Работаем с numpy массивами
+        in_uptrend = df['in_uptrend'].fillna(False).astype(bool).values
+        volume = df['volume'].values
+        mean_volume = df['mean_volume'].values
+        
+        # Создаем массив сигналов
+        signals = np.zeros(len(df), dtype=np.int8)
+        
+        # Условия для покупки и продажи
+        buy_condition = (in_uptrend[1:]) & (~in_uptrend[:-1]) & (volume[1:] > mean_volume[1:])
+        sell_condition = (~in_uptrend[1:]) & (in_uptrend[:-1]) & (volume[1:] > mean_volume[1:])
+        
+        signals[1:][buy_condition] = 1
+        signals[1:][sell_condition] = -1
+        
+        df['signal'] = signals
+        
         df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
@@ -366,36 +387,38 @@ class LEG1_PHOGA(BaseEG):
         return None
         
 class LEG1_BORSCH(BaseEG):
-    """stop=None, take=None, period=20"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=20):
+    """stop=None, take=None, period=20, period_mvol=20"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=20, period_mvol=20):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
         self.period = period
         self.type_eg = 1
+        self.period_mvol = period_mvol
 
     def preprocessing(self, tdata):
         pdata = {}
-        df = tdata['chart']
-        # Расчёт момента (momentum)
-
+        df = tdata['chart'].copy()
+        
+        # Расчёт моментума (если нужен - добавьте)
+        
         # Добавление уровней недавних максимумов и минимумов
         df['recent_max'] = df['high'].rolling(window=self.period).max()
         df['recent_min'] = df['low'].rolling(window=self.period).min()
-
+        
         # Фильтр по объёму
-        mean_volume = df['volume'].mean()
-        df['above_avg_volume'] = df['volume'] > mean_volume
-
-        # Добавление сигнала
+        df['mean_volume'] = df['volume'].rolling(self.period_mvol).mean()
+        df['above_avg_volume'] = df['volume'] > df['mean_volume']
+        
+        # Векторизованная генерация сигналов (без цикла!)
+        # Сдвигаем уровни для сравнения с предыдущим баром
+        recent_max_shifted = df['recent_max'].shift(1)
+        recent_min_shifted = df['recent_min'].shift(1)
+        
+        # Сигналы
         df['signal'] = 0
-
-        # Генерация сигналов
-        for i in range(len(df)):
-            if df['close'].iloc[i] > df['recent_max'].iloc[i-1] and df['above_avg_volume'].iloc[i]:
-                df.loc[df.index[i], 'signal'] = 1
-            elif df['close'].iloc[i] < df['recent_min'].iloc[i-1] and df['above_avg_volume'].iloc[i]:
-                df.loc[df.index[i], 'signal'] = -1
-
+        df.loc[(df['close'] > recent_max_shifted) & df['above_avg_volume'], 'signal'] = 1
+        df.loc[(df['close'] < recent_min_shifted) & df['above_avg_volume'], 'signal'] = -1
+        
         df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
@@ -416,18 +439,31 @@ class LEG1_PHOBO(BaseEG):
         self.period = period
         self.multiplier = multiplier
         self.type_eg = 1
+        self.problems = 'Mcfly'
 
     def preprocessing(self, tdata):
         pdata = {}
-        df = tdata['chart']
+        df = tdata['chart'].copy()
+        
         df = add_supertrend(df, self.period, self.multiplier)
-        df['signal'] = 0
-        # Генерация сигналов
-        for i in range(1, len(df)):
-            if df['in_uptrend'].iloc[i] and not df['in_uptrend'].iloc[i - 1]:
-                df.loc[df.index[i], 'signal'] = 1  # Покупать
-            elif not df['in_uptrend'].iloc[i] and df['in_uptrend'].iloc[i - 1]:
-                df.loc[df.index[i], 'signal'] = -1  # Продавать
+        
+        # Работаем с numpy массивами
+        in_uptrend = df['in_uptrend'].fillna(False).values
+        n = len(in_uptrend)
+        
+        # Создаем массив сигналов
+        signals = np.zeros(n, dtype=np.int8)
+        
+        # Покупка: текущий True, предыдущий False
+        buy_mask = (in_uptrend[1:] == True) & (in_uptrend[:-1] == False)
+        signals[1:][buy_mask] = 1
+        
+        # Продажа: текущий False, предыдущий True
+        sell_mask = (in_uptrend[1:] == False) & (in_uptrend[:-1] == True)
+        signals[1:][sell_mask] = -1
+        
+        df['signal'] = signals
+        
         df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
