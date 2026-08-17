@@ -12,9 +12,9 @@ fee = 0.001
 # ws = [EG,(100,30,20)]
 # ws = [UEG4_FALCON,],
 
-ws = (LEG1_BIBI,(3,27,27,13,7,'rsi_tw',))
+# ws = (LEG1_BIBI,(3,27,27,13,7,'rsi_tw',))
 ws = (LEG1_BIBI,[])
-ws = (DebugMean,[])
+# ws = (DebugMean,[])
 cegt = CheckEGTrader(
     path_df,
     ws,
@@ -28,12 +28,13 @@ cegt.df = cegt.df.iloc[-500:]
 # cegt.print_statistics()
 cegt.check_strategy_faster()
 # cegt.ws.save_to_csv("faster_actions.csv")
-cegt.ws.save_to_csv("faster_means.csv")
+# cegt.ws.save_to_csv("faster_means.csv")
 cegt.print_statistics()
-cegt.ws.debug_data = []
+# cegt.plot_chart_and_sequtity()
+# cegt.ws.debug_data = []
 cegt.check_strategy_window(normalization=False)
 # cegt.ws.save_to_csv("window_actions.csv")
-cegt.ws.save_to_csv("window_means.csv")
+# cegt.ws.save_to_csv("window_means.csv")
 # cegt.check_strategy_fast_debug()
 # result_row = cegt.get_statistics()
 # print(result_row)

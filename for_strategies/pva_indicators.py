@@ -434,8 +434,9 @@ def add_std_fractals_channel(df:pd.DataFrame, period=5,period_sma=10):
     
 #     return df
 
-def add_mean_on_fractals_(df:pd.DataFrame, max_period=55, kind='rsi', shift=2):
+def add_mean_on_fractals(df:pd.DataFrame, max_period=55, kind='rsi', period_fractal=5):
     """add 'top_mean', 'bottom_mean'"""
+    shift = (period_fractal - 1) // 2
     window = max_period - shift
     
     # Если window < 1, создаём пустые колонки
@@ -458,39 +459,39 @@ def add_mean_on_fractals_(df:pd.DataFrame, max_period=55, kind='rsi', shift=2):
     
     return df
 
-def add_mean_on_fractals(df, period=5, kind='rsi', max_window=55, shift=2):
-    """add 'top_mean', bottom_mean'"""
-    df['top_mean'] = np.nan
-    df['bottom_mean'] = np.nan
+# def add_mean_on_fractals(df, period=5, kind='rsi', max_window=55, shift=2):
+#     """add 'top_mean', bottom_mean'"""
+#     df['top_mean'] = np.nan
+#     df['bottom_mean'] = np.nan
     
-    # start = df.index.values[0] + max_window
-    # end = df.index.values[-1]
-    start = df['x'].values[0] + max_window
-    end = df['x'].values[-1]
+#     # start = df.index.values[0] + max_window
+#     # end = df.index.values[-1]
+#     start = df['x'].values[0] + max_window
+#     end = df['x'].values[-1]
     
-    for i in range(start, end + 1):
-        # Верхние фракталы
-        df_slice = df.loc[i - max_window+shift+1:i - shift -1]
-        ups = df_slice[df_slice['fractal_up']]
-        values = ups[kind].values
+#     for i in range(start, end + 1):
+#         # Верхние фракталы
+#         df_slice = df.loc[i - max_window+shift+1:i - shift -1]
+#         ups = df_slice[df_slice['fractal_up']]
+#         values = ups[kind].values
         
-        if len(values) > 0:
-            if len(values) >= period:
-                df.loc[i, 'top_mean'] = np.mean(values[-period:])
-            else:
-                df.loc[i, 'top_mean'] = np.mean(values)
+#         if len(values) > 0:
+#             if len(values) >= period:
+#                 df.loc[i, 'top_mean'] = np.mean(values[-period:])
+#             else:
+#                 df.loc[i, 'top_mean'] = np.mean(values)
         
-        # Нижние фракталы
-        downs = df_slice[df_slice['fractal_down']]
-        values_down = downs[kind].values
+#         # Нижние фракталы
+#         downs = df_slice[df_slice['fractal_down']]
+#         values_down = downs[kind].values
         
-        if len(values_down) > 0:
-            if len(values_down) >= period:
-                df.loc[i, 'bottom_mean'] = np.mean(values_down[-period:])
-            else:
-                df.loc[i, 'bottom_mean'] = np.mean(values_down)
+#         if len(values_down) > 0:
+#             if len(values_down) >= period:
+#                 df.loc[i, 'bottom_mean'] = np.mean(values_down[-period:])
+#             else:
+#                 df.loc[i, 'bottom_mean'] = np.mean(values_down)
     
-    return df
+#     return df
 #?good indicator
 def add_diffmean_fractals_channel(df,period=2,kind='sma'):
     """add 'dmu', 'dmd'"""

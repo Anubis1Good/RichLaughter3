@@ -179,18 +179,18 @@ class LEG1_PIN(BaseEG):
             return 'open_short'
         
         return None
-        
+
+# Mcfly problem
 class LEG1_BIBI(BaseEG):
-    """stop=None, take=None, period=15, period_fractal=10, period_mean=5, kind='rsi',period_winmean=55
+    """stop=None, take=None, period=15, period_fractal=10, kind='rsi',period_winmean=55
     'cmo','rsi','rsi_tw','williams_r','mfi','ultimate_oscillator','cci','%d'
     """
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=15, period_fractal=10, period_mean=5, kind='rsi',period_winmean=55):
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=15, period_fractal=10, kind='rsi',period_winmean=55):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
         self.period = period
         self.kind = kind
         self.period_fractal = period_fractal
-        self.period_mean = period_mean
         self.period_winmean = period_winmean
 
     def preprocessing(self, tdata):
@@ -213,9 +213,7 @@ class LEG1_BIBI(BaseEG):
         if self.kind == '%d':
             df = add_stochastic(df, self.period, self.period // 2)
         df = add_fractals(df, self.period_fractal,self.period_winmean)
-        shift = (self.period_fractal - 1) // 2
-        # df = add_mean_on_fractals(df, self.period_winmean, self.kind,shift)
-        df = add_mean_on_fractals(df, self.period, self.kind,self.period_winmean,shift)
+        df = add_mean_on_fractals(df, self.period_winmean, self.kind,self.period_fractal)
         df['oversold'] = df[self.kind] < df['bottom_mean']
         df['overbought'] = df[self.kind] > df['top_mean']
         df = self.add_slice_df(df)
