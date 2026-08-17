@@ -73,7 +73,8 @@ class LEG1_CC(BaseEG):
             return 'close_all'
         
         return None
-        
+
+# Healthy
 class LEG1_OKROSHKA(BaseEG):
     """stop=None, take=None, period=15, period_chop=10"""
     def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=15, period_chop=10):
@@ -108,7 +109,8 @@ class LEG1_OKROSHKA(BaseEG):
             return 'open_short'
         
         return None
-        
+    
+# Healthy   
 class LEG1_PIN(BaseEG):
     """stop=None, take=None, period=15, period2=3, threshold=30, solution=5"""
     def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=15, period2=3, threshold=30, solution=5):
@@ -182,13 +184,14 @@ class LEG1_BIBI(BaseEG):
     """stop=None, take=None, period=15, period_fractal=10, period_mean=5, kind='rsi'
     'cmo','rsi','rsi_tw','williams_r','mfi','ultimate_oscillator','cci','%d'
     """
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=15, period_fractal=10, period_mean=5, kind='rsi'):
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=15, period_fractal=10, period_mean=5, kind='rsi',period_winmean=55):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
         self.period = period
         self.kind = kind
         self.period_fractal = period_fractal
         self.period_mean = period_mean
+        self.period_winmean = period_winmean
 
     def preprocessing(self, tdata):
         pdata = {}
@@ -209,8 +212,8 @@ class LEG1_BIBI(BaseEG):
             df = add_cci(df, self.period)
         if self.kind == '%d':
             df = add_stochastic(df, self.period, self.period // 2)
-        df = add_fractals(df, self.period_fractal)
-        df = add_mean_on_fractals(df, self.period_mean, self.kind)
+        df = add_fractals(df, self.period_fractal,self.period_winmean)
+        df = add_mean_on_fractals(df, self.period_mean, self.kind, self.period_winmean)
         df['oversold'] = df[self.kind] < df['bottom_mean']
         df['overbought'] = df[self.kind] > df['top_mean']
         df = self.add_slice_df(df)

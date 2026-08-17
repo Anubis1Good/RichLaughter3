@@ -398,14 +398,112 @@ def add_std_fractals_channel(df:pd.DataFrame, period=5,period_sma=10):
     return df
 
 #good indicator
-def add_mean_on_fractals(df,period=5,kind='rsi'):
-    """add 'top_mean', bottom_mean'"""
-    ups = df[df['fractal_up']]
-    df['top_mean'] = ups[kind].rolling(period).mean()
-    df['top_mean'] = df['top_mean'].ffill()
-    downs = df[df['fractal_down']]
-    df['bottom_mean'] = downs[kind].rolling(period).mean()
-    df['bottom_mean'] = df['bottom_mean'].ffill()
+# def add_mean_on_fractals(df,period=5,kind='rsi'):
+#     """add 'top_mean', bottom_mean'"""
+#     ups = df[df['fractal_up']]
+#     df['top_mean'] = ups[kind].rolling(period).mean()
+#     df['top_mean'] = df['top_mean'].ffill()
+#     downs = df[df['fractal_down']]
+#     df['bottom_mean'] = downs[kind].rolling(period).mean()
+#     df['bottom_mean'] = df['bottom_mean'].ffill()
+#     return df
+
+def add_mean_on_fractals_(df, period=5, kind='rsi', max_period=55):
+    """
+    Использует last_confirmed_up_x/down_x для расчёта средних.
+    """
+    df = df.copy()
+    
+    # Создаём словарь для быстрого доступа к значениям kind по x
+    x_to_kind = dict(zip(df['x'], df[kind]))
+    
+    # Берём значения kind на моменте фрактала
+    df['top_val_at_fractal'] = df['last_confirmed_up_x'].map(x_to_kind)
+    df['bottom_val_at_fractal'] = df['last_confirmed_down_x'].map(x_to_kind)
+    
+    # Rolling mean по последним period фракталам
+    df['top_mean'] = df['top_val_at_fractal'].rolling(window=period, min_periods=1).mean()
+    df['bottom_mean'] = df['bottom_val_at_fractal'].rolling(window=period, min_periods=1).mean()
+    
+    # Убираем ffill, потому что он уже сделан в add_fractals с ограничением!
+    # (Или оставляем, но с лимитом)
+    df['top_mean'] = df['top_mean'].ffill(limit=max_period).round(2)
+    df['bottom_mean'] = df['bottom_mean'].ffill(limit=max_period).round(2)
+    
+    df.drop(['top_val_at_fractal', 'bottom_val_at_fractal'], axis=1, inplace=True)
+    
+    return df
+
+def add_mean_on_fractals(df, period=5, kind='rsi', max_period=55):
+    """
+    Использует last_confirmed_up_x/down_x для расчёта средних.
+    """
+    df = df.copy()
+    
+    # Получаем все верхние фракталы с их x и kind
+    up_mask = df['fractal_up'] == True
+    up_x_values = df.loc[up_mask, 'x'].values
+    up_kind_values = df.loc[up_mask, kind].values
+    
+    # Сортируем по x (по возрастанию)
+    sort_idx = np.argsort(up_x_values)
+    up_x_sorted = up_x_values[sort_idx]
+    up_kind_sorted = up_kind_values[sort_idx]
+    
+    up_means = []
+    
+    for idx in df.index:
+        current_x = df.loc[idx, 'x']
+        last_confirmed = df.loc[idx, 'last_confirmed_up_x']
+        
+        # Находим фракталы в диапазоне [current_x - max_period, current_x]
+        # и подтвержденные (x <= last_confirmed)
+        mask = (up_x_sorted >= current_x - max_period) & (up_x_sorted <= current_x)
+        if not pd.isna(last_confirmed):
+            mask = mask & (up_x_sorted <= last_confirmed)
+        
+        fractals_x = up_x_sorted[mask]
+        fractals_kind = up_kind_sorted[mask]
+        
+        if len(fractals_x) > 0:
+            # Берем последние period (самые свежие - с конца)
+            recent_kind = fractals_kind[-period:] if len(fractals_kind) >= period else fractals_kind
+            up_means.append(np.mean(recent_kind))
+        else:
+            up_means.append(np.nan)
+    
+    df['top_mean'] = np.array(up_means).round(2)
+    
+    # ---- НИЖНИЕ ФРАКТАЛЫ ----
+    down_mask = df['fractal_down'] == True
+    down_x_values = df.loc[down_mask, 'x'].values
+    down_kind_values = df.loc[down_mask, kind].values
+    
+    sort_idx = np.argsort(down_x_values)
+    down_x_sorted = down_x_values[sort_idx]
+    down_kind_sorted = down_kind_values[sort_idx]
+    
+    down_means = []
+    
+    for idx in df.index:
+        current_x = df.loc[idx, 'x']
+        last_confirmed = df.loc[idx, 'last_confirmed_down_x']
+        
+        mask = (down_x_sorted >= current_x - max_period) & (down_x_sorted <= current_x)
+        if not pd.isna(last_confirmed):
+            mask = mask & (down_x_sorted <= last_confirmed)
+        
+        fractals_x = down_x_sorted[mask]
+        fractals_kind = down_kind_sorted[mask]
+        
+        if len(fractals_x) > 0:
+            recent_kind = fractals_kind[-period:] if len(fractals_kind) >= period else fractals_kind
+            down_means.append(np.mean(recent_kind))
+        else:
+            down_means.append(np.nan)
+    
+    df['bottom_mean'] = np.array(down_means).round(2)
+    
     return df
 
 #?good indicator
