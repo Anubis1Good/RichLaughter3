@@ -11,34 +11,15 @@ from utils.work_dfs.load_df import simple_load_df
 filepath = '_data_for_tests\_before_opt\ALRS_5_1786793061.parquet'
 
 df = simple_load_df(filepath)
-df = df.iloc[-120:]
+df = df.iloc[-60:]
 df = add_fractals(df)
 # df = add_rsi(df)
-
+max_period = 55
+can_period = max_period // 3
 # 58.056667    55.53666
-def add_average_fractals(df: pd.DataFrame, period=30, period_fractal=5):
-    """add 'ave_up', 'ave_down'"""
-    df = df.copy()
-    
-    shift = (period_fractal - 1) // 2
-    window = period - shift
+df = add_donchan_channel(df, 10)
+all_starts, all_ends = get_all_enter_exit_DC(df, 'max_hb', 'min_hb')
+df = add_benefit(df, all_starts, all_ends, 'DCr',50)
 
-    # Верхние фракталы
-    up_points = df[df['fractal_up']]
-    df['ave_up'] = up_points['high']
-    df['ave_up'] = df['ave_up'].shift(shift)
-    df['ave_up'] = df['ave_up'].rolling(window, min_periods=1).mean().round(2)
-
-    # Нижние фракталы
-    down_points = df[df['fractal_down']]
-    df['ave_down'] = down_points['low']
-    df['ave_down'] = df['ave_down'].shift(shift)
-    df['ave_down'] = df['ave_down'].rolling(window, min_periods=1).mean().round(2)
-    
-    return df
-
-df = add_average_fractals(df)
-# print(df[['x', 'top_mean_list']].head(20))
-# print(df[['x', 'bottom_mean_list']].head(20))
 
 print(df.tail(60))

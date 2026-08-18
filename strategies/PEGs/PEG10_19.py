@@ -5,15 +5,25 @@ from for_strategies.pva_indicators import add_kusuruken_channel,add_velcro_indic
 from for_strategies.other_indicators import add_vangerchik
 
 class PEG11_KUSURUKEN(BaseEG):
-    """stop=None, take=None, period=60, period2=10, period3=20, threshold=20, kind_enter='hl'
+    """stop=None, take=None, period=55, period2=10, period3=20, threshold=20, kind_enter='hl',max_period=55 \n
     kind_enter -> hl | c
     """
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=60, period2=10, period3=20, threshold=20, kind_enter='hl'):
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=55, period2=10, period3=20, threshold=20, kind_enter='hl',max_period=55):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
         self.period = period
-        self.period2 = period2
-        self.period3 = period3
+        can_period = max_period // 3
+        self.period3 = min(can_period,period3)
+        max_total = can_period * 2
+        total = self.period3 + period2
+
+        if total > max_total:
+            ratio = max_total / total
+            self.period3 = int(self.period3 * ratio)
+            self.period2 = int(period2 * ratio)
+        else:
+            self.period2 = period2
+
         self.threshold = threshold
         self.kind_enter_l = 'low' if kind_enter == 'hl' else 'close'
         self.kind_enter_s = 'high' if kind_enter == 'hl' else 'close'
@@ -26,7 +36,7 @@ class PEG11_KUSURUKEN(BaseEG):
         df = add_chop(df, self.period3)
         df['sma'] = df['chop'].rolling(window=self.period3).mean()
         df['sma2'] = df['chop'].rolling(window=self.period2).mean()
-        df = self.add_slice_df(df, period=self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -58,7 +68,7 @@ class PEG11_KUSURUKEN(BaseEG):
 
 class PEG13_DWDDCr(BaseEG):
     """stop=None, take=None, period=60, threshold=30, period2=20"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=60, threshold=30, period2=20):
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=55, threshold=30, period2=20):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
         self.period = period
@@ -71,7 +81,7 @@ class PEG13_DWDDCr(BaseEG):
         df = add_donchan_channel(df, self.period2)
         df = add_awesome_oscillator(df, long_period=self.period)
         df = add_rsi(df, self.period2)
-        df = self.add_slice_df(df, period=self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -93,14 +103,23 @@ class PEG13_DWDDCr(BaseEG):
         return None
 
 class PEG14_RWDDCr(BaseEG):
-    """stop=None, take=None, period=20, threshold=30, period2=10, period3=20"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=20, threshold=30, period2=10, period3=20):
+    """stop=None, take=None, period=20, threshold=30, period2=10, period3=20,max_period=55"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=20, threshold=30, period2=10, period3=20,max_period=55):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
         self.period = period
         self.threshold = threshold
-        self.period2 = period2
-        self.period3 = period3
+        can_period = max_period // 3
+        self.period3 = min(can_period,period3)
+        max_total = can_period * 2
+        total = self.period3 + period2
+
+        if total > max_total:
+            ratio = max_total / total
+            self.period3 = int(self.period3 * ratio)
+            self.period2 = int(period2 * ratio)
+        else:
+            self.period2 = period2
 
     def preprocessing(self, tdata):
         pdata = {}
@@ -110,7 +129,7 @@ class PEG14_RWDDCr(BaseEG):
         df = add_chop(df, self.period3)
         df['sma'] = df['chop'].rolling(window=self.period3).mean()
         df['sma2'] = df['chop'].rolling(window=self.period2).mean()
-        df = self.add_slice_df(df, period=self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -128,11 +147,12 @@ class PEG14_RWDDCr(BaseEG):
         return None
 
 class PEG14_RANGER(BaseEG):
-    """stop=None, take=None, period=100, threshold_rsi=30, period2=100, period3=20, threshold_chop=60, threshold_adx=30"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=100, threshold_rsi=30, period2=100, period3=20, threshold_chop=60, threshold_adx=30):
+    """stop=None, take=None, period=55, threshold_rsi=30, period2=55, period3=20, threshold_chop=50, threshold_adx=20,max_period=55"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=55, threshold_rsi=30, period2=55, period3=20, threshold_chop=50, threshold_adx=20,max_period=55):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
-        self.period = period
+        can_period = max_period // 2
+        self.period = min(period,can_period)
         self.threshold_rsi = threshold_rsi
         self.threshold_chop = threshold_chop
         self.threshold_adx = threshold_adx
@@ -146,7 +166,7 @@ class PEG14_RANGER(BaseEG):
         df = add_rsi(df, self.period3)
         df = add_chop(df, self.period2)
         df = add_adx(df, self.period)
-        df = self.add_slice_df(df, period=self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -165,11 +185,12 @@ class PEG14_RANGER(BaseEG):
         return None
 
 class PEG14_RENEGADE(BaseEG):
-    """stop=None, take=None, period=100, threshold_rsi=30, period2=100, period3=20, threshold_chop=60, threshold_adx=30"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=100, threshold_rsi=30, period2=100, period3=20, threshold_chop=60, threshold_adx=30):
+    """stop=None, take=None, period=55, threshold_rsi=30, period2=55, period3=20, threshold_chop=50, threshold_adx=20,max_period=55"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=55, threshold_rsi=30, period2=55, period3=20, threshold_chop=50, threshold_adx=20,max_period=55):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
-        self.period = period
+        can_period = max_period // 2
+        self.period = min(period,can_period)
         self.threshold_rsi = threshold_rsi
         self.threshold_chop = threshold_chop
         self.threshold_adx = threshold_adx
@@ -286,7 +307,7 @@ class PEG15_SILVANA(BaseEG):
 #Долгий, но использовать можно
 class PEG16_LEORIC(BaseEG):
     """stop=None, take=None, period=30, period2=10"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=30, period2=10):
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=50, period2=10):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
         self.period = period

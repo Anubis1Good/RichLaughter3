@@ -4,8 +4,8 @@ from for_strategies.pva_indicators import add_static_channel,add_vodka_channel
 from for_strategies.help_indicators import add_buffer_add
 
 class LEG2_HOTS(BaseEG):
-    """stop=None, take=None,period=100,multiplier=2,period2=10,threshold_enter=40,threshold_exit=20,shift=10,use_stop=1"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None,period=100,multiplier=2,period2=10,threshold_enter=40,threshold_exit=20,shift=10,use_stop=1):
+    """stop=None, take=None,period=100,multiplier=2,period2=10,threshold_enter=40,threshold_exit=20,use_stop=1"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None,period=55,multiplier=2,period2=10,threshold_enter=40,threshold_exit=20,use_stop=1):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart':self.symbol}
         self.period = period
@@ -13,16 +13,12 @@ class LEG2_HOTS(BaseEG):
         self.multiplier = multiplier
         self.threshold_enter = threshold_enter
         self.threshold_exit = threshold_exit
-        self.shift = shift
         self.use_stop = use_stop
 
     def preprocessing(self, tdata):
         pdata = {}
         df = tdata['chart']
         df = add_bollinger(df,self.period,multiplier=self.multiplier)
-        df['bbu'] = df['bbu'].shift(self.shift)
-        df['bbd'] = df['bbd'].shift(self.shift)
-        df['sma'] = df['sma'].shift(self.shift)
         df = add_donchan_channel(df,self.period2)
         df = add_rsi(df,self.period2)
         df = self.add_slice_df(df)
@@ -56,7 +52,7 @@ class LEG2_HOTS(BaseEG):
             
 class LEG2_LOGAN(BaseEG):
     """stop=None, take=None, period=100, period2=50, threshold=50"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=100, period2=50, threshold=50):
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=55, period2=50, threshold=50):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
         self.period = period
@@ -88,8 +84,8 @@ class LEG2_LOGAN(BaseEG):
         return None
         
 class LEG2_DRINKER(BaseEG):
-    """stop=None, take=None, period=100, multiplier=2, period2=10, threshold_enter=40, threshold_exit=20, shift=10, use_stop=1"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=100, multiplier=2, period2=10, threshold_enter=40, threshold_exit=20, shift=10, use_stop=1):
+    """stop=None, take=None, period=100, multiplier=2, period2=10, threshold_enter=40, threshold_exit=20, use_stop=1"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=55, multiplier=2, period2=10, threshold_enter=40, threshold_exit=20, use_stop=1):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
         self.period = period
@@ -97,16 +93,12 @@ class LEG2_DRINKER(BaseEG):
         self.multiplier = multiplier
         self.threshold_enter = threshold_enter
         self.threshold_exit = threshold_exit
-        self.shift = shift
         self.use_stop = use_stop
 
     def preprocessing(self, tdata):
         pdata = {}
         df = tdata['chart']
         df = add_bollinger(df, self.period, multiplier=self.multiplier)
-        df['bbu'] = df['bbu'].shift(self.shift)
-        df['bbd'] = df['bbd'].shift(self.shift)
-        df['sma'] = df['sma'].shift(self.shift)
         df = add_vodka_channel(df, self.period2)
         df = add_rsi(df, self.period2)
         df = self.add_slice_df(df)
@@ -139,23 +131,19 @@ class LEG2_DRINKER(BaseEG):
         return None
 
 class LEG2_ALKASH(BaseEG):
-    """stop=None, take=None, period=100, multiplier=2, period2=10, shift=10, use_stop=1"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=100, multiplier=2, period2=10, shift=10, use_stop=1):
+    """stop=None, take=None, period=100, multiplier=2, period2=10, use_stop=1"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=55, multiplier=2, period2=10, use_stop=1):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
         self.period = period
         self.period2 = period2
         self.multiplier = multiplier
-        self.shift = shift
         self.use_stop = use_stop
 
     def preprocessing(self, tdata):
         pdata = {}
         df = tdata['chart']
         df = add_bollinger(df, self.period, multiplier=self.multiplier)
-        df['bbu'] = df['bbu'].shift(self.shift)
-        df['bbd'] = df['bbd'].shift(self.shift)
-        df['sma'] = df['sma'].shift(self.shift)
         df = add_vodka_channel(df, self.period2)
         df = self.add_slice_df(df)
         pdata['chart'] = df
@@ -187,8 +175,8 @@ class LEG2_ALKASH(BaseEG):
         return None
 
 class LEG2_FENNEC(BaseEG):
-    """stop=None, take=None, period=100, multiplier=2, period2=10, threshold_enter=40, threshold_exit=20, shift=10, divider=1, use_stop=1"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=100, multiplier=2, period2=10, threshold_enter=40, threshold_exit=20, shift=10, divider=1, use_stop=1):
+    """stop=None, take=None, period=100, multiplier=2, period2=10, threshold_enter=40, threshold_exit=20, divider=1, use_stop=1"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=55, multiplier=2, period2=10, threshold_enter=40, threshold_exit=20, divider=1, use_stop=1):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
         self.period = period
@@ -196,7 +184,6 @@ class LEG2_FENNEC(BaseEG):
         self.multiplier = multiplier
         self.threshold_enter = threshold_enter
         self.threshold_exit = threshold_exit
-        self.shift = shift
         self.use_stop = use_stop
         self.divider = divider
 
@@ -204,9 +191,6 @@ class LEG2_FENNEC(BaseEG):
         pdata = {}
         df = tdata['chart']
         df = add_bollinger(df, self.period, multiplier=self.multiplier)
-        df['bbu'] = df['bbu'].shift(self.shift)
-        df['bbd'] = df['bbd'].shift(self.shift)
-        df['sma'] = df['sma'].shift(self.shift)
         df = add_vodka_channel(df, self.period2)
         df = add_buffer_add(df, 'top_mean', 'bottom_mean', self.divider)
         df = add_rsi(df, self.period2)
@@ -240,14 +224,13 @@ class LEG2_FENNEC(BaseEG):
         return None
 
 class LEG2_LYNX(BaseEG):
-    """stop=None, take=None, period=100, multiplier=2, period2=10, shift=10, divider=1, use_stop=1"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=100, multiplier=2, period2=10, shift=10, divider=1, use_stop=1):
+    """stop=None, take=None, period=100, multiplier=2, period2=10, divider=1, use_stop=1"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=55, multiplier=2, period2=10, divider=1, use_stop=1):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
         self.period = period
         self.period2 = period2
         self.multiplier = multiplier
-        self.shift = shift
         self.use_stop = use_stop
         self.divider = divider
 
@@ -255,9 +238,6 @@ class LEG2_LYNX(BaseEG):
         pdata = {}
         df = tdata['chart']
         df = add_bollinger(df, self.period, multiplier=self.multiplier)
-        df['bbu'] = df['bbu'].shift(self.shift)
-        df['bbd'] = df['bbd'].shift(self.shift)
-        df['sma'] = df['sma'].shift(self.shift)
         df = add_vodka_channel(df, self.period2)
         df = add_buffer_add(df, 'top_mean', 'bottom_mean', self.divider)
         df = self.add_slice_df(df)
@@ -290,15 +270,23 @@ class LEG2_LYNX(BaseEG):
         return None
 
 class LEG2_MONSTER(BaseEG):
-    """stop=None, take=None, period=20, threshold=30, period2=10, shift=2, period_adx=30"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=20, threshold=30, period2=10, shift=2, period_adx=30):
+    """stop=None, take=None, period=20, threshold=30, period2=10, shift=2, period_adx=30,max_period=55"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=20, threshold=30, period2=10, shift=2, period_adx=30,max_period=55):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
-        self.period = period
+        max_total = (max_period // 3) * 2
+        total = period + period_adx
+
+        if total > max_total:
+            ratio = max_total / total
+            self.period = int(period * ratio)
+            self.period_adx = int(period_adx * ratio)
+        else:
+            self.period = period
+            self.period_adx = period_adx
         self.threshold = threshold
         self.period2 = period2
         self.shift = shift
-        self.period_adx = period_adx
         self.type_eg = 1
 
     def preprocessing(self, tdata):
@@ -327,8 +315,8 @@ class LEG2_MONSTER(BaseEG):
         return 'close_all'
 
 class LEG2_DRG(BaseEG):
-    """stop=None, take=None, period=100, multiplier=2, period2=10, threshold_enter=40, threshold_exit=20, shift=10, use_stop=1"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=100, multiplier=2, period2=10, threshold_enter=40, threshold_exit=20, shift=10, use_stop=1):
+    """stop=None, take=None, period=100, multiplier=2, period2=10, threshold_enter=40, threshold_exit=20,  use_stop=1"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=55, multiplier=2, period2=10, threshold_enter=40, threshold_exit=20,  use_stop=1):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
         self.period = period
@@ -336,16 +324,12 @@ class LEG2_DRG(BaseEG):
         self.multiplier = multiplier
         self.threshold_enter = threshold_enter
         self.threshold_exit = threshold_exit
-        self.shift = shift
         self.use_stop = use_stop
 
     def preprocessing(self, tdata):
         pdata = {}
         df = tdata['chart']
         df = add_bollinger(df, self.period, multiplier=self.multiplier)
-        df['bbu'] = df['bbu'].shift(self.shift)
-        df['bbd'] = df['bbd'].shift(self.shift)
-        df['sma'] = df['sma'].shift(self.shift)
         df = add_donchan_channel(df, self.period2)
         df = add_rsi(df, self.period2)
         df = self.add_slice_df(df)

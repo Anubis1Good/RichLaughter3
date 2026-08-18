@@ -30,12 +30,21 @@ class PEG2_DDCrWork(BaseEG):
         return None
     
 class PEG2_SDDCr(BaseEG):
-    """stop=None, take=None, period=20, period2=20"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=20, period2=20):
+    """stop=None, take=None, period=55, period2=55, max_period=55"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=55, period2=20, max_period=55):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
-        self.period = period
-        self.period2 = period2
+        max_total = (max_period // 3) * 2
+        total = period + period2
+
+        if total > max_total:
+            ratio = max_total / total
+            self.period = int(period * ratio)
+            self.period2 = int(period2 * ratio)
+        else:
+            self.period = period
+            self.period2 = period2
+
 
     def preprocessing(self, tdata):
         pdata = {}
@@ -142,22 +151,23 @@ class PEG4_UNIVERSAL(BaseEG):
                 
 class PEG4_U3(BaseEG):
     '''
-    stop=None, take=None, period=20, period_rsi=20, period_fractal=10, period_mean=5
+    stop=None, take=None, period=20, period_rsi=20, period_fractal=10, period_max=55, kind_channel='DC', kind_rsi='rsi' \n
     kind_channel in ["DC","VG","BB","VC","WC"]
     kind_rsi in ["rsi","rsi_tw","mfi","s","uo"]
     '''
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=20, period_rsi=20, period_fractal=10, period_mean=5, kind_channel='DC', kind_rsi='rsi'):
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=20, period_rsi=20, period_fractal=10, period_max=55, kind_channel='DC', kind_rsi='rsi'):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
         self.period = period
         self.period_fractal = period_fractal
-        self.period_mean = period_mean
+        self.period_max = period_max
         self.period_rsi = period_rsi
         self.kind_channel = kind_channel
         self.kind_rsi = kind_rsi
         self.rsi = 'rsi'
         self.up = 'up'
         self.down = 'down'
+        self.problems = 'Mcfly'
 
     def add_channel(self, df):
         if self.kind_channel == 'VG':
@@ -202,7 +212,7 @@ class PEG4_U3(BaseEG):
         df = self.add_channel(df)
         df = self.add_rsi(df)
         df = add_fractals(df, self.period_fractal)
-        df = add_mean_on_fractals(df, self.period_mean, 'rsi')
+        df = add_mean_on_fractals(df, self.period_max, 'rsi',self.period_fractal)
         df['oversold'] = df['rsi'] < df['bottom_mean']
         df['overbought'] = df['rsi'] > df['top_mean']
         df = self.add_slice_df(df)

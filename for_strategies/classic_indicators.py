@@ -252,7 +252,7 @@ def add_adx(df:pd.DataFrame,adx_period=14):
 
     # Расчет ADX
     df['dx'] = (abs(df['plus_di'] - df['minus_di']) / (df['plus_di'] + df['minus_di'])) * 100
-    df['adx'] = df['dx'].rolling(window=adx_period, min_periods=adx_period).mean()
+    df['adx'] = df['dx'].rolling(window=adx_period, min_periods=adx_period).mean().round(2)
 
     return df
 
@@ -802,7 +802,8 @@ def add_chaikin_volatility(df: pd.DataFrame, ema_period=10, change_period=10):
     return df
 
 def add_supertrend(df: pd.DataFrame, period: int = 10, multiplier: float = 3.0) -> pd.DataFrame:
-    """
+    """ 
+    Mcfly \n
     Оптимизированный расчет индикатора SuperTrend.
     Использует списки вместо .iloc для максимальной скорости.
     

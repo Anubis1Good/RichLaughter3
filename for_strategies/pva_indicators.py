@@ -455,7 +455,9 @@ def add_std_fractals_channel(df:pd.DataFrame, period=5,period_sma=10):
 #     return df
 
 def add_mean_on_fractals(df:pd.DataFrame, max_period=55, kind='rsi', period_fractal=5):
-    """add 'top_mean', 'bottom_mean'"""
+    """add 'top_mean', 'bottom_mean' \n
+    Mcfly
+    """
     shift = (period_fractal - 1) // 2
     window = max_period - shift
     
@@ -546,7 +548,8 @@ def add_sdiffmean_fractals_channel(df,period=2,kind='sma',period_smooth=20):
 #     return df
 
 def add_ext_on_fractals(df:pd.DataFrame, max_period=55, kind='rsi', period_fractal=5):
-    """add 'top_ext', 'bottom_ext'"""
+    """add 'top_ext', 'bottom_ext' \n
+    Mcfly"""
     shift = (period_fractal - 1) // 2
     window = max_period - shift
     
@@ -713,7 +716,48 @@ def add_benefit(df, all_starts, all_ends, id, period=60):
     
     return df
 
-def get_all_enter_exit_DC(df, kind_top, kind_bottom):
+def get_all_enter_exit_DC(df, kind_top, kind_bottom, window=100):
+    """
+    Векторизованная версия с ограничением по окну.
+    Использует расширяющееся окно (expanding) с ограничением.
+    """
+    n = len(df)
+    all_starts = np.full(n, np.nan)
+    all_ends = np.full(n, np.nan)
+    
+    # Предварительные вычисления для всего датафрейма
+    high = df['high'].values
+    low = df['low'].values
+    top = df[kind_top].values
+    bottom = df[kind_bottom].values
+    
+    # Маски для всех возможных точек
+    start_mask = (high >= np.roll(top, 1)) & (np.roll(high, 1) < np.roll(top, 2))
+    end_mask = (low <= np.roll(bottom, 1)) & (np.roll(low, 1) > np.roll(bottom, 2))
+    
+    # Сдвигаем маски, чтобы они соответствовали индексам
+    start_mask = np.roll(start_mask, -1)
+    end_mask = np.roll(end_mask, -1)
+    start_mask[:2] = False
+    end_mask[:2] = False
+    
+    # Для каждой точки проверяем, есть ли сигнал в окне
+    for i in range(n):
+        start_idx = max(0, i - window)
+        
+        # Проверяем, есть ли точка входа в окне
+        if np.any(start_mask[start_idx:i+1]):
+            # Берем последний сигнал в окне
+            last_start_idx = np.where(start_mask[start_idx:i+1])[0][-1] + start_idx
+            all_starts[i] = top[last_start_idx]
+        
+        if np.any(end_mask[start_idx:i+1]):
+            last_end_idx = np.where(end_mask[start_idx:i+1])[0][-1] + start_idx
+            all_ends[i] = bottom[last_end_idx]
+    
+    return all_starts, all_ends
+
+def get_all_enter_exit_DC_(df, kind_top, kind_bottom):
     """all_starts,all_ends"""
     # 1. Находим ВСЕ возможные точки входа и выхода (как в оригинале)
     all_starts = np.where(

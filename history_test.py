@@ -14,8 +14,8 @@ window = 60
 # ws = [EG,(100,30,20)]
 # ws = [UEG4_FALCON,],
 
-# ws = (LEG1_PHOGA,(9,34,15,1.4,))
-ws = (LEG1_CC,[])
+# ws = (PEG14_RENEGADE,(5,35,39,29,45,10,40,57,))
+ws = (PEG16_LEORIC,[])
 # ws = (DebugMean,[])
 cegt = CheckEGTrader(
     path_df,
