@@ -159,6 +159,7 @@ def add_hl_stair_fast(df: pd.DataFrame, n=3, period=20):
 
 def add_pc_stair_fast(df: pd.DataFrame, n=3, period=20):
     """ add 'stair'
+    'Mcfly'
     """
     df = df.copy()
     df = df.reset_index(drop=True)
@@ -223,11 +224,13 @@ def add_integrity_index(df:pd.DataFrame,period:int=14):
     df['spred'] = df['high'] - df['low']
     df['integrity'] = np.where(df['direction'] == 1, df['spred'],-df['spred'])
     df['ii'] = (df['integrity'].rolling(period).sum() / np.abs(df['integrity']).rolling(period).sum()) * 100
+    df['ii'] = df['ii'].round(2)
     df = df.drop(['spred','integrity'],axis=1)
     return df
 
 def add_cascade_channel(df: pd.DataFrame, n=3, period=20,period_smooth=100):
     """ add 'stair','top_line','bottom_line'
+    Mcfly
     """
     df = df.copy()
     df = df.reset_index(drop=True)
@@ -306,6 +309,7 @@ def add_assessment_motion_index(df:pd.DataFrame,period=100,period_filter=50):
 
 def add_hope_channel(df: pd.DataFrame, n=3, period=100,shift=10):
     """ add 'stair','top_line','bottom_line'
+    Mcfly
     """
     df = df.copy()
     df = df.reset_index(drop=True)

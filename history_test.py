@@ -10,12 +10,13 @@ symbol = path_df.split('\\')[-1].split('_')[0]
 fee = 0.001
 window = 60
 # window = 110
+# window = 200
 # ws = [EG,[]]
 # ws = [EG,(100,30,20)]
 # ws = [UEG4_FALCON,],
 
-# ws = (PEG14_RENEGADE,(5,35,39,29,45,10,40,57,))
-ws = (PEG16_LEORIC,[])
+# ws = (PEG17_PHOENIX,(10,38,29,51,17,5,36,0,))
+ws = (PEG21_WHITEMANE,[])
 # ws = (DebugMean,[])
 cegt = CheckEGTrader(
     path_df,

@@ -326,6 +326,143 @@ def add_dzz_peaks(df: pd.DataFrame, source='high_low', n_std=1.5, method='std', 
     
     return df
 
+
+def add_zigzag180826(df: pd.DataFrame, n_std: float = 1.5, period: int = 20, add_lust_fake_peak=True):
+    """
+    ZigZag индикатор.
+    
+    Параметры:
+    df - DataFrame с колонками: high, low, close
+    n_std - множитель для std
+    period - период для расчета волатильности
+    
+    Возвращает:
+    df с колонками:
+        zigzag - линейно интерполированные значения зигзага
+        zigzag_peaks - точки перелома
+        zigzag_direction - направление (1=up, -1=down)
+        reversal_threshold - порог разворота
+    """
+    df = df.copy()
+    
+    rolling_std = df['close'].rolling(period).std().bfill()
+    reversal_values = rolling_std * n_std
+    
+    size = len(df)
+    zz = np.full(size, np.nan)
+    direction = np.zeros(size, dtype=np.int8)
+    
+    # Первая точка - пик
+    first_idx = 0
+    first_high = df['high'].iloc[first_idx]
+    first_low = df['low'].iloc[first_idx]
+    
+    # Вторая точка
+    second_idx = 1
+    second_high = df['high'].iloc[second_idx]
+    second_low = df['low'].iloc[second_idx]
+    
+    if second_high > first_high:
+        # Направление 1: точка 1 - локальный минимум, точка 2 - локальный максимум
+        direction[first_idx] = 1
+        zz[first_idx] = first_low
+        local_min = first_low
+        local_min_idx = first_idx
+        local_max = second_high
+        local_max_idx = second_idx
+        zz[second_idx] = second_high
+        direction[second_idx] = 1
+        current_dir = 1
+    else:
+        # Направление -1: точка 1 - локальный максимум, точка 2 - локальный минимум
+        direction[first_idx] = -1
+        zz[first_idx] = first_high
+        local_max = first_high
+        local_max_idx = first_idx
+        local_min = second_low
+        local_min_idx = second_idx
+        zz[second_idx] = second_low
+        direction[second_idx] = -1
+        current_dir = -1
+    
+    for i in range(second_idx + 1, size):
+        high = df['high'].iloc[i]
+        low = df['low'].iloc[i]
+        reversal = reversal_values.iloc[i]
+        
+        if current_dir == 1:
+            if high > local_max:
+                # Обновляем максимум
+                zz[local_max_idx] = np.nan
+                local_max = high
+                local_max_idx = i
+                zz[i] = local_max
+                direction[i] = 1
+            elif local_max - low > reversal:
+                # Разворот вниз
+                zz[local_max_idx] = local_max
+                current_dir = -1
+                local_min = low
+                local_min_idx = i
+                zz[i] = local_min
+                direction[i] = -1
+            else:
+                direction[i] = 1
+        else:  # current_dir == -1
+            if low < local_min:
+                # Обновляем минимум
+                zz[local_min_idx] = np.nan
+                local_min = low
+                local_min_idx = i
+                zz[i] = local_min
+                direction[i] = -1
+            elif high - local_min > reversal:
+                # Разворот вверх
+                zz[local_min_idx] = local_min
+                current_dir = 1
+                local_max = high
+                local_max_idx = i
+                zz[i] = local_max
+                direction[i] = 1
+            else:
+                direction[i] = -1
+    
+    # Линейная интерполяция
+    zz_final = np.full(size, np.nan)
+    start_idx = None
+    start_val = np.nan
+    
+    for i in range(size):
+        if not np.isnan(zz[i]):
+            if start_idx is not None:
+                zz_final[start_idx:i+1] = np.linspace(start_val, zz[i], i - start_idx + 1)
+            start_idx = i
+            start_val = zz[i]
+    
+    df['zigzag'] = zz_final
+    
+    df['zigzag_peaks'] = np.where(
+        ((df['zigzag'].shift(1) < df['zigzag']) & (df['zigzag'] > df['zigzag'].shift(-1))) |
+        ((df['zigzag'].shift(1) > df['zigzag']) & (df['zigzag'] < df['zigzag'].shift(-1))),
+        df['zigzag'],
+        np.nan
+    )
+    
+    df['zigzag_direction'] = direction
+    df['reversal_threshold'] = reversal_values
+    if add_lust_fake_peak:
+        last_idx = df.index[-1]
+
+        # Проверяем направление и присваиваем соответствующее значение
+        if df.loc[last_idx, 'zigzag_direction'] == 1:
+            df.at[last_idx, 'zigzag_peaks'] = df.loc[last_idx, 'high']
+        else:
+            df.at[last_idx, 'zigzag_peaks'] = df.loc[last_idx, 'low']
+
+    return df
+
+
+
 def add_percent_zz_peaks(df: pd.DataFrame, source='high_low', percent_threshold=0.1, drop_last=True):
     """
     add 'zigzag','zigzag_peaks'
@@ -627,6 +764,41 @@ def add_analys_dzz(df, period_sma=3):
                   (peacks['zigzag_peaks'].shift(1) > peacks['zigzag_peaks'].shift(3))
     down_condition = (peacks['zigzag_peaks'] < peacks['zigzag_peaks'].shift(2)) & \
                     (peacks['zigzag_peaks'].shift(1) < peacks['zigzag_peaks'].shift(3))
+    
+    # Используем .loc для безопасного присвоения
+    peacks.loc[:, 'trend'] = 0  # Инициализация через .loc
+    peacks.loc[up_condition, 'trend'] = 1
+    peacks.loc[down_condition, 'trend'] = -1
+    
+    # Считаем SMA
+    peacks.loc[:, 'trend_sma'] = peacks['trend'].rolling(period_sma).mean()
+    
+    # Заполняем основной DataFrame
+    df['trend'] = peacks['trend'].reindex(df.index).ffill().fillna(0)
+    df['trend_sma'] = peacks['trend_sma'].reindex(df.index).ffill().fillna(0)
+    
+    return df
+
+def add_analys_dzz180826(df, period_sma=3):
+    """add 'trend','trend_sma' \n
+    180826"""
+    # Создаем явную копию DataFrame
+    df = df.copy()
+    df['trend'] = np.nan
+    
+    # Создаем копию для работы с пиками
+    peacks = df[~df['zp_s'].isna()].copy()  # Явное копирование
+    
+    if len(peacks) < 4:
+        df['trend'] = 0
+        df['trend_sma'] = 0
+        return df
+    
+    # Условия для тренда
+    up_condition = (peacks['zp_s'] > peacks['zp_s'].shift(2)) & \
+                  (peacks['zp_s'].shift(1) > peacks['zp_s'].shift(3))
+    down_condition = (peacks['zp_s'] < peacks['zp_s'].shift(2)) & \
+                    (peacks['zp_s'].shift(1) < peacks['zp_s'].shift(3))
     
     # Используем .loc для безопасного присвоения
     peacks.loc[:, 'trend'] = 0  # Инициализация через .loc
@@ -1332,5 +1504,31 @@ def _trim_nan(df):
         cols = ['zigzag', 'zigzag_line', 'zigzag_high', 'zigzag_low']
         df.loc[:first_valid, cols] = np.nan
         df.loc[last_valid+1:, cols] = np.nan
+    
+    return df
+
+def add_shift_zz_peaks(df, shift=1):
+    """
+    add 'zp_s' , 'zp_istop'
+    'zp_s' - сдвинутая точка зигзага на shift
+    'zp_istop' - точка вверху? (True/False)
+    """
+    # Создаем маску для строк, где zigzag_peaks не NaN
+    mask = ~pd.isna(df['zigzag_peaks'])
+    
+    # Создаем новый DataFrame только с нужными строками (явная копия)
+    zz = df.loc[mask].copy()
+    
+    # Добавляем колонки в копию
+    zz['zp_s'] = zz['zigzag_peaks'].shift(shift)
+    zz['zp_istop'] = zz['zigzag_direction'] < 0
+    
+    # Инициализируем колонки в исходном df с правильными типами
+    df['zp_s'] = np.nan  # float64
+    df['zp_istop'] = pd.NA  # или False, или pd.Series(dtype='boolean')
+    
+    # Записываем значения из zz обратно в df с явным приведением типа
+    df.loc[zz.index, 'zp_s'] = zz['zp_s'].astype(float)
+    df.loc[zz.index, 'zp_istop'] = zz['zp_istop'].astype('boolean')
     
     return df

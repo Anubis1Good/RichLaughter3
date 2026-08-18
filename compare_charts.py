@@ -11,75 +11,121 @@ from for_strategies.vsa_indicators import *
 from for_strategies.zigzag_indicators import *
 from utils.work_dfs.load_df import simple_load_df
 
+# Начальные параметры окна
+window = 60
+START = 60
+END = START + window
+WINDOW_SIZE = END - START
+COLUMNS = ['zp_s','zigzag']  # <--- СПИСОК КОЛОНОК
+
+# ===== НАСТРОЙКА ЦВЕТОВ =====
+# Для DF1 (полный расчет) - сплошные линии
+COLORS_DF1 = ['blue', 'green']  # для zigzag и zigzag_peaks соответственно
+
+# Для DF2 (расчет на окне) - пунктирные линии
+COLORS_DF2 = ['red', 'orange']  # для zigzag и zigzag_peaks соответственно
+
+# Альтернативные варианты цветов (раскомментируйте нужный):
+# Вариант 1: Все колонки DF1 синие, все DF2 красные
+# COLORS_DF1 = 'blue'
+# COLORS_DF2 = 'red'
+
+# Вариант 2: Разные цвета для каждой колонки
+# COLORS_DF1 = ['#1f77b4', '#2ca02c', '#d62728', '#9467bd']
+# COLORS_DF2 = ['#ff7f0e', '#98df8a', '#ff9896', '#c5b0d5']
+
+# Вариант 3: Цвета из палитры
+# from matplotlib import cm
+# colors = cm.tab10(np.linspace(0, 1, len(COLUMNS)))
+# COLORS_DF1 = colors
+# COLORS_DF2 = [c for c in colors]  # те же цвета для DF2
+# =================================
+
 # ===== ФУНКЦИЯ 1: Обработка датафрейма =====
 def preprocessing(df):
     """Добавляем индикаторы в датафрейм"""
     df = df.copy()
-    df = add_supertrend(df)
-    
-    # Работаем с numpy массивами для максимальной скорости
-    in_uptrend = df['in_uptrend'].fillna(False).values
-    
-    # Создаем массив сигналов
-    signals = np.zeros(len(df), dtype=np.int8)
-    
-    # Векторизованная логика
-    # Сигнал покупки: текущий True, предыдущий False
-    buy_mask = (in_uptrend[1:] == True) & (in_uptrend[:-1] == False)
-    signals[1:][buy_mask] = 1
-    
-    # Сигнал продажи: текущий False, предыдущий True
-    sell_mask = (in_uptrend[1:] == False) & (in_uptrend[:-1] == True)
-    signals[1:][sell_mask] = -1
-    
-    df['signal'] = signals
+    # df = add_dzz_peaks(df,drop_last=True)
+    df = add_zigzag180826(df,1.5)
+    # df['zz_old'] = df['zigzag']
+    # df = add_dzz_peaks_sleep(df,drop_last=True)
+    df = add_shift_zz_peaks(df,1)
+    df = add_analys_dzz180826(df)
+    # df['zp_s'] = df['zp_s'].shift(1)
+    df['zp_s'] = df['zp_s'].ffill()
+    # df['zigzag_peaks_shifted'] = df['zigzag_peaks_shifted'].ffill()
+    # df['zigzag_peaks'] = df['zigzag_peaks'].fillna(0)
     
     return df
 
 # ===== ФУНКЦИЯ 2: Отрисовка =====
-def plot_comparison(df1, df2, start_idx, end_idx, columns=['rsi']):
+def plot_comparison(df1, df2, start_idx, end_idx, columns=['rsi'], 
+                    colors_df1=None, colors_df2=None):
     """
-    Отрисовывает сравнение двух датафреймов на одном срезе
-    Верхний график - из первого датафрейма
-    Нижний график - из второго датафрейма
+    Отрисовывает сравнение двух датафреймов на одном графике
+    
+    Параметры:
+    df1, df2 - датафреймы для сравнения
+    start_idx, end_idx - индексы для среза
     columns - список колонок для отображения
+    colors_df1 - список цветов для колонок из df1 (если None, используется синий)
+    colors_df2 - список цветов для колонок из df2 (если None, используется красный)
     """
     slice1 = df1.iloc[start_idx:end_idx]
     slice2 = df2
     print(slice1.tail())
     print(slice2.tail())
-    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(14, 8), sharex=True)
+    # Если цвета не заданы - используем стандартные
+    if colors_df1 is None:
+        colors_df1 = ['blue'] * len(columns)
+    if colors_df2 is None:
+        colors_df2 = ['red'] * len(columns)
     
-    # Верхний график - все колонки из первого датафрейма
+    # Если передан один цвет для всех колонок - расширяем до списка
+    if isinstance(colors_df1, str):
+        colors_df1 = [colors_df1] * len(columns)
+    if isinstance(colors_df2, str):
+        colors_df2 = [colors_df2] * len(columns)
+    
+    # Если цветов меньше чем колонок - повторяем последний
+    if len(colors_df1) < len(columns):
+        colors_df1 = colors_df1 + [colors_df1[-1]] * (len(columns) - len(colors_df1))
+    if len(colors_df2) < len(columns):
+        colors_df2 = colors_df2 + [colors_df2[-1]] * (len(columns) - len(colors_df2))
+    
+    fig, ax = plt.subplots(figsize=(14, 8))
+    
+    # График DF1 - используем цвета из colors_df1
+    for i, col in enumerate(columns):
+        ax.plot(range(len(slice1)), slice1[col], linewidth=2, 
+                label=f'DF1 (полный) - {col}', 
+                color=colors_df1[i], alpha=0.7, linestyle='--')
+    
+    # График DF2 - используем цвета из colors_df2
+    for i, col in enumerate(columns):
+        ax.plot(range(len(slice2)), slice2[col], linewidth=2, 
+                label=f'DF2 (окно) - {col}', 
+                color=colors_df2[i], alpha=0.7, linestyle='-')
+    
+    ax.set_title(f'Сравнение индикаторов: полный расчет (сплошные) vs расчет на окне (пунктирные)')
+    ax.set_ylabel('Значение')
+    ax.set_xlabel('Индекс')
+    ax.grid(True, alpha=0.3)
+    ax.legend(loc='best')
+    
+    # Выравниваем Y для всего графика
+    all_values = []
     for col in columns:
-        ax1.plot(range(len(slice1)), slice1[col], linewidth=2, label=col)
-    ax1.set_title(f'DF1 - полный расчет')
-    ax1.set_ylabel('Значение')
-    ax1.grid(True, alpha=0.3)
-    ax1.legend()
+        all_values.extend(slice1[col].values)
+        all_values.extend(slice2[col].values)
     
-    # Нижний график - все колонки из второго датафрейма
-    for col in columns:
-        ax2.plot(range(len(slice2)), slice2[col], linewidth=2, label=col)
-    ax2.set_title(f'DF2 - расчет на окне')
-    ax2.set_ylabel('Значение')
-    ax2.set_xlabel('Индекс')
-    ax2.grid(True, alpha=0.3)
-    ax2.legend()
-    
-    # Выравниваем Y для каждого графика отдельно
-    y_min1 = min([slice1[col].min() for col in columns])
-    y_max1 = max([slice1[col].max() for col in columns])
-    y_padding1 = (y_max1 - y_min1) * 0.1
-    ax1.set_ylim(y_min1 - y_padding1, y_max1 + y_padding1)
-    
-    y_min2 = min([slice2[col].min() for col in columns])
-    y_max2 = max([slice2[col].max() for col in columns])
-    y_padding2 = (y_max2 - y_min2) * 0.1
-    ax2.set_ylim(y_min2 - y_padding2, y_max2 + y_padding2)
+    y_min = min(all_values)
+    y_max = max(all_values)
+    y_padding = (y_max - y_min) * 0.1
+    ax.set_ylim(y_min - y_padding, y_max + y_padding)
     
     plt.tight_layout()
-    return fig, ax1, ax2
+    return fig, ax
 
 # ===== ОСНОВНОЙ КОД С КНОПКАМИ =====
 
@@ -90,27 +136,21 @@ df = simple_load_df(filepath)
 # 1. Обрабатываем ВЕСЬ датафрейм
 df_full = preprocessing(df)
 
-# Начальные параметры окна
-window = 60
-# window = 120
-START = 60
-START = 5031
-END = START + window
-WINDOW_SIZE = END - START
-# COLUMNS = ['top_mean', 'bottom_mean']  # <--- СПИСОК КОЛОНОК
-COLUMNS = ['signal']  # <--- СПИСОК КОЛОНОК
+
 
 # Берем срез
 df_slice = df.iloc[START:END].copy()
 df_slice_processed = preprocessing(df_slice)
 
 # Создаем фигуру с графиками
-fig, ax1, ax2 = plot_comparison(
+fig, ax = plot_comparison(
     df1=df_full,
     df2=df_slice_processed,
     start_idx=START,
     end_idx=END,
-    columns=COLUMNS
+    columns=COLUMNS,
+    colors_df1=COLORS_DF1,
+    colors_df2=COLORS_DF2
 )
 
 # Добавляем кнопки
@@ -140,38 +180,41 @@ def update_plot(new_start):
     # Обновляем данные на графиках
     slice1 = df_full.iloc[START:END]
     slice2 = df_slice_processed
-    
+    print(slice1.tail())
+    print(slice2.tail())
     # Очищаем и перерисовываем
-    ax1.clear()
-    ax2.clear()
+    ax.clear()
     
-    # Верхний график
+    # График DF1 - используем цвета из COLORS_DF1
+    for i, col in enumerate(COLUMNS):
+        color = COLORS_DF1[i] if i < len(COLORS_DF1) else COLORS_DF1[-1]
+        ax.plot(range(len(slice1)), slice1[col], linewidth=2, 
+                label=f'DF1 (полный) - {col}', 
+                color=color, alpha=0.7, linestyle='--')
+    
+    # График DF2 - используем цвета из COLORS_DF2
+    for i, col in enumerate(COLUMNS):
+        color = COLORS_DF2[i] if i < len(COLORS_DF2) else COLORS_DF2[-1]
+        ax.plot(range(len(slice2)), slice2[col], linewidth=2, 
+                label=f'DF2 (окно) - {col}', 
+                color=color, alpha=0.7, linestyle='-')
+    
+    ax.set_title(f'Сравнение индикаторов: полный расчет (сплошные) vs расчет на окне (пунктирные)  Окно: {START}-{END}')
+    ax.set_ylabel('Значение')
+    ax.set_xlabel('Индекс')
+    ax.grid(True, alpha=0.3)
+    ax.legend(loc='best')
+    
+    # Выравниваем Y для всего графика
+    all_values = []
     for col in COLUMNS:
-        ax1.plot(range(len(slice1)), slice1[col], linewidth=2, label=col)
-    ax1.set_title(f'DF1 - полный расчет  Окно: {START}-{END}')
-    ax1.set_ylabel('Значение')
-    ax1.grid(True, alpha=0.3)
-    ax1.legend()
+        all_values.extend(slice1[col].values)
+        all_values.extend(slice2[col].values)
     
-    # Нижний график
-    for col in COLUMNS:
-        ax2.plot(range(len(slice2)), slice2[col], linewidth=2, label=col)
-    ax2.set_title(f'DF2 - расчет на окне  Окно: {START}-{END}')
-    ax2.set_ylabel('Значение')
-    ax2.set_xlabel('Индекс')
-    ax2.grid(True, alpha=0.3)
-    ax2.legend()
-    
-    # Выравниваем Y для каждого графика отдельно
-    y_min1 = min([slice1[col].min() for col in COLUMNS])
-    y_max1 = max([slice1[col].max() for col in COLUMNS])
-    y_padding1 = (y_max1 - y_min1) * 0.1
-    ax1.set_ylim(y_min1 - y_padding1, y_max1 + y_padding1)
-    
-    y_min2 = min([slice2[col].min() for col in COLUMNS])
-    y_max2 = max([slice2[col].max() for col in COLUMNS])
-    y_padding2 = (y_max2 - y_min2) * 0.1
-    ax2.set_ylim(y_min2 - y_padding2, y_max2 + y_padding2)
+    y_min = min(all_values)
+    y_max = max(all_values)
+    y_padding = (y_max - y_min) * 0.1
+    ax.set_ylim(y_min - y_padding, y_max + y_padding)
     
     fig.canvas.draw_idle()
 

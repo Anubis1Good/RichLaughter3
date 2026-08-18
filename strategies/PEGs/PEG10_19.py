@@ -305,6 +305,7 @@ class PEG15_SILVANA(BaseEG):
         return None
 
 #Долгий, но использовать можно
+# TODO решить проблему с индикаторами. Заглядывают слишком сильнов историю
 class PEG16_LEORIC(BaseEG):
     """stop=None, take=None, period=30, period2=10"""
     def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=50, period2=10):
@@ -373,6 +374,7 @@ class PEG16_LEORIC(BaseEG):
         return None
 
 #Быстрый товарищ
+# TODO решить проблему с индикаторами. Заглядывают слишком сильнов историю
 class PEG16_CHEN(BaseEG):
     """stop=None, take=None, period=30, period2=10"""
     def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=30, period2=10):
@@ -419,6 +421,7 @@ class PEG16_CHEN(BaseEG):
         return None
         
 #Быстрый товарищ     
+# TODO решить проблему с индикаторами. Заглядывают слишком сильнов историю
 class PEG16_ARTANIS(BaseEG):
     """stop=None, take=None, period=30, period2=10"""
     def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=30, period2=10):
@@ -467,16 +470,33 @@ class PEG16_ARTANIS(BaseEG):
         return None
 
 class PEG17_PHOENIX(BaseEG):
-    """stop=None, take=None, period=100, period_dc=20, period_rsi=20, period_velcro=50, threshold_velcro=30, use_stop=0"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=100, period_dc=20, period_rsi=20, period_velcro=50, threshold_velcro=30, use_stop=0):
+    """stop=None, take=None, period=100, period_dc=20, period_rsi=20, period_velcro=50, threshold_velcro=30, use_stop=0, max_period=55"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=55, period_dc=20, period_rsi=20, period_velcro=50, threshold_velcro=30, use_stop=0, max_period=55):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
-        self.period = period
         self.threshold_velcro = threshold_velcro
-        self.period_dc = period_dc
-        self.period_rsi = period_rsi
-        self.period_velcro = period_velcro
         self.use_stop = use_stop
+
+        max_total = (max_period // 3) * 2
+        total = period_dc + period_velcro
+
+        if total > max_total:
+            ratio = max_total / total
+            self.period_dc = int(period_dc * ratio)
+            self.period_velcro = int(period_velcro * ratio)
+        else:
+            self.period_dc = period_dc
+            self.period_velcro = period_velcro
+
+        total = period + period_rsi
+
+        if total > max_total:
+            ratio = max_total / total
+            self.period = int(period * ratio)
+            self.period_rsi = int(period_rsi * ratio)
+        else:
+            self.period = period
+            self.period_rsi = period_rsi
 
     def preprocessing(self, tdata):
         pdata = {}
@@ -512,8 +532,8 @@ class PEG17_PHOENIX(BaseEG):
         return None
 
 class PEG18_REXXAR(BaseEG):
-    """stop=None, take=None, period=100, n_stairs=3, period2=10, threshold_enter=40, threshold_exit=20"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=100, n_stairs=3, period2=10, threshold_enter=40, threshold_exit=20):
+    """stop=None, take=None, period=100, n_stairs=3, period2=10, threshold_enter=40, threshold_exit=20, use_stop=0"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=10, n_stairs=3, period2=10, threshold_enter=40, threshold_exit=20, use_stop=0):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
         self.period = period
@@ -521,20 +541,21 @@ class PEG18_REXXAR(BaseEG):
         self.period2 = period2
         self.threshold_enter = threshold_enter
         self.threshold_exit = threshold_exit
+        self.use_stop = use_stop
+        self.problems = 'Mcfly'
 
     def preprocessing(self, tdata):
         pdata = {}
         df = tdata['chart']
         df = add_pc_stair_fast(df, self.n_stairs, self.period2)
-        df = add_donchan_channel(df, self.period2)
-        df = add_rsi(df, self.period2)
-        df['stair_s'] = df['stair'].rolling(self.period2).mean()
+        df = add_donchan_channel(df, self.period)
+        df = add_rsi(df, self.period)
         df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
     def _get_action_from_row(self, row):
-        can_long = row['close'] > row['stair_s']
+        can_long = row['close'] > row['stair']
         nearest_long = row['high'] - row['close'] > row['close'] - row['low']
         
         if row['low'] <= row['min_hb']:
@@ -551,14 +572,15 @@ class PEG18_REXXAR(BaseEG):
                 if row['rsi'] > 100 - self.threshold_exit:
                     return 'close_long'
         
-        if can_long:
-            return 'close_short'
-        else:
-            return 'close_long'
+        if self.use_stop:
+            if can_long:
+                return 'close_short'
+            else:
+                return 'close_long'
 
 class PEG18_UTER(BaseEG):
-    """stop=None, take=None, period=100, n_stairs=3, period2=10, threshold=30, threshold_adx=40, period3=30"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=100, n_stairs=3, period2=10, threshold=30, threshold_adx=40, period3=30):
+    """stop=None, take=None, period=100, n_stairs=3, period2=10, threshold=30, threshold_adx=40, period3=30, use_stop=0"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=55, n_stairs=3, period2=10, threshold=30, threshold_adx=40, period3=30, use_stop=0):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
         self.period = period
@@ -567,15 +589,16 @@ class PEG18_UTER(BaseEG):
         self.period3 = period3
         self.threshold_adx = threshold_adx
         self.threshold = threshold
+        self.use_stop = use_stop
+        self.problems = 'Mcfly'
 
     def preprocessing(self, tdata):
         pdata = {}
         df = tdata['chart']
-        df = add_pc_stair_fast(df, self.n_stairs, self.period2)
+        df = add_pc_stair_fast(df, self.n_stairs, self.period)
         df = add_donchan_channel(df, self.period2)
         df = add_rsi(df, self.period2)
         df = add_adx(df, self.period3)
-        df['stair_s'] = df['stair'].rolling(self.period2).mean()
         df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
@@ -584,7 +607,7 @@ class PEG18_UTER(BaseEG):
         nearest_long = row['high'] - row['close'] > row['close'] - row['low']
         
         if row['adx'] > self.threshold_adx:
-            can_long = row['close'] > row['stair_s']
+            can_long = row['close'] > row['stair']
             
             if row['low'] <= row['min_hb'] and nearest_long:
                 if can_long:
@@ -598,10 +621,11 @@ class PEG18_UTER(BaseEG):
                 if row['rsi'] > 100 - self.threshold:
                     return 'close_long'
             
-            if can_long:
-                return 'close_short'
-            else:
-                return 'close_long'
+            if self.use_stop:
+                if can_long:
+                    return 'close_short'
+                else:
+                    return 'close_long'
         else:
             if row['low'] <= row['min_hb'] and nearest_long:
                 return 'open_long'
@@ -611,28 +635,29 @@ class PEG18_UTER(BaseEG):
         return None
 
 class PEG18_DIABLO(BaseEG):
-    """stop=None, take=None, period=100, n_stairs=3, period2=10, threshold=30"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=100, n_stairs=3, period2=10, threshold=30):
+    """stop=None, take=None, period=55, n_stairs=3, period2=10, threshold=30,use_stop=0"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=55, n_stairs=3, period2=10, threshold=30,use_stop=0):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
         self.period = period
         self.n_stairs = n_stairs
         self.period2 = period2
         self.threshold = threshold
+        self.use_stop = use_stop
+        self.problems = 'Mcfly'
 
     def preprocessing(self, tdata):
         pdata = {}
         df = tdata['chart']
-        df = add_pc_stair_fast(df, self.n_stairs, self.period2)
+        df = add_pc_stair_fast(df, self.n_stairs, self.period)
         df = add_donchan_channel(df, self.period2)
         df = add_rsi(df, self.period2)
-        df['stair_s'] = df['stair'].rolling(self.period2).mean()
         df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
     def _get_action_from_row(self, row):
-        can_long = row['close'] > row['stair_s']
+        can_long = row['close'] > row['stair']
         nearest_long = row['high'] - row['close'] > row['close'] - row['low']
         
         if row['close'] <= row['avarege'] and nearest_long and can_long:
@@ -646,15 +671,15 @@ class PEG18_DIABLO(BaseEG):
         
         if row['rsi'] > 100 - self.threshold and row['high'] >= row['max_hb']:
             return 'close_long'
-        
-        if can_long:
-            return 'close_short'
-        else:
-            return 'close_long'
+        if self.use_stop:
+            if can_long:
+                return 'close_short'
+            else:
+                return 'close_long'
         
 class PEG18_VARIAN(BaseEG):
-    """stop=None, take=None, period=100, n_stairs=3, period2=10, threshold=30, threshold_ii=25"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=100, n_stairs=3, period2=10, threshold=30, threshold_ii=25):
+    """stop=None, take=None, period=55, n_stairs=3, period2=10, threshold=30, threshold_ii=25, period_ii=10, use_stop=0)"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=10, n_stairs=3, period2=10, threshold=30, threshold_ii=25, period_ii=10, use_stop=0):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
         self.period = period
@@ -662,21 +687,23 @@ class PEG18_VARIAN(BaseEG):
         self.period2 = period2
         self.threshold = threshold
         self.threshold_ii = threshold_ii
+        self.use_stop = use_stop
+        self.period_ii = period_ii
+        self.problems = 'Mcfly'
 
     def preprocessing(self, tdata):
         pdata = {}
         df = tdata['chart']
-        df = add_pc_stair_fast(df, self.n_stairs, self.period2)
+        df = add_pc_stair_fast(df, self.n_stairs, self.period)
         df = add_donchan_channel(df, self.period2)
         df = add_rsi(df, self.period2)
-        df = add_integrity_index(df, self.period2 * 2)
-        df['stair_s'] = df['stair'].rolling(self.period2).mean()
+        df = add_integrity_index(df, self.period_ii)
         df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
     def _get_action_from_row(self, row):
-        can_long = row['close'] > row['stair_s']
+        can_long = row['close'] > row['stair']
         nearest_long = row['high'] - row['close'] > row['close'] - row['low']
         
         if nearest_long and can_long:
@@ -696,23 +723,31 @@ class PEG18_VARIAN(BaseEG):
         
         if row['rsi'] > 100 - self.threshold and row['high'] >= row['max_hb']:
             return 'close_long'
-        
-        if can_long:
-            return 'close_short'
-        else:
-            return 'close_long'
+        if self.use_stop:
+            if can_long:
+                return 'close_short'
+            else:
+                return 'close_long'
 
 class PEG18_BLAZE(BaseEG):
-    """stop=None, take=None, period=100, period2=10, period3=50, threshold_enter=40, threshold_exit=20, use_stop=1"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=100, period2=10, period3=50, threshold_enter=40, threshold_exit=20, use_stop=1):
+    """period=55, period2=10, period3=55, threshold_enter=40, threshold_exit=20, use_stop=1, max_period=55"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=55, period2=10, period3=55, threshold_enter=40, threshold_exit=20, use_stop=1, max_period=55):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
-        self.period = period
         self.period2 = period2
-        self.period3 = period3
         self.threshold_enter = threshold_enter
         self.threshold_exit = threshold_exit
         self.use_stop = use_stop
+        max_total = (max_period // 3) * 2
+        total = period + period3
+
+        if total > max_total:
+            ratio = max_total / total
+            self.period = int(period * ratio)
+            self.period3 = int(period3 * ratio)
+        else:
+            self.period = period
+            self.period3 = period3
 
     def preprocessing(self, tdata):
         pdata = {}
@@ -750,7 +785,7 @@ class PEG18_BLAZE(BaseEG):
 
 class PEG19_YREL(BaseEG):
     """stop=None, take=None, period=100, n_stairs=3, period2=10, threshold_enter=40, threshold_exit=20, shift=10, use_stop=1"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=100, n_stairs=3, period2=10, threshold_enter=40, threshold_exit=20, shift=10, use_stop=1):
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=55, n_stairs=3, period2=10, threshold_enter=40, threshold_exit=20, shift=10, use_stop=1):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
         self.period = period
@@ -760,6 +795,7 @@ class PEG19_YREL(BaseEG):
         self.threshold_exit = threshold_exit
         self.shift = shift
         self.use_stop = use_stop
+        self.problems = 'Mcfly'
 
     def preprocessing(self, tdata):
         pdata = {}
@@ -798,7 +834,7 @@ class PEG19_YREL(BaseEG):
 
 class PEG19_VALEERA(BaseEG):
     """stop=None, take=None, period=100, n_stairs=3, period2=10, threshold_enter=40, threshold_exit=20, shift=10, use_stop=1"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=100, n_stairs=3, period2=10, threshold_enter=40, threshold_exit=20, shift=10, use_stop=1):
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=55, n_stairs=3, period2=10, threshold_enter=40, threshold_exit=20, shift=10, use_stop=1):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
         self.period = period
@@ -808,6 +844,7 @@ class PEG19_VALEERA(BaseEG):
         self.threshold_exit = threshold_exit
         self.shift = shift
         self.use_stop = use_stop
+        self.problems = 'Mcfly'
 
     def preprocessing(self, tdata):
         pdata = {}
@@ -851,25 +888,34 @@ class PEG19_VALEERA(BaseEG):
         return None
 
 class PEG19_ZERATUL(BaseEG):
-    """stop=None, take=None, period=100, n_stairs=3, period2=10, period3=30, threshold_enter=40, threshold_exit=20, use_stop=1"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=100, n_stairs=3, period2=10, period3=30, threshold_enter=40, threshold_exit=20, use_stop=1):
+    """stop=None, take=None, period=55, n_stairs=3, period2=55, period3=55, threshold_enter=40, threshold_exit=20, use_stop=1, max_period=55"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=55, n_stairs=3, period2=55, period3=55, threshold_enter=40, threshold_exit=20, use_stop=1, max_period=55):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
         self.period = period
         self.n_stairs = n_stairs
-        self.period2 = period2
-        self.period3 = period3
         self.threshold_enter = threshold_enter
         self.threshold_exit = threshold_exit
         self.use_stop = use_stop
+        max_total = (max_period // 3) * 2
+        total = period2 + period3
+
+        if total > max_total:
+            ratio = max_total / total
+            self.period2 = int(period2 * ratio)
+            self.period3 = int(period3 * ratio)
+        else:
+            self.period2 = period2
+            self.period3 = period3
+        self.problems = 'Mcfly'
 
     def preprocessing(self, tdata):
         pdata = {}
         df = tdata['chart']
         df = add_cascade_channel(df, self.n_stairs, self.period2, self.period3)
-        df = add_donchan_channel(df, self.period2)
+        df = add_donchan_channel(df, self.period)
         df = add_vangerchik(df)
-        df = add_rsi(df, self.period2)
+        df = add_rsi(df, self.period)
         df['end_up'] = np.where((df['high'].shift(1) >= df['max_hb'].shift(1)) & (df['close'] < df['max_vg']), df['high'], np.nan)
         df['end_down'] = np.where((df['low'].shift(1) <= df['min_hb'].shift(1)) & (df['close'] > df['min_vg']), df['low'], np.nan)
         df = self.add_slice_df(df)
@@ -904,26 +950,89 @@ class PEG19_ZERATUL(BaseEG):
         
         return None
 
-class PEG19_CASSIA(BaseEG):
-    """stop=None, take=None, period=100, n_stairs=3, period2=10, period3=20, threshold_enter=40, threshold_exit=20, use_stop=1"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=100, n_stairs=3, period2=10, period3=20, threshold_enter=40, threshold_exit=20, use_stop=1):
+class PEG19_JOHANNA(BaseEG):
+    """stop=None, take=None, period=10,n_stairs=3,period2=10,period3=20,threshold_enter=40,threshold_exit=20,use_stop=1, max_period=55"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=10,n_stairs=3,period2=10,period3=20,threshold_enter=40,threshold_exit=20,use_stop=1, max_period=55):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
         self.period = period
         self.n_stairs = n_stairs
-        self.period2 = period2
-        self.period3 = period3
         self.threshold_enter = threshold_enter
         self.threshold_exit = threshold_exit
-        self.threshold_middle = (threshold_enter + threshold_exit) // 2
         self.use_stop = use_stop
+        max_total = (max_period // 3) * 2
+        total = period2 + period3
+
+        if total > max_total:
+            ratio = max_total / total
+            self.period2 = int(period2 * ratio)
+            self.period3 = int(period3 * ratio)
+        else:
+            self.period2 = period2
+            self.period3 = period3
+        self.problems = 'Mcfly'
 
     def preprocessing(self, tdata):
         pdata = {}
         df = tdata['chart']
         df = add_cascade_channel(df, self.n_stairs, self.period2, self.period3)
-        df = add_donchan_channel(df, self.period2)
-        df = add_rsi(df, self.period2)
+        df = add_donchan_channel(df, self.period)
+        df = add_rsi(df, self.period)
+        df = self.add_slice_df(df)
+        pdata['chart'] = df
+        return pdata
+    
+    def _get_action_from_row(self, row):
+        can_long = row['close'] > row['bottom_line']
+        can_short = row['close'] < row['top_line']
+        nearest_long = row['high'] - row['close'] > row['close'] - row['low'] 
+        if row['low'] <= row['min_hb']:
+            if nearest_long:
+                if can_long and row['rsi'] < self.threshold_enter:
+                    return 'open_long'
+                if row['rsi'] < self.threshold_exit:
+                    return 'close_short'
+        if row['high'] >= row['max_hb']:
+            if not nearest_long :
+                if can_short and row['rsi'] > 100-self.threshold_enter:
+                    return 'open_short'
+                if row['rsi'] > 100-self.threshold_exit:
+                    return 'close_long'
+        if self.use_stop:
+            if not can_short:
+                return 'close_short'
+            if not can_long:
+                return 'close_long'
+
+class PEG19_CASSIA(BaseEG):
+    """stop=None, take=None, period=100, n_stairs=3, period2=10, period3=20, threshold_enter=40, threshold_exit=20, use_stop=1, max_period=55"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=10, n_stairs=3, period2=10, period3=20, threshold_enter=40, threshold_exit=20, use_stop=1, max_period=55):
+        super().__init__(symbol, price_step, mult_ps, mode, stop, take)
+        self.needs_info = {'chart': self.symbol}
+        self.period = period
+        self.n_stairs = n_stairs
+        self.threshold_enter = threshold_enter
+        self.threshold_exit = threshold_exit
+        self.threshold_middle = (threshold_enter + threshold_exit) // 2
+        self.use_stop = use_stop
+        max_total = (max_period // 3) * 2
+        total = period2 + period3
+
+        if total > max_total:
+            ratio = max_total / total
+            self.period2 = int(period2 * ratio)
+            self.period3 = int(period3 * ratio)
+        else:
+            self.period2 = period2
+            self.period3 = period3
+        self.problems = 'Mcfly'
+
+    def preprocessing(self, tdata):
+        pdata = {}
+        df = tdata['chart']
+        df = add_cascade_channel(df, self.n_stairs, self.period2, self.period3)
+        df = add_donchan_channel(df, self.period)
+        df = add_rsi(df, self.period)
         df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
@@ -957,25 +1066,34 @@ class PEG19_CASSIA(BaseEG):
         return None
 
 class PEG19_IMPERIUS(BaseEG):
-    """stop=None, take=None, period=100, n_stairs=3, period2=10, period3=20, threshold_enter=40, threshold_exit=20, use_stop=1"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=100, n_stairs=3, period2=10, period3=20, threshold_enter=40, threshold_exit=20, use_stop=1):
+    """stop=None, take=None, period=100, n_stairs=3, period2=10, period3=20, threshold_enter=40, threshold_exit=20, use_stop=1, max_period=55"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=10, n_stairs=3, period2=10, period3=20, threshold_enter=40, threshold_exit=20, use_stop=1, max_period=55):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
         self.period = period
         self.n_stairs = n_stairs
-        self.period2 = period2
-        self.period3 = period3
         self.threshold_enter = threshold_enter
         self.threshold_exit = threshold_exit
         self.threshold_middle = (threshold_enter + threshold_exit) // 2
         self.use_stop = use_stop
+        max_total = (max_period // 3) * 2
+        total = period2 + period3
+
+        if total > max_total:
+            ratio = max_total / total
+            self.period2 = int(period2 * ratio)
+            self.period3 = int(period3 * ratio)
+        else:
+            self.period2 = period2
+            self.period3 = period3
+        self.problems = 'Mcfly'
 
     def preprocessing(self, tdata):
         pdata = {}
         df = tdata['chart']
         df = add_cascade_channel(df, self.n_stairs, self.period2, self.period3)
-        df = add_donchan_channel(df, self.period2)
-        df = add_rsi(df, self.period2)
+        df = add_donchan_channel(df, self.period)
+        df = add_rsi(df, self.period)
         df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata

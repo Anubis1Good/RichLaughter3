@@ -1,11 +1,11 @@
 from strategies.BaseEG import BaseEG
 from for_strategies.classic_indicators import add_bollinger,add_rsi,add_donchan_channel,add_fractals,add_chop,add_adx,add_ema
 from for_strategies.pva_indicators import add_mean_on_fractals,add_ext_on_fractals,add_smooth_channel,add_integrity_index,add_stable_ma_direction
-from for_strategies.zigzag_indicators import add_dzz_peaks,add_analys_dzz,add_percent_zz_peaks,add_pattern18_dzz_czd,add_stop_loss_p18czd
+from for_strategies.zigzag_indicators import add_dzz_peaks,add_analys_dzz,add_percent_zz_peaks,add_pattern18_dzz_czd,add_stop_loss_p18czd, add_analys_dzz180826, add_zigzag180826,add_shift_zz_peaks
 
 class PEG20_HOGGER(BaseEG):
     """stop=None, take=None, period=100, period2=5, mult_big=2, mult_small=0.5, threshold_enter=40, threshold_exit=20"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=100, period2=5, mult_big=2, mult_small=0.5, threshold_enter=40, threshold_exit=20):
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=55, period2=5, mult_big=2, mult_small=0.5, threshold_enter=40, threshold_exit=20):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
         self.period = period
@@ -18,8 +18,9 @@ class PEG20_HOGGER(BaseEG):
     def preprocessing(self, tdata):
         pdata = {}
         df = tdata['chart']
-        df['smab'] = df['middle'].rolling(window=self.period).mean()
-        std_dev = df['middle'].rolling(window=self.period).std()
+        middle_rolling = df['middle'].rolling(window=self.period)
+        df['smab'] = middle_rolling.mean()
+        std_dev = middle_rolling.std()
         # Вычисляем верхнюю и нижнюю полосы Боллинджера
         df['bbub'] = df['smab'] + (self.mult_big * std_dev)
         df['bbdb'] = df['smab'] - (self.mult_big * std_dev)
@@ -57,19 +58,21 @@ class PEG20_HOGGER(BaseEG):
 
 class PEG21_WHITEMANE(BaseEG):
     '''
-    stop=None, take=None, period=20, period_rsi=20, period_fractal=10, period_mean=5, n_std=1.5, period_sma=3, threshold_trend=0.5, use_stop=0
+    stop=None, take=None, period=20, period_rsi=20, period_fractal=10, period_max=55, n_std=1.5, period_sma=3, threshold_trend=0.5, use_stop=0, period_zz=20
     '''
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=20, period_rsi=20, period_fractal=10, period_mean=5, n_std=1.5, period_sma=3, threshold_trend=0.5, use_stop=0):
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=20, period_rsi=20, period_fractal=10, period_max=55, n_std=1.5, period_sma=3, threshold_trend=0.5, use_stop=0, period_zz=20):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
         self.period = period
         self.period_fractal = period_fractal
-        self.period_mean = period_mean
+        self.period_max = period_max
         self.period_rsi = period_rsi
         self.period_sma = period_sma
+        self.period_zz = period_zz
         self.n_std = n_std
         self.threshold_trend = threshold_trend
         self.use_stop = use_stop
+        self.problems = 'Mcfly_FixVanga'
 
     def preprocessing(self, tdata):
         pdata = {}
@@ -77,11 +80,12 @@ class PEG21_WHITEMANE(BaseEG):
         df = add_donchan_channel(df, self.period)
         df = add_rsi(df, self.period_rsi)
         df = add_fractals(df, self.period_fractal)
-        df = add_mean_on_fractals(df, self.period_mean, 'rsi')
+        df = add_mean_on_fractals(df, self.period_max, 'rsi',self.period_fractal)
         df['oversold'] = df['rsi'] < df['bottom_mean']
         df['overbought'] = df['rsi'] > df['top_mean']
-        df = add_dzz_peaks(df, n_std=self.n_std)
-        df = add_analys_dzz(df, self.period_sma)
+        df = add_zigzag180826(df, n_std=self.n_std,period=self.period_zz)
+        df = add_shift_zz_peaks(df)
+        df = add_analys_dzz180826(df, self.period_sma)
         df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata

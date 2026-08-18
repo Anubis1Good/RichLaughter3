@@ -124,27 +124,27 @@ group = (
             (2, max_period, 1),
         ]
     ),
-    (
-        PEG16_LEORIC, 
-        [
-            (2, max_period, 1),
-            (2, max_period, 1),
-        ]
-    ),
-    (
-        PEG16_CHEN, 
-        [
-            (2, max_period, 1),
-            (2, max_period, 1),
-        ]
-    ),
-    (
-        PEG16_ARTANIS, 
-        [
-            (2, max_period, 1),
-            (2, max_period, 1),
-        ]
-    ),
+    # (
+    #     PEG16_LEORIC, 
+    #     [
+    #         (2, max_period, 1),
+    #         (2, max_period, 1),
+    #     ]
+    # ),
+    # (
+    #     PEG16_CHEN, 
+    #     [
+    #         (2, max_period, 1),
+    #         (2, max_period, 1),
+    #     ]
+    # ),
+    # (
+    #     PEG16_ARTANIS, 
+    #     [
+    #         (2, max_period, 1),
+    #         (2, max_period, 1),
+    #     ]
+    # ),
     (
         PEG17_PHOENIX, 
         [
@@ -165,6 +165,7 @@ group = (
             (5, 40, 1),
             (5, 40, 1),
             (0, 1),
+            (max_period,),
         ]
     ),
     (
@@ -174,6 +175,7 @@ group = (
             (3,10,1),
             (2, max_period, 1),
             (5, 40, 1),
+            (0,1),
         ]
     ),
     (
@@ -184,6 +186,7 @@ group = (
             (2, max_period, 1),
             (5, 40, 1),
             (5, 40, 1),
+            (0,1),
         ]
     ),
     (
@@ -195,6 +198,7 @@ group = (
             (5, 40, 1),
             (5, 90, 1),
             (2, max_period, 1),
+            (0,1),
         ]
     ),
     (
@@ -205,6 +209,21 @@ group = (
             (2, max_period, 1),
             (5, 40, 1),
             (5, 40, 1),
+            (2, max_period, 1),
+            (0,1),
+        ]
+    ),
+    (
+        PEG19_JOHANNA, 
+        [
+            (2, max_period, 1),
+            (3,10,1),
+            (2, max_period, 1),
+            (2, max_period, 1),
+            (5, 40, 1),
+            (5, 40, 1),
+            (0,1),
+            (max_period,),
         ]
     ),
     (
@@ -217,6 +236,7 @@ group = (
             (5, 40, 1),
             (5, 40, 1),
             (0,1),
+            (max_period,),
         ]
     ),
     (
@@ -229,6 +249,7 @@ group = (
             (5, 40, 1),
             (5, 40, 1),
             (0,1),
+            (max_period,),
         ]
     ),
     (
@@ -265,6 +286,7 @@ group = (
             (5, 40, 1),
             (5, 40, 1),
             (0,1),
+            (max_period,),
         ]
     ),
     (
@@ -306,11 +328,12 @@ group = (
             (2, max_period, 1),
             (2, max_period, 1),
             (2, 15, 1),
-            (2, 10, 1),
+            (max_period,),
             (1.5,3,0.1),
-            (2, 10, 1),
+            (2, 4, 1),
             (0,0.5,0.1),
             (0,1)
+            (2, max_period, 1),
         ]
     ),
    
