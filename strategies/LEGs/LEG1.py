@@ -496,7 +496,6 @@ class LEG1_LAKSAe(BaseEG):
         df.loc[(df['high'] >= df['local_max']) & (df['close'] < df['ema']) & (df['nearest_long'] == False), 'signal'] = -1  # Продажа
 
         df = self.add_slice_df(df)
-        # df[df['signal'] != 0].info()
         pdata['chart'] = df
         return pdata
     

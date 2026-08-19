@@ -72,14 +72,14 @@ def add_bollinger(df: pd.DataFrame, period=20, kind='close', multiplier=2):
         raise ValueError("Неподдерживаемый тип цены. Используйте 'middle', 'high', 'low' или 'close'.")
     
     # Вычисляем SMA
-    df['sma'] = price.rolling(window=period).mean()
+    df['sma'] = price.rolling(window=period).mean().round(2)
     
     # Вычисляем стандартное отклонение
     std_dev = price.rolling(window=period).std()
     
     # Вычисляем верхнюю и нижнюю полосы Боллинджера
-    df['bbu'] = df['sma'] + (multiplier * std_dev)
-    df['bbd'] = df['sma'] - (multiplier * std_dev)
+    df['bbu'] = (df['sma'] + (multiplier * std_dev)).round(2)
+    df['bbd'] = (df['sma'] - (multiplier * std_dev)).round(2)
     
     return df
 
@@ -174,7 +174,7 @@ def add_ema(df:pd.DataFrame, period=20, kind='close'):
     ema = df[kind].ewm(alpha=alpha, adjust=False).mean()
     
     # Комбинируем SMA (первые period-1 значений) и EMA (остальные значения)
-    df['ema'] = sma.where(sma.notna(), ema)
+    df['ema'] = sma.where(sma.notna(), ema).round(2)
     
     return df
 
@@ -244,7 +244,10 @@ def add_adx(df:pd.DataFrame,adx_period=14):
     # Расчет ADX
     df['dx'] = (abs(df['plus_di'] - df['minus_di']) / (df['plus_di'] + df['minus_di'])) * 100
     df['adx'] = df['dx'].rolling(window=adx_period, min_periods=adx_period).mean().round(2)
-
+    cols_to_drop = ['tr', 'plus_dm', 'minus_dm', 'tr_smooth', 
+                    'plus_dm_smooth', 'minus_dm_smooth', 
+                    'plus_di', 'minus_di', 'dx']
+    df.drop(columns=cols_to_drop, inplace=True)
     return df
 
 def add_kama(df:pd.DataFrame, period=30,fast_ema=2,slow_ema=30):

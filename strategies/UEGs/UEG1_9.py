@@ -255,15 +255,15 @@ class UEG5_HAWK(BaseEG):
         return None
             
 class UEG6_DODO(BaseEG):
-    """stop=None, take=None, period=20, period_smas=2, adx_threshold=30, adx_stop=35
+    """stop=None, take=None, period_adx=20, period_smas=2, adx_threshold=30, adx_stop=35
     \n
     фильтрованный по adx GGD быстрых параметров. RANGER + GGD
     ADX-фильтр + GGD (быстрые SMA). При сильном ADX → close_all
     """
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=20, period_smas=2, adx_threshold=30, adx_stop=35):
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_adx=20, period_smas=2, adx_threshold=30, adx_stop=35):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
-        self.period = period
+        self.period_adx = period_adx
         self.period_smas = period_smas
         self.adx_threshold = adx_threshold
         self.adx_stop = adx_stop
@@ -271,7 +271,7 @@ class UEG6_DODO(BaseEG):
     def preprocessing(self, tdata):
         pdata = {}
         df = tdata['chart']
-        df = add_adx(df, self.period)
+        df = add_adx(df, self.period_adx)
         df['high_sma'] = df['high'].rolling(self.period_smas).mean()
         df['low_sma'] = df['low'].rolling(self.period_smas).mean()
         df = self.add_slice_df(df)
@@ -291,14 +291,15 @@ class UEG6_DODO(BaseEG):
         return None
 
 class UEG6_DUELDODO(BaseEG):
-    """stop=None, take=None, period=20, period_smas=2, adx_threshold=30, period_sma=20, use_stop=0
+    """stop=None, take=None, period=20, period_smas=2, adx_threshold=30, period_sma=20, use_stop=0,period_adx=27
     \n
     фильтрованный по adx, направленный по sma GGD быстрых параметров.
     ADX-фильтр + направление по SMA. В тренде — закрытие/открытие с учётом направления"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=20, period_smas=2, adx_threshold=30, period_sma=20, use_stop=0):
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=20, period_smas=2, adx_threshold=30, period_sma=20, use_stop=0,period_adx=27):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
         self.period = period
+        self.period_adx = period_adx
         self.period_smas = period_smas
         self.adx_threshold = adx_threshold
         self.period_sma = period_sma
@@ -307,7 +308,7 @@ class UEG6_DUELDODO(BaseEG):
     def preprocessing(self, tdata):
         pdata = {}
         df = tdata['chart']
-        df = add_adx(df, self.period)
+        df = add_adx(df, self.period_adx)
         df['sma'] = df['close'].rolling(self.period).mean()
         df['high_sma'] = df['high'].rolling(self.period_smas).mean()
         df['low_sma'] = df['low'].rolling(self.period_smas).mean()
@@ -340,14 +341,15 @@ class UEG6_DUELDODO(BaseEG):
         return None
 
 class UEG6_VULTURE(BaseEG):
-    """stop=None, take=None, period=20, period_smas=2, adx_threshold=30, period_sma=20, n_candles=5, n_fractals=3, allowance=0.1
+    """stop=None, take=None, period=20, period_smas=2, adx_threshold=30, period_sma=20, n_candles=5, n_fractals=3, allowance=0.1, period_adx=27
     \n
     фильтрованный по adx, направленный по sma GGD(быстрых параметров) + PELICAN .
     ADX-фильтр + SMA + PELICAN (фрактальные каналы)"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=20, period_smas=2, adx_threshold=30, period_sma=20, n_candles=5, n_fractals=3, allowance=0.1):
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=20, period_smas=2, adx_threshold=30, period_sma=20, n_candles=5, n_fractals=3, allowance=0.1, period_adx=27):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
         self.period = period
+        self.period_adx = period_adx
         self.period_smas = period_smas
         self.adx_threshold = adx_threshold
         self.period_sma = period_sma
@@ -358,7 +360,7 @@ class UEG6_VULTURE(BaseEG):
     def preprocessing(self, tdata):
         pdata = {}
         df = tdata['chart']
-        df = add_adx(df, self.period)
+        df = add_adx(df, self.period_adx)
         df['sma'] = df['close'].rolling(self.period).mean()
         df['high_sma'] = df['high'].rolling(self.period_smas).mean()
         df['low_sma'] = df['low'].rolling(self.period_smas).mean()
@@ -532,14 +534,14 @@ class UEG6_SHERIFF(BaseEG):
         return None
             
 class UEG7_DODO(BaseEG):
-    """stop=None, take=None, period=20, n_candles=5, n_fractals=3, adx_threshold=30, adx_stop=35
+    """stop=None, take=None, period_adx=20, n_candles=5, n_fractals=3, adx_threshold=30, adx_stop=35
     \n
     фильтрованный по adx GGD быстрых параметров. RANGER + GGD
     """
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=20, n_candles=5, n_fractals=3, adx_threshold=30, adx_stop=35):
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_adx=20, n_candles=5, n_fractals=3, adx_threshold=30, adx_stop=35):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
-        self.period = period
+        self.period_adx = period_adx
         self.n_candles = n_candles
         self.n_fractals = n_fractals
         self.adx_threshold = adx_threshold
@@ -548,7 +550,7 @@ class UEG7_DODO(BaseEG):
     def preprocessing(self, tdata):
         pdata = {}
         df = tdata['chart']
-        df = add_adx(df, self.period)
+        df = add_adx(df, self.period_adx)
         df = add_fractals(df, self.n_candles)
         df = add_average_fractals(df, self.n_fractals)
         df = self.add_slice_df(df)
@@ -568,13 +570,13 @@ class UEG7_DODO(BaseEG):
         return None
             
 class UEG7_DUELDODO(BaseEG):
-    """stop=None, take=None, period=20, n_candles=5, n_fractals=3, adx_threshold=30, period_sma=20, use_stop=0
+    """stop=None, take=None, period_adx=20, n_candles=5, n_fractals=3, adx_threshold=30, period_sma=20, use_stop=0
     \n
     фильтрованный по adx, направленный по sma GGD быстрых параметров."""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=20, n_candles=5, n_fractals=3, adx_threshold=30, period_sma=20, use_stop=0):
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_adx=20, n_candles=5, n_fractals=3, adx_threshold=30, period_sma=20, use_stop=0):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
-        self.period = period
+        self.period_adx = period_adx
         self.n_candles = n_candles
         self.n_fractals = n_fractals
         self.adx_threshold = adx_threshold
@@ -584,7 +586,7 @@ class UEG7_DUELDODO(BaseEG):
     def preprocessing(self, tdata):
         pdata = {}
         df = tdata['chart']
-        df = add_adx(df, self.period)
+        df = add_adx(df, self.period_adx)
         df['sma'] = df['close'].rolling(self.period).mean()
         df = add_fractals(df, self.n_candles)
         df = add_average_fractals(df, self.n_fractals)
@@ -617,13 +619,14 @@ class UEG7_DUELDODO(BaseEG):
         return None
 
 class UEG7_VULTURE(BaseEG):
-    """stop=None, take=None, period=20, adx_threshold=30, period_sma=20, n_candles=7, n_fractals=5, n_candles2=5, n_fractals2=3, allowance=0.1
+    """stop=None, take=None, period=20, adx_threshold=30, period_sma=20, n_candles=7, n_fractals=5, n_candles2=5, n_fractals2=3, allowance=0.1, period_adx=27
     \n
     фильтрованный по adx, направленный по sma GGD(быстрых параметров) + PELICAN ."""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=20, adx_threshold=30, period_sma=20, n_candles=7, n_fractals=5, n_candles2=5, n_fractals2=3, allowance=0.1):
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=20, adx_threshold=30, period_sma=20, n_candles=7, n_fractals=5, n_candles2=5, n_fractals2=3, allowance=0.1, period_adx=27):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
         self.period = period
+        self.period_adx = period_adx
         self.adx_threshold = adx_threshold
         self.period_sma = period_sma
         self.n_candles = n_candles
@@ -635,7 +638,7 @@ class UEG7_VULTURE(BaseEG):
     def preprocessing(self, tdata):
         pdata = {}
         df = tdata['chart']
-        df = add_adx(df, self.period)
+        df = add_adx(df, self.period_adx)
         df['sma'] = df['close'].rolling(self.period).mean()
         df = add_fractals(df, self.n_candles)
         df = add_average_fractals(df, self.n_fractals)

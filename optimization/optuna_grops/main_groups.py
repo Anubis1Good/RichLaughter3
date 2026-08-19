@@ -11,6 +11,7 @@ from strategies.VEGs.VEG1 import *
 
 # (min, max, step)
 max_period = 55
+half_max_period = max_period // 2
 group = (
     (
         PEG2_SDDCr, 
@@ -78,25 +79,23 @@ group = (
     (
         PEG14_RANGER, 
         [
-            (2, max_period, 1),
+            (2, half_max_period, 1),
             (5, 40, 1),
             (2, max_period, 1),
             (2, max_period, 1),
             (5, 100, 1),
             (5, 100, 1),
-            (max_period, ),
         ]
     ),
     (
         PEG14_RENEGADE, 
         [
-            (2, max_period, 1),
+            (2, half_max_period, 1),
             (5, 40, 1),
             (2, max_period, 1),
             (2, max_period, 1),
             (5, 100, 1),
             (5, 100, 1),
-            (max_period, ),
         ]
     ),
     (
@@ -197,7 +196,7 @@ group = (
             (2, max_period, 1),
             (5, 40, 1),
             (5, 90, 1),
-            (2, max_period, 1),
+            (2, half_max_period, 1),
             (0,1),
         ]
     ),
@@ -340,7 +339,7 @@ group = (
     (
         PEG22_BERSERK, 
         [
-            (2, max_period, 1),
+            (2, half_max_period, 1),
             (2, 15, 1),
             (max_period,),
             (1.5,3,0.1),
@@ -356,7 +355,7 @@ group = (
     (
         PEG22_SONYA, 
         [
-            (2, max_period, 1),
+            (2, half_max_period, 1),
             (2, 15, 1),
             (max_period,),
             (2, 4, 1),
@@ -604,7 +603,7 @@ group = (
             (10,90,1),
             (2, max_period, 1),
             (0,max_period,1),
-            (2, max_period, 1),
+            (2, half_max_period, 1),
             (max_period,)
         ]
     ),
@@ -623,12 +622,13 @@ group = (
             (2, max_period, 1),
             (3,10,1),
             (2, max_period, 1),
+            (max_period,)
         ]
     ),
     (
         SEG2_FAST, 
         [
-            (2, max_period, 1),
+            (2, half_max_period, 1),
             (3,10,1),
             (2, max_period, 1),
             (10,90,1),
@@ -637,22 +637,24 @@ group = (
     (
         SEG2_ULTRA, 
         [
-            (2, max_period, 1),
+            (2, half_max_period, 1),
             (3,10,1),
             (2, max_period, 1),
             (10,90,1),
+            (2, max_period, 1),
+            (max_period,)
         ]
     ),
     (
         SEG3_FORCE, 
         [
             (2, max_period, 1),
-            (3,9,1),
+            (0.5,3,0.1),
             (1,5,1),
-            (2,9,1),
+            (2, half_max_period, 1),
+            (10,90,1),
             (2, max_period, 1),
-            (10,40,1),
-            (2, max_period, 1),
+            (0.1, 1, 0.1),
         ]
     ),
  
@@ -742,7 +744,7 @@ group = (
     (
         UEG6_DODO, 
         [
-            (2, max_period, 1),
+            (2, half_max_period, 1),
             (2, max_period, 1),
             (10,70,1),
             (10,70,1),
@@ -755,7 +757,8 @@ group = (
             (2, max_period, 1),
             (10,70,1),
             (2, max_period, 1),
-            (0,1)
+            (0,1),
+            (2, half_max_period, 1),
         ]
     ),
     (
@@ -788,7 +791,8 @@ group = (
             (2, max_period, 1),
             (2,30,1),
             (1,20,1),
-            (0,1,0.01)
+            (0,1,0.01),
+            (2, half_max_period, 1),
         ]
     ),
     (
@@ -804,7 +808,7 @@ group = (
     (
         UEG7_DODO, 
         [
-            (2, max_period, 1),
+            (2, half_max_period, 1),
             (2,30,1),
             (1,20,1),
             (10,70,1),
@@ -814,7 +818,7 @@ group = (
     (
         UEG7_DUELDODO, 
         [
-            (2, max_period, 1),
+            (2, half_max_period, 1),
             (2,30,1),
             (1,20,1),
             (10,70,1),
@@ -854,7 +858,8 @@ group = (
             (1,20,1),
             (2,30,1),
             (1,20,1),
-            (0,1,0.01)
+            (0,1,0.01),
+            (2, half_max_period, 1),
         ]
     ),
     (

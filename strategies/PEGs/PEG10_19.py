@@ -147,12 +147,11 @@ class PEG14_RWDDCr(BaseEG):
         return None
 
 class PEG14_RANGER(BaseEG):
-    """stop=None, take=None, period=55, threshold_rsi=30, period2=55, period3=20, threshold_chop=50, threshold_adx=20,max_period=55"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=55, threshold_rsi=30, period2=55, period3=20, threshold_chop=50, threshold_adx=20,max_period=55):
+    """stop=None, take=None, period_adx=55, threshold_rsi=30, period2=55, period3=20, threshold_chop=50, threshold_adx=20"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_adx=55, threshold_rsi=30, period2=55, period3=20, threshold_chop=50, threshold_adx=20):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
-        can_period = max_period // 2
-        self.period = min(period,can_period)
+        self.period_adx = period_adx
         self.threshold_rsi = threshold_rsi
         self.threshold_chop = threshold_chop
         self.threshold_adx = threshold_adx
@@ -165,7 +164,7 @@ class PEG14_RANGER(BaseEG):
         df = add_donchan_channel(df, self.period3)
         df = add_rsi(df, self.period3)
         df = add_chop(df, self.period2)
-        df = add_adx(df, self.period)
+        df = add_adx(df, self.period_adx)
         df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
@@ -185,12 +184,12 @@ class PEG14_RANGER(BaseEG):
         return None
 
 class PEG14_RENEGADE(BaseEG):
-    """stop=None, take=None, period=55, threshold_rsi=30, period2=55, period3=20, threshold_chop=50, threshold_adx=20,max_period=55"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=55, threshold_rsi=30, period2=55, period3=20, threshold_chop=50, threshold_adx=20,max_period=55):
+    """stop=None, take=None, period_adx=27, threshold_rsi=30, period2=55, period3=20, threshold_chop=50, threshold_adx=20"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_adx=27, threshold_rsi=30, period2=55, period3=20, threshold_chop=50, threshold_adx=20):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
-        can_period = max_period // 2
-        self.period = min(period,can_period)
+
+        self.period_adx = period_adx
         self.threshold_rsi = threshold_rsi
         self.threshold_chop = threshold_chop
         self.threshold_adx = threshold_adx
@@ -203,8 +202,8 @@ class PEG14_RENEGADE(BaseEG):
         df = add_donchan_channel(df, self.period3)
         df = add_rsi(df, self.period3)
         df = add_chop(df, self.period2)
-        df = add_adx(df, self.period)
-        df = self.add_slice_df(df, period=self.period)
+        df = add_adx(df, self.period_adx)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -579,14 +578,14 @@ class PEG18_REXXAR(BaseEG):
                 return 'close_long'
 
 class PEG18_UTER(BaseEG):
-    """stop=None, take=None, period=100, n_stairs=3, period2=10, threshold=30, threshold_adx=40, period3=30, use_stop=0"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=55, n_stairs=3, period2=10, threshold=30, threshold_adx=40, period3=30, use_stop=0):
+    """stop=None, take=None, period=55, n_stairs=3, period2=10, threshold=30, threshold_adx=40, period_adx=30, use_stop=0"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=55, n_stairs=3, period2=10, threshold=30, threshold_adx=40, period_adx=30, use_stop=0):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
         self.period = period
         self.n_stairs = n_stairs
         self.period2 = period2
-        self.period3 = period3
+        self.period_adx = period_adx
         self.threshold_adx = threshold_adx
         self.threshold = threshold
         self.use_stop = use_stop
@@ -598,7 +597,7 @@ class PEG18_UTER(BaseEG):
         df = add_pc_stair_fast(df, self.n_stairs, self.period)
         df = add_donchan_channel(df, self.period2)
         df = add_rsi(df, self.period2)
-        df = add_adx(df, self.period3)
+        df = add_adx(df, self.period_adx)
         df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata

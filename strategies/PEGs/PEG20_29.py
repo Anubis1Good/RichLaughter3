@@ -213,11 +213,11 @@ class PEG21_MALTHAEL(BaseEG):
 
 # Попробовать написать версию на add_percent_zz190826
 class PEG22_BERSERK(BaseEG):
-    """stop=None, take=None, period=100, period_fractal=10, period_max=55, n_std=1.5, period_sma=3, threshold_trend=0.5, period2=100, period3=20, threshold_chop=60, threshold_adx=30, period_zz=20"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=55, period_fractal=10, period_max=55, n_std=1.5, period_sma=3, threshold_trend=0.5, period2=55, period3=20, threshold_chop=60, threshold_adx=30, period_zz=20):
+    """stop=None, take=None, period_adx=27, period_fractal=10, period_max=55, n_std=1.5, period_sma=3, threshold_trend=0.5, period2=55, period3=20, threshold_chop=60, threshold_adx=30, period_zz=20"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_adx=27, period_fractal=10, period_max=55, n_std=1.5, period_sma=3, threshold_trend=0.5, period2=55, period3=20, threshold_chop=60, threshold_adx=30, period_zz=20):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
-        self.period = period
+        self.period_adx = period_adx
         self.period_fractal = period_fractal
         self.period_max = period_max
         self.period_sma = period_sma
@@ -236,7 +236,7 @@ class PEG22_BERSERK(BaseEG):
         df = add_donchan_channel(df, self.period3)
         df = add_rsi(df, self.period3)
         df = add_chop(df, self.period2)
-        df = add_adx(df, self.period)
+        df = add_adx(df, self.period_adx)
         df = add_fractals(df, self.period_fractal)
         df = add_mean_on_fractals(df, self.period_max, 'rsi',self.period_fractal)
         df['oversold'] = df['rsi'] < df['bottom_mean']
@@ -272,11 +272,11 @@ class PEG22_BERSERK(BaseEG):
 
 # Если Соня будет лучше чем Берсерк, то нужно будет сделать вариации 21 и 23 с add_percent_zz190826
 class PEG22_SONYA(BaseEG):
-    """stop=None, take=None, period=55, period_fractal=10, period_max=55, period_sma=3, threshold_trend=0.5, period2=55, period3=20, threshold_chop=60, threshold_adx=30, percent_threshold=0.5"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=55, period_fractal=10, period_max=55, period_sma=3, threshold_trend=0.5, period2=55, period3=20, threshold_chop=60, threshold_adx=30, percent_threshold=0.5):
+    """stop=None, take=None, period_adx=27, period_fractal=10, period_max=55, period_sma=3, threshold_trend=0.5, period2=55, period3=20, threshold_chop=60, threshold_adx=30, percent_threshold=0.5"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_adx=27, period_fractal=10, period_max=55, period_sma=3, threshold_trend=0.5, period2=55, period3=20, threshold_chop=60, threshold_adx=30, percent_threshold=0.5):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
-        self.period = period
+        self.period_adx = period_adx
         self.period_fractal = period_fractal
         self.period_max = period_max
         self.period_sma = period_sma
@@ -294,7 +294,7 @@ class PEG22_SONYA(BaseEG):
         df = add_donchan_channel(df, self.period3)
         df = add_rsi(df, self.period3)
         df = add_chop(df, self.period2)
-        df = add_adx(df, self.period)
+        df = add_adx(df, self.period_adx)
         df = add_fractals(df, self.period_fractal)
         df = add_mean_on_fractals(df, self.period_max, 'rsi',self.period_fractal)
         df['oversold'] = df['rsi'] < df['bottom_mean']

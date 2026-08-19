@@ -19,11 +19,12 @@ can_period = max_period // 3
 # 58.056667    55.53666
 period=55
 period2=55
-df = add_ema(df, can_period)
-df = add_stable_ma_direction(df, can_period, 'ema')
-df = add_donchan_channel(df, period2)
-df = add_rsi(df, period2)
-df = add_integrity_index(df, period2)
+df = add_bollinger(df, period=period)
+df = add_ema(df, period=period // 2)
+df = add_pc_stair_fast(df, 3, period)
+df = add_adx(df,27)
+df['bbu_detach'] = (df['high'] < df['bbu']) & (df['high'].shift(1) < df['bbu'].shift(1)) & (df['high'].shift(2) > df['bbu'].shift(2))
+df['bbd_detach'] = (df['low'] > df['bbd']) & (df['low'].shift(1) > df['bbd'].shift(1)) & (df['low'].shift(2) < df['bbd'].shift(2))
 
 
 print(df.tail(60))
