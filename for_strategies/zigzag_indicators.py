@@ -327,7 +327,7 @@ def add_dzz_peaks(df: pd.DataFrame, source='high_low', n_std=1.5, method='std', 
     return df
 
 
-def add_zigzag180826(df: pd.DataFrame, n_std: float = 1.5, period: int = 20, add_lust_fake_peak=True):
+def add_zigzag180826(df: pd.DataFrame, n_std: float = 1.5, period: int = 20):
     """
     ZigZag индикатор.
     
@@ -440,6 +440,7 @@ def add_zigzag180826(df: pd.DataFrame, n_std: float = 1.5, period: int = 20, add
             start_val = zz[i]
     
     df['zigzag'] = zz_final
+    df['zigzag_direction'] = direction
     
     df['zigzag_peaks'] = np.where(
         ((df['zigzag'].shift(1) < df['zigzag']) & (df['zigzag'] > df['zigzag'].shift(-1))) |
@@ -448,20 +449,127 @@ def add_zigzag180826(df: pd.DataFrame, n_std: float = 1.5, period: int = 20, add
         np.nan
     )
     
-    df['zigzag_direction'] = direction
     df['reversal_threshold'] = reversal_values
-    if add_lust_fake_peak:
-        last_idx = df.index[-1]
 
-        # Проверяем направление и присваиваем соответствующее значение
-        if df.loc[last_idx, 'zigzag_direction'] == 1:
-            df.at[last_idx, 'zigzag_peaks'] = df.loc[last_idx, 'high']
-        else:
-            df.at[last_idx, 'zigzag_peaks'] = df.loc[last_idx, 'low']
 
     return df
 
 
+
+def add_percent_zz190826(df: pd.DataFrame, source='high_low', percent_threshold=0.1, drop_last=False):
+    """
+    add 'zigzag','zigzag_peaks'
+    ZigZag с динамическим reversal на основе процентного отклонения
+    
+    Параметры:
+    df - DataFrame с колонками: high, low, close
+    source - 'high_low' (по экстремумам) или 'close' (по ценам закрытия)
+    percent_threshold - процент отклонения для разворота (0.1 = 0.1%)
+    drop_last - исключать последний бар (еще не сформировавшийся)
+    
+    Возвращает:
+    df с колонками:
+        zigzag - линейно интерполированные значения зигзага
+        zigzag_peaks - точки перелома (пики/впадины)
+        zigzag_direction - направление (1=up, -1=down)
+        reversal_threshold - порог разворота (в абсолютных значениях)
+    """
+    df = df.copy()
+    
+    # Выбор источника данных
+    if source == 'high_low':
+        prices = df[['high', 'low']].values
+    elif source == 'close':
+        prices = df[['close', 'close']].values
+    else:
+        raise ValueError("source должен быть 'high_low' или 'close'")
+    
+    highs = prices[:, 0]
+    lows = prices[:, 1]
+    size = len(df)
+    
+    # Инициализация массивов
+    zz = np.full(size, np.nan)  # Точки разворота
+    direction = np.zeros(size, dtype=np.int8)  # 1=up, -1=down
+    reversal_values = np.full(size, np.nan)  # Пороги разворота
+    
+    # Начальные условия
+    direction[0] = 1  # Начинаем с восходящего тренда
+    last_pivot = highs[0]
+    last_pivot_idx = 0
+    zz[0] = last_pivot  # Первая точка
+    
+    for i in range(1, size):
+        high = highs[i]
+        low = lows[i]
+        reversal = last_pivot * (percent_threshold / 100)  # Вычисляем процентный порог
+        reversal_values[i] = reversal  # Сохраняем порог
+        prev_dir = direction[i-1]
+        
+        if prev_dir == 1:  # Предыдущее направление - вверх
+            # Сначала проверяем обновление максимума
+            if high > last_pivot:
+                # Удаляем старый максимум
+                zz[last_pivot_idx] = np.nan
+                last_pivot = high
+                last_pivot_idx = i
+                zz[i] = last_pivot
+                direction[i] = 1  # Подтверждаем текущее направление
+            # Затем проверяем разворот (только если не обновили максимум)
+            elif low <= last_pivot - reversal:
+                direction[i] = -1
+                last_pivot = low
+                last_pivot_idx = i
+                zz[i] = last_pivot
+            else:
+                direction[i] = 1
+                
+        else:  # Предыдущее направление - вниз
+            # Сначала проверяем обновление минимума
+            if low < last_pivot:
+                # Удаляем старый минимум
+                zz[last_pivot_idx] = np.nan
+                last_pivot = low
+                last_pivot_idx = i
+                zz[i] = last_pivot
+                direction[i] = -1  # Подтверждаем текущее направление
+            # Затем проверяем разворот (только если не обновили минимум)
+            elif high >= last_pivot + reversal:
+                direction[i] = 1
+                last_pivot = high
+                last_pivot_idx = i
+                zz[i] = last_pivot
+            else:
+                direction[i] = -1
+    
+    # Сохраняем точки перелома до интерполяции
+    if drop_last:
+        zz[-1] = np.nan
+
+    
+    # Линейная интерполяция между точками для непрерывного зигзага
+    zz_final = np.full(size, np.nan)
+    start_idx = None
+    start_val = np.nan
+    
+    for i in range(size):
+        if not np.isnan(zz[i]):
+            if start_idx is not None:
+                zz_final[start_idx:i+1] = np.linspace(start_val, zz[i], i - start_idx + 1)
+            start_idx = i
+            start_val = zz[i]
+
+    df['zigzag'] = zz_final
+    df['zigzag_peaks'] = np.where(
+        ((df['zigzag'].shift(1) < df['zigzag']) & (df['zigzag'] > df['zigzag'].shift(-1))) |
+        ((df['zigzag'].shift(1) > df['zigzag']) & (df['zigzag'] < df['zigzag'].shift(-1))),
+        df['zigzag'],
+        np.nan
+    )
+    df['zigzag_direction'] = direction
+    df['reversal_threshold'] = reversal_values
+    
+    return df
 
 def add_percent_zz_peaks(df: pd.DataFrame, source='high_low', percent_threshold=0.1, drop_last=True):
     """
@@ -1507,12 +1615,20 @@ def _trim_nan(df):
     
     return df
 
-def add_shift_zz_peaks(df, shift=1):
+def add_shift_zz_peaks(df, shift=1, add_lust_fake_peak=True):
     """
     add 'zp_s' , 'zp_istop'
     'zp_s' - сдвинутая точка зигзага на shift
     'zp_istop' - точка вверху? (True/False)
     """
+    if add_lust_fake_peak:
+        last_idx = df.index[-1]
+
+        # Проверяем направление и присваиваем соответствующее значение
+        if df.loc[last_idx, 'zigzag_direction'] == 1:
+            df.at[last_idx, 'zigzag_peaks'] = df.loc[last_idx, 'high']
+        else:
+            df.at[last_idx, 'zigzag_peaks'] = df.loc[last_idx, 'low']
     # Создаем маску для строк, где zigzag_peaks не NaN
     mask = ~pd.isna(df['zigzag_peaks'])
     
@@ -1530,5 +1646,156 @@ def add_shift_zz_peaks(df, shift=1):
     # Записываем значения из zz обратно в df с явным приведением типа
     df.loc[zz.index, 'zp_s'] = zz['zp_s'].astype(float)
     df.loc[zz.index, 'zp_istop'] = zz['zp_istop'].astype('boolean')
+    
+    return df
+
+# Долгий, не всегда правильные точки выбирает
+def add_wzz3p(df: pd.DataFrame, period=55):
+    """ add 'wzp1''wzp2''wzp3''idx_wzp1''idx_wzp2''idx_wzp3' \n
+    создает 3 точки зигзага в окне
+    19.08.2026
+    """
+    # Инициализация колонок одной строкой
+    df[['wzp1', 'wzp2', 'wzp3', 'idx_wzp1', 'idx_wzp2', 'idx_wzp3']] = np.nan
+    
+    for i in range(period, len(df)):
+        start_pos = i - period
+        slice1 = df.iloc[start_pos:i]
+        
+        # Находим экстремумы
+        idx_h1 = slice1['high'].idxmax()
+        idx_l1 = slice1['low'].idxmin()
+        
+        pos_h1 = df.index.get_loc(idx_h1)
+        pos_l1 = df.index.get_loc(idx_l1)
+        
+        # Определяем паттерн
+        if pos_h1 > pos_l1 or (pos_h1 == pos_l1 and slice1.loc[idx_h1, 'direction'] == 1):
+            # Паттерн "рост": l1 -> h1 -> l2
+            first_idx, first_val = idx_l1, slice1.loc[idx_l1, 'low']
+            second_idx, second_val = idx_h1, slice1.loc[idx_h1, 'high']
+            pos_second = pos_h1
+            search_min = True
+        else:
+            # Паттерн "падение": h1 -> l1 -> h2
+            first_idx, first_val = idx_h1, slice1.loc[idx_h1, 'high']
+            second_idx, second_val = idx_l1, slice1.loc[idx_l1, 'low']
+            pos_second = pos_l1
+            search_min = False
+        
+        # Сохраняем первые две точки
+        df.loc[df.index[i], ['idx_wzp1', 'wzp1']] = first_idx, first_val
+        df.loc[df.index[i], ['idx_wzp2', 'wzp2']] = second_idx, second_val
+        
+        # Ищем третью точку
+        if pos_second + 1 < len(df):
+            slice2 = df.iloc[pos_second + 1:i + 1]
+            if len(slice2) > 0:
+                col = 'low' if search_min else 'high'
+                third_idx = slice2[col].idxmin() if search_min else slice2[col].idxmax()
+                third_val = slice2.loc[third_idx, col]
+                
+                df.loc[df.index[i], ['idx_wzp3', 'wzp3']] = third_idx, third_val
+    
+    # Приводим к Int64
+    df[['idx_wzp1', 'idx_wzp2', 'idx_wzp3']] = df[['idx_wzp1', 'idx_wzp2', 'idx_wzp3']].astype('Int64')
+    
+    return df
+
+# Долгий, не всегда правильные точки выбирает
+def add_wzz5p(df: pd.DataFrame, period=55):
+    """ add 'wzp1''wzp2''wzp3''wzp4''wzp5' и их индексы \n
+    создает 5 точек зигзага в окне
+    Точки: 1 -> 2 -> 3 -> 4 -> 5
+    где 3 и 4 - промежуточные экстремумы между 2 и 5
+    """
+    # Инициализация колонок
+    cols = ['wzp1', 'wzp2', 'wzp3', 'wzp4', 'wzp5',
+            'idx_wzp1', 'idx_wzp2', 'idx_wzp3', 'idx_wzp4', 'idx_wzp5']
+    df[cols] = np.nan
+    
+    for i in range(period, len(df)):
+        start_pos = i - period
+        slice1 = df.iloc[start_pos:i]
+        
+        # Находим экстремумы в первом окне
+        idx_h1 = slice1['high'].idxmax()
+        idx_l1 = slice1['low'].idxmin()
+        
+        pos_h1 = df.index.get_loc(idx_h1)
+        pos_l1 = df.index.get_loc(idx_l1)
+        
+        # Определяем паттерн для первых двух точек
+        if pos_h1 > pos_l1 or (pos_h1 == pos_l1 and slice1.loc[idx_h1, 'direction'] == 1):
+            # Паттерн "рост": l1 -> h1 -> ... -> l2
+            first_idx, first_val = idx_l1, slice1.loc[idx_l1, 'low']
+            second_idx, second_val = idx_h1, slice1.loc[idx_h1, 'high']
+            pos_second = pos_h1
+            is_up = True
+        else:
+            # Паттерн "падение": h1 -> l1 -> ... -> h2
+            first_idx, first_val = idx_h1, slice1.loc[idx_h1, 'high']
+            second_idx, second_val = idx_l1, slice1.loc[idx_l1, 'low']
+            pos_second = pos_l1
+            is_up = False
+        
+        # Сохраняем первые две точки
+        df.loc[df.index[i], ['idx_wzp1', 'wzp1']] = first_idx, first_val
+        df.loc[df.index[i], ['idx_wzp2', 'wzp2']] = second_idx, second_val
+        
+        # Ищем пятую точку (последний экстремум)
+        if pos_second + 1 < len(df):
+            slice_last = df.iloc[pos_second + 1:i + 1]
+            if len(slice_last) > 0:
+                if is_up:
+                    # Для роста ищем минимум после максимума (точка 5)
+                    fifth_idx = slice_last['low'].idxmin()
+                    fifth_val = slice_last.loc[fifth_idx, 'low']
+                else:
+                    # Для падения ищем максимум после минимума (точка 5)
+                    fifth_idx = slice_last['high'].idxmax()
+                    fifth_val = slice_last.loc[fifth_idx, 'high']
+                
+                pos_fifth = df.index.get_loc(fifth_idx)
+                
+                # Сохраняем пятую точку
+                df.loc[df.index[i], ['idx_wzp5', 'wzp5']] = fifth_idx, fifth_val
+                
+                # Теперь ищем точки 3 и 4 между точкой 2 и точкой 5
+                if pos_second + 1 < pos_fifth:
+                    # Разделяем промежуток между точкой 2 и точкой 5 пополам
+                    mid_pos = (pos_second + pos_fifth) // 2
+                    
+                    # Первая половина: от точки 2 до середины
+                    slice3 = df.iloc[pos_second + 1:mid_pos + 1]
+                    if len(slice3) > 0:
+                        if is_up:
+                            # После максимума ищем минимум (точка 3)
+                            third_idx = slice3['low'].idxmin()
+                            third_val = slice3.loc[third_idx, 'low']
+                        else:
+                            # После минимума ищем максимум (точка 3)
+                            third_idx = slice3['high'].idxmax()
+                            third_val = slice3.loc[third_idx, 'high']
+                        
+                        df.loc[df.index[i], ['idx_wzp3', 'wzp3']] = third_idx, third_val
+                    
+                    # Вторая половина: от середины до точки 5
+                    slice4 = df.iloc[mid_pos + 1:pos_fifth + 1]
+                    if len(slice4) > 0:
+                        if is_up:
+                            # Ищем максимум перед минимумом (точка 4)
+                            fourth_idx = slice4['high'].idxmax()
+                            fourth_val = slice4.loc[fourth_idx, 'high']
+                        else:
+                            # Ищем минимум перед максимумом (точка 4)
+                            fourth_idx = slice4['low'].idxmin()
+                            fourth_val = slice4.loc[fourth_idx, 'low']
+                        
+                        df.loc[df.index[i], ['idx_wzp4', 'wzp4']] = fourth_idx, fourth_val
+    
+    # Приводим индексы к Int64
+    idx_cols = ['idx_wzp1', 'idx_wzp2', 'idx_wzp3', 'idx_wzp4', 'idx_wzp5']
+    df[idx_cols] = df[idx_cols].astype('Int64')
     
     return df

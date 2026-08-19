@@ -1,7 +1,7 @@
 from strategies.BaseEG import BaseEG
 from for_strategies.classic_indicators import add_bollinger,add_rsi,add_donchan_channel,add_fractals,add_chop,add_adx,add_ema
 from for_strategies.pva_indicators import add_mean_on_fractals,add_ext_on_fractals,add_smooth_channel,add_integrity_index,add_stable_ma_direction
-from for_strategies.zigzag_indicators import add_dzz_peaks,add_analys_dzz,add_percent_zz_peaks,add_pattern18_dzz_czd,add_stop_loss_p18czd, add_analys_dzz180826, add_zigzag180826,add_shift_zz_peaks
+from for_strategies.zigzag_indicators import add_dzz_peaks,add_analys_dzz,add_percent_zz_peaks,add_pattern18_dzz_czd,add_stop_loss_p18czd, add_analys_dzz180826, add_zigzag180826, add_shift_zz_peaks,add_percent_zz190826
 
 class PEG20_HOGGER(BaseEG):
     """stop=None, take=None, period=100, period2=5, mult_big=2, mult_small=0.5, threshold_enter=40, threshold_exit=20"""
@@ -56,6 +56,7 @@ class PEG20_HOGGER(BaseEG):
         
         return None
 
+# Попробовать написать версию на add_percent_zz190826
 class PEG21_WHITEMANE(BaseEG):
     '''
     stop=None, take=None, period=20, period_rsi=20, period_fractal=10, period_max=55, n_std=1.5, period_sma=3, threshold_trend=0.5, use_stop=0, period_zz=20
@@ -111,30 +112,34 @@ class PEG21_WHITEMANE(BaseEG):
         
         return None
 
+# Попробовать написать версию на add_percent_zz190826
 class PEG21_AURIEL(BaseEG):
     '''
-    stop=None, take=None, period=20, period_fractal=10, period_mean=5, n_std=1.5, period_sma=3, threshold_trend=0.5
+    stop=None, take=None, period=20, period_fractal=10, period_max=55, n_std=1.5, period_sma=3, threshold_trend=0.5, period_zz=20
     '''
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=20, period_fractal=10, period_mean=5, n_std=1.5, period_sma=3, threshold_trend=0.5):
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=20, period_fractal=10, period_max=55, n_std=1.5, period_sma=3, threshold_trend=0.5, period_zz=20):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
         self.period = period
         self.period_fractal = period_fractal
-        self.period_mean = period_mean
+        self.period_max = period_max
         self.period_sma = period_sma
+        self.period_zz = period_zz
         self.n_std = n_std
         self.threshold_trend = threshold_trend
+        self.problems = 'Mcfly_FixVanga'
 
     def preprocessing(self, tdata):
         pdata = {}
         df = tdata['chart']
         df = add_rsi(df, self.period)
         df = add_fractals(df, self.period_fractal)
-        df = add_mean_on_fractals(df, self.period_mean, 'rsi')
+        df = add_mean_on_fractals(df, self.period_max, 'rsi',self.period_fractal)
         df['oversold'] = df['rsi'] < df['bottom_mean']
         df['overbought'] = df['rsi'] > df['top_mean']
-        df = add_dzz_peaks(df, n_std=self.n_std)
-        df = add_analys_dzz(df, self.period_sma)
+        df = add_zigzag180826(df, n_std=self.n_std,period=self.period_zz)
+        df = add_shift_zz_peaks(df)
+        df = add_analys_dzz180826(df, self.period_sma)
         df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
@@ -156,26 +161,27 @@ class PEG21_AURIEL(BaseEG):
 
 class PEG21_MALTHAEL(BaseEG):
     '''
-    stop=None, take=None, period=20, period_fractal=10, period_mean=5, percent_threshold=0.5, use_stop=0
+    stop=None, take=None, period=20, period_fractal=10, period_max=55, percent_threshold=0.5, use_stop=0
     '''
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=20, period_fractal=10, period_mean=5, percent_threshold=0.5, use_stop=0):
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=20, period_fractal=10, period_max=55, percent_threshold=0.5, use_stop=0):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
         self.period = period
         self.period_fractal = period_fractal
-        self.period_mean = period_mean
+        self.period_max = period_max
         self.percent_threshold = percent_threshold
         self.use_stop = use_stop
+        self.problems = 'Mcfly'
 
     def preprocessing(self, tdata):
         pdata = {}
         df = tdata['chart']
         df = add_rsi(df, self.period)
         df = add_fractals(df, self.period_fractal)
-        df = add_mean_on_fractals(df, self.period_mean, 'rsi')
+        df = add_mean_on_fractals(df, self.period_max, 'rsi',self.period_fractal)
         df['oversold'] = df['rsi'] < df['bottom_mean']
         df['overbought'] = df['rsi'] > df['top_mean']
-        df = add_percent_zz_peaks(df, percent_threshold=self.percent_threshold)
+        df = add_percent_zz190826(df, percent_threshold=self.percent_threshold,drop_last=False)
         df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
@@ -205,14 +211,15 @@ class PEG21_MALTHAEL(BaseEG):
         
         return None
 
+# Попробовать написать версию на add_percent_zz190826
 class PEG22_BERSERK(BaseEG):
-    """stop=None, take=None, period=100, period_fractal=10, period_mean=5, n_std=1.5, period_sma=3, threshold_trend=0.5, period2=100, period3=20, threshold_chop=60, threshold_adx=30"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=100, period_fractal=10, period_mean=5, n_std=1.5, period_sma=3, threshold_trend=0.5, period2=100, period3=20, threshold_chop=60, threshold_adx=30):
+    """stop=None, take=None, period=100, period_fractal=10, period_max=55, n_std=1.5, period_sma=3, threshold_trend=0.5, period2=100, period3=20, threshold_chop=60, threshold_adx=30, period_zz=20"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=55, period_fractal=10, period_max=55, n_std=1.5, period_sma=3, threshold_trend=0.5, period2=55, period3=20, threshold_chop=60, threshold_adx=30, period_zz=20):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
         self.period = period
         self.period_fractal = period_fractal
-        self.period_mean = period_mean
+        self.period_max = period_max
         self.period_sma = period_sma
         self.n_std = n_std
         self.threshold_trend = threshold_trend
@@ -220,6 +227,8 @@ class PEG22_BERSERK(BaseEG):
         self.threshold_adx = threshold_adx
         self.period2 = period2
         self.period3 = period3
+        self.period_zz = period_zz
+        self.problems = 'Mcfly_FixVanga'
 
     def preprocessing(self, tdata):
         pdata = {}
@@ -229,10 +238,68 @@ class PEG22_BERSERK(BaseEG):
         df = add_chop(df, self.period2)
         df = add_adx(df, self.period)
         df = add_fractals(df, self.period_fractal)
-        df = add_mean_on_fractals(df, self.period_mean, 'rsi')
+        df = add_mean_on_fractals(df, self.period_max, 'rsi',self.period_fractal)
         df['oversold'] = df['rsi'] < df['bottom_mean']
         df['overbought'] = df['rsi'] > df['top_mean']
-        df = add_dzz_peaks(df, n_std=self.n_std)
+        df = add_zigzag180826(df, n_std=self.n_std,period=self.period_zz)
+        df = add_shift_zz_peaks(df)
+        df = add_analys_dzz180826(df, self.period_sma)
+        df = self.add_slice_df(df)
+        pdata['chart'] = df
+        return pdata
+    
+    def _get_action_from_row(self, row):
+        ranger = row['chop'] > self.threshold_chop and row['adx'] < self.threshold_adx
+        
+        if ranger:
+            if row['low'] <= row['min_hb'] and row['oversold']:
+                return 'open_long'
+            if row['high'] >= row['max_hb'] and row['overbought']:
+                return 'open_short'
+        else:
+            if row['oversold']:
+                if row['trend_sma'] >= -self.threshold_trend:
+                    return 'open_long'
+                else:
+                    return 'close_short'
+            if row['overbought']:
+                if row['trend_sma'] <= self.threshold_trend:
+                    return 'open_short'
+                else:
+                    return 'close_long'
+        
+        return None
+
+# Если Соня будет лучше чем Берсерк, то нужно будет сделать вариации 21 и 23 с add_percent_zz190826
+class PEG22_SONYA(BaseEG):
+    """stop=None, take=None, period=55, period_fractal=10, period_max=55, period_sma=3, threshold_trend=0.5, period2=55, period3=20, threshold_chop=60, threshold_adx=30, percent_threshold=0.5"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=55, period_fractal=10, period_max=55, period_sma=3, threshold_trend=0.5, period2=55, period3=20, threshold_chop=60, threshold_adx=30, percent_threshold=0.5):
+        super().__init__(symbol, price_step, mult_ps, mode, stop, take)
+        self.needs_info = {'chart': self.symbol}
+        self.period = period
+        self.period_fractal = period_fractal
+        self.period_max = period_max
+        self.period_sma = period_sma
+        self.percent_threshold = percent_threshold
+        self.threshold_trend = threshold_trend
+        self.threshold_chop = threshold_chop
+        self.threshold_adx = threshold_adx
+        self.period2 = period2
+        self.period3 = period3
+        self.problems = 'Mcfly'
+
+    def preprocessing(self, tdata):
+        pdata = {}
+        df = tdata['chart']
+        df = add_donchan_channel(df, self.period3)
+        df = add_rsi(df, self.period3)
+        df = add_chop(df, self.period2)
+        df = add_adx(df, self.period)
+        df = add_fractals(df, self.period_fractal)
+        df = add_mean_on_fractals(df, self.period_max, 'rsi',self.period_fractal)
+        df['oversold'] = df['rsi'] < df['bottom_mean']
+        df['overbought'] = df['rsi'] > df['top_mean']
+        df = add_percent_zz190826(df, percent_threshold=self.percent_threshold,drop_last=False)
         df = add_analys_dzz(df, self.period_sma)
         df = self.add_slice_df(df)
         pdata['chart'] = df
@@ -261,30 +328,39 @@ class PEG22_BERSERK(BaseEG):
         return None
 
 class PEG23_ULTIMATUM(BaseEG):
-    """stop=None, take=None, period=100, period_dc=20, period_sdc=20, period_rsi=20, period_fractal=10, type_treshold=0, period_mean=5, n_std=1.5, period_sma=3, threshold_trend=0.5, allowance=0.1, use_stop=0"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=100, period_dc=20, period_sdc=20, period_rsi=20, period_fractal=10, type_treshold=0, period_mean=5, n_std=1.5, period_sma=3, threshold_trend=0.5, allowance=0.1, use_stop=0):
+    """stop=None, take=None, period_dc=20, period_sdc=20, period_rsi=20, period_fractal=10, type_treshold=0, period_max=55, n_std=1.5, period_sma=3, threshold_trend=0.5, allowance=0.1, use_stop=0, period_zz=20"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_dc=20, period_sdc=20, period_rsi=20, period_fractal=10, type_treshold=0, period_max=55, n_std=1.5, period_sma=3, threshold_trend=0.5, allowance=0.1, use_stop=0, period_zz=20):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
-        self.period = period
         self.period_fractal = period_fractal
         self.type_treshold = type_treshold
-        self.period_mean = period_mean
+        self.period_max = period_max
         self.period_sma = period_sma
         self.n_std = n_std
         self.threshold_trend = threshold_trend
-        self.period_dc = period_dc
-        self.period_sdc = period_sdc
         self.period_rsi = period_rsi
         self.allowance = allowance
         self.use_stop = use_stop
+        max_total = (period_max // 3) * 2
+        total = period_dc + period_sdc
+
+        if total > max_total:
+            ratio = max_total / total
+            self.period_dc = int(period_dc * ratio)
+            self.period_sdc = int(period_sdc * ratio)
+        else:
+            self.period_dc = period_dc
+            self.period_sdc = period_sdc
+        self.period_zz = period_zz
+        self.problems = 'Mcfly_FixVanga'
 
     def add_threshold(self, df):
         if self.type_treshold == 0:
-            df = add_mean_on_fractals(df, self.period_mean, 'rsi')
+            df = add_mean_on_fractals(df, self.period_max, 'rsi',self.period_fractal)
             df['oversold'] = df['rsi'] < df['bottom_mean']
             df['overbought'] = df['rsi'] > df['top_mean']
         else:
-            df = add_ext_on_fractals(df, self.period_mean, 'rsi')
+            df = add_ext_on_fractals(df, self.period_max, 'rsi',self.period_fractal)
             df['oversold'] = df['rsi'] < df['bottom_ext']
             df['overbought'] = df['rsi'] > df['top_ext']
         return df
@@ -299,8 +375,9 @@ class PEG23_ULTIMATUM(BaseEG):
         df = add_rsi(df, self.period_rsi)
         df = add_fractals(df, self.period_fractal)
         df = self.add_threshold(df)
-        df = add_dzz_peaks(df, n_std=self.n_std)
-        df = add_analys_dzz(df, self.period_sma)
+        df = add_zigzag180826(df, n_std=self.n_std,period=self.period_zz)
+        df = add_shift_zz_peaks(df)
+        df = add_analys_dzz180826(df, self.period_sma)
         df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
@@ -330,12 +407,12 @@ class PEG24_BRIGHTWING(BaseEG):
     '''
     stop=None, take=None, period=20, period_fractal=10, period_mean=5, percent_threshold=0.2, threshold_dzz=0.2, buff=0.1, divider=2, use_stop=1
     '''
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=20, period_fractal=10, period_mean=5, percent_threshold=0.2, threshold_dzz=0.2, buff=0.1, divider=2, use_stop=1):
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=20, period_fractal=10, period_max=55, percent_threshold=0.2, threshold_dzz=0.2, buff=0.1, divider=2, use_stop=1):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
         self.period = period
         self.period_fractal = period_fractal
-        self.period_mean = period_mean
+        self.period_max = period_max
         self.percent_threshold = percent_threshold
         self.threshold_dzz = threshold_dzz
         self.buff = buff
@@ -347,10 +424,11 @@ class PEG24_BRIGHTWING(BaseEG):
         df = tdata['chart']
         df = add_rsi(df, self.period)
         df = add_fractals(df, self.period_fractal)
-        df = add_mean_on_fractals(df, self.period_mean, 'rsi')
+        df = add_mean_on_fractals(df, self.period_max, 'rsi',self.period_fractal)
         df['oversold'] = df['rsi'] < df['bottom_mean']
         df['overbought'] = df['rsi'] > df['top_mean']
-        df = add_percent_zz_peaks(df, percent_threshold=self.percent_threshold)
+        df = add_percent_zz190826(df, percent_threshold=self.percent_threshold)
+        df['zigzag_peaks'] = df['zigzag_peaks'].shift(1)
         df = add_pattern18_dzz_czd(df, self.threshold_dzz, self.buff)
         df = add_stop_loss_p18czd(df, self.divider)
         df = self.add_slice_df(df)

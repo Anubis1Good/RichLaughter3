@@ -12,38 +12,8 @@ from strategies.VEGs.VEG1 import *
 # (min, max, step)
 max_period = 55
 group = (
- (
-        PEG22_BERSERK, 
-        [
-            (2, max_period, 1),
-            (2, 15, 1),
-            (2, 10, 1),
-            (1.5,3,0.1),
-            (2, 10, 1),
-            (0,0.5,0.1),
-            (2, max_period, 1),
-            (2, max_period, 1),
-            (10,90,1),
-            (10,90,1),
-        ]
-    ),
-    (
-        PEG23_ULTIMATUM, 
-        [
-            (2, max_period, 1),
-            (2, max_period, 1),
-            (2, max_period, 1),
-            (2, max_period, 1),
-            (2, 15, 1),
-            (0, 1),
-            (2, 10, 1),
-            (1.5,3,0.1),
-            (2, 10, 1),
-            (0,0.5,0.1),
-            (0,1,0.1),
-            (0, 1),
-        ]
-    ),
+
+
     (
         PEG24_BRIGHTWING, 
         [

@@ -103,15 +103,6 @@ def add_fractals(df: pd.DataFrame, period=5, max_period=55):
     df['fractal_up'] = fractal_up_condition
     df['fractal_down'] = fractal_down_condition
     
-    # # ===== СМЕЩЕНИЕ С ОГРАНИЧЕНИЕМ =====
-    # # Берём x на моменте фрактала и смещаем вперёд
-    # df['last_confirmed_up_x'] = df['x'].where(df['fractal_up']).shift(shift)
-    # df['last_confirmed_down_x'] = df['x'].where(df['fractal_down']).shift(shift)
-    
-    # # Заполняем вперёд, но НЕ ДАЛЬШЕ max_period!
-    # df['last_confirmed_up_x'] = df['last_confirmed_up_x'].ffill(limit=max_period)
-    # df['last_confirmed_down_x'] = df['last_confirmed_down_x'].ffill(limit=max_period)
-    
     return df
 
 def add_rsi(df:pd.DataFrame, period=14,kind='close'):
