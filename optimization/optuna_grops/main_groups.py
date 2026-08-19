@@ -14,449 +14,449 @@ max_period = 55
 half_max_period = max_period // 2
 max_percent_threshold = 1
 group = (
-    (
-        PEG2_SDDCr, 
-        [
-            (2,max_period,1),
-            (2,max_period,1),
-            (max_period,),
-        ]
-    ),
-    (
-        PEG4_UNIVERSAL, 
-        [
-            (2,max_period,1),
-            (2,max_period,1),
-            (5,45,1),
-            (5,45,1),
-            ["DC","VG","BB","VC","WC"],
-            ["rsi","rsi_tw","mfi","s","uo"],      
-        ]
-    ),
-    (
-        PEG4_U3, 
-        [
-            (2,max_period,1),
-            (2,max_period,1),
-            (2,half_max_period,1),
-            (max_period,),
-            ("DC","VG","BB","VC","WC"),
-            ("rsi","rsi_tw","mfi","s","uo"),    
-        ]
-    ),
-    (
-        PEG8_DOBBY, 
-        [
-            (2,max_period,1),
-            (0.5,3,0.1),   
-        ]
-    ),
-    (
-        PEG8_LOBSTER, 
-        [
-            (2,max_period,1),
-            (0.5,3,0.1),   
-        ]
-    ),
-    (
-        PEG11_KUSURUKEN, 
-        [
-            (5, max_period, 1),
-            (2, max_period, 1),
-            (2, max_period, 1),
-            (5, 40, 1),    
-            ('c', 'hl'),    
-            (max_period,),
-        ]
-    ),
-    (
-        PEG13_DWDDCr, 
-        [
-            (2, max_period, 1),
-            (5, 40, 1),
-            (2, max_period, 1),
-        ]
-    ),
-    (
-        PEG14_RANGER, 
-        [
-            (2, half_max_period, 1),
-            (5, 40, 1),
-            (2, max_period, 1),
-            (2, max_period, 1),
-            (5, 100, 1),
-            (5, 100, 1),
-        ]
-    ),
-    (
-        PEG14_RENEGADE, 
-        [
-            (2, half_max_period, 1),
-            (5, 40, 1),
-            (2, max_period, 1),
-            (2, max_period, 1),
-            (5, 100, 1),
-            (5, 100, 1),
-        ]
-    ),
-    (
-        PEG14_RWDDCr, 
-        [
-            (2, max_period, 1),
-            (5, 40, 1),
-            (2, max_period, 1),
-            (2, max_period, 1),
-            (max_period,),
-        ]
-    ),
-    (
-        PEG15_ANNA, 
-        [
-            (2, max_period, 1),
-            (5, 40, 1),
-        ]
-    ),
-    (
-        PEG15_SILVANA, 
-        [
-            (2, max_period, 1),
-            (5, 40, 1),
-            (2, max_period, 1),
-        ]
-    ),
     # (
-    #     PEG16_LEORIC, 
+    #     PEG2_SDDCr, 
+    #     [
+    #         (2,max_period,1),
+    #         (2,max_period,1),
+    #         (max_period,),
+    #     ]
+    # ),
+    # (
+    #     PEG4_UNIVERSAL, 
+    #     [
+    #         (2,max_period,1),
+    #         (2,max_period,1),
+    #         (5,45,1),
+    #         (5,45,1),
+    #         ["DC","VG","BB","VC","WC"],
+    #         ["rsi","rsi_tw","mfi","s","uo"],      
+    #     ]
+    # ),
+    # (
+    #     PEG4_U3, 
+    #     [
+    #         (2,max_period,1),
+    #         (2,max_period,1),
+    #         (2,half_max_period,1),
+    #         (max_period,),
+    #         ("DC","VG","BB","VC","WC"),
+    #         ("rsi","rsi_tw","mfi","s","uo"),    
+    #     ]
+    # ),
+    # (
+    #     PEG8_DOBBY, 
+    #     [
+    #         (2,max_period,1),
+    #         (0.5,3,0.1),   
+    #     ]
+    # ),
+    # (
+    #     PEG8_LOBSTER, 
+    #     [
+    #         (2,max_period,1),
+    #         (0.5,3,0.1),   
+    #     ]
+    # ),
+    # (
+    #     PEG11_KUSURUKEN, 
+    #     [
+    #         (5, max_period, 1),
+    #         (2, max_period, 1),
+    #         (2, max_period, 1),
+    #         (5, 40, 1),    
+    #         ('c', 'hl'),    
+    #         (max_period,),
+    #     ]
+    # ),
+    # (
+    #     PEG13_DWDDCr, 
     #     [
     #         (2, max_period, 1),
+    #         (5, 40, 1),
     #         (2, max_period, 1),
     #     ]
     # ),
     # (
-    #     PEG16_CHEN, 
+    #     PEG14_RANGER, 
     #     [
+    #         (2, half_max_period, 1),
+    #         (5, 40, 1),
     #         (2, max_period, 1),
     #         (2, max_period, 1),
+    #         (5, 100, 1),
+    #         (5, 100, 1),
     #     ]
     # ),
     # (
-    #     PEG16_ARTANIS, 
+    #     PEG14_RENEGADE, 
+    #     [
+    #         (2, half_max_period, 1),
+    #         (5, 40, 1),
+    #         (2, max_period, 1),
+    #         (2, max_period, 1),
+    #         (5, 100, 1),
+    #         (5, 100, 1),
+    #     ]
+    # ),
+    # (
+    #     PEG14_RWDDCr, 
     #     [
     #         (2, max_period, 1),
+    #         (5, 40, 1),
+    #         (2, max_period, 1),
+    #         (2, max_period, 1),
+    #         (max_period,),
+    #     ]
+    # ),
+    # (
+    #     PEG15_ANNA, 
+    #     [
+    #         (2, max_period, 1),
+    #         (5, 40, 1),
+    #     ]
+    # ),
+    # (
+    #     PEG15_SILVANA, 
+    #     [
+    #         (2, max_period, 1),
+    #         (5, 40, 1),
     #         (2, max_period, 1),
     #     ]
     # ),
-    (
-        PEG17_PHOENIX, 
-        [
-            (2, max_period, 1),
-            (2, max_period, 1),
-            (2, max_period, 1),
-            (2, max_period, 1),
-            (5, 40, 1),
-            (0, 1),
-            (max_period,),
-        ]
-    ),
-    (
-        PEG18_BLAZE, 
-        [
-            (2, max_period, 1),
-            (2, max_period, 1),
-            (2, max_period, 1),
-            (5, 40, 1),
-            (5, 40, 1),
-            (0, 1),
-            (max_period,),
-        ]
-    ),
-    (
-        PEG18_DIABLO, 
-        [
-            (2, max_period, 1),
-            (3,10,1),
-            (2, max_period, 1),
-            (5, 40, 1),
-            (0,1),
-        ]
-    ),
-    (
-        PEG18_REXXAR, 
-        [
-            (2, max_period, 1),
-            (3,10,1),
-            (2, max_period, 1),
-            (5, 40, 1),
-            (5, 40, 1),
-            (0,1),
-        ]
-    ),
-    (
-        PEG18_UTER, 
-        [
-            (2, max_period, 1),
-            (3,10,1),
-            (2, max_period, 1),
-            (5, 40, 1),
-            (5, 90, 1),
-            (2, half_max_period, 1),
-            (0,1),
-        ]
-    ),
-    (
-        PEG18_VARIAN, 
-        [
-            (2, max_period, 1),
-            (3,10,1),
-            (2, max_period, 1),
-            (5, 40, 1),
-            (5, 40, 1),
-            (2, max_period, 1),
-            (0,1),
-        ]
-    ),
-    (
-        PEG19_JOHANNA, 
-        [
-            (2, max_period, 1),
-            (3,10,1),
-            (2, max_period, 1),
-            (2, max_period, 1),
-            (5, 40, 1),
-            (5, 40, 1),
-            (0,1),
-            (max_period,),
-        ]
-    ),
-    (
-        PEG19_CASSIA, 
-        [
-            (2, max_period, 1),
-            (3,10,1),
-            (2, max_period, 1),
-            (2, max_period, 1),
-            (5, 40, 1),
-            (5, 40, 1),
-            (0,1),
-            (max_period,),
-        ]
-    ),
-    (
-        PEG19_IMPERIUS, 
-        [
-            (2, max_period, 1),
-            (3,10,1),
-            (2, max_period, 1),
-            (2, max_period, 1),
-            (5, 40, 1),
-            (5, 40, 1),
-            (0,1),
-            (max_period,),
-        ]
-    ),
-    (
-        PEG19_VALEERA, 
-        [
-            (2, max_period, 1),
-            (3,10,1),
-            (2, max_period, 1),
-            (5, 40, 1),
-            (5, 40, 1),
-            (0,max_period,1),
-            (0,1),
-        ]
-    ),
-    (
-        PEG19_YREL, 
-        [
-            (2, max_period, 1),
-            (3,10,1),
-            (2, max_period, 1),
-            (5, 40, 1),
-            (5, 40, 1),
-            (0,max_period,1),
-            (0,1),
-        ]
-    ),
-    (
-        PEG19_ZERATUL, 
-        [
-            (2, max_period, 1),
-            (3,10,1),
-            (2, max_period, 1),
-            (2, max_period, 1),
-            (5, 40, 1),
-            (5, 40, 1),
-            (0,1),
-            (max_period,),
-        ]
-    ),
-    (
-        PEG20_HOGGER, 
-        [
-            (2, max_period, 1),
-            (2, max_period, 1),
-            (0.5,3,0.1),
-            (0.5,3,0.1),
-            (5, 40, 1),
-            (5, 40, 1),
+    # # (
+    # #     PEG16_LEORIC, 
+    # #     [
+    # #         (2, max_period, 1),
+    # #         (2, max_period, 1),
+    # #     ]
+    # # ),
+    # # (
+    # #     PEG16_CHEN, 
+    # #     [
+    # #         (2, max_period, 1),
+    # #         (2, max_period, 1),
+    # #     ]
+    # # ),
+    # # (
+    # #     PEG16_ARTANIS, 
+    # #     [
+    # #         (2, max_period, 1),
+    # #         (2, max_period, 1),
+    # #     ]
+    # # ),
+    # (
+    #     PEG17_PHOENIX, 
+    #     [
+    #         (2, max_period, 1),
+    #         (2, max_period, 1),
+    #         (2, max_period, 1),
+    #         (2, max_period, 1),
+    #         (5, 40, 1),
+    #         (0, 1),
+    #         (max_period,),
+    #     ]
+    # ),
+    # (
+    #     PEG18_BLAZE, 
+    #     [
+    #         (2, max_period, 1),
+    #         (2, max_period, 1),
+    #         (2, max_period, 1),
+    #         (5, 40, 1),
+    #         (5, 40, 1),
+    #         (0, 1),
+    #         (max_period,),
+    #     ]
+    # ),
+    # (
+    #     PEG18_DIABLO, 
+    #     [
+    #         (2, max_period, 1),
+    #         (3,10,1),
+    #         (2, max_period, 1),
+    #         (5, 40, 1),
+    #         (0,1),
+    #     ]
+    # ),
+    # (
+    #     PEG18_REXXAR, 
+    #     [
+    #         (2, max_period, 1),
+    #         (3,10,1),
+    #         (2, max_period, 1),
+    #         (5, 40, 1),
+    #         (5, 40, 1),
+    #         (0,1),
+    #     ]
+    # ),
+    # (
+    #     PEG18_UTER, 
+    #     [
+    #         (2, max_period, 1),
+    #         (3,10,1),
+    #         (2, max_period, 1),
+    #         (5, 40, 1),
+    #         (5, 90, 1),
+    #         (2, half_max_period, 1),
+    #         (0,1),
+    #     ]
+    # ),
+    # (
+    #     PEG18_VARIAN, 
+    #     [
+    #         (2, max_period, 1),
+    #         (3,10,1),
+    #         (2, max_period, 1),
+    #         (5, 40, 1),
+    #         (5, 40, 1),
+    #         (2, max_period, 1),
+    #         (0,1),
+    #     ]
+    # ),
+    # (
+    #     PEG19_JOHANNA, 
+    #     [
+    #         (2, max_period, 1),
+    #         (3,10,1),
+    #         (2, max_period, 1),
+    #         (2, max_period, 1),
+    #         (5, 40, 1),
+    #         (5, 40, 1),
+    #         (0,1),
+    #         (max_period,),
+    #     ]
+    # ),
+    # (
+    #     PEG19_CASSIA, 
+    #     [
+    #         (2, max_period, 1),
+    #         (3,10,1),
+    #         (2, max_period, 1),
+    #         (2, max_period, 1),
+    #         (5, 40, 1),
+    #         (5, 40, 1),
+    #         (0,1),
+    #         (max_period,),
+    #     ]
+    # ),
+    # (
+    #     PEG19_IMPERIUS, 
+    #     [
+    #         (2, max_period, 1),
+    #         (3,10,1),
+    #         (2, max_period, 1),
+    #         (2, max_period, 1),
+    #         (5, 40, 1),
+    #         (5, 40, 1),
+    #         (0,1),
+    #         (max_period,),
+    #     ]
+    # ),
+    # (
+    #     PEG19_VALEERA, 
+    #     [
+    #         (2, max_period, 1),
+    #         (3,10,1),
+    #         (2, max_period, 1),
+    #         (5, 40, 1),
+    #         (5, 40, 1),
+    #         (0,max_period,1),
+    #         (0,1),
+    #     ]
+    # ),
+    # (
+    #     PEG19_YREL, 
+    #     [
+    #         (2, max_period, 1),
+    #         (3,10,1),
+    #         (2, max_period, 1),
+    #         (5, 40, 1),
+    #         (5, 40, 1),
+    #         (0,max_period,1),
+    #         (0,1),
+    #     ]
+    # ),
+    # (
+    #     PEG19_ZERATUL, 
+    #     [
+    #         (2, max_period, 1),
+    #         (3,10,1),
+    #         (2, max_period, 1),
+    #         (2, max_period, 1),
+    #         (5, 40, 1),
+    #         (5, 40, 1),
+    #         (0,1),
+    #         (max_period,),
+    #     ]
+    # ),
+    # (
+    #     PEG20_HOGGER, 
+    #     [
+    #         (2, max_period, 1),
+    #         (2, max_period, 1),
+    #         (0.5,3,0.1),
+    #         (0.5,3,0.1),
+    #         (5, 40, 1),
+    #         (5, 40, 1),
 
-        ]
-    ),
-    (
-        PEG21_AURIEL, 
-        [
-            (2, max_period, 1),
-            (2, half_max_period, 1),
-            (max_period,),
-            (1.5,3,0.1),
-            (2, 4, 1),
-            (0,0.5,0.1),
-            (2, max_period, 1),
-        ]
-    ),
-    (
-        PEG21_MALTHAEL, 
-        [
-            (2, max_period, 1),
-            (2, 15, 1),
-            (max_period,),
-            (0.1,max_percent_threshold,0.1),
-            (0,1),
-        ]
-    ),
-    (
-        PEG21_WHITEMANE, 
-        [
-            (2, max_period, 1),
-            (2, max_period, 1),
-            (2, half_max_period, 1),
-            (max_period,),
-            (1.5,3,0.1),
-            (2, 4, 1),
-            (0,0.5,0.1),
-            (0,1),
-            (2, max_period, 1),
-        ]
-    ),
-    (
-        PEG22_BERSERK, 
-        [
-            (2, half_max_period, 1),
-            (2, half_max_period, 1),
-            (max_period,),
-            (1.5,3,0.1),
-            (2, 4, 1),
-            (0,0.5,0.1),
-            (2, max_period, 1),
-            (2, max_period, 1),
-            (10,90,1),
-            (10,90,1),
-            (2, max_period, 1),
-        ]
-    ),
-    (
-        PEG22_SONYA, 
-        [
-            (2, half_max_period, 1),
-            (2, 15, 1),
-            (max_period,),
-            (2, 4, 1),
-            (0,0.5,0.1),
-            (2, max_period, 1),
-            (2, max_period, 1),
-            (10,90,1),
-            (10,90,1),
-            (0.1,max_percent_threshold,0.1), #Если на крупных тф надо увеличивать
-        ]
-    ),
-    (
-        PEG23_ULTIMATUM, 
-        [
-            (2, max_period, 1),
-            (2, max_period, 1),
-            (2, max_period, 1),
-            (2, half_max_period, 1),
-            (0, 1),
-            (max_period,),
-            (1.5,3,0.1),
-            (2, 4, 1),
-            (0,0.5,0.1),
-            (0,1,0.1),
-            (0, 1),
-            (2, max_period, 1),
-        ]
-    ),
-    (
-        PEG24_BRIGHTWING, 
-        [
-            (2, max_period, 1),
-            (2, half_max_period, 1),
-            (max_period,),
-            (0.1, max_percent_threshold, 0.1),
-            (0, 1, 0.1),
-            (0, 0.5, 0.1),
-            (0.5, 10, 0.5),
-            (0, 1),
-        ]
-    ),
-    (
-        PEG24_DEATHWING, 
-        [
-            (2, max_period, 1),
-            (2, half_max_period, 1),
-            (max_period,),
-            (0.1, max_percent_threshold, 0.1),
-            (0, 1, 0.1),
-            (0, 0.5, 0.1),
-            (0.5, 10, 0.5),
-            (0, 1),
-        ]
-    ),
-    (
-        PEG25_TASSADAR, 
-        [
-            (2, max_period, 1),
-            (2, half_max_period, 1),
-            (max_period,),
-            (0.1, max_percent_threshold, 0.1),
-            (0, 1, 0.1),
-            (0, 0.5, 0.1),
-            (0.5, 10, 0.5),
-            (0,40,1),
-            (0, 1),
-        ]
-    ),
-    (
-        PEG26_UNKNOWN, 
-        [
-            (2, max_period, 1),
-            (2, max_period, 1),
-            (5, 40, 1),
-            (5, 40, 1),
-            (2, max_period, 1),
-            (2, max_period, 1),
-            (2, max_period, 1),
-            (max_period,),
-            (0, 1),
-        ]
-    ),
+    #     ]
+    # ),
+    # (
+    #     PEG21_AURIEL, 
+    #     [
+    #         (2, max_period, 1),
+    #         (2, half_max_period, 1),
+    #         (max_period,),
+    #         (1.5,3,0.1),
+    #         (2, 4, 1),
+    #         (0,0.5,0.1),
+    #         (2, max_period, 1),
+    #     ]
+    # ),
+    # (
+    #     PEG21_MALTHAEL, 
+    #     [
+    #         (2, max_period, 1),
+    #         (2, 15, 1),
+    #         (max_period,),
+    #         (0.1,max_percent_threshold,0.1),
+    #         (0,1),
+    #     ]
+    # ),
+    # (
+    #     PEG21_WHITEMANE, 
+    #     [
+    #         (2, max_period, 1),
+    #         (2, max_period, 1),
+    #         (2, half_max_period, 1),
+    #         (max_period,),
+    #         (1.5,3,0.1),
+    #         (2, 4, 1),
+    #         (0,0.5,0.1),
+    #         (0,1),
+    #         (2, max_period, 1),
+    #     ]
+    # ),
+    # (
+    #     PEG22_BERSERK, 
+    #     [
+    #         (2, half_max_period, 1),
+    #         (2, half_max_period, 1),
+    #         (max_period,),
+    #         (1.5,3,0.1),
+    #         (2, 4, 1),
+    #         (0,0.5,0.1),
+    #         (2, max_period, 1),
+    #         (2, max_period, 1),
+    #         (10,90,1),
+    #         (10,90,1),
+    #         (2, max_period, 1),
+    #     ]
+    # ),
+    # (
+    #     PEG22_SONYA, 
+    #     [
+    #         (2, half_max_period, 1),
+    #         (2, 15, 1),
+    #         (max_period,),
+    #         (2, 4, 1),
+    #         (0,0.5,0.1),
+    #         (2, max_period, 1),
+    #         (2, max_period, 1),
+    #         (10,90,1),
+    #         (10,90,1),
+    #         (0.1,max_percent_threshold,0.1), #Если на крупных тф надо увеличивать
+    #     ]
+    # ),
+    # (
+    #     PEG23_ULTIMATUM, 
+    #     [
+    #         (2, max_period, 1),
+    #         (2, max_period, 1),
+    #         (2, max_period, 1),
+    #         (2, half_max_period, 1),
+    #         (0, 1),
+    #         (max_period,),
+    #         (1.5,3,0.1),
+    #         (2, 4, 1),
+    #         (0,0.5,0.1),
+    #         (0,1,0.1),
+    #         (0, 1),
+    #         (2, max_period, 1),
+    #     ]
+    # ),
+    # (
+    #     PEG24_BRIGHTWING, 
+    #     [
+    #         (2, max_period, 1),
+    #         (2, half_max_period, 1),
+    #         (max_period,),
+    #         (0.1, max_percent_threshold, 0.1),
+    #         (0, 1, 0.1),
+    #         (0, 0.5, 0.1),
+    #         (0.5, 10, 0.5),
+    #         (0, 1),
+    #     ]
+    # ),
+    # (
+    #     PEG24_DEATHWING, 
+    #     [
+    #         (2, max_period, 1),
+    #         (2, half_max_period, 1),
+    #         (max_period,),
+    #         (0.1, max_percent_threshold, 0.1),
+    #         (0, 1, 0.1),
+    #         (0, 0.5, 0.1),
+    #         (0.5, 10, 0.5),
+    #         (0, 1),
+    #     ]
+    # ),
+    # (
+    #     PEG25_TASSADAR, 
+    #     [
+    #         (2, max_period, 1),
+    #         (2, half_max_period, 1),
+    #         (max_period,),
+    #         (0.1, max_percent_threshold, 0.1),
+    #         (0, 1, 0.1),
+    #         (0, 0.5, 0.1),
+    #         (0.5, 10, 0.5),
+    #         (0,40,1),
+    #         (0, 1),
+    #     ]
+    # ),
+    # (
+    #     PEG26_UNKNOWN, 
+    #     [
+    #         (2, max_period, 1),
+    #         (2, max_period, 1),
+    #         (5, 40, 1),
+    #         (5, 40, 1),
+    #         (2, max_period, 1),
+    #         (2, max_period, 1),
+    #         (2, max_period, 1),
+    #         (max_period,),
+    #         (0, 1),
+    #     ]
+    # ),
 
-    (
-        LEG1_BIBI, 
-        [
-            (2, max_period, 1),
-            (3,half_max_period,1),
-            ('cmo','rsi','rsi_tw','williams_r','mfi','ultimate_oscillator','cci','%d'),
-            (max_period, ),
-        ]
-    ),
-    (
-        LEG1_BORSCH, 
-        [
-            (2, max_period, 1),
-            (2, max_period, 1),
-        ]
-    ),
+    # (
+    #     LEG1_BIBI, 
+    #     [
+    #         (2, max_period, 1),
+    #         (3,half_max_period,1),
+    #         ('cmo','rsi','rsi_tw','williams_r','mfi','ultimate_oscillator','cci','%d'),
+    #         (max_period, ),
+    #     ]
+    # ),
+    # (
+    #     LEG1_BORSCH, 
+    #     [
+    #         (2, max_period, 1),
+    #         (2, max_period, 1),
+    #     ]
+    # ),
     (
         LEG1_CC, 
         [

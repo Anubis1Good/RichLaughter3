@@ -45,6 +45,10 @@ def add_average_fractals(df: pd.DataFrame, period=30, period_fractal=5):
     
     shift = (period_fractal - 1) // 2
     window = period - shift
+    if window < 1:
+        df['ave_up'] = np.nan
+        df['ave_down'] = np.nan
+        return df
 
     # Верхние фракталы
     up_points = df[df['fractal_up']]
