@@ -66,7 +66,8 @@ class WindowTester:
             close_on_time=self.close_on_time,
             close_map=self.close_map,
             measure_time=False,
-            use_tqdm=False
+            use_tqdm=False,
+            window=self.window_size
         )
         
         return trader
@@ -123,7 +124,7 @@ class WindowTester:
             
             # ОКОННЫЙ ТЕСТ
             trader.reload_data()
-            trader.check_strategy_window(window=self.window_size, normalization=self.normalization)
+            trader.check_strategy_window(normalization=self.normalization)
             trades_window, eq_window, eq_f_window, _, _, _ = trader.process_old_type_result()
             
             # Берем реальные значения SL/TP из стратегии
@@ -343,11 +344,12 @@ class WindowTester:
 
 
 if __name__ == "__main__":
-    DATA_FOLDER = "_data_for_tests/before_opt"
+    DATA_FOLDER = "_data_for_tests/_before_opt"
     RESULTS_EXCEL = "_test_results/optuna/total_optuna.xlsx"
     OUTPUT_FOLDER = "_test_results/window_test"
     
-    TICKERS = ["ASTR","MAGN","MTLR"]
+    # TICKERS = ["ASTR","MAGN","MTLR"]
+    TICKERS = []
     
     tester = WindowTester(
         data_folder=DATA_FOLDER,
