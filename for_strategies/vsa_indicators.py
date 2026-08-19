@@ -89,17 +89,24 @@ def add_OGTA2_rails_info(df:pd.DataFrame):
     df['info'] = df.apply(lambda row: get_ogta2_info(row,df),axis=1)
     return df
 
-def help_delta(row):
-    if row['close'] > row['open']:  # Бычья свеча
-        return row['volume']
-    elif row['close'] < row['open']:  # Медвежья свеча
-        return -row['volume']
-    return 0
-
-def add_CDV(df:pd.DataFrame):
-    'add "cdv"'
-    df['delta'] = df.apply(help_delta,axis=1)
-    df['cdv'] = df['delta'].cumsum()  # Кумулятивная сумма
+def add_CDV(df: pd.DataFrame):
+    """add 'cdv' - cumulative delta volume"""
+    close = df['close'].values
+    open_ = df['open'].values
+    volume = df['volume'].values
+    
+    delta = np.zeros(len(df), dtype=np.float64)
+    
+    # Бычьи свечи
+    mask_bull = close > open_
+    delta[mask_bull] = volume[mask_bull]
+    
+    # Медвежьи свечи
+    mask_bear = close < open_
+    delta[mask_bear] = -volume[mask_bear]
+    
+    df['delta'] = delta
+    df['cdv'] = np.cumsum(delta)
     return df
 
 def add_real_vsa_stop_action(df, volume_threshold=1.2, trend_lookback=3):

@@ -55,13 +55,14 @@ class WEG4_PUPPY(BaseEG):
             return 'close_long'
         
 class WEG4_RAT(BaseEG):
-    """stop=None, take=None, period=14, period_fractal=5, period_mean=10"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=14, period_fractal=5, period_mean=10):
+    """stop=None, take=None, period=14, period_fractal=5, period_max=55"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=14, period_fractal=5, period_max=55):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
         self.period = period
         self.period_fractal = period_fractal
-        self.period_mean = period_mean
+        self.period_max = period_max
+        self.problems = 'Mcfly'
 
     def preprocessing(self, tdata):
         pdata = {}
@@ -69,7 +70,7 @@ class WEG4_RAT(BaseEG):
         df = add_cdvsai(df, period=self.period)
         df = add_rsi(df, self.period, 'cum_dvsai')
         df = add_fractals(df, self.period_fractal)
-        df = add_mean_on_fractals(df, self.period_mean, 'rsi')
+        df = add_mean_on_fractals(df, self.period_max, 'rsi',self.period_fractal)
         df['oversold'] = df['rsi'] < df['bottom_mean']
         df['overbought'] = df['rsi'] > df['top_mean']
         df = self.add_slice_df(df)

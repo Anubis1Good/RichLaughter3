@@ -66,7 +66,7 @@ class PEG2_SDDCr(BaseEG):
     
 class PEG4_UNIVERSAL(BaseEG):
     '''
-    stop=None, take=None, period=20, period_rsi=20, threshold_long=30, threshold_short=30
+    stop=None, take=None, period=20, period_rsi=20, threshold_long=30, threshold_short=30, kind_channel='DC', kind_rsi='rsi' \n
     kind_channel in ["DC","VG","BB","VC","WC"]
     kind_rsi in ["rsi","rsi_tw","mfi","s","uo"]
     '''

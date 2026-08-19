@@ -83,7 +83,7 @@ def add_bollinger(df: pd.DataFrame, period=20, kind='close', multiplier=2):
     
     return df
 
-def add_fractals(df: pd.DataFrame, period=5, max_period=55):
+def add_fractals(df: pd.DataFrame, period=5):
     """
     Добавляет фракталы Билла Вильямса.
     """

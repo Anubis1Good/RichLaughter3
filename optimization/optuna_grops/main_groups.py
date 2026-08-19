@@ -12,6 +12,7 @@ from strategies.VEGs.VEG1 import *
 # (min, max, step)
 max_period = 55
 half_max_period = max_period // 2
+max_percent_threshold = 1
 group = (
     (
         PEG2_SDDCr, 
@@ -26,8 +27,8 @@ group = (
         [
             (2,max_period,1),
             (2,max_period,1),
-            (5,95,1),
-            (5,95,1),
+            (5,45,1),
+            (5,45,1),
             ["DC","VG","BB","VC","WC"],
             ["rsi","rsi_tw","mfi","s","uo"],      
         ]
@@ -37,8 +38,8 @@ group = (
         [
             (2,max_period,1),
             (2,max_period,1),
-            (2,15,1),
-            (2,max_period,1),
+            (2,half_max_period,1),
+            (max_period,),
             ("DC","VG","BB","VC","WC"),
             ("rsi","rsi_tw","mfi","s","uo"),    
         ]
@@ -153,6 +154,7 @@ group = (
             (2, max_period, 1),
             (5, 40, 1),
             (0, 1),
+            (max_period,),
         ]
     ),
     (
@@ -259,7 +261,7 @@ group = (
             (2, max_period, 1),
             (5, 40, 1),
             (5, 40, 1),
-            (0,30,1),
+            (0,max_period,1),
             (0,1),
         ]
     ),
@@ -271,7 +273,7 @@ group = (
             (2, max_period, 1),
             (5, 40, 1),
             (5, 40, 1),
-            (0,30,1),
+            (0,max_period,1),
             (0,1),
         ]
     ),
@@ -304,7 +306,7 @@ group = (
         PEG21_AURIEL, 
         [
             (2, max_period, 1),
-            (2, 15, 1),
+            (2, half_max_period, 1),
             (max_period,),
             (1.5,3,0.1),
             (2, 4, 1),
@@ -318,7 +320,7 @@ group = (
             (2, max_period, 1),
             (2, 15, 1),
             (max_period,),
-            (0.1,1,0.1), #Если на крупных тф надо увеличивать
+            (0.1,max_percent_threshold,0.1),
             (0,1),
         ]
     ),
@@ -327,12 +329,12 @@ group = (
         [
             (2, max_period, 1),
             (2, max_period, 1),
-            (2, 15, 1),
+            (2, half_max_period, 1),
             (max_period,),
             (1.5,3,0.1),
             (2, 4, 1),
             (0,0.5,0.1),
-            (0,1)
+            (0,1),
             (2, max_period, 1),
         ]
     ),
@@ -340,7 +342,7 @@ group = (
         PEG22_BERSERK, 
         [
             (2, half_max_period, 1),
-            (2, 15, 1),
+            (2, half_max_period, 1),
             (max_period,),
             (1.5,3,0.1),
             (2, 4, 1),
@@ -364,7 +366,7 @@ group = (
             (2, max_period, 1),
             (10,90,1),
             (10,90,1),
-            (0.1,1,0.1), #Если на крупных тф надо увеличивать
+            (0.1,max_percent_threshold,0.1), #Если на крупных тф надо увеличивать
         ]
     ),
     (
@@ -373,7 +375,7 @@ group = (
             (2, max_period, 1),
             (2, max_period, 1),
             (2, max_period, 1),
-            (2, 15, 1),
+            (2, half_max_period, 1),
             (0, 1),
             (max_period,),
             (1.5,3,0.1),
@@ -388,9 +390,9 @@ group = (
         PEG24_BRIGHTWING, 
         [
             (2, max_period, 1),
-            (2, 15, 1),
+            (2, half_max_period, 1),
             (max_period,),
-            (0.1, 1, 0.1),
+            (0.1, max_percent_threshold, 0.1),
             (0, 1, 0.1),
             (0, 0.5, 0.1),
             (0.5, 10, 0.5),
@@ -401,9 +403,9 @@ group = (
         PEG24_DEATHWING, 
         [
             (2, max_period, 1),
-            (2, 15, 1),
+            (2, half_max_period, 1),
             (max_period,),
-            (0.1, 1, 0.1),
+            (0.1, max_percent_threshold, 0.1),
             (0, 1, 0.1),
             (0, 0.5, 0.1),
             (0.5, 10, 0.5),
@@ -414,9 +416,9 @@ group = (
         PEG25_TASSADAR, 
         [
             (2, max_period, 1),
-            (2, 15, 1),
+            (2, half_max_period, 1),
             (max_period,),
-            (0.1, 1, 0.1),
+            (0.1, max_percent_threshold, 0.1),
             (0, 1, 0.1),
             (0, 0.5, 0.1),
             (0.5, 10, 0.5),
@@ -443,9 +445,9 @@ group = (
         LEG1_BIBI, 
         [
             (2, max_period, 1),
-            (3,15,1),
-            ('cmo','rsi','rsi_tw','williams_r','mfi','ultimate_oscillator','cci','%d')
-            (2, max_period, 1),
+            (3,half_max_period,1),
+            ('cmo','rsi','rsi_tw','williams_r','mfi','ultimate_oscillator','cci','%d'),
+            (max_period, ),
         ]
     ),
     (
@@ -459,8 +461,8 @@ group = (
         LEG1_CC, 
         [
             (2, max_period, 1),
-            (2, 20, 1),
-            (2, max_period, 1),
+            (2, half_max_period, 1),
+            (max_period, ),
             (2, 14, 1),
             (2, max_period, 1),
             (0.5, 3, 0.1),
@@ -472,17 +474,17 @@ group = (
         LEG1_IGOGOSHA, 
         [
             (2, max_period, 1),
-            (4,15,1),
-            (2, max_period, 1),
-            ('cmo','rsi','rsi_tw','williams_r','mfi','ultimate_oscillator','cci','%d')
+            (4,half_max_period,1),
+            (max_period, ),
+            ('cmo','rsi','rsi_tw','williams_r','mfi','ultimate_oscillator','cci','%d'),
         ]
     ),
     (
         LEG1_IRONANNY, 
         [
             (2, max_period, 1),
-            (4,15,1),
-            (2, max_period, 1),
+            (4,half_max_period,1),
+            (max_period, ),
             (2,7,1)
         ]
     ),
@@ -661,25 +663,22 @@ group = (
     (
         UEG2_GGD, 
         [
-            (2, max_period, 1),
-            (2,30,1),
-            (2,10,1),
+            (max_period,),
+            (2,half_max_period,1),
         ]
     ),
     (
         UEG2_DUCK, 
         [
-            (2, max_period, 1),
-            (2,30,1),
-            (2,10,1),
+            (2,half_max_period,1),
+            (2,5,1),
         ]
     ),
     (
         UEG2_GOOSE, 
         [
-            (2, max_period, 1),
-            (2,30,1),
-            (2,10,1),
+            (2,half_max_period,1),
+            (2,5,1),
         ]
     ),
     (
@@ -692,26 +691,22 @@ group = (
     (
         UEG3_ZEUS, 
         [
-            (2, max_period, 1),
-            (2,20,1),
-            ('std','mean'),
+            (0.1,max_percent_threshold,0.1),
         ]
     ),
     (
         UEG4_FALCON, 
         [
-            (2, max_period, 1),
-            (2,30,1),
-            (1,20,1),
+            (2,half_max_period,1),
+            (1,5,1),
             (0,1,0.01)
         ]
     ),
     (
         UEG4_PELICAN, 
         [
-            (2, max_period, 1),
-            (2,30,1),
-            (1,20,1),
+            (2, half_max_period, 1),
+            (1,5,1),
             (0,1,0.01)
         ]
     ),
@@ -719,14 +714,14 @@ group = (
         UEG5_HAWK, 
         [
             (2, max_period, 1),
-            (2,30,1),
-            (1,20,1),
+            (2,half_max_period,1),
+            (1,5,1),
             (2, max_period, 1),
             (0,1),
-            (2, max_period, 1),
+            (max_period, ),
             (1,10,0.1),
-            (2, max_period, 1),
-            (0,1,0.1),
+            (2, 4, 1),
+            (0,max_percent_threshold,0.1),
             (0,1,0.01),
             (0,1)
         ]
@@ -767,8 +762,8 @@ group = (
             (2, max_period, 1),
             (2, max_period, 1),
             (2, max_period, 1),
-            (2,30,1),
-            (1,20,1),
+            (2,half_max_period,1),
+            (1,5,1),
             (0,1,0.01),
             (0.1,3,0.1),
             (0,1)
@@ -789,8 +784,8 @@ group = (
             (2, max_period, 1),
             (10,70,1),
             (2, max_period, 1),
-            (2,30,1),
-            (1,20,1),
+            (2,half_max_period,1),
+            (1,5,1),
             (0,1,0.01),
             (2, half_max_period, 1),
         ]
@@ -799,8 +794,8 @@ group = (
         UEG7_ADVENTURE, 
         [
             (2, max_period, 1),
-            (2,30,1),
-            (1,20,1),
+            (2,half_max_period,1),
+            (max_period,),
             (0.1,3,0.1),
             (0,1)
         ]
@@ -809,18 +804,19 @@ group = (
         UEG7_DODO, 
         [
             (2, half_max_period, 1),
-            (2,30,1),
-            (1,20,1),
+            (2, half_max_period, 1),
+            (max_period,),
             (10,70,1),
             (10,70,1),
+            (0,1),
         ]
     ),
     (
         UEG7_DUELDODO, 
         [
             (2, half_max_period, 1),
-            (2,30,1),
-            (1,20,1),
+            (2, half_max_period, 1),
+            (max_period,),
             (10,70,1),
             (2, max_period, 1),
             (0,1)
@@ -830,10 +826,10 @@ group = (
         UEG7_PIGEON, 
         [
             (2, max_period, 1),
-            (2,30,1),
-            (1,20,1),
-            (2,30,1),
-            (1,20,1),
+            (2, half_max_period, 1),
+            (max_period,),
+            (2, half_max_period, 1),
+            (1,5,1),
             (0,1,0.01),
             (0.1,3,0.1),
             (0,1)
@@ -843,8 +839,8 @@ group = (
         UEG7_SHERIFF, 
         [
             (2, max_period, 1),
-            (2,30,1),
-            (1,20,1),
+            (2,half_max_period,1),
+            (max_period,),
             (0.1,3,0.1),
         ]
     ),
@@ -853,11 +849,10 @@ group = (
         [
             (2, max_period, 1),
             (10,70,1),
-            (2, max_period, 1),
-            (2,30,1),
-            (1,20,1),
-            (2,30,1),
-            (1,20,1),
+            (2, half_max_period, 1),
+            (2,5,1),
+            (2, half_max_period, 1),
+            (max_period,),
             (0,1,0.01),
             (2, half_max_period, 1),
         ]
@@ -865,13 +860,45 @@ group = (
     (
         UEG8_AVENGER, 
         [
-            (2, max_period, 1),
             (2,20,1),
-            (0,1,0.1),
+            (0,max_percent_threshold,0.1),
             (0,1,0.1),
             (0.1,1,0.1),
             (0.5,10,0.5),
             (0,1)
+        ]
+    ),
+    (
+        UEG9_BIRDWATCHER, 
+        [
+            (0.1,max_percent_threshold,0.1),
+            (2,5,1),
+            (0,0.3,0.1),
+            (0.25,2,0.05),
+            (0,1),
+            (0,1),
+        ]
+    ),
+    (
+        UEG9_GRAVY, 
+        [
+            (0.1,max_percent_threshold,0.1),
+            (2,5,1),
+            (0,0.3,0.1),
+            (0.25,2,0.05),
+            (0,1),
+        ]
+    ),
+    (
+        VEG1_VENUS, 
+        [
+            (0.1,max_percent_threshold,0.1),
+            (0,1,0.1),
+            (0.1,0.5,0.1),
+            (0.5,2,0.1),
+            (0,1),
+            (0,1),
+            (0,1),
         ]
     ),
     (
@@ -899,8 +926,8 @@ group = (
         WEG4_RAT, 
         [
             (2, max_period, 1),
-            (3,20,1),
-            (2,30,1),
+            (3,half_max_period,1),
+            (max_period,),
         ]
     ),
     (

@@ -1,6 +1,7 @@
 from strategies.BaseEG import BaseEG
-from for_strategies.zigzag_indicators import add_dzz_peaks,add_pattern18_dzz_czd,add_stop_loss_p18czd,add_percent_zz_peaks
+from for_strategies.zigzag_indicators import add_dzz_peaks,add_pattern18_dzz_czd,add_stop_loss_p18czd,add_percent_zz_peaks,add_percent_zz190826
 
+# Надо разбираться или не надо, есть Venus, который работает норм
 class VEG1_MERCURY(BaseEG):
     """stop=None, take=None, period=20, n_std=5, threshold_dzz=0.2, buff=0.1, divider=2, use_target=0, hard_stop=1, use_stop=1"""
     def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=20, n_std=5, threshold_dzz=0.2, buff=0.1, divider=2, use_target=0, hard_stop=1, use_stop=1):
@@ -14,11 +15,13 @@ class VEG1_MERCURY(BaseEG):
         self.use_stop = use_stop
         self.use_target = use_target
         self.hard_stop = hard_stop
+        self.problems = 'Vanga'
 
     def preprocessing(self, tdata):
         pdata = {}
         df = tdata['chart']
         df = add_dzz_peaks(df, period=self.period, n_std=self.n_std, drop_last=False)
+        # df['zigzag_peaks'] = df['zigzag_peaks'].shift(1)
         df = add_pattern18_dzz_czd(df, self.threshold_dzz, self.buff)
         df = add_stop_loss_p18czd(df, self.divider)
         df = self.add_slice_df(df)
@@ -114,11 +117,10 @@ class VEG1_MERCURY(BaseEG):
         return self.stop_loss_action(row)
 
 class VEG1_VENUS(BaseEG):
-    """stop=None, take=None, period=20, percent_threshold=0.2, threshold_dzz=0.2, buff=0.1, divider=2, use_target=0, hard_stop=1, use_stop=1"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=20, percent_threshold=0.2, threshold_dzz=0.2, buff=0.1, divider=2, use_target=0, hard_stop=1, use_stop=1):
+    """stop=None, take=None,  percent_threshold=0.2, threshold_dzz=0.2, buff=0.1, divider=2, use_target=0, hard_stop=1, use_stop=1"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None,  percent_threshold=0.2, threshold_dzz=0.2, buff=0.1, divider=2, use_target=0, hard_stop=1, use_stop=1):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
-        self.period = period
         self.percent_threshold = percent_threshold
         self.threshold_dzz = threshold_dzz
         self.buff = buff
@@ -130,7 +132,8 @@ class VEG1_VENUS(BaseEG):
     def preprocessing(self, tdata):
         pdata = {}
         df = tdata['chart']
-        df = add_percent_zz_peaks(df, percent_threshold=self.percent_threshold)
+        df = add_percent_zz190826(df, percent_threshold=self.percent_threshold)
+        df['zigzag_peaks'] = df['zigzag_peaks'].shift(1)
         df = add_pattern18_dzz_czd(df, self.threshold_dzz, self.buff)
         df = add_stop_loss_p18czd(df, self.divider)
         df = self.add_slice_df(df)

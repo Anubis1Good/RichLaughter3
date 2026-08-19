@@ -1,22 +1,22 @@
 from strategies.BaseEG import BaseEG
 from for_strategies.classic_indicators import add_fractals,add_rsi,add_adx,add_bollinger
 from for_strategies.pva_indicators import add_average_fractals,add_plus_delta_fc,add_exp_pdfc,add_ext_on_fractals,add_mean_on_fractals
-from for_strategies.zigzag_indicators import add_dynamic_zigzag,add_dzz_peaks,add_analys_dzz,add_percent_zz_peaks,add_pattern18_dzz_czd,add_stop_loss_p18czd,add_exp_plusdelta_dzz_peaks,add_mean_dzz_peaks,add_plusdelta_dzz_peaks
+from for_strategies.zigzag_indicators import add_percent_zz190826,add_dzz_peaks,add_analys_dzz,add_percent_zz_peaks,add_pattern18_dzz_czd,add_stop_loss_p18czd,add_exp_plusdelta_dzz_peaks,add_mean_dzz_peaks,add_plusdelta_dzz_peaks,add_zigzag180826,add_shift_zz_peaks,add_analys_dzz180826
 
 class UEG2_GGD(BaseEG):
-    """stop=None, take=None, period=20, n_candles=5, n_fractals=3"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=20, n_candles=5, n_fractals=3):
+    """stop=None, take=None, max_period=55, period_fractal=5"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, max_period=55, period_fractal=5):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
-        self.period = period
-        self.n_candles = n_candles
-        self.n_fractals = n_fractals
+        self.max_period = max_period
+        self.period_fractal = period_fractal
+
 
     def preprocessing(self, tdata):
         pdata = {}
         df = tdata['chart']
-        df = add_fractals(df, self.n_candles)
-        df = add_average_fractals(df, self.n_fractals)
+        df = add_fractals(df, self.period_fractal)
+        df = add_average_fractals(df, self.max_period, self.period_fractal)
         df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
@@ -30,19 +30,19 @@ class UEG2_GGD(BaseEG):
         return None
 
 class UEG2_GOOSE(BaseEG):
-    """stop=None, take=None, period=20, n_candles=5, n_fractals=3"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=20, n_candles=5, n_fractals=3):
+    """stop=None, take=None, period_fractal=5, n_fractals=3"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_fractal=5, n_fractals=3):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
-        self.period = period
-        self.n_candles = n_candles
+        self.period_fractal = period_fractal
         self.n_fractals = n_fractals
+        self.problems = 'Mcfly'
 
     def preprocessing(self, tdata):
         pdata = {}
         df = tdata['chart']
-        df = add_fractals(df, self.n_candles)
-        df = add_exp_pdfc(df, self.n_fractals)
+        df = add_fractals(df, self.period_fractal)
+        df = add_exp_pdfc(df, self.n_fractals, self.period_fractal)
         df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
@@ -56,19 +56,19 @@ class UEG2_GOOSE(BaseEG):
         return None
         
 class UEG2_DUCK(BaseEG):
-    """stop=None, take=None, period=20, n_candles=5, n_fractals=3"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=20, n_candles=5, n_fractals=3):
+    """stop=None, take=None, period_fractal=5, n_fractals=3"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_fractal=5, n_fractals=3):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
-        self.period = period
-        self.n_candles = n_candles
+        self.period_fractal = period_fractal
         self.n_fractals = n_fractals
+        self.problems = 'Mcfly'
 
     def preprocessing(self, tdata):
         pdata = {}
         df = tdata['chart']
-        df = add_fractals(df, self.n_candles)
-        df = add_plus_delta_fc(df, self.n_fractals)
+        df = add_fractals(df, self.period_fractal)
+        df = add_plus_delta_fc(df, self.n_fractals, self.period_fractal)
         df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
@@ -82,19 +82,17 @@ class UEG2_DUCK(BaseEG):
         return None
         
 class UEG3_ZEUS(BaseEG):
-    """stop=None, take=None, period=20, n_std=5, method='std'|'mean'"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=20, n_std=5, method='std'):
+    """stop=None, take=None, percent_threshold=0.5"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, percent_threshold=0.5):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
-        self.period = period
-        self.n_std = n_std
-        self.method = method
+        self.percent_threshold = percent_threshold
 
     def preprocessing(self, tdata):
         pdata = {}
         df = tdata['chart']
-        df = add_dynamic_zigzag(df, n_std=self.n_std, method=self.method, period=self.period)
-        df = self.add_slice_df(df)
+        df = add_percent_zz190826(df, percent_threshold=self.percent_threshold,drop_last=False)
+        # df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -107,17 +105,18 @@ class UEG3_ZEUS(BaseEG):
         return None
             
 class UEG3_REVAN(BaseEG):
-    """stop=None, take=None, period=60, n_std=5"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=60, n_std=5):
+    """stop=None, take=None, period=55, n_std=5"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=55, n_std=5):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
         self.period = period
         self.n_std = n_std
+        self.problems = 'Mcfly'
 
     def preprocessing(self, tdata):
         pdata = {}
         df = tdata['chart']
-        df = add_dzz_peaks(df, n_std=self.n_std, period=self.period)
+        df = add_dzz_peaks(df, n_std=self.n_std, period=self.period,drop_last=False)
         df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
@@ -131,20 +130,20 @@ class UEG3_REVAN(BaseEG):
         return None
     
 class UEG4_FALCON(BaseEG):
-    """stop=None, take=None, period=20, n_candles=5, n_fractals=3, allowance=0.1"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=20, n_candles=5, n_fractals=3, allowance=0.1):
+    """stop=None, take=None, period_fractal=5, n_fractals=3, allowance=0.1"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_fractal=5, n_fractals=3, allowance=0.1):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
-        self.period = period
-        self.n_candles = n_candles
+        self.period_fractal = period_fractal
         self.n_fractals = n_fractals
         self.allowance = allowance
+        self.problems = 'Mcfly'
 
     def preprocessing(self, tdata):
         pdata = {}
         df = tdata['chart']
-        df = add_fractals(df, self.n_candles)
-        df = add_plus_delta_fc(df, self.n_fractals)
+        df = add_fractals(df, self.period_fractal)
+        df = add_plus_delta_fc(df, self.n_fractals, self.period_fractal)
         df['pdf_diff_percent'] = ((df['pdf_up'] - df['pdf_down']) / df['pdf_down']) * 100
         df['allowance'] = df['pdf_diff_percent'] > self.allowance
         df = self.add_slice_df(df)
@@ -161,20 +160,20 @@ class UEG4_FALCON(BaseEG):
         return None
 
 class UEG4_PELICAN(BaseEG):
-    """stop=None, take=None, period=20, n_candles=5, n_fractals=3, allowance=0.1"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=20, n_candles=5, n_fractals=3, allowance=0.1):
+    """stop=None, take=None, period_fractal=5, n_fractals=3, allowance=0.1"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_fractal=5, n_fractals=3, allowance=0.1):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
-        self.period = period
-        self.n_candles = n_candles
+        self.period_fractal = period_fractal
         self.n_fractals = n_fractals
         self.allowance = allowance
+        self.problems = 'Mcfly'
 
     def preprocessing(self, tdata):
         pdata = {}
         df = tdata['chart']
-        df = add_fractals(df, self.n_candles)
-        df = add_exp_pdfc(df, self.n_fractals)
+        df = add_fractals(df, self.period_fractal)
+        df = add_exp_pdfc(df, self.n_fractals, self.period_fractal)
         df['pdf_diff_percent'] = ((df['pdf_up'] - df['pdf_down']) / df['pdf_down']) * 100
         df['allowance'] = df['pdf_diff_percent'] > self.allowance
         df = self.add_slice_df(df)
@@ -191,29 +190,30 @@ class UEG4_PELICAN(BaseEG):
         return None
             
 class UEG5_HAWK(BaseEG):
-    """stop=None, take=None, period=100, n_candles=5, n_fractals=3, period_rsi=20, type_treshold=0, period_mean=5, n_std=1.5, period_sma=3, threshold_trend=0.5, allowance=0.1, use_stop=0"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=100, n_candles=5, n_fractals=3, period_rsi=20, type_treshold=0, period_mean=5, n_std=1.5, period_sma=3, threshold_trend=0.5, allowance=0.1, use_stop=0):
+    """stop=None, take=None, period_zz=20, period_fractal=5, n_fractals=3, period_rsi=20, type_treshold=0, period_max=55, n_std=1.5, period_sma=3, threshold_trend=0.5, allowance=0.1, use_stop=0"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_zz=20, period_fractal=5, n_fractals=3, period_rsi=20, type_treshold=0, period_max=55, n_std=1.5, period_sma=3, threshold_trend=0.5, allowance=0.1, use_stop=0):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
-        self.period = period
-        self.n_candles = n_candles
+        self.period_zz = period_zz
+        self.period_fractal = period_fractal
         self.n_fractals = n_fractals
         self.type_treshold = type_treshold
-        self.period_mean = period_mean
+        self.period_max = period_max
         self.period_sma = period_sma
         self.n_std = n_std
         self.threshold_trend = threshold_trend
         self.period_rsi = period_rsi
         self.allowance = allowance
         self.use_stop = use_stop
+        self.problems = 'Mcfly'
 
     def add_threshold(self, df):
         if self.type_treshold == 0:
-            df = add_mean_on_fractals(df, self.period_mean, 'rsi')
+            df = add_mean_on_fractals(df, self.period_max, 'rsi',self.period_fractal)
             df['oversold'] = df['rsi'] < df['bottom_mean']
             df['overbought'] = df['rsi'] > df['top_mean']
         else:
-            df = add_ext_on_fractals(df, self.period_mean, 'rsi')
+            df = add_ext_on_fractals(df, self.period_max, 'rsi',self.period_fractal)
             df['oversold'] = df['rsi'] < df['bottom_ext']
             df['overbought'] = df['rsi'] > df['top_ext']
         return df
@@ -221,14 +221,15 @@ class UEG5_HAWK(BaseEG):
     def preprocessing(self, tdata):
         pdata = {}
         df = tdata['chart']
-        df = add_fractals(df, self.n_candles)
-        df = add_exp_pdfc(df, self.n_fractals)
+        df = add_fractals(df, self.period_fractal)
+        df = add_exp_pdfc(df, self.n_fractals, self.period_fractal)
         df['pdf_diff_percent'] = ((df['pdf_up'] - df['pdf_down']) / df['pdf_down']) * 100
         df['allowance'] = df['pdf_diff_percent'] > self.allowance
         df = add_rsi(df, self.period_rsi)
         df = self.add_threshold(df)
-        df = add_dzz_peaks(df, n_std=self.n_std)
-        df = add_analys_dzz(df, self.period_sma)
+        df = add_zigzag180826(df, n_std=self.n_std,period=self.period_zz)
+        df = add_shift_zz_peaks(df)
+        df = add_analys_dzz180826(df, self.period_sma)
         df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
@@ -341,11 +342,11 @@ class UEG6_DUELDODO(BaseEG):
         return None
 
 class UEG6_VULTURE(BaseEG):
-    """stop=None, take=None, period=20, period_smas=2, adx_threshold=30, period_sma=20, n_candles=5, n_fractals=3, allowance=0.1, period_adx=27
+    """stop=None, take=None, period=20, period_smas=2, adx_threshold=30, period_sma=20, period_fractal=5, n_fractals=3, allowance=0.1, period_adx=27
     \n
     фильтрованный по adx, направленный по sma GGD(быстрых параметров) + PELICAN .
     ADX-фильтр + SMA + PELICAN (фрактальные каналы)"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=20, period_smas=2, adx_threshold=30, period_sma=20, n_candles=5, n_fractals=3, allowance=0.1, period_adx=27):
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=20, period_smas=2, adx_threshold=30, period_sma=20, period_fractal=5, n_fractals=3, allowance=0.1, period_adx=27):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
         self.period = period
@@ -353,9 +354,10 @@ class UEG6_VULTURE(BaseEG):
         self.period_smas = period_smas
         self.adx_threshold = adx_threshold
         self.period_sma = period_sma
-        self.n_candles = n_candles
+        self.period_fractal = period_fractal
         self.n_fractals = n_fractals
         self.allowance = allowance
+        self.problems = 'Mcfly'
 
     def preprocessing(self, tdata):
         pdata = {}
@@ -364,8 +366,8 @@ class UEG6_VULTURE(BaseEG):
         df['sma'] = df['close'].rolling(self.period).mean()
         df['high_sma'] = df['high'].rolling(self.period_smas).mean()
         df['low_sma'] = df['low'].rolling(self.period_smas).mean()
-        df = add_fractals(df, self.n_candles)
-        df = add_exp_pdfc(df, self.n_fractals)
+        df = add_fractals(df, self.period_fractal)
+        df = add_exp_pdfc(df, self.n_fractals, self.period_fractal)
         df['pdf_diff_percent'] = ((df['pdf_up'] - df['pdf_down']) / df['pdf_down']) * 100
         df['allowance'] = df['pdf_diff_percent'] > self.allowance
         df = self.add_slice_df(df)
@@ -394,21 +396,22 @@ class UEG6_VULTURE(BaseEG):
         return None
 
 class UEG6_PIGEON(BaseEG):
-    """stop=None, take=None, period=60, period_smas=2, period_sma=20, n_candles=5, n_fractals=3, allowance=0.1, mult_bb=1, use_stop=0
+    """stop=None, take=None, period=60, period_smas=2, period_sma=20, period_fractal=5, n_fractals=3, allowance=0.1, mult_bb=1, use_stop=0
     \n
     Что-то типо DRG+VULTURE
     Bollinger + фрактальные каналы. Комбинация DRG+VULTURE"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=60, period_smas=2, period_sma=20, n_candles=5, n_fractals=3, allowance=0.1, mult_bb=1, use_stop=0):
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=55, period_smas=2, period_sma=20, period_fractal=5, n_fractals=3, allowance=0.1, mult_bb=1, use_stop=0):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
         self.period = period
         self.period_smas = period_smas
         self.period_sma = period_sma
-        self.n_candles = n_candles
+        self.period_fractal = period_fractal
         self.n_fractals = n_fractals
         self.allowance = allowance
         self.mult_bb = mult_bb
         self.use_stop = use_stop
+        self.problems = 'Mcfly'
 
     def preprocessing(self, tdata):
         pdata = {}
@@ -416,8 +419,8 @@ class UEG6_PIGEON(BaseEG):
         df = add_bollinger(df, self.period, multiplier=self.mult_bb)
         df['high_sma'] = df['high'].rolling(self.period_smas).mean()
         df['low_sma'] = df['low'].rolling(self.period_smas).mean()
-        df = add_fractals(df, self.n_candles)
-        df = add_exp_pdfc(df, self.n_fractals)
+        df = add_fractals(df, self.period_fractal)
+        df = add_exp_pdfc(df, self.n_fractals, self.period_fractal)
         df['pdf_diff_percent'] = ((df['pdf_up'] - df['pdf_down']) / df['pdf_down']) * 100
         df['allowance'] = df['pdf_diff_percent'] > self.allowance
         df = self.add_slice_df(df)
@@ -454,7 +457,7 @@ class UEG6_ADVENTURE(BaseEG):
     \n
     DRG+DUELDODO
     Bollinger + GGD. Комбинация DRG+DUELDODO"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=60, period_smas=2, period_sma=20, mult_bb=1, use_stop=0):
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=55, period_smas=2, period_sma=20, mult_bb=1, use_stop=0):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
         self.period = period
@@ -502,7 +505,7 @@ class UEG6_SHERIFF(BaseEG):
     \n
     GGD+PUBG
     Bollinger + GGD (упрощённая версия). При выходе за BB — сигнал в сторону пробоя"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=60, period_smas=2, mult_bb=2):
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=55, period_smas=2, mult_bb=2):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
         self.period = period
@@ -534,32 +537,34 @@ class UEG6_SHERIFF(BaseEG):
         return None
             
 class UEG7_DODO(BaseEG):
-    """stop=None, take=None, period_adx=20, n_candles=5, n_fractals=3, adx_threshold=30, adx_stop=35
+    """stop=None, take=None, period_adx=20, period_fractal=5, max_period=55, adx_threshold=30, adx_stop=35, use_stop=0
     \n
     фильтрованный по adx GGD быстрых параметров. RANGER + GGD
     """
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_adx=20, n_candles=5, n_fractals=3, adx_threshold=30, adx_stop=35):
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_adx=20, period_fractal=5, max_period=55, adx_threshold=30, adx_stop=35, use_stop=0):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
         self.period_adx = period_adx
-        self.n_candles = n_candles
-        self.n_fractals = n_fractals
+        self.max_period = max_period
+        self.period_fractal = period_fractal
         self.adx_threshold = adx_threshold
         self.adx_stop = adx_stop
+        self.use_stop = use_stop
 
     def preprocessing(self, tdata):
         pdata = {}
         df = tdata['chart']
         df = add_adx(df, self.period_adx)
-        df = add_fractals(df, self.n_candles)
-        df = add_average_fractals(df, self.n_fractals)
+        df = add_fractals(df, self.period_fractal)
+        df = add_average_fractals(df, self.max_period, self.period_fractal)
         df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
     def _get_action_from_row(self, row):
-        if row['adx'] > self.adx_stop:
-            return 'close_all'
+        if self.use_stop:
+            if row['adx'] > self.adx_stop:
+                return 'close_all'
         
         if row['adx'] < self.adx_threshold:
             if row['close'] >= row['ave_up']:
@@ -570,15 +575,15 @@ class UEG7_DODO(BaseEG):
         return None
             
 class UEG7_DUELDODO(BaseEG):
-    """stop=None, take=None, period_adx=20, n_candles=5, n_fractals=3, adx_threshold=30, period_sma=20, use_stop=0
+    """stop=None, take=None, period_adx=20, period_fractal=5, max_period=55, adx_threshold=30, period_sma=20, use_stop=0
     \n
     фильтрованный по adx, направленный по sma GGD быстрых параметров."""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_adx=20, n_candles=5, n_fractals=3, adx_threshold=30, period_sma=20, use_stop=0):
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_adx=20, period_fractal=5, max_period=55, adx_threshold=30, period_sma=20, use_stop=0):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
         self.period_adx = period_adx
-        self.n_candles = n_candles
-        self.n_fractals = n_fractals
+        self.max_period = max_period
+        self.period_fractal = period_fractal
         self.adx_threshold = adx_threshold
         self.period_sma = period_sma
         self.use_stop = use_stop
@@ -587,9 +592,9 @@ class UEG7_DUELDODO(BaseEG):
         pdata = {}
         df = tdata['chart']
         df = add_adx(df, self.period_adx)
-        df['sma'] = df['close'].rolling(self.period).mean()
-        df = add_fractals(df, self.n_candles)
-        df = add_average_fractals(df, self.n_fractals)
+        df['sma'] = df['close'].rolling(self.period_sma).mean()
+        df = add_fractals(df, self.period_fractal)
+        df = add_average_fractals(df, self.max_period, self.period_fractal)
         df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
@@ -619,32 +624,33 @@ class UEG7_DUELDODO(BaseEG):
         return None
 
 class UEG7_VULTURE(BaseEG):
-    """stop=None, take=None, period=20, adx_threshold=30, period_sma=20, n_candles=7, n_fractals=5, n_candles2=5, n_fractals2=3, allowance=0.1, period_adx=27
+    """stop=None, take=None, period_sma=20, adx_threshold=30, period_fractal=7, n_fractals=5, period_fractal2=5, max_period=55, allowance=0.1, period_adx=27
     \n
     фильтрованный по adx, направленный по sma GGD(быстрых параметров) + PELICAN ."""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=20, adx_threshold=30, period_sma=20, n_candles=7, n_fractals=5, n_candles2=5, n_fractals2=3, allowance=0.1, period_adx=27):
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_sma=20, adx_threshold=30, period_fractal=7, n_fractals=5, period_fractal2=5, max_period=55, allowance=0.1, period_adx=27):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
-        self.period = period
+        self.period_sma = period_sma
         self.period_adx = period_adx
         self.adx_threshold = adx_threshold
         self.period_sma = period_sma
-        self.n_candles = n_candles
+        self.period_fractal = period_fractal
         self.n_fractals = n_fractals
-        self.n_candles2 = n_candles2
-        self.n_fractals2 = n_fractals2
+        self.period_fractal2 = period_fractal2
+        self.max_period = max_period
         self.allowance = allowance
+        self.problems = 'Mcfly'
 
     def preprocessing(self, tdata):
         pdata = {}
         df = tdata['chart']
         df = add_adx(df, self.period_adx)
-        df['sma'] = df['close'].rolling(self.period).mean()
-        df = add_fractals(df, self.n_candles)
-        df = add_average_fractals(df, self.n_fractals)
+        df['sma'] = df['close'].rolling(self.period_sma).mean()
+        df = add_fractals(df, self.period_fractal)
+        df = add_average_fractals(df, self.max_period, self.period_fractal)
         df = df.drop(['fractal_up', 'fractal_down'], axis=1)
-        df = add_fractals(df, self.n_candles2)
-        df = add_exp_pdfc(df, self.n_fractals2)
+        df = add_fractals(df, self.period_fractal2)
+        df = add_exp_pdfc(df, self.n_fractals, self.period_fractal2)
         df['pdf_diff_percent'] = ((df['pdf_up'] - df['pdf_down']) / df['pdf_down']) * 100
         df['allowance'] = df['pdf_diff_percent'] > self.allowance
         df = self.add_slice_df(df)
@@ -673,30 +679,31 @@ class UEG7_VULTURE(BaseEG):
         return None
 
 class UEG7_PIGEON(BaseEG):
-    """stop=None, take=None, period=60, n_candles=10, n_fractals=6, n_candles2=5, n_fractals2=3, allowance=0.1, mult_bb=1, use_stop=0
+    """stop=None, take=None, period=60, period_fractal=10, max_period=55, period_fractal2=5, n_fractals2=3, allowance=0.1, mult_bb=1, use_stop=0
     \n
     Что-то типо DRG+VULTURE"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=60, n_candles=10, n_fractals=6, n_candles2=5, n_fractals2=3, allowance=0.1, mult_bb=1, use_stop=0):
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=55, period_fractal=10, max_period=55, period_fractal2=5, n_fractals2=3, allowance=0.1, mult_bb=1, use_stop=0):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
         self.period = period
-        self.n_candles = n_candles
-        self.n_fractals = n_fractals
-        self.n_candles2 = n_candles2
+        self.period_fractal = period_fractal
+        self.max_period = max_period
+        self.period_fractal2 = period_fractal2
         self.n_fractals2 = n_fractals2
         self.allowance = allowance
         self.mult_bb = mult_bb
         self.use_stop = use_stop
+        self.problems = 'Mcfly'
 
     def preprocessing(self, tdata):
         pdata = {}
         df = tdata['chart']
         df = add_bollinger(df, self.period, multiplier=self.mult_bb)
-        df = add_fractals(df, self.n_candles)
-        df = add_average_fractals(df, self.n_fractals)
+        df = add_fractals(df, self.period_fractal)
+        df = add_average_fractals(df, self.max_period, self.period_fractal)
         df = df.drop(['fractal_up', 'fractal_down'], axis=1)
-        df = add_fractals(df, self.n_candles2)
-        df = add_exp_pdfc(df, self.n_fractals2)
+        df = add_fractals(df, self.period_fractal2)
+        df = add_exp_pdfc(df, self.n_fractals2, self.period_fractal2)
         df['pdf_diff_percent'] = ((df['pdf_up'] - df['pdf_down']) / df['pdf_down']) * 100
         df['allowance'] = df['pdf_diff_percent'] > self.allowance
         df = self.add_slice_df(df)
@@ -729,15 +736,15 @@ class UEG7_PIGEON(BaseEG):
         return None
                     
 class UEG7_ADVENTURE(BaseEG):
-    """stop=None, take=None, period=60, n_candles=5, n_fractals=3, mult_bb=1, use_stop=0
+    """stop=None, take=None, period=60, period_fractal=5, max_period=55, mult_bb=1, use_stop=0
     \n
     DRG+DUELDODO"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=60, n_candles=5, n_fractals=3, mult_bb=1, use_stop=0):
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=55, period_fractal=5, max_period=55, mult_bb=1, use_stop=0):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
         self.period = period
-        self.n_candles = n_candles
-        self.n_fractals = n_fractals
+        self.period_fractal = period_fractal
+        self.max_period = max_period
         self.mult_bb = mult_bb
         self.use_stop = use_stop
 
@@ -745,8 +752,8 @@ class UEG7_ADVENTURE(BaseEG):
         pdata = {}
         df = tdata['chart']
         df = add_bollinger(df, self.period, multiplier=self.mult_bb)
-        df = add_fractals(df, self.n_candles)
-        df = add_average_fractals(df, self.n_fractals)
+        df = add_fractals(df, self.period_fractal)
+        df = add_average_fractals(df, self.max_period, self.period_fractal)
         df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
@@ -776,23 +783,23 @@ class UEG7_ADVENTURE(BaseEG):
         return None
 
 class UEG7_SHERIFF(BaseEG):
-    """stop=None, take=None, period=60, n_candles=5, n_fractals=3, mult_bb=2
+    """stop=None, take=None, period=55, period_fractal=5, max_period=55, mult_bb=2
     \n
     GGD+PUBG"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=60, n_candles=5, n_fractals=3, mult_bb=2):
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=55, period_fractal=5, max_period=55, mult_bb=2):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
         self.period = period
-        self.n_candles = n_candles
-        self.n_fractals = n_fractals
+        self.period_fractal = period_fractal
+        self.max_period = max_period
         self.mult_bb = mult_bb
 
     def preprocessing(self, tdata):
         pdata = {}
         df = tdata['chart']
         df = add_bollinger(df, self.period, multiplier=self.mult_bb)
-        df = add_fractals(df, self.n_candles)
-        df = add_average_fractals(df, self.n_fractals)
+        df = add_fractals(df, self.period_fractal)
+        df = add_average_fractals(df, self.max_period, self.period_fractal)
         df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
@@ -813,25 +820,26 @@ class UEG7_SHERIFF(BaseEG):
             
 class UEG8_AVENGER(BaseEG):
     '''
-    stop=None, take=None, period=20, divider_buff=10, percent_threshold=0.2, threshold_dzz=0.2, buff=0.1, divider_stop=2, use_stop=1
+    stop=None, take=None, divider_buff=10, percent_threshold=0.2, threshold_dzz=0.2, buff=0.1, divider_stop=2, use_stop=1
     \n
     Сложная паттерн-стратегия на основе ZigZag и паттернов Volume Spread Analysis (VSA)
     '''
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=20, divider_buff=10, percent_threshold=0.2, threshold_dzz=0.2, buff=0.1, divider_stop=2, use_stop=1):
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, divider_buff=10, percent_threshold=0.2, threshold_dzz=0.2, buff=0.1, divider_stop=2, use_stop=1):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
-        self.period = period
         self.divider_buff = divider_buff
         self.percent_threshold = percent_threshold
         self.threshold_dzz = threshold_dzz
         self.buff = buff
         self.divider_stop = divider_stop
         self.use_stop = use_stop
+        self.problems = 'Mcfly'
 
     def preprocessing(self, tdata):
         pdata = {}
         df = tdata['chart']
-        df = add_percent_zz_peaks(df, percent_threshold=self.percent_threshold)
+        df = add_percent_zz190826(df, percent_threshold=self.percent_threshold)
+        df['zigzag_peaks'] = df['zigzag_peaks'].shift(1)
         df = add_pattern18_dzz_czd(df, self.threshold_dzz, self.buff)
         df = add_stop_loss_p18czd(df, self.divider_stop)
         df['buffer'] = ((df['zp2'] - df['zp3']) / self.divider_buff).abs()
@@ -869,23 +877,24 @@ class UEG8_AVENGER(BaseEG):
 
 class UEG9_BIRDWATCHER(BaseEG):
     '''
-    stop=None, take=None, period=20, n_std=3, period_pd=2, buffer_pd=0.1, mult_stop=0.5, use_exp=1, use_stop=1
+    stop=None, take=None, percent_threshold=0.2, period_pd=2, buffer_pd=0.1, mult_stop=0.5, use_exp=1, use_stop=1
     '''
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=20, n_std=3, period_pd=2, buffer_pd=0.1, mult_stop=0.5, use_exp=1, use_stop=1):
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, percent_threshold=0.2, period_pd=2, buffer_pd=0.1, mult_stop=0.5, use_exp=1, use_stop=1):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
-        self.period = period
-        self.n_std = n_std
+        self.percent_threshold = percent_threshold
         self.period_pd = period_pd
         self.buffer_pd = buffer_pd
         self.mult_stop = mult_stop
         self.plusdelta_func = add_exp_plusdelta_dzz_peaks if use_exp else add_plusdelta_dzz_peaks
         self.use_stop = use_stop
+        self.problems = 'Mcfly'
 
     def preprocessing(self, tdata):
         pdata = {}
         df = tdata['chart']
-        df = add_dzz_peaks(df, n_std=self.n_std, period=self.period)
+        df = add_percent_zz190826(df, percent_threshold=self.percent_threshold)
+        df['zigzag_peaks'] = df['zigzag_peaks'].shift(1)
         df = self.plusdelta_func(df, self.period_pd, self.buffer_pd)
         df['top_stop'] = df['top_pd'] + df['delta_pd'] * self.mult_stop
         df['bottom_stop'] = df['bottom_pd'] - df['delta_pd'] * self.mult_stop
@@ -911,22 +920,23 @@ class UEG9_BIRDWATCHER(BaseEG):
 
 class UEG9_GRAVY(BaseEG):
     '''
-    stop=None, take=None, period=20, n_std=3, period_mean=2, buffer_mean=0.1, mult_stop=0.5, use_stop=1
+    stop=None, take=None, percent_threshold=0.3, period_mean=2, buffer_mean=0.1, mult_stop=0.5, use_stop=1
     '''
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=20, n_std=3, period_mean=2, buffer_mean=0.1, mult_stop=0.5, use_stop=1):
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, percent_threshold=0.3, period_mean=2, buffer_mean=0.1, mult_stop=0.5, use_stop=1):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
-        self.period = period
-        self.n_std = n_std
+        self.percent_threshold = percent_threshold
         self.period_mean = period_mean
         self.buffer_mean = buffer_mean
         self.mult_stop = mult_stop
         self.use_stop = use_stop
+        self.problems = 'Mcfly'
 
     def preprocessing(self, tdata):
         pdata = {}
         df = tdata['chart']
-        df = add_dzz_peaks(df, n_std=self.n_std, period=self.period)
+        df = add_percent_zz190826(df, percent_threshold=self.percent_threshold)
+        df['zigzag_peaks'] = df['zigzag_peaks'].shift(1)
         df = add_mean_dzz_peaks(df, self.period_mean, self.buffer_mean)
         df['top_stop'] = df['top_mean'] + df['delta_mean'] * self.mult_stop
         df['bottom_stop'] = df['bottom_mean'] - df['delta_mean'] * self.mult_stop

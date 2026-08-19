@@ -121,29 +121,7 @@ group = (
 #   File "C:\Users\user\AppData\Local\Programs\Python\Python311\Lib\multiprocessing\pool.py", line 873, in next
 #     raise value
 # ValueError: Found array with 0 sample(s) (shape=(0, 8)) while a minimum of 1 is required by DecisionTreeClassifier.
-   (
-        UEG9_BIRDWATCHER, 
-        [
-            (2, max_period, 1),
-            (1.5,10,0.5),
-            (2,5,1),
-            (0,0.3,0.1),
-            (0.25,2,0.25),
-            (0,1),
-            (0,1),
-        ]
-    ),
-    (
-        UEG9_GRAVY, 
-        [
-            (2, max_period, 1),
-            (1.5,10,0.5),
-            (2,5,1),
-            (0,0.3,0.1),
-            (0.25,2,0.25),
-            (0,1),
-        ]
-    ),
+
     (
         VEG1_MERCURY, 
         [
@@ -157,17 +135,5 @@ group = (
             (0,1),
         ]
     ),
-    (
-        VEG1_VENUS, 
-        [
-            (2, max_period, 1),
-            (0.1,1,0.1),
-            (0,1,0.1),
-            (0.1,0.5,0.1),
-            (0.5,2,0.1),
-            (0,1),
-            (0,1),
-            (0,1),
-        ]
-    ),
+
 )

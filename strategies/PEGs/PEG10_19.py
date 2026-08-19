@@ -729,7 +729,7 @@ class PEG18_VARIAN(BaseEG):
                 return 'close_long'
 
 class PEG18_BLAZE(BaseEG):
-    """period=55, period2=10, period3=55, threshold_enter=40, threshold_exit=20, use_stop=1, max_period=55"""
+    """stop=None, take=None, period=55, period2=10, period3=55, threshold_enter=40, threshold_exit=20, use_stop=1, max_period=55"""
     def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=55, period2=10, period3=55, threshold_enter=40, threshold_exit=20, use_stop=1, max_period=55):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}

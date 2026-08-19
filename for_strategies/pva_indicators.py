@@ -582,36 +582,44 @@ def add_smooth_channel(df:pd.DataFrame,period=20,smooth_features=('max_hb', 'min
         df[sf] = df[sf].rolling(period).agg([variant_smooth])
     return df
 
-def add_plus_delta_fc(df:pd.DataFrame, period=1):
+def add_plus_delta_fc(df:pd.DataFrame, period=1,period_fractal=5):
     """add 'pdf_up', 'pdf_down'
     \n plus delta fractal channel
+    Mcfly
     """
+    shift = (period_fractal - 1) // 2
     up_points = df[df['fractal_up']].copy()
     up_points['delta_high'] = up_points['high'].diff()
     up_points['dhm'] = up_points['delta_high'].rolling(period).mean()
     df['pdf_up'] = up_points['high'] + up_points['dhm']
     df['pdf_up'] = df['pdf_up'].ffill()
+    df['pdf_up'] = df['pdf_up'].shift(shift)
     down_points = df[df['fractal_down']].copy()
     down_points['delta_low'] = down_points['low'].diff()
     down_points['dlm'] = down_points['delta_low'].rolling(period).mean()
     df['pdf_down'] = down_points['low'] + down_points['dlm']
     df['pdf_down'] = df['pdf_down'].ffill()
+    df['pdf_down'] = df['pdf_down'].shift(shift)
     return df
 
-def add_exp_pdfc(df:pd.DataFrame, period=1):
+def add_exp_pdfc(df:pd.DataFrame, period=1,period_fractal=5):
     """add 'pdf_up', 'pdf_down'
     \n exponential plus delta fractal channel
+    Mcfly
     """
+    shift = (period_fractal - 1) // 2
     up_points = df[df['fractal_up']].copy()
     up_points['delta_high'] = up_points['high'].diff()
     up_points['dhm'] = up_points['delta_high'].ewm(period).mean()
     df['pdf_up'] = up_points['high'] + up_points['dhm']
     df['pdf_up'] = df['pdf_up'].ffill()
+    df['pdf_up'] = df['pdf_up'].shift(shift)
     down_points = df[df['fractal_down']].copy()
     down_points['delta_low'] = down_points['low'].diff()
     down_points['dlm'] = down_points['delta_low'].ewm(period).mean()
     df['pdf_down'] = down_points['low'] + down_points['dlm']
     df['pdf_down'] = df['pdf_down'].ffill()
+    df['pdf_down'] = df['pdf_down'].shift(shift)
     return df
 
 def add_stable_ma_direction(df:pd.DataFrame,period=10,kind:str='sma'):
