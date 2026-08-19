@@ -16,7 +16,7 @@ window = 60
 # ws = [UEG4_FALCON,],
 
 # ws = (PEG17_PHOENIX,(10,38,29,51,17,5,36,0,))
-ws = (PEG23_ULTIMATUM,[])
+ws = (PEG26_UNKNOWN,[])
 # ws = (DebugMean,[])
 cegt = CheckEGTrader(
     path_df,

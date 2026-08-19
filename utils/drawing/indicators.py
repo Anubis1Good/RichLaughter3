@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 
-def draw_wzp(df:pd.DataFrame,wzp=5,color='black',ax=None):
+def draw_wzp(df:pd.DataFrame,wzp=4,color='black',ax=None):
     if ax is not None:
         _plt = ax
     else:

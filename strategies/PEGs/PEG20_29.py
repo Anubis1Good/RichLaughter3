@@ -405,7 +405,7 @@ class PEG23_ULTIMATUM(BaseEG):
 
 class PEG24_BRIGHTWING(BaseEG):
     '''
-    stop=None, take=None, period=20, period_fractal=10, period_mean=5, percent_threshold=0.2, threshold_dzz=0.2, buff=0.1, divider=2, use_stop=1
+    stop=None, take=None, period=20, period_fractal=10, period_max=55, percent_threshold=0.2, threshold_dzz=0.2, buff=0.1, divider=2, use_stop=1
     '''
     def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=20, period_fractal=10, period_max=55, percent_threshold=0.2, threshold_dzz=0.2, buff=0.1, divider=2, use_stop=1):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
@@ -418,6 +418,7 @@ class PEG24_BRIGHTWING(BaseEG):
         self.buff = buff
         self.divider = divider
         self.use_stop = use_stop
+        self.problems = 'Mcfly'
 
     def preprocessing(self, tdata):
         pdata = {}
@@ -436,58 +437,57 @@ class PEG24_BRIGHTWING(BaseEG):
         return pdata
     
     def _get_action_from_row(self, row):
-        try:
-            if row['oversold']:
-                if row['pattern18'] in ('btc', 'bui', 'bottom_range', 'double_bottom', 'weak_short', 'narrowing_up', 'upthrust', 'sow'):
-                    return 'open_long'
-                elif self.use_stop and row['close'] < row['lsl']:
-                    return 'close_all'
-                else:
-                    return 'close_short'
-            
-            if row['overbought']:
-                if row['pattern18'] in ('bti', 'joc', 'top_range', 'double_top', 'weak_long', 'narrowing_down', 'spring', 'sos'):
-                    return 'open_short'
-                elif self.use_stop and row['close'] < row['ssl']:
-                    return 'close_all'
-                else:
-                    return 'close_long'
-            
-            if self.use_stop:
-                if row['close'] > row['ssl']:
-                    return 'close_short'
-                if row['close'] < row['lsl']:
-                    return 'close_long'
-        except:
-            return None
+        if row['oversold']:
+            if row['pattern18'] in ('btc', 'bui', 'bottom_range', 'double_bottom', 'weak_short', 'narrowing_up', 'upthrust', 'sow'):
+                return 'open_long'
+            elif self.use_stop and row['close'] < row['lsl']:
+                return 'close_all'
+            else:
+                return 'close_short'
+        
+        if row['overbought']:
+            if row['pattern18'] in ('bti', 'joc', 'top_range', 'double_top', 'weak_long', 'narrowing_down', 'spring', 'sos'):
+                return 'open_short'
+            elif self.use_stop and row['close'] < row['ssl']:
+                return 'close_all'
+            else:
+                return 'close_long'
+        
+        if self.use_stop:
+            if row['close'] > row['ssl']:
+                return 'close_short'
+            if row['close'] < row['lsl']:
+                return 'close_long'
         
         return None
 
 class PEG24_DEATHWING(BaseEG):
     '''
-    stop=None, take=None, period=20, period_fractal=10, period_mean=5, percent_threshold=0.2, threshold_dzz=0.2, buff=0.1, divider=2, use_stop=1
+    stop=None, take=None, period=20, period_fractal=10, period_max=55, percent_threshold=0.2, threshold_dzz=0.2, buff=0.1, divider=2, use_stop=1
     '''
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=20, period_fractal=10, period_mean=5, percent_threshold=0.2, threshold_dzz=0.2, buff=0.1, divider=2, use_stop=1):
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=20, period_fractal=10, period_max=55, percent_threshold=0.2, threshold_dzz=0.2, buff=0.1, divider=2, use_stop=1):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
         self.period = period
         self.period_fractal = period_fractal
-        self.period_mean = period_mean
+        self.period_max = period_max
         self.percent_threshold = percent_threshold
         self.threshold_dzz = threshold_dzz
         self.buff = buff
         self.divider = divider
         self.use_stop = use_stop
+        self.problems = 'Mcfly'
 
     def preprocessing(self, tdata):
         pdata = {}
         df = tdata['chart']
         df = add_rsi(df, self.period)
         df = add_fractals(df, self.period_fractal)
-        df = add_mean_on_fractals(df, self.period_mean, 'rsi')
+        df = add_mean_on_fractals(df, self.period_max, 'rsi',self.period_fractal)
         df['oversold'] = df['rsi'] < df['bottom_mean']
         df['overbought'] = df['rsi'] > df['top_mean']
-        df = add_percent_zz_peaks(df, percent_threshold=self.percent_threshold)
+        df = add_percent_zz190826(df, percent_threshold=self.percent_threshold)
+        df['zigzag_peaks'] = df['zigzag_peaks'].shift(1)
         df = add_pattern18_dzz_czd(df, self.threshold_dzz, self.buff)
         df = add_stop_loss_p18czd(df, self.divider)
         df = self.add_slice_df(df)
@@ -521,31 +521,33 @@ class PEG24_DEATHWING(BaseEG):
 
 class PEG25_TASSADAR(BaseEG):
     '''
-    stop=None, take=None, period=20, period_fractal=10, period_mean=5, percent_threshold=0.2, threshold_dzz=0.2, buff=0.1, divider=2, threshold_over=10, use_stop=0
+    stop=None, take=None, period=20, period_fractal=10, period_max=55, percent_threshold=0.2, threshold_dzz=0.2, buff=0.1, divider=2, threshold_over=10, use_stop=0
     '''
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=20, period_fractal=10, period_mean=5, percent_threshold=0.2, threshold_dzz=0.2, buff=0.1, divider=2, threshold_over=10, use_stop=0):
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=20, period_fractal=10, period_max=55, percent_threshold=0.2, threshold_dzz=0.2, buff=0.1, divider=2, threshold_over=10, use_stop=0):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
         self.period = period
         self.period_fractal = period_fractal
-        self.period_mean = period_mean
+        self.period_max = period_max
         self.threshold_over = threshold_over
         self.percent_threshold = percent_threshold
         self.threshold_dzz = threshold_dzz
         self.buff = buff
         self.divider = divider
         self.use_stop = use_stop
+        self.problems = 'Mcfly'
 
     def preprocessing(self, tdata):
         pdata = {}
         df = tdata['chart']
         df = add_rsi(df, self.period)
         df = add_fractals(df, self.period_fractal)
-        df = add_mean_on_fractals(df, self.period_mean, 'rsi')
+        df = add_mean_on_fractals(df, self.period_max, 'rsi',self.period_fractal)
         df['oversold'] = df['rsi'] < df['bottom_mean']
         df['overbought'] = df['rsi'] > df['top_mean']
         df['overlimit'] = (df['top_mean'] - df['bottom_mean']) > self.threshold_over
-        df = add_percent_zz_peaks(df, percent_threshold=self.percent_threshold)
+        df = add_percent_zz190826(df, percent_threshold=self.percent_threshold)
+        df['zigzag_peaks'] = df['zigzag_peaks'].shift(1)
         df = add_pattern18_dzz_czd(df, self.threshold_dzz, self.buff)
         df = add_stop_loss_p18czd(df, self.divider)
         df = self.add_slice_df(df)
@@ -588,24 +590,36 @@ class PEG25_TASSADAR(BaseEG):
         return None
 
 class PEG26_UNKNOWN(BaseEG):
-    """stop=None, take=None, period=100, n_stairs=3, period2=10, threshold=30, threshold_ii=25"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=100, n_stairs=3, period2=10, threshold=30, threshold_ii=25):
+    """stop=None, take=None, period_ema=55, period_rsi=10, threshold=30, threshold_ii=25,period_smad=55,period_dc=10,period_ii=20,max_period=55,use_stop=0"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_ema=55, period_rsi=10, threshold=30, threshold_ii=25,period_smad=55,period_dc=10,period_ii=20,max_period=55,use_stop=0):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
-        self.period = period
-        self.n_stairs = n_stairs
-        self.period2 = period2
+        self.period_rsi = period_rsi
+        self.period_dc = period_dc
+        self.period_ii = period_ii
         self.threshold = threshold
         self.threshold_ii = threshold_ii
+        self.use_stop = use_stop
+        max_total = (max_period // 3) * 2
+        total = period_ema + period_smad
+
+        if total > max_total:
+            ratio = max_total / total
+            self.period_ema = int(period_ema * ratio)
+            self.period_smad = int(period_smad * ratio)
+        else:
+            self.period_ema = period_ema
+            self.period_smad = period_smad
+        self.problems = 'Mcfly'
 
     def preprocessing(self, tdata):
         pdata = {}
         df = tdata['chart']
-        df = add_ema(df, self.period)
-        df = add_stable_ma_direction(df, self.period, 'ema')
-        df = add_donchan_channel(df, self.period2)
-        df = add_rsi(df, self.period2)
-        df = add_integrity_index(df, self.period2 * 2)
+        df = add_ema(df, self.period_ema)
+        df = add_stable_ma_direction(df, self.period_smad, 'ema')
+        df = add_donchan_channel(df, self.period_dc)
+        df = add_rsi(df, self.period_rsi)
+        df = add_integrity_index(df, self.period_ii)
         df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
@@ -632,7 +646,8 @@ class PEG26_UNKNOWN(BaseEG):
         if row['rsi'] > 100 - self.threshold and row['high'] >= row['max_hb']:
             return 'close_long'
         
-        if can_long:
-            return 'close_short'
-        else:
-            return 'close_long'
+        if self.use_stop:
+            if can_long:
+                return 'close_short'
+            else:
+                return 'close_long'

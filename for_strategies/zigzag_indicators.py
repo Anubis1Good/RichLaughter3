@@ -1799,3 +1799,109 @@ def add_wzz5p(df: pd.DataFrame, period=55):
     df[idx_cols] = df[idx_cols].astype('Int64')
     
     return df
+
+
+def get_rolling_extremes_indices(series: pd.Series, period: int, extremum: str):
+    """Получает индексы экстремумов для скользящего окна"""
+    indices = []
+    for i in range(len(series)):
+        start = max(0, i - period + 1)
+        window = series.iloc[start:i+1]
+        if len(window) == period:
+            if extremum == 'max':
+                indices.append(window.idxmax())
+            else:  # 'min'
+                indices.append(window.idxmin())
+        else:
+            indices.append(pd.NaT)
+    return indices
+
+
+# Прикольно, но как будто, можно лучше сделать. В любом случае с этим нужно будет что-то сделать
+def add_window_zigzag190826(df: pd.DataFrame, period=55):
+    cols = ['wzp1', 'wzp2', 'wzp3', 'wzp4', 
+            'idx_wzp1', 'idx_wzp2', 'idx_wzp3', 'idx_wzp4',
+            'dir_wzp1', 'dir_wzp2', 'dir_wzp3']
+    df[cols] = np.nan
+    
+    # Получаем rolling экстремумы
+    df['max_value'] = df['high'].rolling(period).max()
+    df['min_value'] = df['low'].rolling(period).min()
+    df['max_idx'] = get_rolling_extremes_indices(df['high'], period, 'max')
+    df['min_idx'] = get_rolling_extremes_indices(df['low'], period, 'min')
+    
+    # Основные случаи - векторизация
+    mask_max_after_min = df['max_idx'] > df['min_idx']
+    mask_min_after_max = df['max_idx'] < df['min_idx']
+    
+    # Заполняем основные случаи одной операцией
+    df.loc[mask_max_after_min, ['wzp4', 'wzp3', 'wzp2']] = df.loc[mask_max_after_min, ['low', 'max_value', 'min_value']].values
+    df.loc[mask_max_after_min, ['idx_wzp4', 'idx_wzp3', 'idx_wzp2']] = np.column_stack([
+        df.index[mask_max_after_min],
+        df.loc[mask_max_after_min, 'max_idx'],
+        df.loc[mask_max_after_min, 'min_idx']
+    ])
+    
+    df.loc[mask_min_after_max, ['wzp4', 'wzp3', 'wzp2']] = df.loc[mask_min_after_max, ['high', 'min_value', 'max_value']].values
+    df.loc[mask_min_after_max, ['idx_wzp4', 'idx_wzp3', 'idx_wzp2']] = np.column_stack([
+        df.index[mask_min_after_max],
+        df.loc[mask_min_after_max, 'min_idx'],
+        df.loc[mask_min_after_max, 'max_idx']
+    ])
+    
+    # Equal cases - минимизируем обращения к df
+    mask_equal = df['max_idx'] == df['min_idx']
+    equal_indices = df.index[mask_equal]
+    
+    # Подготовка данных для equal cases
+    for idx in equal_indices:
+        pos = df.index.get_loc(idx)
+        if pos < period:
+            continue
+            
+        max_idx_val = df.loc[idx, 'max_idx']
+        close_ext = df.loc[max_idx_val, 'close']
+        nearest_long = df.loc[idx, 'max_value'] - close_ext > close_ext - df.loc[idx, 'min_value']
+        
+        if nearest_long:
+            df.loc[idx, ['wzp4', 'wzp3', 'wzp2']] = [df.loc[idx, 'low'], df.loc[idx, 'max_value'], df.loc[idx, 'min_value']]
+            df.loc[idx, ['idx_wzp4', 'idx_wzp3', 'idx_wzp2']] = [idx, max_idx_val, df.loc[idx, 'min_idx']]
+        else:
+            df.loc[idx, ['wzp4', 'wzp3', 'wzp2']] = [df.loc[idx, 'high'], df.loc[idx, 'min_value'], df.loc[idx, 'max_value']]
+            df.loc[idx, ['idx_wzp4', 'idx_wzp3', 'idx_wzp2']] = [idx, df.loc[idx, 'min_idx'], max_idx_val]
+    
+    # wzp1 - используем предварительно созданные массивы для скорости
+    wzp1_values = np.full(len(df), np.nan)
+    idx_wzp1_values = np.full(len(df), pd.NaT, dtype='object')
+    
+    for i in range(period, len(df)):
+        if pd.isna(df.iloc[i]['wzp2']):
+            continue
+            
+        wzp2_is_low = df.iloc[i]['wzp2'] == df.iloc[i]['min_value']
+        end_idx = df.iloc[i]['idx_wzp2']
+        start_idx = df.index[i - period]
+        
+        if wzp2_is_low:
+            mask = (df.index >= start_idx) & (df.index <= end_idx)
+            if mask.any():
+                wzp1_values[i] = df.loc[mask, 'high'].max()
+                idx_wzp1_values[i] = df.loc[mask, 'high'].idxmax()
+        else:
+            mask = (df.index >= start_idx) & (df.index <= end_idx)
+            if mask.any():
+                wzp1_values[i] = df.loc[mask, 'low'].min()
+                idx_wzp1_values[i] = df.loc[mask, 'low'].idxmin()
+    
+    df['wzp1'] = wzp1_values
+    df['idx_wzp1'] = idx_wzp1_values
+    
+    return df
+
+
+"""
+    Идеи для зигзагов:
+    1. Какая-нибудь функция синусоиды и по ней строить зигзаг
+    2. Попытаться строить по скользящей стредней
+    3. Диагонали в канеле дончана
+"""
