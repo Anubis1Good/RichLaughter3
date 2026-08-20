@@ -1,6 +1,6 @@
 import numpy as np
 from strategies.BaseEG import BaseEG
-from for_strategies.classic_indicators import add_rsi,add_rsi_tw,add_williams_r,add_mfi,add_ultimate_oscillator,add_cmo,add_cci,add_stochastic,add_roc,add_fractals,add_bollinger,add_chop,add_supertrend,add_ema
+from for_strategies.classic_indicators import add_rsi,add_rsi_tw,add_williams_r,add_mfi,add_ultimate_oscillator,add_cmo,add_cci,add_stochastic,add_roc,add_fractals,add_bollinger,add_chop,add_supertrend,add_sma
 from for_strategies.pva_indicators import add_integrity_index,add_mean_on_fractals,add_average_fractals,add_ext_on_fractals
 from for_strategies.vsa_indicators import add_dvsai,add_cdvsai
 
@@ -487,13 +487,13 @@ class LEG1_LAKSAe(BaseEG):
     def preprocessing(self, tdata):
         pdata = {}
         df = tdata['chart']
-        df = add_ema(df, self.period)
+        df = add_sma(df, self.period)
         df['local_max'] = df['close'].rolling(window=self.period2).max()
         df['local_min'] = df['close'].rolling(window=self.period2).min()
         df['nearest_long'] = df['high'] - df['close'] > df['close'] - df['low']
         df['signal'] = 0  # 0 = нет сигнала, 1 = покупка, -1 = продажа
-        df.loc[(df['low'] <= df['local_min']) & (df['close'] > df['ema']) & (df['nearest_long'] == True), 'signal'] = 1  # Покупка
-        df.loc[(df['high'] >= df['local_max']) & (df['close'] < df['ema']) & (df['nearest_long'] == False), 'signal'] = -1  # Продажа
+        df.loc[(df['low'] <= df['local_min']) & (df['close'] > df['sma']) & (df['nearest_long'] == True), 'signal'] = 1  # Покупка
+        df.loc[(df['high'] >= df['local_max']) & (df['close'] < df['sma']) & (df['nearest_long'] == False), 'signal'] = -1  # Продажа
 
         df = self.add_slice_df(df)
         pdata['chart'] = df

@@ -72,14 +72,14 @@ def add_bollinger(df: pd.DataFrame, period=20, kind='close', multiplier=2):
         raise ValueError("Неподдерживаемый тип цены. Используйте 'middle', 'high', 'low' или 'close'.")
     
     # Вычисляем SMA
-    df['sma'] = price.rolling(window=period).mean().round(2)
+    df['sma'] = price.rolling(window=period).mean()
     
     # Вычисляем стандартное отклонение
     std_dev = price.rolling(window=period).std()
     
     # Вычисляем верхнюю и нижнюю полосы Боллинджера
-    df['bbu'] = (df['sma'] + (multiplier * std_dev)).round(2)
-    df['bbd'] = (df['sma'] - (multiplier * std_dev)).round(2)
+    df['bbu'] = (df['sma'] + (multiplier * std_dev))
+    df['bbd'] = (df['sma'] - (multiplier * std_dev))
     
     return df
 
@@ -174,7 +174,7 @@ def add_ema(df:pd.DataFrame, period=20, kind='close'):
     ema = df[kind].ewm(alpha=alpha, adjust=False).mean()
     
     # Комбинируем SMA (первые period-1 значений) и EMA (остальные значения)
-    df['ema'] = sma.where(sma.notna(), ema).round(2)
+    df['ema'] = sma.where(sma.notna(), ema)
     
     return df
 

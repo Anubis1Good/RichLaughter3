@@ -9,7 +9,7 @@ from strategies.SEGs.SEG_CA1_9 import *
 from strategies.SEGs.SEG_ML10_19 import *
 from strategies.VEGs.VEG1 import *
 
-max_period = 55
+from optimization.optuna_grops.opt_params import *
 group = (    
     (
         PEG4_UNIVERSAL, 

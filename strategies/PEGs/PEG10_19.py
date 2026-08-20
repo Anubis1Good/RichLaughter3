@@ -530,6 +530,7 @@ class PEG17_PHOENIX(BaseEG):
         
         return None
 
+# Написать 18 версии на супертернде или исправить stairs
 class PEG18_REXXAR(BaseEG):
     """stop=None, take=None, period=100, n_stairs=3, period2=10, threshold_enter=40, threshold_exit=20, use_stop=0"""
     def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=10, n_stairs=3, period2=10, threshold_enter=40, threshold_exit=20, use_stop=0):

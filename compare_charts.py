@@ -12,11 +12,15 @@ from for_strategies.zigzag_indicators import *
 from utils.work_dfs.load_df import simple_load_df
 from utils.drawing.indicators import draw_wzp
 # Начальные параметры окна
+# Загружаем данные
+filepath = '_data_for_tests\_before_opt\ALRS_5_1787155697.parquet'
+df = simple_load_df(filepath)
+
 window = 60
 START = 60
 END = START + window
 WINDOW_SIZE = END - START
-COLUMNS = ['top_pd','bottom_pd']  # <--- СПИСОК КОЛОНОК
+COLUMNS = ['stair']  # <--- СПИСОК КОЛОНОК
 # COLUMNS = []  # <--- СПИСОК КОЛОНОК
 draw_chart = True
 # draw_chart = False
@@ -33,9 +37,7 @@ COLORS_DF2 = ['red', 'orange']  # для zigzag и zigzag_peaks соответс
 def preprocessing(df):
     """Добавляем индикаторы в датафрейм"""
     df = df.copy()
-    df = add_percent_zz190826(df)
-    df['zigzag_peaks'] = df['zigzag_peaks'].shift(1)
-    df = add_plusdelta_dzz_peaks(df)
+    df = add_hl_stair_fast(df)
     # df = add_plus_delta_fc2(df)
     return df
 # ===== ФУНКЦИЯ ДЛЯ РИСОВАНИЯ ГРАФИКА =====
@@ -150,9 +152,7 @@ def create_figure(df1, df2, start_idx, end_idx, columns=['rsi'],
 
 # ===== ОСНОВНОЙ КОД С КНОПКАМИ =====
 
-# Загружаем данные
-filepath = '_data_for_tests\_before_opt\ALRS_5_1786793061.parquet'
-df = simple_load_df(filepath)
+
 
 # 1. Обрабатываем ВЕСЬ датафрейм
 df_full = preprocessing(df)

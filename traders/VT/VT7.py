@@ -53,6 +53,7 @@ class VT7:
         # Распаковка charts
         self.chart_region = {symbol: [] for symbol in symbols}
         self.offset = {symbol: [] for symbol in symbols}
+        self.candle_max = {symbol: [] for symbol in symbols}
 
         for chart in conf_data['charts']:
             for i, symbol in enumerate(symbols):
@@ -311,8 +312,9 @@ class VT7:
                 chart_region = self.chart_region[symbol][0]
                 self._remove_levels(symbol,0)
                 offset = self.offset[symbol][0]
+                candle_max = self.candle_max[symbol][0]
                 for lvl in levels:
-                    self._add_level(10,int(-lvl+offset),chart_region)
+                    self._add_level(10,int(-lvl*candle_max+offset),chart_region)
             if isinstance(levels,dict):
                 ...
 
@@ -395,6 +397,16 @@ class VT7:
         for k in ('high','low','volume','middle','open','close'):
             bars[k] = -bars[k] + self.offset[symbol][idx]
         bars['volume'] = bars['volume'] + 1
+        # нормализация к значениям 0 - 1
+        candle_max = bars['high'].max()
+        if candle_max > 0:
+            bars['volume'] = bars['volume'] / bars['volume'].max() if bars['volume'].max() > 0 else 0
+            bars['close'] = bars['close'] / candle_max
+            bars['open'] = bars['open'] / candle_max
+            bars['low'] = bars['low'] / candle_max
+            bars['high'] = bars['high'] / candle_max
+            bars['middle'] = bars['middle'] / candle_max
+        self.candle_max[symbol][idx] = candle_max
         return bars
     
     def _get_df(self,img,symbol,idx) -> pd.DataFrame:

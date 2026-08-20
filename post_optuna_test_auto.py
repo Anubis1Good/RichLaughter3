@@ -25,7 +25,7 @@ class WindowTester:
                  results_excel: str,
                  output_folder: str = '_test_results/window_test',
                  tickers: list = None,
-                 fee: float = 0.0002,
+                 fee: float = 0.001,
                  close_on_time: bool = True,
                  close_map: tuple = ((22,30),(22,30),(22,30),(22,30),(22,30),(17,30),(17,30)),
                  window_size: int = 60,

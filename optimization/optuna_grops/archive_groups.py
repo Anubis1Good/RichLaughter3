@@ -10,12 +10,26 @@ from strategies.SEGs.SEG_ML10_19 import *
 from strategies.VEGs.VEG1 import *
 
 # (min, max, step)
-max_period = 55
+from optimization.optuna_grops.opt_params import *
 group = (
     (
         PEG2_DDCrWork, 
         [
             (2,max_period,1),
+        ]
+    ),
+
+    (
+        UEG3_REVAN, 
+        [
+            (2, max_period, 1),
+            (2,20,1),
+        ]
+    ),
+    (
+        UEG3_ZEUS, 
+        [
+            (0.1,max_percent_threshold,0.1),
         ]
     ),
 )

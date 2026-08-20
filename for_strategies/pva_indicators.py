@@ -106,8 +106,6 @@ def add_kefir_channel(df:pd.DataFrame,period=20):
 def add_hl_stair_fast(df: pd.DataFrame, n=3, period=20):
     """ add 'stair'
     """
-    df = df.copy()
-    df = df.reset_index(drop=True)
     high = df['high'].values
     low = df['low'].values
 
@@ -165,8 +163,8 @@ def add_pc_stair_fast(df: pd.DataFrame, n=3, period=20):
     """ add 'stair'
     'Mcfly'
     """
-    df = df.copy()
-    df = df.reset_index(drop=True)
+    # df = df.copy()
+    # df = df.reset_index(drop=True)
     close = df['close'].values
     high = df['high'].values
     low = df['low'].values
@@ -220,7 +218,7 @@ def add_pc_stair_fast(df: pd.DataFrame, n=3, period=20):
     stair = np.full(size, np.nan)
     stair[dir_changes] = prev_close[dir_changes]
     
-    df['stair'] = pd.Series(stair).ffill()
+    df['stair'] = pd.Series(stair,df.index).ffill()
     return df
 
 def add_integrity_index(df:pd.DataFrame,period:int=14):
@@ -797,30 +795,22 @@ def get_all_lup(df,kind_top,kind_bottom):
     return all_starts,all_ends
 
 def add_simple_dynamics_ma(df: pd.DataFrame, period: int = 20, 
-                           kind: str = 'sma', divider_period: int = 1) -> pd.DataFrame:
-    """
-    Супер-быстрая версия без создания промежуточных колонок.
-    """
+                           kind: str = 'sma', divider_period: int = 1,
+                           epsilon: float = 1e-10) -> pd.DataFrame:
     values = df[kind].values
     n = len(values)
     
-    # Вычисляем sdiff (разница между соседними значениями)
     sdiff = np.zeros(n)
     if n > 1:
-        sdiff[1:] = np.where(values[1:] > values[:-1], 1, 
-                            np.where(values[1:] < values[:-1], -1, 0))
+        diff = values[1:] - values[:-1]
+        sdiff[1:] = np.where(diff > epsilon, 1, 
+                            np.where(diff < -epsilon, -1, 0))
     
-    # Вычисляем скользящее среднее
     window = period // divider_period
-    
-    # Используем cumsum для быстрого расчета среднего
     cumsum = np.concatenate([[0], np.cumsum(sdiff)])
+    sdm = np.full(n, -1.0)
     if n >= window:
-        # Векторизованный расчет среднего для всех окон
-        sdm = np.full(n, -1.0)
         sdm[window-1:] = (cumsum[window:] - cumsum[:-window]) / window
-    else:
-        sdm = np.full(n, -1.0)
     
     df['sdm'] = sdm
     return df

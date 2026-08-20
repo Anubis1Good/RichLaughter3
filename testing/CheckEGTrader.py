@@ -351,7 +351,7 @@ class CheckEGTrader:
                     df_slice['open'] = df_slice['open'] / candle_max
                     df_slice['low'] = df_slice['low'] / candle_max
                     df_slice['high'] = df_slice['high'] / candle_max
-            
+                    df_slice['middle'] = df_slice['middle'] / candle_max
             
             # Подготавливаем данные через preprocessing стратегии
             tdata = {'chart': df_slice}

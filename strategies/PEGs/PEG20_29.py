@@ -1,5 +1,5 @@
 from strategies.BaseEG import BaseEG
-from for_strategies.classic_indicators import add_bollinger,add_rsi,add_donchan_channel,add_fractals,add_chop,add_adx,add_ema
+from for_strategies.classic_indicators import add_bollinger,add_rsi,add_donchan_channel,add_fractals,add_chop,add_adx,add_sma
 from for_strategies.pva_indicators import add_mean_on_fractals,add_ext_on_fractals,add_smooth_channel,add_integrity_index,add_stable_ma_direction
 from for_strategies.zigzag_indicators import add_dzz_peaks,add_analys_dzz,add_percent_zz_peaks,add_pattern18_dzz_czd,add_stop_loss_p18czd, add_analys_dzz180826, add_zigzag180826, add_shift_zz_peaks,add_percent_zz190826
 
@@ -590,8 +590,8 @@ class PEG25_TASSADAR(BaseEG):
         return None
 
 class PEG26_UNKNOWN(BaseEG):
-    """stop=None, take=None, period_ema=55, period_rsi=10, threshold=30, threshold_ii=25,period_smad=55,period_dc=10,period_ii=20,max_period=55,use_stop=0"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_ema=55, period_rsi=10, threshold=30, threshold_ii=25,period_smad=55,period_dc=10,period_ii=20,max_period=55,use_stop=0):
+    """stop=None, take=None, period_sma=55, period_rsi=10, threshold=30, threshold_ii=25,period_smad=55,period_dc=10,period_ii=20,max_period=55,use_stop=0"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_sma=55, period_rsi=10, threshold=30, threshold_ii=25,period_smad=55,period_dc=10,period_ii=20,max_period=55,use_stop=0):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
         self.period_rsi = period_rsi
@@ -601,22 +601,22 @@ class PEG26_UNKNOWN(BaseEG):
         self.threshold_ii = threshold_ii
         self.use_stop = use_stop
         max_total = (max_period // 3) * 2
-        total = period_ema + period_smad
+        total = period_sma + period_smad
 
         if total > max_total:
             ratio = max_total / total
-            self.period_ema = int(period_ema * ratio)
+            self.period_sma = int(period_sma * ratio)
             self.period_smad = int(period_smad * ratio)
         else:
-            self.period_ema = period_ema
+            self.period_sma = period_sma
             self.period_smad = period_smad
         self.problems = 'Mcfly'
 
     def preprocessing(self, tdata):
         pdata = {}
         df = tdata['chart']
-        df = add_ema(df, self.period_ema)
-        df = add_stable_ma_direction(df, self.period_smad, 'ema')
+        df = add_sma(df, self.period_sma)
+        df = add_stable_ma_direction(df, self.period_smad, 'sma')
         df = add_donchan_channel(df, self.period_dc)
         df = add_rsi(df, self.period_rsi)
         df = add_integrity_index(df, self.period_ii)
