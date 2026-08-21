@@ -21,12 +21,15 @@ def duration_time(func):
         return result
     return wrapper
 
+# fee = 0.0001   # 0.01% — realistic для лимиток с учётом минимума
+# fee = 0.0005   # 0.05% — realistic для рынка
+# fee = 0.00005  # 0.005% — минимальная лимитная комиссия (для акций больше 500 р)
 #добавить учет риск-менеджмента
 class CheckEGTrader:
     def __init__(self,
                  df:pd.DataFrame | str, 
                  ws:list|tuple|BaseEG,
-                 fee:float = 0.001,
+                 fee:float = 0.001, #в долях (абсолютное значение)
                  symbol:str = 'Test',
                  close_on_time:bool=True,
                  close_map:tuple|list=(

@@ -17,7 +17,7 @@ save_cores = 0
 if __name__ == '__main__':
     optimizer = OptimizatorOptuna(
         test_folder='_data_for_tests/data_stock_5m',
-        fee=0.001,
+        fee=0.0002,
         max_period=max_period,
         bottom_limit=80,
         top_limit=1000,
