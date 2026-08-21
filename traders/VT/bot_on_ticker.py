@@ -51,18 +51,31 @@ bot_on_ticker = {
     # 'MVID':(PEG31_HYPERION,(10,1,2,0,True,10,1,2,5),1,None), #+
     # 'ABIO':(PEG31_HYPERION,(10,1,2,0,True,20,1,1),1,None), #0
     # 'RTKMP':(PEG31_HYPERION,(10,1,2,0,True,30,5,1),1,None), #+
-    'ALRS':(PEG4_U3,(5,37,18,3,23,55,'DC','rsi',),3,None),
-    'ALRS2':(WEG4_PUPPY,(16,37,8,11,37,),3,None),
-    'IRAO':(VEG1_VENUS,(34,98,0.6,0.8,0.1,0.9,0,1,0,),7,None),
-    'IRAO2':(PEG14_RENEGADE,(37,74,14,39,40,17,42,56,),6,None),
-    'MAGN':(UEG8_AVENGER,(39,54,20,0.4,0.2,0.4,7.0,0,),5,None),
-    'MAGN2':(UEG4_PELICAN,(37,23,4,5,0.95,),3,None),
-    'MTLR':(WEG3_DS,(33,71,42,),6,None),
-    'MTLR2':(LEG1_PIN,(22,64,8,46,24,3,),5,None),
-    'RUAL':(PEG4_UNIVERSAL,(49,61,6,37,41,25,'WC','s',),5,None),
-    'RUAL2':(PEG11_KUSURUKEN,(45,65,49,4,31,15,'c',55,),5,None),
-    'VTBR':(PEG11_KUSURUKEN,(77,202,36,4,49,25,'c',55,),16,None),
-    'VTBR2':(WEG4_PUPPY,(110,83,55,39,26,),9,None),
+    'ALRS':(PEG4_U3,(5,37,18,3,23,55,'DC','rsi',),3,None), #0
+    'ALRS2':(WEG4_PUPPY,(16,37,8,11,37,),3,None), #+8
+    'IRAO':(VEG1_VENUS,(34,98,0.6,0.8,0.1,0.9,0,1,0,),7,None), #-4
+    'IRAO2':(PEG14_RENEGADE,(37,74,14,39,40,17,42,56,),6,None), #+0
+    'MAGN':(UEG8_AVENGER,(39,54,20,0.4,0.2,0.4,7.0,0,),5,None), #-2
+    'MAGN2':(UEG4_PELICAN,(37,23,4,5,0.95,),3,None), #-3
+    'MTLR':(WEG3_DS,(33,71,42,),6,None), #-11
+    'MTLR2':(LEG1_PIN,(22,64,8,46,24,3,),5,None), #-6
+    'RUAL':(PEG4_UNIVERSAL,(49,61,6,37,41,25,'WC','s',),5,None), #+7
+    'RUAL2':(PEG11_KUSURUKEN,(45,65,49,4,31,15,'c',55,),5,None), #-4
+    'VTBR':(PEG11_KUSURUKEN,(77,202,36,4,49,25,'c',55,),16,None), # +5
+    'VTBR2':(WEG4_PUPPY,(110,83,55,39,26,),9,None), #-0
+
+    'ASTR':(WEG4_DOG,(39,78,7,30,)), #
+    'ASTR2':(LEG2_DRINKER,(34,68,23,2.9,6,31,17,1,)), #
+    'ROSN':(PEG4_UNIVERSAL,(66,47,27,5,35,12,'DC','mfi',4,)), #
+    'ROSN2':(UEG8_AVENGER,(61,116,19,0.0,1.0,1.0,9.5,0,)), #
+    'SBER':(LEG1_PIN,(209,338,5,16,23,4,)), #
+    'SBER2':(PEG14_RENEGADE,(267,440,16,39,48,18,28,54,)), #
+    'SIBN':(LEG1_PHOGA,(85,173,3,1.1,7,)), #
+    'SIBN2':(PEG26_UNKNOWN,(86,173,54,42,27,37,29,9,15,55,0,)), #
+    'SNGSP':(PEG4_UNIVERSAL,(78,128,31,27,43,8,'VC','s',6,)), #
+    'SNGSP2':(LEG1_CC,(51,97,16,5,55,10,53,1.1,0,1,)), #
+    'T':(SEG3_FORCE,(125,98,55,1.8,3,2,15,25,0.7,)), #
+    'T2':(UEG6_VULTURE,(120,112,54,22,46,5,2,1,0.43,6,)), #
 }
 # sleep_group = ()
 

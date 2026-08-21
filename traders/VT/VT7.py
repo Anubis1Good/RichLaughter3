@@ -204,10 +204,10 @@ class VT7:
             button = 's'
         else:
             button = 'f'
-        need_update = self._update_order(img,direction,symbol,idx)
-        # print(symbol,need_update)
-        if not need_update:
-            return
+        # need_update = self._update_order(img,direction,symbol,idx)
+        # # print(symbol,need_update)
+        # if not need_update:
+        #     return
         pdi.press('f')
         pdi.press(button)
         if direction == 'all':
@@ -806,6 +806,13 @@ class VT7:
                 f.write(str(datetime.now()) + "\n")
                 f.write('\n')
                 f.write(traceback.format_exc() + "\n")
+
+    def prev_screen_reset(self):
+        """Сбрасывает заявки для символов без режима перед скриншотом"""
+        for symbol in self.symbols:
+            if self.wss[symbol].mode is None:
+                for i in range(len(self.glass_region[symbol])):
+                    self._reset_req(symbol,i)
 
     def run(self,img):
         if not self.can_work:

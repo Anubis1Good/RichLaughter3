@@ -80,7 +80,7 @@ class TradeWorker(QThread):
             keyboard.send('shift')
             if self.isInterruptionRequested():
                 return
-
+            wt.prev_screen_reset()
             img = np.array(pag.screenshot()) 
             img = cv2.cvtColor(img,cv2.COLOR_RGB2BGR)
             # cv2.imwrite('test.png',img)

@@ -6,18 +6,11 @@ from multiprocessing import Pool
 from testing.CheckEGTrader import CheckEGTrader
 import traceback
 import re
+import matplotlib.pyplot as plt
+from time import time
 
 # Импортируем все стратегии
-from strategies.PEGs.PEG1_9 import *
-from strategies.PEGs.PEG10_19 import *
-from strategies.PEGs.PEG20_29 import *
-from strategies.LEGs.LEG1 import *
-from strategies.LEGs.LEG2 import *
-from strategies.WEGs.WEG1_9 import *
-from strategies.UEGs.UEG1_9 import *
-from strategies.SEGs.SEG_CA1_9 import *
-from strategies.SEGs.SEG_ML10_19 import *
-from strategies.VEGs.VEG1 import *
+from strategies.all_egs import *
 
 class WindowTester:
     def __init__(self,
@@ -30,7 +23,8 @@ class WindowTester:
                  close_map: tuple = ((22,30),(22,30),(22,30),(22,30),(22,30),(17,30),(17,30)),
                  window_size: int = 60,
                  normalization: bool = True,
-                 save_cores: int = 1
+                 save_cores: int = 1,
+                 need_plot = False
                  ):
         
         self.data_folder = data_folder
@@ -44,9 +38,12 @@ class WindowTester:
         self.normalization = normalization
         self.save_cores = save_cores
         self.phys_cores = psutil.cpu_count(logical=False)
-        
+        self.need_plot = need_plot
         if not os.path.exists(output_folder):
             os.makedirs(output_folder)
+        if self.need_plot:
+            self.img_folder = os.path.join(output_folder,'imgs',str(int(time())))
+            os.makedirs(self.img_folder,exist_ok=True)
     
     def load_trader(self, ticker):
         files = [f for f in os.listdir(self.data_folder) 
@@ -120,31 +117,41 @@ class WindowTester:
             
             # БЫСТРЫЙ ТЕСТ
             trader.check_strategy_faster()
-            trades_fast, eq_fast, eq_f_fast, _, _, _ = trader.process_old_type_result()
-            
+            trades_fast, _, _, _, _, _ = trader.process_old_type_result()
+            ef_fast = trader.trade_data['step_eq_fee']
             # ОКОННЫЙ ТЕСТ
             trader.reload_data()
             trader.check_strategy_window(normalization=self.normalization)
-            trades_window, eq_window, eq_f_window, _, _, _ = trader.process_old_type_result()
-            
+            trades_window, _, _, _, _, _ = trader.process_old_type_result()
+            ef_window = trader.trade_data['step_eq_fee']
+
+            if self.need_plot:
+                full_name_img = os.path.join(self.img_folder, f"{row_name}.png")
+                plt.figure(figsize=(12, 6))
+                plt.plot(ef_window, color='red', label='Equity')
+                plt.plot(ef_fast, color='blue', label='Equity with Fees')
+                plt.title(f"{row_name}")
+                plt.legend()
+                plt.savefig(full_name_img, bbox_inches='tight')
+                plt.close()
             # Берем реальные значения SL/TP из стратегии
-            amount_sl = trader.ws.amount_sl if hasattr(trader.ws, 'amount_sl') else 0
-            amount_tp = trader.ws.amount_tp if hasattr(trader.ws, 'amount_tp') else 0
+            # amount_sl = trader.ws.amount_sl if hasattr(trader.ws, 'amount_sl') else 0
+            # amount_tp = trader.ws.amount_tp if hasattr(trader.ws, 'amount_tp') else 0
             
-            # Считаем sl/tp, sl_pct, tp_pct
-            sl_tp_ratio = round(amount_sl / amount_tp, 2) if amount_tp > 0 else 0
-            sl_pct = round(amount_sl * trader.price_step_per, 2)
-            tp_pct = round(amount_tp * trader.price_step_per, 2)
+            # # Считаем sl/tp, sl_pct, tp_pct
+            # sl_tp_ratio = round(amount_sl / amount_tp, 2) if amount_tp > 0 else 0
+            # sl_pct = round(amount_sl * trader.price_step_per, 2)
+            # tp_pct = round(amount_tp * trader.price_step_per, 2)
             
             result = {
                 'origin': ticker,
                 'name': row_name,
                 'ws': original_ws,
-                'amount_sl': amount_sl,
-                'amount_tp': amount_tp,
-                'sl/tp': sl_tp_ratio,
-                'sl_pct': sl_pct,
-                'tp_pct': tp_pct,
+                # 'amount_sl': amount_sl,
+                # 'amount_tp': amount_tp,
+                # 'sl/tp': sl_tp_ratio,
+                # 'sl_pct': sl_pct,
+                # 'tp_pct': tp_pct,
             }
             
             # Результаты быстрого теста
@@ -356,12 +363,13 @@ if __name__ == "__main__":
         results_excel=RESULTS_EXCEL,
         output_folder=OUTPUT_FOLDER,
         tickers=TICKERS,
-        fee=0.001,
+        fee=0.0002,
         close_on_time=True,
         close_map=((22,30),(22,30),(22,30),(22,30),(22,30),(17,30),(17,30)),
         window_size=60,
         normalization=True,
-        save_cores=0
+        save_cores=0,
+        need_plot=True
     )
     
     tester.run_tests()

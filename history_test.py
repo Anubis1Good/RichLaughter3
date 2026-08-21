@@ -3,7 +3,7 @@ from strategies.all_egs import *
 from strategies.helpEGs.debugEG import DebugAction,DebugMean
 
 # path_df = '_data_for_tests\\before_opt\MTLR_5_1786793053.parquet'
-path_df = '_data_for_tests\_before_opt\ALRS_5_1787155697.parquet'
+path_df = '_data_for_tests\_before_opt\ALRS_5_1787328168.parquet'
 # path_df = '_data_for_tests\data_stock_5m\MTLR_5_1785876346.parquet'
 # path_df = '_data_for_tests\data_stock_5m\MTLR_5_1785977685.parquet'
 symbol = path_df.split('\\')[-1].split('_')[0]
@@ -27,16 +27,19 @@ cegt = CheckEGTrader(
     use_tqdm=True,
     window=window
 )
-# cegt.df = cegt.df.iloc[-500:]
+cegt.df = cegt.df.iloc[-500:]
 # cegt.check_strategy_fast()
 # cegt.print_statistics()
 cegt.check_strategy_faster()
 # cegt.ws.save_to_csv("faster_actions.csv")
 # cegt.ws.save_to_csv("faster_means.csv")
 cegt.print_statistics()
+ef_fast = cegt.trade_data['step_eq_fee']
+
 # cegt.plot_chart_and_sequtity()
 # cegt.ws.debug_data = []
 cegt.check_strategy_window(normalization=True)
+ef_window = cegt.trade_data['step_eq_fee']
 # cegt.check_strategy_window(normalization=False)
 # cegt.ws.save_to_csv("window_actions.csv")
 # cegt.ws.save_to_csv("window_means.csv")
@@ -47,3 +50,15 @@ cegt.check_strategy_window(normalization=True)
 cegt.print_statistics()
 # cegt.plot_chart_and_sequtity()
 # cegt.plot_chart_and_sequtity(help_info='sltp')
+import matplotlib.pyplot as plt
+
+# full_name_img = os.path.join(images_folder, f"{name_file}.png")
+name_bot = 'Vasya'
+plt.figure(figsize=(12, 6))
+plt.plot(ef_window, color='red', label='Equity')
+plt.plot(ef_fast, color='blue', label='Equity with Fees')
+plt.show()
+plt.title(f"{name_bot}")
+plt.legend()
+# plt.savefig(full_name_img, bbox_inches='tight')
+# plt.close()
