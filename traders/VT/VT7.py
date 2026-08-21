@@ -60,6 +60,7 @@ class VT7:
                 if i < len(chart):
                     self.chart_region[symbol].append(chart[i])
                     self.offset[symbol].append(None)
+                    self.candle_max[symbol].append(None)
 
         self.price_step = conf_data['price_step']
         self.wss: dict[str, BaseEG] = dict()
