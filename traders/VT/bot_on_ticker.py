@@ -53,16 +53,16 @@ bot_on_ticker = {
     # 'RTKMP':(PEG31_HYPERION,(10,1,2,0,True,30,5,1),1,None), #+
     'ALRS':(PEG4_U3,(5,37,18,3,23,55,'DC','rsi',),3,None), #0
     'ALRS2':(WEG4_PUPPY,(16,37,8,11,37,),3,None), #+8
-    'IRAO':(VEG1_VENUS,(34,98,0.6,0.8,0.1,0.9,0,1,0,),7,None), #-4
-    'IRAO2':(PEG14_RENEGADE,(37,74,14,39,40,17,42,56,),6,None), #+0
-    'MAGN':(UEG8_AVENGER,(39,54,20,0.4,0.2,0.4,7.0,0,),5,None), #-2
+    'IRAO':(VEG1_VENUS,(34,98,0.6,0.8,0.1,0.9,0,1,0,),7,None), #-3
+    'IRAO2':(PEG14_RENEGADE,(37,74,14,39,40,17,42,56,),6,None), #-1
+    'MAGN':(UEG8_AVENGER,(39,54,20,0.4,0.2,0.4,7.0,0,),5,None), #-5
     'MAGN2':(UEG4_PELICAN,(37,23,4,5,0.95,),3,None), #-3
-    'MTLR':(WEG3_DS,(33,71,42,),6,None), #-11
+    'MTLR':(WEG3_DS,(33,71,42,),6,None), #-5
     'MTLR2':(LEG1_PIN,(22,64,8,46,24,3,),5,None), #-6
-    'RUAL':(PEG4_UNIVERSAL,(49,61,6,37,41,25,'WC','s',),5,None), #+7
-    'RUAL2':(PEG11_KUSURUKEN,(45,65,49,4,31,15,'c',55,),5,None), #-4
+    'RUAL':(PEG4_UNIVERSAL,(49,61,6,37,41,25,'WC','s',),5,None), #+4
+    'RUAL2':(PEG11_KUSURUKEN,(45,65,49,4,31,15,'c',55,),5,None), #-5
     'VTBR':(PEG11_KUSURUKEN,(77,202,36,4,49,25,'c',55,),16,None), # +5
-    'VTBR2':(WEG4_PUPPY,(110,83,55,39,26,),9,None), #-0
+    'VTBR2':(WEG4_PUPPY,(110,83,55,39,26,),9,None), #+0
 
     'ASTR':(WEG4_DOG,(39,78,7,30,)), #
     'ASTR2':(LEG2_DRINKER,(34,68,23,2.9,6,31,17,1,)), #

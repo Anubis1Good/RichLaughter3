@@ -41,9 +41,9 @@ class WindowTester:
         self.need_plot = need_plot
         if not os.path.exists(output_folder):
             os.makedirs(output_folder)
-        if self.need_plot:
-            self.img_folder = os.path.join(output_folder,'imgs',str(int(time())))
-            os.makedirs(self.img_folder,exist_ok=True)
+        # if self.need_plot:
+        #     self.img_folder = os.path.join(output_folder,'imgs',str(int(time())))
+        #     os.makedirs(self.img_folder,exist_ok=True)
     
     def load_trader(self, ticker):
         files = [f for f in os.listdir(self.data_folder) 
@@ -128,8 +128,8 @@ class WindowTester:
             if self.need_plot:
                 full_name_img = os.path.join(self.img_folder, f"{row_name}.png")
                 plt.figure(figsize=(12, 6))
-                plt.plot(ef_window, color='red', label='Equity')
-                plt.plot(ef_fast, color='blue', label='Equity with Fees')
+                plt.plot(ef_window, color='red', label='Equity_window')
+                plt.plot(ef_fast, color='blue', label='Equity_fast')
                 plt.title(f"{row_name}")
                 plt.legend()
                 plt.savefig(full_name_img, bbox_inches='tight')
@@ -235,7 +235,7 @@ class WindowTester:
     @staticmethod
     def process_chunk_static(data_folder, results_excel, output_folder, tickers, fee, 
                             close_on_time, close_map, window_size, normalization, 
-                            chunk_data, chunk_index):
+                            chunk_data, chunk_index, need_plot, img_folder):
         tester = WindowTester(
             data_folder=data_folder,
             results_excel=results_excel,
@@ -246,8 +246,12 @@ class WindowTester:
             close_map=close_map,
             window_size=window_size,
             normalization=normalization,
-            save_cores=1
+            save_cores=1,
+            need_plot=need_plot
         )
+        # Используем общую папку
+        if need_plot and img_folder:
+            tester.img_folder = img_folder
         return tester.test_rows_chunk(chunk_data, chunk_index)
     
     def run_tests(self):
@@ -281,7 +285,12 @@ class WindowTester:
         print(f"Files will be updated after EACH successful strategy test")
         print(f"First result will appear in ~21 seconds (1 strategy)")
         print("="*50)
-        
+        if self.need_plot:
+            img_folder = os.path.join(self.output_folder, 'imgs', str(int(time())))
+            os.makedirs(img_folder, exist_ok=True)
+        else:
+            img_folder = None
+    
         args_list = []
         for i, chunk_data in enumerate(chunks):
             args_list.append((
@@ -295,7 +304,9 @@ class WindowTester:
                 self.window_size,
                 self.normalization,
                 chunk_data,
-                i
+                i,
+                self.need_plot,
+                img_folder  # передаем общую папку
             ))
         
         if num_processes > 1:
@@ -324,7 +335,8 @@ class WindowTester:
             final_df = final_df.sort_values('total_fee_per_fast', ascending=False)
             final_df = final_df.reset_index(drop=True)
             
-            output_path = os.path.join(self.output_folder, 'window_test_results.xlsx')
+            final_filename = 'window_test_results' + str(int(time())) + '.xlsx'
+            output_path = os.path.join(self.output_folder, final_filename)
             with pd.ExcelWriter(output_path, engine='xlsxwriter') as writer:
                 final_df.to_excel(writer, sheet_name='results', index=False)
                 worksheet = writer.sheets['results']
