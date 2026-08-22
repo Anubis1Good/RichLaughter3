@@ -143,8 +143,6 @@ class WEG3_BATYA(BaseEG):
         self.sign_spred = sign_spred
         self.sign_dir = sign_dir
         
-
-
     def preprocessing(self, tdata):
         pdata = {}
         df = tdata['chart']

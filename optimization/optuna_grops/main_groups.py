@@ -489,7 +489,7 @@ group = (
             (2, max_period, 1),
             (2,period_fractal_max,1),
             (max_period, ),
-            (2,7,1)
+            (2,7,1),
             (2,period2s_max,1),
         ]
     ),
