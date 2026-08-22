@@ -1,13 +1,4 @@
-from strategies.PEGs.PEG1_9 import *
-from strategies.PEGs.PEG10_19 import *
-from strategies.PEGs.PEG20_29 import *
-from strategies.LEGs.LEG1 import *
-from strategies.LEGs.LEG2 import *
-from strategies.WEGs.WEG1_9 import *
-from strategies.UEGs.UEG1_9 import *
-from strategies.SEGs.SEG_CA1_9 import *
-from strategies.SEGs.SEG_ML10_19 import *
-from strategies.VEGs.VEG1 import *
+from strategies.all_egs import *
 
 # (min, max, step)
 from optimization.optuna_grops.opt_params import *
@@ -32,4 +23,12 @@ group = (
             (0.1,max_percent_threshold,0.1),
         ]
     ),
+    (
+        WEG3_DS, 
+        [
+            (2, max_period, 1),
+            (0.5, 3, 0.1),
+        ]
+    ),
+
 )

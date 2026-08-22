@@ -5,15 +5,16 @@ from for_strategies.pva_indicators import add_integrity_index,add_mean_on_fracta
 from for_strategies.vsa_indicators import add_dvsai,add_cdvsai
 
 class LEG1_CC(BaseEG):
-    """stop=None, take=None, period=15, period_fractal=10, period_max=55, solution=8,period_avfr=30,mult=2,use_stop=1,use_ps=1 \n
+    """stop=None, take=None, period=15, period_fractal=10, period_max=55, solution=8,period_avfr=30,mult=2,use_stop=1,use_ps=1,period2s = 3 \n
     Crisis Counter 15 features"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=15, period_fractal=10, period_max=55, solution=8,period_avfr=30,mult=2,use_stop=1,use_ps=1):
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=15, period_fractal=10, period_max=55, solution=8,period_avfr=30,mult=2,use_stop=1,use_ps=1,period2s = 3):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart':self.symbol}
         self.period = period
         self.solution = solution
         self.period_fractal = period_fractal
         self.period_max = period_max
+        self.period2s = period2s
         self.mult = mult
         self.use_stop = use_stop
         self.use_ps = use_ps
@@ -30,7 +31,7 @@ class LEG1_CC(BaseEG):
         df = add_ultimate_oscillator(df,self.period//3,self.period//2,self.period)
         df = add_cmo(df,self.period)
         df = add_cci(df,self.period)
-        df = add_stochastic(df,self.period,self.period//2)
+        df = add_stochastic(df,self.period,self.period2s)
         df = add_roc(df,self.period)
         df = add_integrity_index(df,self.period)
         df = add_fractals(df,self.period_fractal)
@@ -115,12 +116,12 @@ class LEG1_OKROSHKA(BaseEG):
     
 # Healthy   
 class LEG1_PIN(BaseEG):
-    """stop=None, take=None, period=15, period2=3, threshold=30, solution=5"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=15, period2=3, threshold=30, solution=5):
+    """stop=None, take=None, period=15, period2s=3, threshold=30, solution=5"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=15, period2s=3, threshold=30, solution=5):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
         self.period = period
-        self.period2 = period2
+        self.period2s = period2s
         self.threshold = threshold
         self.solution = solution
 
@@ -134,7 +135,7 @@ class LEG1_PIN(BaseEG):
         df = add_ultimate_oscillator(df, self.period // 3, self.period // 2, self.period)
         df = add_cmo(df, self.period)
         df = add_cci(df, self.period)
-        df = add_stochastic(df, self.period, self.period2)
+        df = add_stochastic(df, self.period, self.period2s)
         df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
@@ -185,14 +186,15 @@ class LEG1_PIN(BaseEG):
 
 # Mcfly problem
 class LEG1_BIBI(BaseEG):
-    """stop=None, take=None, period=15, period_fractal=10, kind='rsi',max_period=55 \n
+    """stop=None, take=None, period=15, period_fractal=10, kind='rsi',max_period=55,period2s = 3 \n
     'cmo','rsi','rsi_tw','williams_r','mfi','ultimate_oscillator','cci','%d'
     """
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=15, period_fractal=10, kind='rsi',max_period=55):
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=15, period_fractal=10, kind='rsi',max_period=55,period2s = 3):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
         self.period = period
         self.kind = kind
+        self.period2s = period2s
         self.period_fractal = period_fractal
         self.max_period = max_period
         self.problems = 'Mcfly'
@@ -215,7 +217,7 @@ class LEG1_BIBI(BaseEG):
         if self.kind == 'cci':
             df = add_cci(df, self.period)
         if self.kind == '%d':
-            df = add_stochastic(df, self.period, self.period // 2)
+            df = add_stochastic(df, self.period, self.period2s)
         df = add_fractals(df, self.period_fractal)
         df = add_mean_on_fractals(df, self.max_period, self.kind,self.period_fractal)
         df['oversold'] = df[self.kind] < df['bottom_mean']
@@ -240,16 +242,17 @@ class LEG1_BIBI(BaseEG):
 
 # Mcfly problem
 class LEG1_IGOGOSHA(BaseEG):
-    """stop=None, take=None, period=15, period_fractal=10, period_max=55, kind='rsi' \n
+    """stop=None, take=None, period=15, period_fractal=10, period_max=55, kind='rsi',period2s = 3 \n
     'cmo','rsi','rsi_tw','williams_r','mfi','ultimate_oscillator','cci','%d'
     """
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=15, period_fractal=10, period_max=55, kind='rsi'):
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=15, period_fractal=10, period_max=55, kind='rsi',period2s = 3):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
         self.period = period
         self.kind = kind
         self.period_fractal = period_fractal
         self.period_max = period_max
+        self.period2s = period2s
         self.problems = 'Mcfly'
 
     def preprocessing(self, tdata):
@@ -270,7 +273,7 @@ class LEG1_IGOGOSHA(BaseEG):
         if self.kind == 'cci':
             df = add_cci(df, self.period)
         if self.kind == '%d':
-            df = add_stochastic(df, self.period, self.period // 2)
+            df = add_stochastic(df, self.period, self.period2s)
         df = add_fractals(df, self.period_fractal)
         df = add_ext_on_fractals(df, self.period_max, self.kind, self.period_fractal)
         df = add_mean_on_fractals(df, self.period_max,self.kind,self.period_fractal)
@@ -297,14 +300,15 @@ class LEG1_IGOGOSHA(BaseEG):
         return None
         
 class LEG1_IRONANNY(BaseEG):
-    """stop=None, take=None, period=15, period_fractal=10, period_max=5, solution=5"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=15, period_fractal=10, period_max=55, solution=5):
+    """stop=None, take=None, period=15, period_fractal=10, period_max=55, solution=5,period2s = 3"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=15, period_fractal=10, period_max=55, solution=5,period2s = 3):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
         self.period = period
         self.solution = solution
         self.period_fractal = period_fractal
         self.period_max = period_max
+        self.period2s = period2s
         self.problems = 'Mcfly'
 
     def preprocessing(self, tdata):
@@ -317,7 +321,7 @@ class LEG1_IRONANNY(BaseEG):
         df = add_ultimate_oscillator(df, self.period // 3, self.period // 2, self.period)
         df = add_cmo(df, self.period)
         df = add_cci(df, self.period)
-        df = add_stochastic(df, self.period, self.period // 2)
+        df = add_stochastic(df, self.period, self.period2s)
         df = add_fractals(df, self.period_fractal)
         inds = ('cmo', 'rsi', 'rsi_tw', 'williams_r', 'mfi', 'ultimate_oscillator', 'cci', '%d')
         df['oversold'] = 0

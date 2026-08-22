@@ -10,10 +10,10 @@ from utils.work_dfs.load_df import simple_load_df
 from utils.drawing.chart import draw_bars_chart,draw_bars_chart_wo_vol
 from utils.drawing.indicators import draw_wzp
 import matplotlib.pyplot as plt
+from testing.test_constants import *
+# PATH_DF = '_data_for_tests\_before_opt\ALRS_5_1787155697.parquet'
 
-filepath = '_data_for_tests\_before_opt\ALRS_5_1787155697.parquet'
-
-df = simple_load_df(filepath)
+df = simple_load_df(PATH_DF)
 # df = df.iloc[-300:]
 period=10
 multiplier=3

@@ -11,16 +11,17 @@ from for_strategies.vsa_indicators import *
 from for_strategies.zigzag_indicators import *
 from utils.work_dfs.load_df import simple_load_df
 from utils.drawing.indicators import draw_wzp
+from testing.test_constants import *
 # Начальные параметры окна
 # Загружаем данные
-filepath = '_data_for_tests\_before_opt\ALRS_5_1787155697.parquet'
-df = simple_load_df(filepath)
+# filepath = '_data_for_tests\_before_opt\ALRS_5_1787155697.parquet'
+df = simple_load_df(PATH_DF)
 
-window = 60
+# window = 60
 START = 60
-END = START + window
+END = START + WINDOW
 WINDOW_SIZE = END - START
-COLUMNS = ['stair']  # <--- СПИСОК КОЛОНОК
+COLUMNS = ['zigzag_peaks']  # <--- СПИСОК КОЛОНОК
 # COLUMNS = []  # <--- СПИСОК КОЛОНОК
 draw_chart = True
 # draw_chart = False
@@ -37,7 +38,9 @@ COLORS_DF2 = ['red', 'orange']  # для zigzag и zigzag_peaks соответс
 def preprocessing(df):
     """Добавляем индикаторы в датафрейм"""
     df = df.copy()
-    df = add_hl_stair_fast(df)
+    df = add_percent_zz190826(df, percent_threshold=0.8)
+    df['zigzag_peaks'] = df['zigzag_peaks'].shift(1)
+    df['zigzag_peaks'] = df['zigzag_peaks'].ffill()
     # df = add_plus_delta_fc2(df)
     return df
 # ===== ФУНКЦИЯ ДЛЯ РИСОВАНИЯ ГРАФИКА =====

@@ -8,7 +8,7 @@ import traceback
 import re
 import matplotlib.pyplot as plt
 from time import time
-
+from testing.test_constants import *
 # Импортируем все стратегии
 from strategies.all_egs import *
 
@@ -375,10 +375,10 @@ if __name__ == "__main__":
         results_excel=RESULTS_EXCEL,
         output_folder=OUTPUT_FOLDER,
         tickers=TICKERS,
-        fee=0.0002,
+        fee=MAIN_FEE,
         close_on_time=True,
         close_map=((22,30),(22,30),(22,30),(22,30),(22,30),(17,30),(17,30)),
-        window_size=60,
+        window_size=WINDOW,
         normalization=True,
         save_cores=0,
         need_plot=True

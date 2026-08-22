@@ -152,17 +152,18 @@ class PEG4_UNIVERSAL(BaseEG):
                 
 class PEG4_U3(BaseEG):
     '''
-    stop=None, take=None, period=20, period_rsi=20, period_fractal=10, period_max=55, kind_channel='DC', kind_rsi='rsi' \n
+    stop=None, take=None, period=20, period_rsi=20, period_fractal=10, period_max=55, kind_channel='DC', kind_rsi='rsi',period2s = 3 \n
     kind_channel in ["DC","VG","BB","VC","WC"]
     kind_rsi in ["rsi","rsi_tw","mfi","s","uo"]
     '''
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=20, period_rsi=20, period_fractal=10, period_max=55, kind_channel='DC', kind_rsi='rsi'):
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=20, period_rsi=20, period_fractal=10, period_max=55, kind_channel='DC', kind_rsi='rsi',period2s = 3):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
         self.period = period
         self.period_fractal = period_fractal
         self.period_max = period_max
         self.period_rsi = period_rsi
+        self.period2s = period2s
         self.kind_channel = kind_channel
         self.kind_rsi = kind_rsi
         self.rsi = 'rsi'
@@ -198,7 +199,7 @@ class PEG4_U3(BaseEG):
             df = add_mfi(df, self.period_rsi)
             df = df.rename({'mfi': 'rsi'}, axis=1)
         elif self.kind_rsi == 's':
-            df = add_stochastic(df, self.period_rsi, self.period_rsi // 3)
+            df = add_stochastic(df, self.period_rsi, self.period2s)
             df = df.rename({'%d': 'rsi'}, axis=1)
         elif self.kind_rsi == 'uo':
             df = add_ultimate_oscillator(df, self.period_rsi // 3, self.period_rsi // 2, self.period_rsi)
