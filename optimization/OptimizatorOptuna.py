@@ -30,7 +30,7 @@ class OptimizatorOptuna:
                  sl_min_pct: float = 0.1,
                  sl_max_pct: float = 1.0,
                  tp_min_pct: float = 0.1,
-                 tp_max_pct: float = 2.0,
+                 tp_max_pct: float = 1.0,
                  use_window_test: bool = False,  
                  window_size: int = 60,          
                  normalization: bool = True,
