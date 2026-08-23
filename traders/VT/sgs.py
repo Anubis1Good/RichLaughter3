@@ -4,9 +4,15 @@ stock_groups= {
         ['FIXR1','VSEH1','PRMD1','MRKC1'],
     ),
     'WORK_LAPTOP':(
-        ['ALRS','IRAO','MAGN','MTLR'],
-        ['ALRS2','IRAO2','MAGN2','MTLR2'],
-        ['RUAL','VTBR','RUAL2','VTBR2'],
+        ['ALRS','ALRS2','MAGN','MAGN2'],
+        ['IRAO','IRAO2','MTLR','MTLR2'],
+        ['RUAL','RUAL2','VTBR','VTBR2'],
+        ['ASTR','ASTR2','ROSN','ROSN2'],
+        ['SBER','SBER2','SIBN','SIBN2'],
+        ['SNGSP','SNGSP2','T','T2'],
+        ['AFLT','AFLT2','HYDR','HYDR2'],
+        ['OGKB','OGKB2','RTKM','RTKM2'],
+        ['TGKA','TGKA2','VKCO','VKCO2'],
 
     ),
     # 'WORK_LAPTOP':(

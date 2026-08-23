@@ -1,6 +1,10 @@
 import os
 import pandas as pd
 from tqdm import tqdm
+import math
+import re
+
+MAX_LENGTH_GLASS_POINT = 12
 
 main_folder = '_test_results\post_optuna_results'
 output_filename = 'total_post_optuna_aggregated.xlsx'
@@ -26,6 +30,67 @@ df_total = df_total.drop(columns=[col for col in columns_to_drop if col in df_to
 df_total = df_total.sort_values(['origin', 'total_fee_per_window'], ascending=[True, False])
 df_total = df_total.reset_index(drop=True)
 
+def fix_ws_string(s):
+    # Ищем имя и значения
+    match = re.match(r'\(([^,]+),\((.+)\)\)', s)
+    if not match:
+        return s
+    
+    name = match.group(1)
+    values_str = match.group(2)
+    
+    # Разбиваем значения, учитывая что в кавычках может быть запятая
+    values = []
+    current = ""
+    in_quotes = False
+    
+    for char in values_str:
+        if char in ['"', "'"]:
+            in_quotes = not in_quotes
+            current += char
+        elif char == ',' and not in_quotes:
+            if current.strip():
+                # Пробуем преобразовать
+                val = current.strip()
+                if val.startswith("'") and val.endswith("'"):
+                    val = val[1:-1]
+                elif val.startswith('"') and val.endswith('"'):
+                    val = val[1:-1]
+                try:
+                    values.append(float(val) if '.' in val else int(val))
+                except ValueError:
+                    values.append(val)
+                current = ""
+        else:
+            current += char
+    
+    # Последнее значение
+    if current.strip():
+        val = current.strip()
+        if val.startswith("'") and val.endswith("'"):
+            val = val[1:-1]
+        elif val.startswith('"') and val.endswith('"'):
+            val = val[1:-1]
+        try:
+            values.append(float(val) if '.' in val else int(val))
+        except ValueError:
+            values.append(val)
+    
+    # Вычисляем
+    if len(values) >= 2:
+        try:
+            first = float(values[0])
+            second = float(values[1])
+            new_val = math.ceil(max(first, second) / MAX_LENGTH_GLASS_POINT)
+        except:
+            new_val = 1
+    else:
+        new_val = 1
+    
+    return f"({name},{tuple(values)},{new_val},None),"
+
+# Применяем к колонке
+df_total['ws'] = df_total['ws'].apply(fix_ws_string)
 # Добавляем новые столбцы
 df_total['ws_name'] = df_total['ws'].str.extract(r'^\(?([^,(]+)')
 df_total['ws_type'] = df_total['ws_name'].str[:3]

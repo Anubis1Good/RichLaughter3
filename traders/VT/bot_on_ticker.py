@@ -77,18 +77,18 @@ bot_on_ticker = {
     'T':(SEG3_FORCE,(125,98,55,1.8,3,2,15,25,0.7,),10,None), #
     'T2':(UEG6_VULTURE,(120,112,54,22,46,5,2,1,0.43,6,),10,None), #
 
-    'AFLT':(WEG3_BATYA,(18,18,6,1.1,1,0,1,),10,None), #
-    'AFLT2':(PEG4_UNIVERSAL,(32,14,11,11,27,34,'DC','s',5,),10,None), #
-    'HYDR':(WEG3_BATYA,(29,9,45,1.2,1,1,1,),10,None), #
-    'HYDR2':(PEG4_UNIVERSAL,(11,15,18,7,5,11,'VC','s',3,),10,None), #
-    'OGKB':(UEG6_DODO,(11,18,10,2,59,67,),10,None), #
-    'OGKB2':(UEG4_PELICAN,(21,6,2,2,0.18,),10,None), #
-    'RTKM':(UEG4_PELICAN,(40,36,5,2,0.35,),10,None), #
-    'RTKM2':(PEG4_UNIVERSAL,(42,42,6,21,38,19,'VC','s',3,),10,None), #
-    'TGKA':(PEG4_UNIVERSAL,(22,8,2,2,41,38,'VG','rsi_tw',4,),10,None), #
-    'TGKA2':(UEG4_PELICAN,(22,3,2,5,0.14,),10,None), #
-    'VKCO':(LEG1_IRONANNY,(28,25,5,2,55,7,5,),10,None), #
-    'VKCO2':(LEG2_HOTS,(26,27,29,2.0,5,27,37,1,),10,None), #
+    'AFLT':(WEG3_BATYA,(18, 18, 6, 1.1, 1, 0, 1),2,None), #
+    'AFLT2':(PEG4_UNIVERSAL,(32, 14, 11, 11, 27, 34, 'DC', 's', 5),3,None), #
+    'HYDR':(WEG3_BATYA,(29, 9, 45, 1.2, 1, 1, 1),3,None), #
+    'HYDR2':(PEG4_UNIVERSAL,(11, 15, 18, 7, 5, 11, 'VC', 's', 3),2,None), #
+    'OGKB':(UEG6_DODO,(11, 18, 10, 2, 59, 67),2,None), #
+    'OGKB2':(UEG4_PELICAN,(21, 6, 2, 2, 0.18),2,None), #
+    'RTKM':(UEG4_PELICAN,(40, 36, 5, 2, 0.35),4,None), #
+    'RTKM2':(PEG4_UNIVERSAL,(42, 42, 6, 21, 38, 19, 'VC', 's', 3),4,None), #
+    'TGKA':(PEG4_UNIVERSAL,(22, 8, 2, 2, 41, 38, 'VG', 'rsi_tw', 4),2,None), #
+    'TGKA2':(UEG4_PELICAN,(22, 3, 2, 5, 0.14),2,None), #
+    'VKCO':(LEG1_IRONANNY,(28, 25, 5, 2, 55, 7, 5),3,None), #
+    'VKCO2':(LEG2_HOTS,(26, 27, 29, 2.0, 5, 27, 37, 1),3,None), #
 }
 # sleep_group = ()
 
