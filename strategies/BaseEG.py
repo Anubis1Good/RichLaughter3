@@ -1,5 +1,6 @@
 import pandas as pd
 from for_strategies.help_dtypes.actions_cls import OrderManager
+from datetime import datetime
 
 # EG - Execution Governor — Управляющий исполнением
 class BaseEG:
@@ -80,7 +81,7 @@ class BaseEG:
         # delta положительная, если мы в плюсе и отрицательная, если в минусе.
         if self.stop is not None and delta is not None:
             if delta * self.mult_ps <= -self.stop:
-                # print(self.symbol,delta * self.mult_ps,self.stop,'сработал стоп!')
+                # print(datetime.now(),self.symbol,delta * self.mult_ps,self.stop,'сработал стоп!')
                 if pos > 0:
                     if self.type_eg in self.block_type_egs:
                         self.can_long = False
@@ -98,7 +99,7 @@ class BaseEG:
     def check_take(self, delta, action):
         if self.take is not None and delta is not None:
             if delta * self.mult_ps >= self.take:
-                # print(self.symbol,delta * self.mult_ps,self.take,'сработал тейк!')
+                # print(datetime.now(),self.symbol,delta * self.mult_ps,self.take,'сработал тейк!')
                 if self.last_action != 'close_all':
                     self.amount_tp += 1
                 return 'close_all'
@@ -113,14 +114,14 @@ class BaseEG:
             if not self.can_long:
                 if 'open' in action:
                     if 'long' in action:
-                        # print(self.symbol,'открытие лонга заблокированно')
+                        # print(datetime.now(),self.symbol,'открытие лонга заблокированно')
                         return None
                     if 'all' in action:
                         return action.replace('all', 'short')
             if not self.can_short:
                 if 'open' in action:
                     if 'short' in action:
-                        # print(self.symbol,'открытие шорта заблокированно')
+                        # print(datetime.now(),self.symbol,'открытие шорта заблокированно')
                         return None
                     if 'all' in action:
                         return action.replace('all', 'long')

@@ -25,7 +25,8 @@ if __name__ == '__main__':
         n_trials=trials,
         need_plot=False,
         use_window_test=use_window,\
-        window_size=WINDOW
+        window_size=WINDOW,
+        days_mode=DAYS_MODE
     )
     
     optimizer.optimize_multiple_groups(group)

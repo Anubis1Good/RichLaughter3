@@ -24,7 +24,8 @@ class WindowTester:
                  window_size: int = 60,
                  normalization: bool = True,
                  save_cores: int = 1,
-                 need_plot = False
+                 need_plot = False,
+                 days_mode = None
                  ):
         
         self.data_folder = data_folder
@@ -39,6 +40,7 @@ class WindowTester:
         self.save_cores = save_cores
         self.phys_cores = psutil.cpu_count(logical=False)
         self.need_plot = need_plot
+        self.days_mode = days_mode
         if not os.path.exists(output_folder):
             os.makedirs(output_folder)
         # if self.need_plot:
@@ -64,7 +66,8 @@ class WindowTester:
             close_map=self.close_map,
             measure_time=False,
             use_tqdm=False,
-            window=self.window_size
+            window=self.window_size,
+            days_mode=self.days_mode
         )
         
         return trader
@@ -235,7 +238,7 @@ class WindowTester:
     @staticmethod
     def process_chunk_static(data_folder, results_excel, output_folder, tickers, fee, 
                             close_on_time, close_map, window_size, normalization, 
-                            chunk_data, chunk_index, need_plot, img_folder):
+                            chunk_data, chunk_index, need_plot, img_folder, days_mode):
         tester = WindowTester(
             data_folder=data_folder,
             results_excel=results_excel,
@@ -247,7 +250,8 @@ class WindowTester:
             window_size=window_size,
             normalization=normalization,
             save_cores=1,
-            need_plot=need_plot
+            need_plot=need_plot,
+            days_mode=days_mode
         )
         # Используем общую папку
         if need_plot and img_folder:
@@ -306,7 +310,8 @@ class WindowTester:
                 chunk_data,
                 i,
                 self.need_plot,
-                img_folder  # передаем общую папку
+                img_folder,
+                self.days_mode  # передаем общую папку
             ))
         
         if num_processes > 1:
@@ -381,7 +386,8 @@ if __name__ == "__main__":
         window_size=WINDOW,
         normalization=True,
         save_cores=0,
-        need_plot=True
+        need_plot=True,
+        days_mode=DAYS_MODE
     )
     
     tester.run_tests()

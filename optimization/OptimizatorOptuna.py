@@ -34,7 +34,8 @@ class OptimizatorOptuna:
                  use_window_test: bool = False,  
                  window_size: int = 60,          
                  normalization: bool = True,
-                 metric:str = 'total_fee_per'      
+                 metric:str = 'total_fee_per',
+                 days_mode = None      
                  ):
         
         self.metric = metric
@@ -62,7 +63,7 @@ class OptimizatorOptuna:
         self.tp_max_pct = tp_max_pct
         self.traders = []
         self.results_cache = {}
-
+        self.days_mode = days_mode
         if not os.path.exists(main_folder):
             os.makedirs(main_folder)
         
@@ -85,7 +86,8 @@ class OptimizatorOptuna:
                 close_on_time=self.close_on_time,
                 close_map=self.close_map,
                 measure_time=self.measure_time,
-                use_tqdm=False
+                use_tqdm=False,
+                days_mode=self.days_mode
             )
             self.traders.append(trader)
         
@@ -274,19 +276,6 @@ class OptimizatorOptuna:
             else:
                 # Страховка
                 continue
-            #     # Страховка - если вдруг нет в кеше, делаем прогон
-            #     strategy = strategy_class(
-            #         ticker, 
-            #         trader.price_step, 
-            #         1, 
-            #         None, 
-            #         *all_params
-            #     )
-                
-            #     trader.ws = strategy
-            #     trader.reload_data()
-            #     trader.check_strategy_faster(history_bars=self.max_period)
-            #     trades, eq, eq_f, _, _, _ = trader.process_old_type_result()
             
             name_doc = f"{ticker}_{name_bot}"
             name_file = f"{name_doc}_{'_'.join(all_param_values)}"

@@ -55,10 +55,12 @@ bot_on_ticker = {
     'ALRS2':(UEG6_VULTURE,(20,15,50,55,43,30,4,5,0.28,15,),2,None), #+
     'MAGN':(WEG4_DOG,(39,59,4,26,),5,None), #
     'MAGN2':(LEG2_DRINKER,(39,75,46,2.7,4,23,11,1,),6,None),#
+
     'IRAO':(LEG1_IRONANNY,(41,57,10,3,55,7,),5,None), #+
     'IRAO2':(PEG17_PHOENIX,(49,49,27,9,16,41,15,1,55,),4,None), #+
     'MTLR':(UEG4_FALCON,(33,75,4,2,0.32,),6,None), #
     'MTLR2':(WEG3_DS,(37,49,44,),4,None), #
+
     'RUAL':(PEG18_BLAZE,(49,91,24,4,49,34,37,0,55,),7,None), #
     'RUAL2':(PEG4_U3,(46,96,44,21,2,55,'BB','mfi',),7,None), #
     'VTBR':(PEG11_KUSURUKEN,(109,213,23,6,23,15,'hl',55,),16,None), #
@@ -68,10 +70,12 @@ bot_on_ticker = {
     'ASTR2':(LEG2_DRINKER,(34,68,23,2.9,6,31,17,1,),5,None), #
     'ROSN':(PEG4_UNIVERSAL,(66,47,27,5,35,12,'DC','mfi',4,),5,None), #-
     'ROSN2':(UEG8_AVENGER,(61,116,19,0.0,1.0,1.0,9.5,0,),9,None), #-
+
     'SBER':(LEG1_PIN,(209,338,5,16,23,4,),25,None), #-
     'SBER2':(PEG14_RENEGADE,(267,440,16,39,48,18,28,54,),32,None), #+
     'SIBN':(LEG1_PHOGA,(85,173,3,1.1,7,),14,None), #
     'SIBN2':(PEG26_UNKNOWN,(86,173,54,42,27,37,29,9,15,55,0,),14,None), #
+
     'SNGSP':(PEG4_UNIVERSAL,(78,128,31,27,43,8,'VC','s',6,),10,None), #+
     'SNGSP2':(LEG1_CC,(51,97,16,5,55,10,53,1.1,0,1,),7,None), #+
     'T':(SEG3_FORCE,(125,98,55,1.8,3,2,15,25,0.7,),10,None), #
@@ -81,10 +85,12 @@ bot_on_ticker = {
     'AFLT2':(PEG4_UNIVERSAL,(32, 14, 11, 11, 27, 34, 'DC', 's', 5),3,None), #
     'HYDR':(WEG3_BATYA,(29, 9, 45, 1.2, 1, 1, 1),3,None), #
     'HYDR2':(PEG4_UNIVERSAL,(11, 15, 18, 7, 5, 11, 'VC', 's', 3),2,None), #
+
     'OGKB':(UEG6_DODO,(11, 18, 10, 2, 59, 67),2,None), #
     'OGKB2':(UEG4_PELICAN,(21, 6, 2, 2, 0.18),2,None), #
     'RTKM':(UEG4_PELICAN,(40, 36, 5, 2, 0.35),4,None), #
     'RTKM2':(PEG4_UNIVERSAL,(42, 42, 6, 21, 38, 19, 'VC', 's', 3),4,None), #
+    
     'TGKA':(PEG4_UNIVERSAL,(22, 8, 2, 2, 41, 38, 'VG', 'rsi_tw', 4),2,None), #
     'TGKA2':(UEG4_PELICAN,(22, 3, 2, 5, 0.14),2,None), #
     'VKCO':(LEG1_IRONANNY,(28, 25, 5, 2, 55, 7, 5),3,None), #

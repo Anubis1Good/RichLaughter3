@@ -22,15 +22,15 @@ period2=55
 # df = add_percent_zz190826(df)
 
 
-candle_max = df['high'].max()
-if candle_max > 0:
-    df['volume'] = df['volume'] / df['volume'].max() if df['volume'].max() > 0 else 0
-    df['close'] = df['close'] / candle_max
-    df['open'] = df['open'] / candle_max
-    df['low'] = df['low'] / candle_max
-    df['high'] = df['high'] / candle_max
-    df['middle'] = df['middle'] / candle_max
-# df = add_percent_zz190826(df)
-df = add_ultimate_oscillator(df, period // 3, period // 2, period)
-print(55 // 8)
+# candle_max = df['high'].max()
+# if candle_max > 0:
+#     df['volume'] = df['volume'] / df['volume'].max() if df['volume'].max() > 0 else 0
+#     df['close'] = df['close'] / candle_max
+#     df['open'] = df['open'] / candle_max
+#     df['low'] = df['low'] / candle_max
+#     df['high'] = df['high'] / candle_max
+#     df['middle'] = df['middle'] / candle_max
+# # df = add_percent_zz190826(df)
+# df = add_ultimate_oscillator(df, period // 3, period // 2, period)
+# print(55 // 8)
 print(df.tail(60))

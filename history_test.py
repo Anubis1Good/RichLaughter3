@@ -16,7 +16,7 @@ symbol = PATH_DF.split('\\')[-1].split('_')[0]
 # ws = [EG,(100,30,20)]
 # ws = [UEG4_FALCON,],
 
-ws = (UEG7_ADVENTURE,(20,24,42,3,55,2.8,0,))
+ws = (WEG3_BATYA,(18, 18, 6, 1.1, 1, 0, 1),2,None)
 # ws = (UEG2_GGD,[])
 # ws = (DebugMean,[])
 cegt = CheckEGTrader(
@@ -26,7 +26,8 @@ cegt = CheckEGTrader(
     symbol,
     measure_time=True,
     use_tqdm=True,
-    window=WINDOW
+    window=WINDOW,
+    days_mode=DAYS_MODE
 )
 # cegt.df = cegt.df.iloc[-500:]
 # cegt.check_strategy_fast()
@@ -60,6 +61,6 @@ plt.plot(ef_window, color='red', label='Equity')
 plt.plot(ef_fast, color='blue', label='Equity with Fees')
 plt.show()
 plt.title(f"{name_bot}")
-plt.legend()
+# plt.legend()
 # plt.savefig(full_name_img, bbox_inches='tight')
 # plt.close()
