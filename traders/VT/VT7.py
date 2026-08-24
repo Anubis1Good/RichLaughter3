@@ -635,12 +635,12 @@ class VT7:
     
     def _work_action(self,action,pos,img,symbol,idx):
         # print(self.name,pos,action) 
-        if 'close_long' == action:
+        if 'close_long' in action:
             if pos == 1:
                 self._send_close('long',symbol,idx,img)
             else:
                 self._reset_req(symbol,idx)
-        elif 'close_short' == action:
+        elif 'close_short' in action:
             if pos == -1:
                 self._send_close('short',symbol,idx,img)
             else:
@@ -655,7 +655,7 @@ class VT7:
                 self._reverse_pos('short',symbol,idx)
             elif pos == 0:
                 self._send_open('short',symbol,idx,img)
-        elif 'close_all' == action:
+        elif 'close_all' in action:
             if pos == -1:
                 self._send_close('short',symbol,idx,img)
             elif pos == 1:

@@ -26,7 +26,8 @@ if __name__ == '__main__':
         need_plot=False,
         use_window_test=use_window,\
         window_size=WINDOW,
-        days_mode=DAYS_MODE
+        days_mode=DAYS_MODE,
+        slip_slope_delta=SLIP_STOP_DELTA
     )
     
     optimizer.optimize_multiple_groups(group)

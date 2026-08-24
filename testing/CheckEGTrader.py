@@ -37,10 +37,12 @@ class CheckEGTrader:
                  measure_time:bool=False,
                  use_tqdm:bool=False,
                  window:int=60,
-                 days_mode=None
+                 days_mode=None,
+                 slip_stop_delta=1
                  ):
         self.window = window
         self.symbol = symbol
+        self.slip_stop_delta = slip_stop_delta
         if isinstance(df,str):
             path_df = df
             self.df = simple_load_df(path_df)
@@ -61,7 +63,7 @@ class CheckEGTrader:
         self.close_on_time = close_on_time
         self.close_map = close_map
         self.check_days_mode(days_mode)
-        self.actions = (None,'open_long','open_short','close_long','close_short','close_all')
+        self.actions = (None,'open_long','open_short','close_long','close_short','close_all','stop_close_long','stop_close_short')
         self.actions_dict = {action: idx for idx, action in enumerate(self.actions)}
         self.measure_time = measure_time
         self.use_tqdm = use_tqdm
@@ -140,7 +142,9 @@ class CheckEGTrader:
         self.trade_data['o_shorts'].append((row_name,price))
         self.trade_data['pos'] = -1
 
-    def close_pos(self,price,feei,delta):
+    def close_pos(self,price,feei,delta,is_stop=False):
+        if is_stop:
+            delta = delta * self.slip_stop_delta
         self.trade_data['total'] += delta
         self.trade_data['total_wfees_per'] += ((delta  / price) * 100) - self.fee_one_p  # комиссия за закрытие
         self.trade_data['fees'] += feei
@@ -148,21 +152,21 @@ class CheckEGTrader:
         self.trade_data['equity_fee'].append(self.trade_data['equity_fee'][-1] + delta - feei - self.open_fee)
         self.open_fee = 0
 
-    def close_long(self,price,feei,row_name):
+    def close_long(self,price,feei,row_name,is_stop=False):
         delta = price - self.trade_data['open_price']  # прибыль по лонгу (как при action=3)
-        self.close_pos(price,feei,delta)
+        self.close_pos(price,feei,delta,is_stop)
         self.trade_data['c_longs'].append((row_name,price))
         self.trade_data['pos'] = 0
     
-    def close_short(self,price,feei,row_name):
+    def close_short(self,price,feei,row_name,is_stop=False):
         delta = self.trade_data['open_price'] - price  # прибыль по шорту (как при action=4)
-        self.close_pos(price,feei,delta)
+        self.close_pos(price,feei,delta,is_stop)
         self.trade_data['c_shorts'].append((row_name,price))
         self.trade_data['pos'] = 0
 
     def work_action(self,signal, price, row_name):
         """return pos,open_price,fees,open_fee"""
-        # actions = (None,'long_pw','short_pw','close_long_pw','close_short_pw','close_all_pw')
+        # self.actions = (None,'open_long','open_short','close_long','close_short','close_all','stop_close_long','stop_close_short')
         feei = self.fee * price  # fee абсолютное значение
         # print(feei)
         if signal == 1:  # long
@@ -181,11 +185,17 @@ class CheckEGTrader:
         elif signal == 4:  # close short
             if self.trade_data['pos'] == -1:
                 self.close_short(price,feei,row_name)
-        elif signal == 5:
+        elif signal == 5: # 'close_all'
             if self.trade_data['pos'] == 1:
                 self.close_long(price,feei,row_name)
             elif self.trade_data['pos'] == -1:
                 self.close_short(price,feei,row_name)
+        elif signal == 6: #'stop_close_long'
+            if self.trade_data['pos'] == 1:
+                self.close_long(price,feei,row_name,True)
+        elif signal == 7: #'stop_close_short'
+            if self.trade_data['pos'] == -1:
+                self.close_short(price,feei,row_name,True)
 
     def add_time_features(self,df:pd.DataFrame):
         df = df.copy()

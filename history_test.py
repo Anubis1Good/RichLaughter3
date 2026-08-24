@@ -16,7 +16,7 @@ symbol = PATH_DF.split('\\')[-1].split('_')[0]
 # ws = [EG,(100,30,20)]
 # ws = [UEG4_FALCON,],
 
-ws = (WEG3_BATYA,(18, 18, 6, 1.1, 1, 0, 1),2,None)
+ws = (UEG6_VULTURE,(20,15,50,55,43,30,4,5,0.28,15,),2,None)
 # ws = (UEG2_GGD,[])
 # ws = (DebugMean,[])
 cegt = CheckEGTrader(
@@ -27,7 +27,8 @@ cegt = CheckEGTrader(
     measure_time=True,
     use_tqdm=True,
     window=WINDOW,
-    days_mode=DAYS_MODE
+    days_mode=DAYS_MODE,
+    slip_stop_delta=SLIP_STOP_DELTA
 )
 # cegt.df = cegt.df.iloc[-500:]
 # cegt.check_strategy_fast()

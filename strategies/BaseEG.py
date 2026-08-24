@@ -85,15 +85,15 @@ class BaseEG:
                 if pos > 0:
                     if self.type_eg in self.block_type_egs:
                         self.can_long = False
-                    if self.last_action != 'close_long':
+                    if self.last_action != 'stop_close_long':
                         self.amount_sl += 1
-                    return 'close_long'
+                    return 'stop_close_long'
                 elif pos < 0:
                     if self.type_eg in self.block_type_egs:
                         self.can_short = False
-                    if self.last_action != 'close_short':
+                    if self.last_action != 'stop_close_short':
                         self.amount_sl += 1
-                    return 'close_short'
+                    return 'stop_close_short'
         return action
 
     def check_take(self, delta, action):

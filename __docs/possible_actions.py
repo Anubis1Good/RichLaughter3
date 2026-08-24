@@ -8,9 +8,10 @@ action = (
     'close_short',
     'close_all',
 
+    'stop_close_long',
+    'stop_close_short',
+
     # c 11.08.2026 не поддерживаются VT7
-    # # 'stop_long',
-    # # 'stop_short',
     # """
     #     sample type large:
         

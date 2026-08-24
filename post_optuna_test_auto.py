@@ -25,7 +25,8 @@ class WindowTester:
                  normalization: bool = True,
                  save_cores: int = 1,
                  need_plot = False,
-                 days_mode = None
+                 days_mode = None,
+                 slip_stop_delta = 1
                  ):
         
         self.data_folder = data_folder
@@ -41,6 +42,7 @@ class WindowTester:
         self.phys_cores = psutil.cpu_count(logical=False)
         self.need_plot = need_plot
         self.days_mode = days_mode
+        self.slip_stop_delta = slip_stop_delta
         if not os.path.exists(output_folder):
             os.makedirs(output_folder)
         # if self.need_plot:
@@ -67,7 +69,8 @@ class WindowTester:
             measure_time=False,
             use_tqdm=False,
             window=self.window_size,
-            days_mode=self.days_mode
+            days_mode=self.days_mode,
+            slip_stop_delta=self.slip_stop_delta
         )
         
         return trader
@@ -238,7 +241,7 @@ class WindowTester:
     @staticmethod
     def process_chunk_static(data_folder, results_excel, output_folder, tickers, fee, 
                             close_on_time, close_map, window_size, normalization, 
-                            chunk_data, chunk_index, need_plot, img_folder, days_mode):
+                            chunk_data, chunk_index, need_plot, img_folder, days_mode,slip_stop_delta):
         tester = WindowTester(
             data_folder=data_folder,
             results_excel=results_excel,
@@ -251,7 +254,8 @@ class WindowTester:
             normalization=normalization,
             save_cores=1,
             need_plot=need_plot,
-            days_mode=days_mode
+            days_mode=days_mode,
+            slip_stop_delta=slip_stop_delta
         )
         # Используем общую папку
         if need_plot and img_folder:
@@ -311,7 +315,8 @@ class WindowTester:
                 i,
                 self.need_plot,
                 img_folder,
-                self.days_mode  # передаем общую папку
+                self.days_mode,
+                self.slip_stop_delta  # передаем общую папку
             ))
         
         if num_processes > 1:
@@ -387,7 +392,8 @@ if __name__ == "__main__":
         normalization=True,
         save_cores=0,
         need_plot=True,
-        days_mode=DAYS_MODE
+        days_mode=DAYS_MODE,
+        slip_stop_delta=SLIP_STOP_DELTA
     )
     
     tester.run_tests()

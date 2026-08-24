@@ -28,14 +28,15 @@ class OptimizatorOptuna:
                  measure_time: bool = False,
                 # Параметры SL/TP в процентах
                  sl_min_pct: float = 0.1,
-                 sl_max_pct: float = 1.0,
+                 sl_max_pct: float = 0.5,
                  tp_min_pct: float = 0.1,
                  tp_max_pct: float = 1.0,
                  use_window_test: bool = False,  
                  window_size: int = 60,          
                  normalization: bool = True,
                  metric:str = 'total_fee_per',
-                 days_mode = None      
+                 days_mode = None,
+                 slip_slope_delta = 1      
                  ):
         
         self.metric = metric
@@ -64,6 +65,7 @@ class OptimizatorOptuna:
         self.traders = []
         self.results_cache = {}
         self.days_mode = days_mode
+        self.slip_slope_delta = slip_slope_delta
         if not os.path.exists(main_folder):
             os.makedirs(main_folder)
         
@@ -87,7 +89,8 @@ class OptimizatorOptuna:
                 close_map=self.close_map,
                 measure_time=self.measure_time,
                 use_tqdm=False,
-                days_mode=self.days_mode
+                days_mode=self.days_mode,
+                slip_stop_delta=self.slip_slope_delta
             )
             self.traders.append(trader)
         

@@ -1,6 +1,5 @@
-from datetime import datetime
+from datetime import date
 
-now = datetime.now()
-cwd = now.weekday()
+today = date.today()
 
-print(now,cwd)
+print(str(today).replace('-','_'))
