@@ -19,12 +19,12 @@ if __name__ == '__main__':
         test_folder='_data_for_tests/data_stock_5m',
         fee=MAIN_FEE,
         max_period=max_period,
-        bottom_limit=80,
+        bottom_limit=60,
         top_limit=1000,
         save_cores=save_cores,
         n_trials=trials,
         need_plot=False,
-        use_window_test=use_window,\
+        use_window_test=use_window,
         window_size=WINDOW,
         days_mode=DAYS_MODE,
         slip_slope_delta=SLIP_STOP_DELTA
