@@ -8,8 +8,8 @@ from testing.test_constants import *
 use_window = False
 # ⏱ Total time: 1h 3m 37s - 50 trials
 # use_window = True
-# trials = 500
-trials = 200
+trials = 400
+# trials = 200
 # trials = 100
 # trials = 50
 save_cores = 0
@@ -20,7 +20,7 @@ if __name__ == '__main__':
         fee=MAIN_FEE,
         max_period=max_period,
         bottom_limit=60,
-        top_limit=1000,
+        top_limit=500,
         save_cores=save_cores,
         n_trials=trials,
         need_plot=False,

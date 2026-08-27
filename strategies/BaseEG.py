@@ -72,10 +72,11 @@ class BaseEG:
         return df
     
     def get_test_row(self, df):
-        try:
-            return df.iloc[-1]
-        except Exception:
-            return None
+        if df is not None:
+            try:
+                return df.iloc[-1]
+            except Exception:
+                return None
 
     def check_stop(self, pos, delta, action):
         # delta положительная, если мы в плюсе и отрицательная, если в минусе.
@@ -136,7 +137,8 @@ class BaseEG:
     # pdata - processed data
     def get_raw_action(self, pdata):
         """Обычный режим"""
-        row = self.get_test_row(pdata['chart'])
+        chart = pdata.get('chart',None)
+        row = self.get_test_row(chart)
         if row is None:
             return None
         return self._get_action_from_row(row)

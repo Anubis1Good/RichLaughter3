@@ -10,7 +10,8 @@ from testing.test_constants import *
 
 today = date.today()
 start_date = str(today - timedelta(days=1))
-tickers = ['ALRS','ALRS2','MAGN','MAGN2','IRAO','IRAO2','MTLR','MTLR2','RUAL','RUAL2','VTBR','VTBR2','ASTR','ASTR2','ROSN','ROSN2','SBER','SBER2','SIBN','SIBN2','SNGSP','SNGSP2','T','T2','AFLT','AFLT2','HYDR','HYDR2','OGKB','OGKB2','RTKM','RTKM2','TGKA','TGKA2','VKCO','VKCO2']
+# tickers = ['ALRS','ALRS2','MAGN','MAGN2','IRAO','IRAO2','MTLR','MTLR2','RUAL','RUAL2','VTBR','VTBR2','ASTR','ASTR2','ROSN','ROSN2','SBER','SBER2','SIBN','SIBN2','SNGSP','SNGSP2','T','T2','AFLT','AFLT2','HYDR','HYDR2','OGKB','OGKB2','RTKM','RTKM2','TGKA','TGKA2','VKCO','VKCO2']
+tickers = bot_on_ticker.keys()
 folder_date = str(today).replace('-','_')
 main_folder: str = os.path.join('_test_results/today',folder_date)
 os.makedirs(main_folder,exist_ok=True)

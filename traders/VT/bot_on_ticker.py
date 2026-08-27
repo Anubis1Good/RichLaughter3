@@ -51,52 +51,52 @@ bot_on_ticker = {
     # 'MVID':(PEG31_HYPERION,(10,1,2,0,True,10,1,2,5),1,None), #+
     # 'ABIO':(PEG31_HYPERION,(10,1,2,0,True,20,1,1),1,None), #0
     # 'RTKMP':(PEG31_HYPERION,(10,1,2,0,True,30,5,1),1,None), #+
-    'ALRS':(PEG14_RWDDCr,(10, 13, 26, 37, 44, 20, 55),2,None), #
-    # 'ALRS2':(UEG6_VULTURE,(20,15,50,55,43,30,4,5,0.28,15,),2,None), #+0
+    'ALRS':(PEG14_RWDDCr,(10, 13, 26, 37, 44, 20, 55),2,None), #-1
+    'ALRS2':(PEG20_HOGGER,(8, 2, 50, 7, 2.0, 1.3, 38, 25),1,None),#
     # 'MAGN':(WEG4_DOG,(39,59,4,26,),5,None), #-2
-    'MAGN2':(VEG1_VENUS,(7, 17, 0.5, 0.9, 0.1, 2.0, 0, 0, 0),2,None),#
+    'MAGN2':(VEG1_VENUS,(7, 17, 0.5, 0.9, 0.1, 2.0, 0, 0, 0),2,None),#+10
 
-    'IRAO':(PEG4_UNIVERSAL,(22, 34, 15, 6, 42, 41, 'WC', 'uo', 6),3,None), #
-    # 'IRAO2':(PEG17_PHOENIX,(49,49,27,9,16,41,15,1,55,),4,None), #+4
-    # 'MTLR':(UEG4_FALCON,(33,75,4,2,0.32,),6,None), #+10
-    'MTLR2':(PEG18_BLAZE,(14, 27, 54, 5, 30, 25, 25, 0, 55),3,None), #0
+    'IRAO':(PEG4_UNIVERSAL,(22, 34, 15, 6, 42, 41, 'WC', 'uo', 6),3,None), #+19
+    'IRAO2':(SEG1_LITE,(21, 40, 53, 1.5, 0.7, 43),4,None), #
+    'MTLR':(WEG4_PUPPY,(13, 10, 23, 28, 16),2,None), #
+    'MTLR2':(PEG18_BLAZE,(14, 27, 54, 5, 30, 25, 25, 0, 55),3,None), #-2
 
-    'RUAL':(PEG8_DOBBY,(20, 51, 50, 1.9),5,None), #
-    'RUAL2':(PEG15_SILVANA,(22, 43, 51, 36, 4),4,None), #
-    'VTBR':(WEG3_BATYA,(43, 105, 28, 1.9, 1, 1, 1),9,None), #
-    # 'VTBR2':(LEG2_FENNEC,(97,157,30,2.0,5,38,14,0.6,0,),11,None), #+3
+    'RUAL':(PEG8_DOBBY,(20, 51, 50, 1.9),5,None), #-2
+    'RUAL2':(PEG15_SILVANA,(22, 43, 51, 36, 4),4,None), #-2
+    'VTBR':(WEG3_BATYA,(43, 105, 28, 1.9, 1, 1, 1),9,None), #+4
+    'VTBR2':(PEG14_RWDDCr,(38, 40, 17, 39, 2, 40, 55),4,None), #
 
-    # 'ASTR':(WEG4_DOG,(39,78,7,30,),6,None), #+0
-    'ASTR2':(LEG2_DRINKER,(6, 36, 9, 2.9, 7, 14, 37, 1),3,None), #
-    'ROSN':(LEG2_LYNX,(33, 61, 19, 2.4, 24, 0.5, 1),6,None), #
-    # 'ROSN2':(UEG8_AVENGER,(61,116,19,0.0,1.0,1.0,9.5,0,),9,None), #-2
+    'ASTR':(PEG14_RWDDCr,(18, 24, 7, 15, 32, 45, 55),2,None), #+0
+    'ASTR2':(LEG2_DRINKER,(6, 36, 9, 2.9, 7, 14, 37, 1),3,None), #-3
+    'ROSN':(LEG2_LYNX,(33, 61, 19, 2.4, 24, 0.5, 1),6,None), #-2
+    'ROSN2':(PEG15_ANNA,(17, 23, 20, 36),2,None), #
 
-    'SBER':(LEG2_HOTS,(67, 78, 53, 2.4, 17, 36, 18, 1),7,None), #
-    # 'SBER2':(PEG14_RENEGADE,(267,440,16,39,48,18,28,54,),32,None), #+0
-    # 'SIBN':(LEG1_PHOGA,(85,173,3,1.1,7,),14,None), #-7
-    'SIBN2':(PEG26_UNKNOWN,(36, 93, 38, 29, 26, 26, 9, 24, 4, 55, 1),8,None), #
+    'SBER':(LEG2_HOTS,(67, 78, 53, 2.4, 17, 36, 18, 1),7,None), #-0
+    'SBER2':(PEG26_UNKNOWN,(124, 130, 7, 52, 14, 39, 23, 19, 37, 55, 0),11,None), #
+    'SIBN':(LEG2_DRG,(45, 64, 45, 0.5, 23, 13, 37, 0),6,None), #
+    'SIBN2':(PEG26_UNKNOWN,(36, 93, 38, 29, 26, 26, 9, 24, 4, 55, 1),8,None), #+6
 
-    'SNGSP':(PEG4_UNIVERSAL,(38, 57, 29, 3, 27, 9, 'VG', 'mfi', 4),5,None), #
-    'SNGSP2':(WEG3_BATYA,(40, 48, 32, 2.9, 1, 1, 1),4,None), #
+    'SNGSP':(PEG4_UNIVERSAL,(38, 57, 29, 3, 27, 9, 'VG', 'mfi', 4),5,None), #+3
+    'SNGSP2':(WEG3_BATYA,(40, 48, 32, 2.9, 1, 1, 1),4,None), #+2
     # 'T':(SEG3_FORCE,(125,98,55,1.8,3,2,15,25,0.7,),10,None), #+2
-    'T2':(PEG14_RWDDCr,(60, 75, 24, 34, 31, 21, 55),7,None), #
+    'T2':(PEG14_RWDDCr,(60, 75, 24, 34, 31, 21, 55),7,None), #+1
     # 'T':(SEG3_FORCE,(125,98,55,1.8,3,2,15,25,0.7,),10,None), #+2
     # 'T2':(UEG6_VULTURE,(120,112,54,22,46,5,2,1,0.43,6,),10,None), #+7
 
-    # 'AFLT':(WEG3_BATYA,(18, 18, 6, 1.1, 1, 0, 1),2,None), #-1
+    'AFLT':(LEG2_FENNEC,(16, 22, 8, 2.2, 7, 17, 37, 1.2, 0),2,None), #
     # 'AFLT2':(PEG4_UNIVERSAL,(32, 14, 11, 11, 27, 34, 'DC', 's', 5),3,None), #+2
-    # 'HYDR':(WEG3_BATYA,(29, 9, 45, 1.2, 1, 1, 1),3,None), #-7
-    # 'HYDR2':(PEG4_UNIVERSAL,(11, 15, 18, 7, 5, 11, 'VC', 's', 3),2,None), #-2
+    'HYDR':(WEG3_BATYA,(15, 22, 24, 2.5, 1, 1, 1),2,None), #
+    'HYDR2':(LEG2_FENNEC,(14, 32, 7, 1.9, 27, 38, 27, 2.0, 0),3,None), #
 
-    # 'OGKB':(UEG6_DODO,(11, 18, 10, 2, 59, 67),2,None), #-18 пиздит
+    'OGKB':(PEG26_UNKNOWN,(8, 18, 50, 10, 34, 31, 4, 13, 26, 55, 1),2,None), #
     # 'OGKB2':(UEG4_PELICAN,(21, 6, 2, 2, 0.18),2,None), #-8
     # 'RTKM':(UEG4_PELICAN,(40, 36, 5, 2, 0.35),4,None), #-0 пиздит
-    # 'RTKM2':(PEG4_UNIVERSAL,(42, 42, 6, 21, 38, 19, 'VC', 's', 3),4,None), #-4
+    'RTKM2':(LEG2_HOTS,(8, 39, 39, 2.3, 16, 38, 13, 0),4,None), #
     
-    # 'TGKA':(PEG4_UNIVERSAL,(22, 8, 2, 2, 41, 38, 'VG', 'rsi_tw', 4),2,None), #-2 пиздит
+    'TGKA':(PEG26_UNKNOWN,(11, 4, 52, 11, 23, 9, 28, 6, 19, 55, 0),1,None),#
     # 'TGKA2':(UEG4_PELICAN,(22, 3, 2, 5, 0.14),2,None), #-8
     # 'VKCO':(LEG1_IRONANNY,(28, 25, 5, 2, 55, 7, 5),3,None), #+10
-    # 'VKCO2':(LEG2_HOTS,(26, 27, 29, 2.0, 5, 27, 37, 1),3,None), #+0
+    'VKCO2':(LEG2_HOTS,(12, 24, 54, 2.2, 5, 20, 14, 0),2,None), #
 }
 # sleep_group = ()
 
