@@ -11,6 +11,7 @@ from testing.CheckEGTrader import CheckEGTrader
 optuna.logging.set_verbosity(optuna.logging.CRITICAL)
 phys_cores = psutil.cpu_count(logical=False)
 
+# TODO добавить возможно не использовать стопы и тейки, а так же возможность трейлинг-стопа
 class OptimizatorOptuna:
     def __init__(self, 
                  test_folder: str,

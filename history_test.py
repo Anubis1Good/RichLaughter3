@@ -16,7 +16,7 @@ symbol = PATH_DF.split('\\')[-1].split('_')[0]
 # ws = [EG,(100,30,20)]
 # ws = [UEG4_FALCON,],
 
-ws = (UEG6_VULTURE,(20,15,50,55,43,30,4,5,0.28,15,),2,None)
+ws = (PEG17_PHOENIX,(14, 15, 35, 9, 46, 28, 10, 0, 55),2,None)
 # ws = (UEG2_GGD,[])
 # ws = (DebugMean,[])
 cegt = CheckEGTrader(

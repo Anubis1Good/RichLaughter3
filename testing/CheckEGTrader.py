@@ -38,7 +38,8 @@ class CheckEGTrader:
                  use_tqdm:bool=False,
                  window:int=60,
                  days_mode=None,
-                 slip_stop_delta=1
+                 slip_stop_delta=1,
+                 auto_take = 1
                  ):
         self.window = window
         self.symbol = symbol
@@ -69,6 +70,7 @@ class CheckEGTrader:
         self.use_tqdm = use_tqdm
         self.df = self.add_time_features(self.df)
         self.days = self.df['ms'].dt.date.nunique()
+        self.auto_take = auto_take
         self.reload_data()
 
     def check_days_mode(self,days_mode):
@@ -226,66 +228,66 @@ class CheckEGTrader:
                 self.update_step_data(price)
 
     # CHECKS_FUNCS
-    @duration_time
-    def check_strategy_fast(self, history_bars=60):
-        """
-        Быстрый тест для оптимизации.
-        Индикаторы рассчитываются один раз на всех данных.
-        Подходит для быстрой проверки множества параметров.
-        """
-        self.reload_data()
+    # @duration_time
+    # def check_strategy_fast(self, history_bars=60):
+    #     """
+    #     Быстрый тест для оптимизации.
+    #     Индикаторы рассчитываются один раз на всех данных.
+    #     Подходит для быстрой проверки множества параметров.
+    #     """
+    #     self.reload_data()
         
-        # Подготавливаем данные через preprocessing
-        pdata = self.ws.preprocessing(self.tdata)
-        df = pdata['chart']
-        window = self.window - (len(self.df) - len(df))
-        self.sync_step_data(df)
+    #     # Подготавливаем данные через preprocessing
+    #     pdata = self.ws.preprocessing(self.tdata)
+    #     df = pdata['chart']
+    #     window = self.window - (len(self.df) - len(df))
+    #     self.sync_step_data(df)
         
-        if self.close_on_time:
-            mask = (df['hour'] >= df['weekday'].map(lambda wd: self.close_map[wd][0])) & \
-                (df['minute'] >= df['weekday'].map(lambda wd: self.close_map[wd][1]))
-            mask_values = mask.values
-        else:
-            mask_values = None
+    #     if self.close_on_time:
+    #         mask = (df['hour'] >= df['weekday'].map(lambda wd: self.close_map[wd][0])) & \
+    #             (df['minute'] >= df['weekday'].map(lambda wd: self.close_map[wd][1]))
+    #         mask_values = mask.values
+    #     else:
+    #         mask_values = None
         
-        prices = df['close'].values
-        row_names = df['x'].values
+    #     prices = df['close'].values
+    #     row_names = df['x'].values
         
 
-        for i in self.get_iterator(range(len(df))):
-            price = prices[i]
-            if i < window:
-                self.update_step_data(price)
-                continue
-            row_name = row_names[i]
+    #     for i in self.get_iterator(range(len(df))):
+    #         price = prices[i]
+    #         if i < window:
+    #             self.update_step_data(price)
+    #             continue
+    #         row_name = row_names[i]
             
-            # Проверка времени закрытия
-            if self.close_on_time and mask_values is not None and mask_values[i]:
-                signal = self.actions_dict['close_all']
-            else:
-                # Берем срез до текущего индекса (не более history_bars)
-                start_idx = max(0, i - history_bars + 1)
-                current_df = df.iloc[start_idx:i+1]  # без .copy()!
+    #         # Проверка времени закрытия
+    #         if self.close_on_time and mask_values is not None and mask_values[i]:
+    #             signal = self.actions_dict['close_all']
+    #         else:
+    #             # Берем срез до текущего индекса (не более history_bars)
+    #             start_idx = max(0, i - history_bars + 1)
+    #             current_df = df.iloc[start_idx:i+1]  # без .copy()!
                 
-                current_pdata = {'chart': current_df}
+    #             current_pdata = {'chart': current_df}
                 
-                # Вычисляем delta только если есть позиция
-                pos = self.trade_data['pos']
-                open_price = self.trade_data['open_price']
+    #             # Вычисляем delta только если есть позиция
+    #             pos = self.trade_data['pos']
+    #             open_price = self.trade_data['open_price']
                 
-                delta = None
-                if pos != 0 and open_price != 0:
-                    if pos > 0:
-                        delta = (price - open_price) // self.price_step
-                    else:
-                        delta = (open_price - price) // self.price_step
+    #             delta = None
+    #             if pos != 0 and open_price != 0:
+    #                 if pos > 0:
+    #                     delta = (price - open_price) // self.price_step
+    #                 else:
+    #                     delta = (open_price - price) // self.price_step
                 
-                action = self.ws(current_pdata, pos, delta)
-                signal = self.actions_dict.get(action, 0)
+    #             action = self.ws(current_pdata, pos, delta)
+    #             signal = self.actions_dict.get(action, 0)
             
-            # Выполняем действие
-            self.work_action(signal, price, row_name)
-            self.update_step_data(price)
+    #         # Выполняем действие
+    #         self.work_action(signal, price, row_name)
+    #         self.update_step_data(price)
 
     @duration_time
     def check_strategy_faster(self, history_bars=None):
@@ -307,7 +309,8 @@ class CheckEGTrader:
             mask_values = mask.values
         else:
             mask_values = None
-        
+        highs = df['high'].values
+        lows = df['low'].values
         prices = df['close'].values
         row_names = df['x'].values
         
@@ -328,9 +331,31 @@ class CheckEGTrader:
                 delta = None
                 if pos != 0 and open_price != 0:
                     if pos > 0:
-                        delta = (price - open_price) // self.price_step
+                        delta_nega = (lows[i] - open_price) // self.price_step
+                        if delta_nega <= -self.ws.stop:
+                            delta = delta_nega
+                        elif self.auto_take is not None and self.ws.take is not None:
+                            delta_posi = (highs[i] - open_price) // self.price_step
+                            auto_take = self.ws.take * self.auto_take
+                            if delta_posi >= auto_take:
+                                delta = auto_take
+                            else:
+                                delta = (price - open_price) // self.price_step
+                        else:
+                            delta = (price - open_price) // self.price_step
                     else:
-                        delta = (open_price - price) // self.price_step
+                        delta_nega = (open_price - highs[i]) // self.price_step
+                        if delta_nega <= -self.ws.stop:
+                            delta = delta_nega
+                        elif self.auto_take is not None and self.ws.take is not None:
+                            delta_posi = (open_price - lows[i]) // self.price_step
+                            auto_take = self.ws.take * self.auto_take
+                            if delta_posi >= auto_take:
+                                delta = auto_take
+                            else:
+                                delta = (open_price - price) // self.price_step
+                        else:
+                            delta = (open_price - price) // self.price_step
                 
                 # БЫСТРЫЙ РЕЖИМ: передаем индексы, а не копию
                 fast_pdata = {
@@ -363,6 +388,8 @@ class CheckEGTrader:
             df_slice = self.df.iloc[i-self.window:i+1].copy()
             price = df_slice.iloc[-1]['close']
             row_name = df_slice.iloc[-1]['x']
+            low = df_slice.iloc[-1]['low']
+            high = df_slice.iloc[-1]['high']
             
             # Проверка времени закрытия
             if self.close_on_time:
@@ -397,9 +424,31 @@ class CheckEGTrader:
             delta = None
             if pos != 0 and open_price != 0:
                 if pos > 0:
-                    delta = (price - open_price) // self.price_step
+                    delta_nega = (low - open_price) // self.price_step
+                    if delta_nega <= -self.ws.stop:
+                        delta = delta_nega
+                    elif self.auto_take is not None and self.ws.take is not None:
+                        delta_posi = (high - open_price) // self.price_step
+                        auto_take = self.ws.take * self.auto_take
+                        if delta_posi >= auto_take:
+                            delta = auto_take
+                        else:
+                            delta = (price - open_price) // self.price_step
+                    else:
+                        delta = (price - open_price) // self.price_step
                 else:
-                    delta = (open_price - price) // self.price_step
+                    delta_nega = (open_price - high) // self.price_step
+                    if delta_nega <= -self.ws.stop:
+                        delta = delta_nega
+                    elif self.auto_take is not None and self.ws.take is not None:
+                        delta_posi = (open_price - low) // self.price_step
+                        auto_take = self.ws.take * self.auto_take
+                        if delta_posi >= auto_take:
+                            delta = auto_take
+                        else:
+                            delta = (open_price - price) // self.price_step
+                    else:
+                        delta = (open_price - price) // self.price_step
             
             # Получаем action от стратегии
             action = self.ws(pdata, pos, delta)

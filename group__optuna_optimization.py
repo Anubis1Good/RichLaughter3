@@ -8,8 +8,8 @@ from testing.test_constants import *
 use_window = False
 # ⏱ Total time: 1h 3m 37s - 50 trials
 # use_window = True
-trials = 400
-# trials = 200
+# trials = 400
+trials = 200
 # trials = 100
 # trials = 50
 save_cores = 0
