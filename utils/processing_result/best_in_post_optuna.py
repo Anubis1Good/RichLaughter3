@@ -30,6 +30,8 @@ df_total = df_total.drop(columns=[col for col in columns_to_drop if col in df_to
 df_total = df_total.sort_values(['origin', 'total_fee_per_window'], ascending=[True, False])
 df_total = df_total.reset_index(drop=True)
 
+MAX_LENGTH_GLASS_POINT = 12
+
 def fix_ws_string(s):
     # Ищем имя и значения
     match = re.match(r'\(([^,]+),\((.+)\)\)', s)
@@ -56,10 +58,19 @@ def fix_ws_string(s):
                     val = val[1:-1]
                 elif val.startswith('"') and val.endswith('"'):
                     val = val[1:-1]
-                try:
-                    values.append(float(val) if '.' in val else int(val))
-                except ValueError:
-                    values.append(val)
+                
+                # Обработка 'None' как строки
+                if val == 'None':
+                    values.append(None)
+                else:
+                    try:
+                        # Пробуем как int, если не получается - как float
+                        if val.isdigit() or (val.startswith('-') and val[1:].isdigit()):
+                            values.append(int(val))
+                        else:
+                            values.append(float(val))
+                    except ValueError:
+                        values.append(val)
                 current = ""
         else:
             current += char
@@ -71,23 +82,62 @@ def fix_ws_string(s):
             val = val[1:-1]
         elif val.startswith('"') and val.endswith('"'):
             val = val[1:-1]
-        try:
-            values.append(float(val) if '.' in val else int(val))
-        except ValueError:
-            values.append(val)
+        
+        # Обработка 'None' как строки
+        if val == 'None':
+            values.append(None)
+        else:
+            try:
+                if val.isdigit() or (val.startswith('-') and val[1:].isdigit()):
+                    values.append(int(val))
+                else:
+                    values.append(float(val))
+            except ValueError:
+                values.append(val)
     
-    # Вычисляем
+    # ==========================================
+    # ВЫЧИСЛЕНИЕ new_val ПО НОВОЙ ЛОГИКЕ
+    # ==========================================
     if len(values) >= 2:
+        first = values[0]
+        second = values[1]
+        
+        is_first_none = first is None
+        is_second_none = second is None
+        
         try:
-            first = float(values[0])
-            second = float(values[1])
-            new_val = math.ceil(max(first, second) / MAX_LENGTH_GLASS_POINT)
-        except:
+            if is_first_none and is_second_none:
+                # Оба None -> 1
+                new_val = 1
+            elif is_first_none:
+                # Только первый None -> берем второе число
+                new_val = math.ceil(second / MAX_LENGTH_GLASS_POINT)
+            elif is_second_none:
+                # Только второй None -> берем первое число
+                new_val = math.ceil(first / MAX_LENGTH_GLASS_POINT)
+            else:
+                # Оба числа -> берем максимальное
+                # Если оба int, то max вернет int, если один float - то float
+                max_val = max(first, second)
+                new_val = math.ceil(max_val / MAX_LENGTH_GLASS_POINT)
+        except (TypeError, ValueError, ZeroDivisionError):
             new_val = 1
     else:
         new_val = 1
     
-    return f"({name},{tuple(values)},{new_val},None),"
+    # ==========================================
+    # ФОРМИРУЕМ НОВУЮ СТРОКУ
+    # ==========================================
+    # Преобразуем значения обратно в строки для вывода
+    # None должен стать 'None'
+    values_str_new = []
+    for v in values:
+        if v is None:
+            values_str_new.append('None')
+        else:
+            values_str_new.append(str(v))
+    
+    return f"({name},({','.join(values_str_new)}),{new_val},None),"
 
 # Применяем к колонке
 df_total['ws'] = df_total['ws'].apply(fix_ws_string)

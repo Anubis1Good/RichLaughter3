@@ -37,9 +37,13 @@ class OptimizatorOptuna:
                  normalization: bool = True,
                  metric:str = 'total_fee_per',
                  days_mode = None,
-                 slip_slope_delta = 1      
+                 slip_slope_delta = 1,
+                 use_stop = 0, # 0 - пробовать оба варианта, -1 - всегда без стопа, 1 - всегда стоп
+                 use_take = 0      
                  ):
         
+        self.use_stop = use_stop
+        self.use_take = use_take
         self.metric = metric
         self.use_window_test = use_window_test
         self.window_size = window_size
@@ -177,8 +181,29 @@ class OptimizatorOptuna:
         sl_min, sl_max = sl_tp_params['sl']
         tp_min, tp_max = sl_tp_params['tp']
         
-        sl_value = trial.suggest_int('sl', sl_min, sl_max, step=1)
-        tp_value = trial.suggest_int('tp', tp_min, tp_max, step=1)
+        # Сначала решаем, использовать ли SL
+        if self.use_stop == 1:
+            sl_value = trial.suggest_int('sl', sl_min, sl_max, step=1)
+        elif self.use_stop == -1:
+            sl_value = None
+        else:
+            use_sl = trial.suggest_categorical('use_sl', [True, False])
+            if use_sl:
+                sl_value = trial.suggest_int('sl', sl_min, sl_max, step=1)
+            else:
+                sl_value = None
+        
+        # Аналогично для TP
+        if self.use_take == 1:
+            tp_value = trial.suggest_int('tp', tp_min, tp_max, step=1)
+        elif self.use_take == -1:
+            tp_value = None
+        else:
+            use_tp = trial.suggest_categorical('use_tp', [True, False])
+            if use_tp:
+                tp_value = trial.suggest_int('tp', tp_min, tp_max, step=1)
+            else:
+                tp_value = None
 
         strategy = strategy_class(
             trader.symbol, 
@@ -244,34 +269,39 @@ class OptimizatorOptuna:
         symbol = trader.symbol
 
         for trial in top_trials:
+            # Стратегические параметры
             params = []
             param_values = []
             for i, _ in enumerate(param_options):
                 param_name = f"param_{i}"
-                param_value = trial.params[param_name]
-                if isinstance(param_value, str):
-                    # Строку - в кавычки
+                param_value = trial.params.get(param_name)
+                
+                if param_value is None:
+                    param_value_str = 'None'
+                elif isinstance(param_value, str):
                     param_value_str = f"'{param_value}'"
                 elif isinstance(param_value, float):
-                    # Число с плавающей точкой - округляем
                     param_value_str = str(round(param_value, 2))
                 else:
-                    # Целое число или другое
                     param_value_str = str(param_value)
+                
                 params.append(param_value)
                 param_values.append(param_value_str)
-                        # SL и TP
-            sl_value = trial.params['sl']
-            tp_value = trial.params['tp']
             
-            # Все параметры
-            # all_params = [sl_value, tp_value] + params
-            all_param_values = [str(sl_value), str(tp_value)] + param_values
-
+            # SL и TP с обработкой None
+            sl_value = trial.params.get('sl', None)
+            tp_value = trial.params.get('tp', None)
+            
+            # Формируем строки для отображения
+            sl_display = 'None' if sl_value is None else str(sl_value)
+            tp_display = 'None' if tp_value is None else str(tp_value)
+            
+            # Все параметры для имени файла
+            all_param_values = [sl_display, tp_display] + param_values
+            
             # ==========================================
             # БЕРЕМ ИЗ КЕША ПО СИМВОЛУ И НОМЕРУ ТРИАЛА
             # ==========================================
-            
             if symbol in self.results_cache and trial.number in self.results_cache[symbol]:
                 cached = self.results_cache[symbol][trial.number]
                 trades = cached['trades']
@@ -285,22 +315,48 @@ class OptimizatorOptuna:
             name_file = f"{name_doc}_{'_'.join(all_param_values)}"
             params_tuple = f"({name_bot},({','.join(all_param_values)},)),"
             price_step_per = trader.price_step_per  # в процентах
+            
+            # Вычисляем соотношение SL/TP с проверкой на None и деление на ноль
+            if sl_value is not None and tp_value is not None and tp_value > 0:
+                sl_tp_ratio = round(sl_value / tp_value, 2)
+            else:
+                sl_tp_ratio = 'N/A'
+            
+            # SL и TP в процентах
+            if sl_value is not None:
+                sl_pct = round(sl_value * price_step_per, 2)
+            else:
+                sl_pct = 'None'
+                
+            if tp_value is not None:
+                tp_pct = round(tp_value * price_step_per, 2)
+            else:
+                tp_pct = 'None'
+            
+            # Получаем amount_sl и amount_tp из стратегии
+            amount_sl = trader.ws.amount_sl if trader.ws and hasattr(trader.ws, 'amount_sl') else None
+            amount_tp = trader.ws.amount_tp if trader.ws and hasattr(trader.ws, 'amount_tp') else None
+            
             result_row = {
                 "name": name_file,
                 "ws": params_tuple,
-                "amount_sl": trader.ws.amount_sl,
-                "amount_tp": trader.ws.amount_tp,
-                "sl/tp": round(sl_value / tp_value,2),
-                "sl_pct": round(sl_value * price_step_per, 2),   # SL в процентах
-                "tp_pct": round(tp_value * price_step_per, 2),   # TP в процентах
+                "amount_sl": amount_sl,
+                "amount_tp": amount_tp,
+                "sl/tp": sl_tp_ratio,
+                "sl_pct": sl_pct,
+                "tp_pct": tp_pct,
             }
+            
+            # Добавляем все данные из trades
             result_row = result_row | trades
             
             result_row['origin'] = ticker
             for i, param_value in enumerate(params):
                 result_row[f"Param_{i}"] = param_value
+            
             results.append(result_row)
             
+            # Сохраняем график если нужно
             if self.need_plot:
                 full_name_img = os.path.join(images_folder, f"{name_file}.png")
                 plt.figure(figsize=(12, 6))
@@ -310,18 +366,27 @@ class OptimizatorOptuna:
                 plt.legend()
                 plt.savefig(full_name_img, bbox_inches='tight')
                 plt.close()
+        
+        # Создаем DataFrame
         df_results = pd.DataFrame(results)
         df_results = df_results.drop_duplicates()
         df_results = df_results.sort_values(self.metric, ascending=False)
         df_results = df_results.reset_index(drop=True)
         
+        # Сохраняем в Excel
         full_name_doc = os.path.join(file_folder, name_doc + '.xlsx')
         with pd.ExcelWriter(full_name_doc, engine='xlsxwriter') as writer:
-            df_results.to_excel(writer, sheet_name='total')
+            df_results.to_excel(writer, sheet_name='total', index=False)
             worksheet = writer.sheets['total']
             for i, col in enumerate(df_results.columns, start=1):
-                width = max(df_results[col].apply(lambda x: len(str(x))).max(), len(col))
-                worksheet.set_column(i, i, width)
+                # Вычисляем ширину колонки
+                max_len = max(
+                    df_results[col].astype(str).apply(len).max(),
+                    len(col)
+                )
+                # Ограничиваем максимальную ширину для читаемости
+                width = min(max_len + 2, 50)
+                worksheet.set_column(i - 1, i - 1, width)  # xlsxwriter использует индексацию с 0
         
         return df_results
     

@@ -45,9 +45,6 @@ class WindowTester:
         self.slip_stop_delta = slip_stop_delta
         if not os.path.exists(output_folder):
             os.makedirs(output_folder)
-        # if self.need_plot:
-        #     self.img_folder = os.path.join(output_folder,'imgs',str(int(time())))
-        #     os.makedirs(self.img_folder,exist_ok=True)
     
     def load_trader(self, ticker):
         files = [f for f in os.listdir(self.data_folder) 
@@ -102,10 +99,17 @@ class WindowTester:
             
             if not isinstance(ws_tuple, tuple) or len(ws_tuple) != 2:
                 return False
-            
+                    
             strategy_class = ws_tuple[0]
             params = ws_tuple[1]
             
+            processed_params = []
+            for p in params:
+                if isinstance(p, str) and p == 'None':
+                    processed_params.append(None)  # реальный None
+                else:
+                    processed_params.append(p) 
+
             trader = self.load_trader(ticker)
             if trader is None:
                 return False
@@ -115,7 +119,7 @@ class WindowTester:
                 trader.price_step,
                 1,
                 None,
-                *params
+                *processed_params
             )
             
             trader.ws = strategy
@@ -140,24 +144,12 @@ class WindowTester:
                 plt.legend()
                 plt.savefig(full_name_img, bbox_inches='tight')
                 plt.close()
-            # Берем реальные значения SL/TP из стратегии
-            # amount_sl = trader.ws.amount_sl if hasattr(trader.ws, 'amount_sl') else 0
-            # amount_tp = trader.ws.amount_tp if hasattr(trader.ws, 'amount_tp') else 0
-            
-            # # Считаем sl/tp, sl_pct, tp_pct
-            # sl_tp_ratio = round(amount_sl / amount_tp, 2) if amount_tp > 0 else 0
-            # sl_pct = round(amount_sl * trader.price_step_per, 2)
-            # tp_pct = round(amount_tp * trader.price_step_per, 2)
             
             result = {
                 'origin': ticker,
                 'name': row_name,
                 'ws': original_ws,
-                # 'amount_sl': amount_sl,
-                # 'amount_tp': amount_tp,
-                # 'sl/tp': sl_tp_ratio,
-                # 'sl_pct': sl_pct,
-                # 'tp_pct': tp_pct,
+
             }
             
             # Результаты быстрого теста
