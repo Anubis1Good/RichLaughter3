@@ -336,7 +336,7 @@ class CheckEGTrader:
                 if pos != 0 and open_price != 0:
                     if pos > 0:
                         delta_nega = (lows[i] - open_price) // self.price_step
-                        if delta_nega <= -self.ws.stop:
+                        if self.ws.stop is not None and delta_nega <= -self.ws.stop:
                             delta = delta_nega
                         elif self.auto_take is not None and self.ws.take is not None:
                             delta_posi = (highs[i] - open_price) // self.price_step
@@ -349,7 +349,7 @@ class CheckEGTrader:
                             delta = (price - open_price) // self.price_step
                     else:
                         delta_nega = (open_price - highs[i]) // self.price_step
-                        if delta_nega <= -self.ws.stop:
+                        if self.ws.stop is not None and delta_nega <= -self.ws.stop:
                             delta = delta_nega
                         elif self.auto_take is not None and self.ws.take is not None:
                             delta_posi = (open_price - lows[i]) // self.price_step
@@ -429,7 +429,7 @@ class CheckEGTrader:
             if pos != 0 and open_price != 0:
                 if pos > 0:
                     delta_nega = (low - open_price) // self.price_step
-                    if delta_nega <= -self.ws.stop:
+                    if self.ws.stop is not None and delta_nega <= -self.ws.stop:
                         delta = delta_nega
                     elif self.auto_take is not None and self.ws.take is not None:
                         delta_posi = (high - open_price) // self.price_step
@@ -442,7 +442,7 @@ class CheckEGTrader:
                         delta = (price - open_price) // self.price_step
                 else:
                     delta_nega = (open_price - high) // self.price_step
-                    if delta_nega <= -self.ws.stop:
+                    if self.ws.stop is not None and  delta_nega <= -self.ws.stop:
                         delta = delta_nega
                     elif self.auto_take is not None and self.ws.take is not None:
                         delta_posi = (open_price - low) // self.price_step

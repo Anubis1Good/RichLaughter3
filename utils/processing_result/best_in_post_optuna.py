@@ -70,6 +70,7 @@ def fix_ws_string(s):
                         else:
                             values.append(float(val))
                     except ValueError:
+                        # Если не число - сохраняем как строку (без кавычек, добавим позже)
                         values.append(val)
                 current = ""
         else:
@@ -93,6 +94,7 @@ def fix_ws_string(s):
                 else:
                     values.append(float(val))
             except ValueError:
+                # Если не число - сохраняем как строку (без кавычек, добавим позже)
                 values.append(val)
     
     # ==========================================
@@ -117,7 +119,6 @@ def fix_ws_string(s):
                 new_val = math.ceil(first / MAX_LENGTH_GLASS_POINT)
             else:
                 # Оба числа -> берем максимальное
-                # Если оба int, то max вернет int, если один float - то float
                 max_val = max(first, second)
                 new_val = math.ceil(max_val / MAX_LENGTH_GLASS_POINT)
         except (TypeError, ValueError, ZeroDivisionError):
@@ -126,15 +127,17 @@ def fix_ws_string(s):
         new_val = 1
     
     # ==========================================
-    # ФОРМИРУЕМ НОВУЮ СТРОКУ
+    # ФОРМИРУЕМ НОВУЮ СТРОКУ С КАВЫЧКАМИ
     # ==========================================
-    # Преобразуем значения обратно в строки для вывода
-    # None должен стать 'None'
     values_str_new = []
     for v in values:
         if v is None:
             values_str_new.append('None')
+        elif isinstance(v, str):
+            # Строки оборачиваем в кавычки
+            values_str_new.append(f"'{v}'")
         else:
+            # Числа без кавычек
             values_str_new.append(str(v))
     
     return f"({name},({','.join(values_str_new)}),{new_val},None),"
