@@ -53,54 +53,56 @@ bot_on_ticker = {
     # 'RTKMP':(PEG31_HYPERION,(10,1,2,0,True,30,5,1),1,None), #+
 
 
-    # 'AFLT':(LEG2_FENNEC,(16, 22, 8, 2.2, 7, 17, 37, 1.2, 0),2,None), # -1
-    # # 'AFLT2':(PEG4_UNIVERSAL,(32, 14, 11, 11, 27, 34, 'DC', 's', 5),3,None), #+2
-    # 'ALRS':(PEG14_RWDDCr,(10, 13, 26, 37, 44, 20, 55),2,None), #-1 -1
-    # 'ALRS2':(PEG20_HOGGER,(8, 2, 50, 7, 2.0, 1.3, 38, 25),1,None),#+1
-    # 'ASTR':(PEG14_RWDDCr,(18, 24, 7, 15, 32, 45, 55),2,None), #+0 +3
-    # 'ASTR2':(LEG2_DRINKER,(6, 36, 9, 2.9, 7, 14, 37, 1),3,None), #-3 -1
+    'AFLT':(UEG4_FALCON,(None,None,4,3,0.45),1,None), #
+    # 'AFLT2':(PEG13_DWDDCr,(None,None,17,31,9),1,None), #
+    'ALRS':(LEG2_DRINKER,(None,16,5,2.1,5,31,16,0),2,None), # 377 сделок
+    # 'ALRS2':(UEG6_VULTURE,(None,18,51,42,18,6,3,3,0.81,12),2,None),#
+    'ASTR':(WEG3_BATYA,(None,40,21,2.1,1,1,1),4,None), #
+    # 'ASTR2':(PEG17_PHOENIX,(None,None,16,30,47,21,38,1,55),1,None), #
     'CHMF':(VEG1_VENUS,(None,None,0.3,0.8,0.1,2.0,1,0,0),1,None), #
-    'CHMF2':(UEG7_PIGEON,(None,None,53,5,55,4,3,0.04,0.4,0),1,None), #
-    # 'FEES':(PEG14_RWDDCr,(18, 24, 7, 15, 32, 45, 55),2,None), #
-    # 'FEES2':(LEG2_DRINKER,(6, 36, 9, 2.9, 7, 14, 37, 1),3,None), #
-    # # 'MAGN':(WEG4_DOG,(39,59,4,26,),5,None), #-2
-    # 'MAGN2':(VEG1_VENUS,(7, 17, 0.5, 0.9, 0.1, 2.0, 0, 0, 0),2,None),#+10 +1
-    # 'MTLR':(WEG4_PUPPY,(13, 10, 23, 28, 16),2,None), # +1
-    # 'MTLR2':(PEG18_BLAZE,(14, 27, 54, 5, 30, 25, 25, 0, 55),3,None), #-2 +5
+    # 'CHMF2':(UEG7_PIGEON,(None,None,53,5,55,4,3,0.04,0.4,0),1,None), #
+    # 'FEES':(PEG11_KUSURUKEN,(None,None,25,55,35,9,'c',55),1,None), #
+    'FEES2':(WEG4_PUPPY,(None,None,16,16,12),1,None), #
+    'MAGN':(PEG18_BLAZE,(None,None,43,10,54,38,20,0,55),1,None), #
+    'MAGN2':(VEG1_VENUS,(7, 17, 0.5, 0.9, 0.1, 2.0, 0, 0, 0),2,None),#+10 +1
+    # 'MAGN2':(UEG6_PIGEON,(None,27,26,39,54,3,5,0.38,0.2,0),3,None),#
+    # 'MTLR':(PEG11_KUSURUKEN,(None,None,44,8,51,36,'c',55),1,None), #
+    'MTLR2':(LEG2_LYNX,(None,17,33,2.0,5,0.6,0),2,None), #
     'NLMK':(LEG2_LYNX,(None,None,4,1.8,2,1.4,0),1,None), #
-    'NLMK2':(PEG18_BLAZE,(None,None,22,4,14,32,28,0,55),1,None), #
-    # 'RAGR':(LEG2_LYNX,(33, 61, 19, 2.4, 24, 0.5, 1),6,None), #
-    # 'RAGR2':(PEG15_ANNA,(17, 23, 20, 36),2,None), #
+    # 'NLMK2':(PEG18_BLAZE,(None,None,22,4,14,32,28,0,55),1,None), #
+    # 'RAGR':(UEG4_FALCON,(None,None,3,4,0.74),1,None), #
+    'RAGR2':(PEG14_RENEGADE,(None,None,6,23,2,4,45,51),1,None), #
     'ROSN':(LEG2_FENNEC,(None,58,27,2.6,17,39,33,1.4,0),5,None), #
-    'ROSN2':(PEG14_RENEGADE,(None,None,16,38,52,6,49,30),1,None), #
-    # 'RUAL':(PEG8_DOBBY,(20, 51, 50, 1.9),5,None), #-2 -3 
-    # 'RUAL2':(PEG15_SILVANA,(22, 43, 51, 36, 4),4,None), #-2 -4
-    'SBER':(PEG14_RENEGADE,(None,None,19,39,31,25,12,46),1,None), #
+    # 'ROSN2':(PEG14_RENEGADE,(None,None,16,38,52,6,49,30),1,None), #
+    # 'RUAL':(PEG26_UNKNOWN,(None,None,25,34,10,25,8,23,52,55,0),1,None), #
+    'RUAL2':(LEG2_LYNX,(None,39,12,2.6,3,0.6,1),4,None), #
+    # 'SBER':(PEG14_RENEGADE,(None,None,19,39,31,25,12,46),1,None), #
     'SBER2':(PEG4_U3,(112,None,53,23,2,55,'BB','mfi',4),10,None), #
-    # 'SBERP':(LEG2_HOTS,(67, 78, 53, 2.4, 17, 36, 18, 1),7,None), #
-    # 'SBERP2':(PEG26_UNKNOWN,(124, 130, 7, 52, 14, 39, 23, 19, 37, 55, 0),11,None), #
-    # 'SFIN':(LEG2_HOTS,(67, 78, 53, 2.4, 17, 36, 18, 1),7,None), #
-    # 'SFIN2':(PEG26_UNKNOWN,(124, 130, 7, 52, 14, 39, 23, 19, 37, 55, 0),11,None), #
-    # 'SGZH':(LEG2_HOTS,(67, 78, 53, 2.4, 17, 36, 18, 1),7,None), #
-    # 'SGZH2':(PEG26_UNKNOWN,(124, 130, 7, 52, 14, 39, 23, 19, 37, 55, 0),11,None), #
-    # 'SIBN':(LEG2_DRG,(45, 64, 45, 0.5, 23, 13, 37, 0),6,None), # -6
-    # 'SIBN2':(PEG26_UNKNOWN,(36, 93, 38, 29, 26, 26, 9, 24, 4, 55, 1),8,None), #+6 -2
-    # 'SMLT':(LEG2_DRG,(45, 64, 45, 0.5, 23, 13, 37, 0),6,None), #
-    # 'SMLT2':(PEG26_UNKNOWN,(36, 93, 38, 29, 26, 26, 9, 24, 4, 55, 1),8,None), #
-    # 'SNGSP':(PEG4_UNIVERSAL,(38, 57, 29, 3, 27, 9, 'VG', 'mfi', 4),5,None), #+3 -4
-    # 'SNGSP2':(WEG3_BATYA,(40, 48, 32, 2.9, 1, 1, 1),4,None), #+2 +3
-    # 'SPBE':(PEG4_UNIVERSAL,(38, 57, 29, 3, 27, 9, 'VG', 'mfi', 4),5,None), #
-    # 'SPBE2':(WEG3_BATYA,(40, 48, 32, 2.9, 1, 1, 1),4,None), #
-    'T':(LEG2_LYNX,(None,None,53,1.5,32,0.5,0),1,None), #
+    'SBERP':(PEG11_KUSURUKEN,(None,None,36,38,45,10,'c',55),1,None), #
+    # 'SBERP2':(PEG26_UNKNOWN,(None,None,46,33,23,39,8,20,4,55,0),1,None), #
+    'SFIN':(PEG14_RENEGADE,(None,None,6,12,14,4,21,95),1,None), #
+    # 'SFIN2':(LEG2_HOTS,(None,None,31,3.0,7,29,12,0),1,None), #
+    # 'SGZH':(UEG6_DODO,(None,None,27,9,42,66),1,None),#
+    'SGZH2':(PEG14_RENEGADE,(None,None,26,35,20,4,48,30),1,None), #
+    'SIBN':(WEG3_BATYA,(None,None,18,1.3,0,1,1),1,None), #
+    # 'SIBN2':(LEG1_PHOGA,(None,None,2,1.1,18),1,None), #
+    'SMLT':(VEG1_VENUS,(None,None,0.2,0.8,0.1,0.7,1,1,1),1,None), #
+    # 'SMLT2':(SEG3_FORCE,(None,None,53,2.4,1,16,43,17,0.4),1,None), #
+    'SNGSP':(LEG2_FENNEC,(None,None,9,2.5,2,31,19,1.8,1),1,None), #
+    'SNGSP2':(WEG3_BATYA,(40, 48, 32, 2.9, 1, 1, 1),4,None), #+2 +3
+    # 'SNGSP2':(LEG1_CC,(None,None,18,4,55,11,21,1.4,0,0,3),1,None), #
+    # 'SPBE':(PEG11_KUSURUKEN,(None,None,53,8,29,37,'c',55),1,None), #
+    'SPBE2':(PEG18_BLAZE,(None,None,47,12,40,37,33,0,55),1,None), #
+    # 'T':(LEG2_LYNX,(None,None,53,1.5,32,0.5,0),1,None), #
     'T2':(PEG11_KUSURUKEN,(None,None,47,7,23,8,'c',55),1,None), #
-    # # 'TATN':(SEG3_FORCE,(125,98,55,1.8,3,2,15,25,0.7,),10,None), #
-    # # 'TATN2':(UEG6_VULTURE,(120,112,54,22,46,5,2,1,0.43,6,),10,None), #
-    # # 'TATNP':(SEG3_FORCE,(125,98,55,1.8,3,2,15,25,0.7,),10,None), #
-    # # 'TATNP2':(UEG6_VULTURE,(120,112,54,22,46,5,2,1,0.43,6,),10,None), #
-    # # 'VKCO':(LEG1_IRONANNY,(28, 25, 5, 2, 55, 7, 5),3,None), #+10
-    # # 'VKCO2':(LEG2_HOTS,(12, 24, 54, 2.2, 5, 20, 14, 0),2,None), # -10
-    # 'VTBR':(WEG3_BATYA,(43, 105, 28, 1.9, 1, 1, 1),9,None), #+4 +0
-    # 'VTBR2':(PEG14_RWDDCr,(38, 40, 17, 39, 2, 40, 55),4,None), # +1
+    # 'TATN':(LEG1_PIN,(20,None,48,3,39,3),2,None), #
+    'TATN2':(WEG4_PUPPY,(None,None,41,39,11),1,None), #
+    'TATNP':(LEG2_LYNX,(None,None,5,2.0,6,0.8,0),1,None), #
+    # 'TATNP2':(SEG3_FORCE,(None,None,14,3.0,3,9,53,43,0.5),1,None), #
+    # 'VKCO':(UEG4_PELICAN,(None,None,3,5,0.54),1,None), #
+    'VKCO2':(PEG11_KUSURUKEN,(None,None,21,13,47,20,'c',55),1,None), #
+    'VTBR':(WEG3_BATYA,(None,None,15,2.0,1,1,1),1,None), #
+    # 'VTBR2':(PEG4_UNIVERSAL,(None,None,23,13,12,36,'VG','s',6),1,None), #
     
 }
 # sleep_group = ()
