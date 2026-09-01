@@ -4,3 +4,5 @@ period_fractal_max = 5
 
 half_max_period = max_period // 2
 period2s_max = max_period//8
+
+# max_supertrend = max_period // 4

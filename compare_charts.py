@@ -18,10 +18,11 @@ from testing.test_constants import *
 df = simple_load_df(PATH_DF)
 
 # window = 60
-START = 60
+START = WINDOW
+START = 3374
 END = START + WINDOW
 WINDOW_SIZE = END - START
-COLUMNS = ['zigzag_peaks']  # <--- СПИСОК КОЛОНОК
+COLUMNS = ['supertrend']  # <--- СПИСОК КОЛОНОК
 # COLUMNS = []  # <--- СПИСОК КОЛОНОК
 draw_chart = True
 # draw_chart = False
@@ -38,9 +39,10 @@ COLORS_DF2 = ['red', 'orange']  # для zigzag и zigzag_peaks соответс
 def preprocessing(df):
     """Добавляем индикаторы в датафрейм"""
     df = df.copy()
-    df = add_percent_zz190826(df, percent_threshold=0.8)
-    df['zigzag_peaks'] = df['zigzag_peaks'].shift(1)
-    df['zigzag_peaks'] = df['zigzag_peaks'].ffill()
+    df = add_supertrend(df,18,3)
+    # df = add_percent_zz190826(df, percent_threshold=0.8)
+    # df['zigzag_peaks'] = df['zigzag_peaks'].shift(1)
+    # df['zigzag_peaks'] = df['zigzag_peaks'].ffill()
     # df = add_plus_delta_fc2(df)
     return df
 # ===== ФУНКЦИЯ ДЛЯ РИСОВАНИЯ ГРАФИКА =====

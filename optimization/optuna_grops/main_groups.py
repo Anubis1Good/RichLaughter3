@@ -170,27 +170,29 @@ group = (
             (max_period,),
         ]
     ),
-    # (
-    #     PEG18_DIABLO, 
-    #     [
-    #         (2, max_period, 1),
-    #         (3,10,1),
-    #         (2, max_period, 1),
-    #         (5, 40, 1),
-    #         (0,1),
-    #     ]
-    # ),
-    # (
-    #     PEG18_REXXAR, 
-    #     [
-    #         (2, max_period, 1),
-    #         (3,10,1),
-    #         (2, max_period, 1),
-    #         (5, 40, 1),
-    #         (5, 40, 1),
-    #         (0,1),
-    #     ]
-    # ),
+    (
+        PEG18_DIABLO2, 
+        [
+            (2, max_period, 1),
+            (0.5,4,0.1),
+            (2, max_period, 1),
+            (5, 40, 1),
+            (0,1),
+            (max_period, ),
+        ]
+    ),
+    (
+        PEG18_REXXAR2, 
+        [
+            (2, max_period, 1),
+            (0.5,4,0.1),
+            (2, max_period, 1),
+            (5, 40, 1),
+            (5, 40, 1),
+            (0,1),
+            (max_period, ),
+        ]
+    ),
     (
         PEG18_UTER, 
         [
@@ -203,18 +205,48 @@ group = (
             (0,1),
         ]
     ),
-    # (
-    #     PEG18_VARIAN, 
-    #     [
-    #         (2, max_period, 1),
-    #         (3,10,1),
-    #         (2, max_period, 1),
-    #         (5, 40, 1),
-    #         (5, 40, 1),
-    #         (2, max_period, 1),
-    #         (0,1),
-    #     ]
-    # ),
+    (
+        PEG18_UTER2, 
+        [
+            (2, max_period, 1),
+            (0.5,4,0.1),
+            (2, max_period, 1),
+            (5, 40, 1),
+            (5, 45, 1),
+            (5, 90, 1),
+            (2, half_max_period, 1),
+            (0,1),
+            (max_period, ),
+            (True,False ),
+            (True,False ),
+        ]
+    ),
+    (
+        PEG18_VARIAN2, 
+        [
+            (2, max_period, 1),
+            (0.5,4,0.1),
+            (2, max_period, 1),
+            (5, 40, 1),
+            (5, 40, 1),
+            (2, max_period, 1),
+            (0,1),
+            (max_period, ),
+        ]
+    ),
+    (
+        PEG18_ANDUIN, 
+        [
+            (2, max_period, 1),
+            (0.5,4,0.1),
+            (2, max_period, 1),
+            (5, 40, 1),
+            (5, 70, 1),
+            (2, half_max_period, 1),
+            (0,1),
+            (max_period, ),
+        ]
+    ),
     # (
     #     PEG19_JOHANNA, 
     #     [
@@ -511,15 +543,17 @@ group = (
         LEG1_PHOBO, 
         [
             (2, max_period, 1),
-            (0.5,3,0.1),
+            (0.5,4,0.1),
+            (max_period, ),
         ]
     ),
     (
         LEG1_PHOGA, 
         [
             (2, max_period, 1),
-            (0.5,3,0.1),
+            (0.5,4,0.1),
             (2, max_period, 1),
+            (max_period, ),
         ]
     ),
     (

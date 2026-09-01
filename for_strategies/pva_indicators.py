@@ -1,5 +1,7 @@
 import pandas as pd
 import numpy as np
+# Используем deque для хранения оконных данных
+from collections import deque
 
 def add_vodka_channel(df:pd.DataFrame,period=20):
     '''add top_mean, bottom_mean, avarege_mean'''
@@ -220,6 +222,7 @@ def add_pc_stair_fast(df: pd.DataFrame, n=3, period=20):
     
     df['stair'] = pd.Series(stair,df.index).ffill()
     return df
+
 
 def add_integrity_index(df:pd.DataFrame,period:int=14):
     """add 'ii'"""
@@ -814,3 +817,5 @@ def add_simple_dynamics_ma(df: pd.DataFrame, period: int = 20,
     
     df['sdm'] = sdm
     return df
+
+

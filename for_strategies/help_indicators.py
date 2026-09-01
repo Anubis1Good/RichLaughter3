@@ -80,3 +80,4 @@ def add_ideal_pos(df:pd.DataFrame):
     df['ideal_pos'] = df['ideal_enter'].ffill()
     df['ideal_enter'] = df['ideal_enter'].fillna(0)
     return df
+

@@ -1,8 +1,9 @@
 import numpy as np
 from strategies.BaseEG import BaseEG
-from for_strategies.classic_indicators import add_rsi,add_chop,add_awesome_oscillator,add_donchan_channel,add_adx
+from for_strategies.classic_indicators import add_rsi,add_chop,add_awesome_oscillator,add_donchan_channel,add_adx,add_supertrend
 from for_strategies.pva_indicators import add_kusuruken_channel,add_velcro_indicator,add_quantile_params,add_benefit,get_all_enter_exit_DC,get_all_lup,add_pc_stair_fast,add_integrity_index,add_assessment_motion_index,add_hope_channel,add_cascade_channel
 from for_strategies.other_indicators import add_vangerchik
+from for_strategies.fix_params import fix_supertrend_params
 
 class PEG11_KUSURUKEN(BaseEG):
     """stop=None, take=None, period=55, period2=10, period3=20, threshold=20, kind_enter='hl',max_period=55 \n
@@ -530,15 +531,15 @@ class PEG17_PHOENIX(BaseEG):
         
         return None
 
-# Написать 18 версии на супертернде или исправить stairs
-class PEG18_REXXAR(BaseEG):
-    """stop=None, take=None, period=100, n_stairs=3, period2=10, threshold_enter=40, threshold_exit=20, use_stop=0"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=10, n_stairs=3, period2=10, threshold_enter=40, threshold_exit=20, use_stop=0):
+
+class PEG18_REXXAR2(BaseEG):
+    """stop=None, take=None, period=10, mult_st=3, period_st=10, threshold_enter=40, threshold_exit=20, use_stop=0,max_period=55"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=10, mult_st=1.5, period_st=55, threshold_enter=40, threshold_exit=20, use_stop=0,max_period=55):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
         self.period = period
-        self.n_stairs = n_stairs
-        self.period2 = period2
+        self.mult_st = mult_st
+        self.period_st = fix_supertrend_params(period_st,mult_st,max_period)
         self.threshold_enter = threshold_enter
         self.threshold_exit = threshold_exit
         self.use_stop = use_stop
@@ -547,7 +548,8 @@ class PEG18_REXXAR(BaseEG):
     def preprocessing(self, tdata):
         pdata = {}
         df = tdata['chart']
-        df = add_pc_stair_fast(df, self.n_stairs, self.period2)
+        # df = add_pc_stair_fast(df, self.n_stairs, self.period2)
+        df = add_supertrend(df,self.period_st,self.mult_st)
         df = add_donchan_channel(df, self.period)
         df = add_rsi(df, self.period)
         df = self.add_slice_df(df)
@@ -555,7 +557,7 @@ class PEG18_REXXAR(BaseEG):
         return pdata
     
     def _get_action_from_row(self, row):
-        can_long = row['close'] > row['stair']
+        can_long = row['in_uptrend']
         nearest_long = row['high'] - row['close'] > row['close'] - row['low']
         
         if row['low'] <= row['min_hb']:
@@ -633,14 +635,77 @@ class PEG18_UTER(BaseEG):
                 return 'open_short'
         
         return None
-
-class PEG18_DIABLO(BaseEG):
-    """stop=None, take=None, period=55, n_stairs=3, period2=10, threshold=30,use_stop=0"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=55, n_stairs=3, period2=10, threshold=30,use_stop=0):
+    
+class PEG18_UTER2(BaseEG):
+    """stop=None, take=None, period_st=55, mult_st=3, period2=10, threshold_enter=30, threshold_exit=40, threshold_adx=40, period_adx=30, use_stop=0, max_period=55, wddcr_trend=False, wddcr_flat=True"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_st=55, mult_st=3, period2=10, threshold_enter=30, threshold_exit=40, threshold_adx=40, period_adx=30, use_stop=0, max_period=55, wddcr_trend=True, wddcr_flat=True):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
-        self.period = period
-        self.n_stairs = n_stairs
+        self.mult_st = mult_st
+        self.period_st = fix_supertrend_params(period_st,mult_st,max_period)
+        self.period2 = period2
+        self.period_adx = period_adx
+        self.threshold_adx = threshold_adx
+        self.threshold_enter = threshold_enter
+        self.threshold_exit = threshold_exit
+        self.use_stop = use_stop
+        self.wddcr_trend = wddcr_trend
+        self.wddcr_flat = wddcr_flat
+        self.problems = 'Mcfly'
+
+    def preprocessing(self, tdata):
+        pdata = {}
+        df = tdata['chart']
+        # df = add_pc_stair_fast(df, self.n_stairs, self.period)
+        df = add_supertrend(df,self.period_st,self.mult_st)
+        df = add_donchan_channel(df, self.period2)
+        df = add_rsi(df, self.period2)
+        df = add_adx(df, self.period_adx)
+        df = self.add_slice_df(df)
+        pdata['chart'] = df
+        return pdata
+    
+    def _get_action_from_row(self, row):
+        nearest_long = row['high'] - row['close'] > row['close'] - row['low']
+        if row['adx'] > self.threshold_adx:
+            can_long = row['in_uptrend']
+            
+            if row['low'] <= row['min_hb'] and nearest_long:
+                long_cond = row['rsi'] < self.threshold_enter if self.wddcr_trend else True
+                if can_long and long_cond:
+                    return 'open_long'
+                if row['rsi'] < self.threshold_exit:
+                    return 'close_short'
+            
+            if row['high'] >= row['max_hb'] and not nearest_long:
+                short_cond = row['rsi'] > 100 - self.threshold_exit if self.wddcr_trend else True
+                if not can_long and short_cond:
+                    return 'open_short'
+                if row['rsi'] > 100 - self.threshold_exit:
+                    return 'close_long'
+            
+            if self.use_stop:
+                if can_long:
+                    return 'close_short'
+                else:
+                    return 'close_long'
+        else:
+            long_cond = row['rsi'] < self.threshold_enter if self.wddcr_flat else True
+            if row['low'] <= row['min_hb'] and nearest_long and long_cond:
+                return 'open_long'
+            short_cond = row['rsi'] > 100 - self.threshold_exit if self.wddcr_flat else True
+            if row['high'] >= row['max_hb'] and not nearest_long and short_cond:
+                return 'open_short'
+        
+        return None
+
+class PEG18_DIABLO2(BaseEG):
+    """stop=None, take=None, period_st=55, mult_st=3, period2=10, threshold=30,use_stop=0, max_period=55"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_st=55, mult_st=3, period2=10, threshold=30,use_stop=0, max_period=55):
+        super().__init__(symbol, price_step, mult_ps, mode, stop, take)
+        self.needs_info = {'chart': self.symbol}
+        self.mult_st = mult_st
+        self.period_st = fix_supertrend_params(period_st,mult_st,max_period)
         self.period2 = period2
         self.threshold = threshold
         self.use_stop = use_stop
@@ -649,7 +714,7 @@ class PEG18_DIABLO(BaseEG):
     def preprocessing(self, tdata):
         pdata = {}
         df = tdata['chart']
-        df = add_pc_stair_fast(df, self.n_stairs, self.period)
+        df = add_supertrend(df,self.period_st,self.mult_st)
         df = add_donchan_channel(df, self.period2)
         df = add_rsi(df, self.period2)
         df = self.add_slice_df(df)
@@ -657,7 +722,7 @@ class PEG18_DIABLO(BaseEG):
         return pdata
     
     def _get_action_from_row(self, row):
-        can_long = row['close'] > row['stair']
+        can_long = row['in_uptrend']
         nearest_long = row['high'] - row['close'] > row['close'] - row['low']
         
         if row['close'] <= row['avarege'] and nearest_long and can_long:
@@ -677,13 +742,13 @@ class PEG18_DIABLO(BaseEG):
             else:
                 return 'close_long'
         
-class PEG18_VARIAN(BaseEG):
-    """stop=None, take=None, period=55, n_stairs=3, period2=10, threshold=30, threshold_ii=25, period_ii=10, use_stop=0)"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=10, n_stairs=3, period2=10, threshold=30, threshold_ii=25, period_ii=10, use_stop=0):
+class PEG18_VARIAN2(BaseEG):
+    """stop=None, take=None, period_st=55, mult_st=3, period2=10, threshold=30, threshold_ii=25, period_ii=10, use_stop=0, max_period=55"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_st=55, mult_st=3, period2=10, threshold=30, threshold_ii=25, period_ii=10, use_stop=0, max_period=55):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
-        self.period = period
-        self.n_stairs = n_stairs
+        self.mult_st = mult_st
+        self.period_st = fix_supertrend_params(period_st,mult_st,max_period)
         self.period2 = period2
         self.threshold = threshold
         self.threshold_ii = threshold_ii
@@ -694,7 +759,7 @@ class PEG18_VARIAN(BaseEG):
     def preprocessing(self, tdata):
         pdata = {}
         df = tdata['chart']
-        df = add_pc_stair_fast(df, self.n_stairs, self.period)
+        df = add_supertrend(df,self.period_st,self.mult_st)
         df = add_donchan_channel(df, self.period2)
         df = add_rsi(df, self.period2)
         df = add_integrity_index(df, self.period_ii)
@@ -703,7 +768,7 @@ class PEG18_VARIAN(BaseEG):
         return pdata
     
     def _get_action_from_row(self, row):
-        can_long = row['close'] > row['stair']
+        can_long = row['in_uptrend']
         nearest_long = row['high'] - row['close'] > row['close'] - row['low']
         
         if nearest_long and can_long:
@@ -714,6 +779,58 @@ class PEG18_VARIAN(BaseEG):
         
         if not nearest_long and not can_long:
             if row['close'] >= row['avarege'] and row['ii'] < -self.threshold_ii:
+                return 'open_short'
+            if row['high'] >= row['max_hb']:
+                return 'open_short'
+        
+        if row['rsi'] < self.threshold and row['low'] <= row['min_hb']:
+            return 'close_short'
+        
+        if row['rsi'] > 100 - self.threshold and row['high'] >= row['max_hb']:
+            return 'close_long'
+        if self.use_stop:
+            if can_long:
+                return 'close_short'
+            else:
+                return 'close_long'
+            
+class PEG18_ANDUIN(BaseEG):
+    """stop=None, take=None, period_st=55, mult_st=3, period2=10, threshold=30, threshold_adx=30, period_adx=10, use_stop=0, max_period=55"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_st=55, mult_st=3, period2=10, threshold=30, threshold_adx=30, period_adx=10, use_stop=0, max_period=55):
+        super().__init__(symbol, price_step, mult_ps, mode, stop, take)
+        self.needs_info = {'chart': self.symbol}
+        self.mult_st = mult_st
+        self.period_st = fix_supertrend_params(period_st,mult_st,max_period)
+        self.period2 = period2
+        self.threshold = threshold
+        self.threshold_adx = threshold_adx
+        self.use_stop = use_stop
+        self.period_adx = period_adx
+        self.problems = 'Mcfly'
+
+    def preprocessing(self, tdata):
+        pdata = {}
+        df = tdata['chart']
+        df = add_supertrend(df,self.period_st,self.mult_st)
+        df = add_donchan_channel(df, self.period2)
+        df = add_rsi(df, self.period2)
+        df = add_adx(df, self.period_adx)
+        df = self.add_slice_df(df)
+        pdata['chart'] = df
+        return pdata
+    
+    def _get_action_from_row(self, row):
+        can_long = row['in_uptrend']
+        nearest_long = row['high'] - row['close'] > row['close'] - row['low']
+        
+        if nearest_long and can_long:
+            if row['close'] <= row['avarege'] and row['adx'] > self.threshold_adx:
+                return 'open_long'
+            if row['low'] <= row['min_hb']:
+                return 'open_long'
+        
+        if not nearest_long and not can_long:
+            if row['close'] >= row['avarege'] and row['adx'] > self.threshold_adx:
                 return 'open_short'
             if row['high'] >= row['max_hb']:
                 return 'open_short'

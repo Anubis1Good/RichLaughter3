@@ -3,6 +3,7 @@ from strategies.BaseEG import BaseEG
 from for_strategies.classic_indicators import add_rsi,add_rsi_tw,add_williams_r,add_mfi,add_ultimate_oscillator,add_cmo,add_cci,add_stochastic,add_roc,add_fractals,add_bollinger,add_chop,add_supertrend,add_sma
 from for_strategies.pva_indicators import add_integrity_index,add_mean_on_fractals,add_average_fractals,add_ext_on_fractals
 from for_strategies.vsa_indicators import add_dvsai,add_cdvsai
+from for_strategies.fix_params import fix_supertrend_params
 
 class LEG1_CC(BaseEG):
     """stop=None, take=None, period=15, period_fractal=10, period_max=55, solution=8,period_avfr=30,mult=2,use_stop=1,use_ps=1,period2s = 3 \n
@@ -344,11 +345,11 @@ class LEG1_IRONANNY(BaseEG):
         
 #хз что за супертренд, надо проверять, но нейронка высоко оценила стратегию 
 class LEG1_PHOGA(BaseEG):
-    """stop=None, take=None, period=10, multiplier=3, period_mvol=10"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=10, multiplier=3, period_mvol=10):
+    """stop=None, take=None, period=10, multiplier=3, period_mvol=10, max_period=55"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=10, multiplier=3, period_mvol=10, max_period=55):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
-        self.period = period
+        self.period= fix_supertrend_params(period,multiplier,max_period)
         self.multiplier = multiplier
         self.period_mvol = period_mvol
         self.type_eg = 1
@@ -436,11 +437,11 @@ class LEG1_BORSCH(BaseEG):
         return None
     
 class LEG1_PHOBO(BaseEG):
-    """stop=None, take=None, period=10, multiplier=3"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=10, multiplier=3):
+    """stop=None, take=None, period=10, multiplier=3, max_period=55"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=10, multiplier=3, max_period=55):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
-        self.period = period
+        self.period= fix_supertrend_params(period,multiplier,max_period)
         self.multiplier = multiplier
         self.type_eg = 1
         self.problems = 'Mcfly'

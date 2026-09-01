@@ -882,3 +882,4 @@ def add_supertrend(df: pd.DataFrame, period: int = 10, multiplier: float = 3.0) 
     df['in_uptrend'] = in_uptrend
     
     return df
+

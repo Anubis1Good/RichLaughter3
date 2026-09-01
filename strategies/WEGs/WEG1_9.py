@@ -105,32 +105,7 @@ class WEG7_PARADOX(BaseEG):
             return 'open_long'
         if row['dvsai'] > row['dvsaiu']:  
             return 'open_short'
-        
-class WEG3_DS(BaseEG):
-    """stop=None, take=None, period=20, mult_spred = 1"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=20, mult_spred = 1):
-        super().__init__(symbol, price_step, mult_ps, mode, stop, take)
-        self.needs_info = {'chart': self.symbol}
-        self.period = period
-        self.mult_spred = mult_spred
-
-    def preprocessing(self, tdata):
-        pdata = {}
-        df = tdata['chart']
-        df['spread'] = df['high'] - df['low']
-
-        # Вычисление среднего объема и спреда
-        df['avg_volume'] = df['volume'].rolling(window=self.period).mean()
-        df['avg_spread'] = df['spread'].rolling(window=self.period).mean()
-
-        # Генерация сигналов
-        df['signal'] = 0  # 0 = нет сигнала, 1 = покупка, -1 = продажа
-        df.loc[(df['volume'] > df['avg_volume']) & (df['spread'] < self.mult_spred * df['avg_spread']) & (df['close'] > df['open']), 'signal'] = 1  # Покупка
-        df.loc[(df['volume'] > df['avg_volume']) & (df['spread'] < self.mult_spred * df['avg_spread']) & (df['close'] < df['open']), 'signal'] = -1  # Продажа
-        df = self.add_slice_df(df)
-        pdata['chart'] = df
-        return pdata
-    
+            
       
 class WEG3_BATYA(BaseEG):
     """stop=None, take=None, period=20, mult_spred = 2, sign_vol=0, sign_spred=0,sign_dir=0"""
@@ -165,3 +140,6 @@ class WEG3_BATYA(BaseEG):
             return 'open_long'
         if row['signal'] == -1:
             return 'open_short'
+        
+
+# Нужна смесь WEG3/4 c PEG18 на st

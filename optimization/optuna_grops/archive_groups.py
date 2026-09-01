@@ -23,12 +23,6 @@ group = (
             (0.1,max_percent_threshold,0.1),
         ]
     ),
-    (
-        WEG3_DS, 
-        [
-            (2, max_period, 1),
-            (0.5, 3, 0.1),
-        ]
-    ),
+
 
 )
