@@ -5,6 +5,7 @@ from for_strategies.pva_indicators import add_kusuruken_channel,add_velcro_indic
 from for_strategies.other_indicators import add_vangerchik
 from for_strategies.fix_params import fix_supertrend_params
 
+# скорее всего сильно чувствтителен к смене тренда
 class PEG11_KUSURUKEN(BaseEG):
     """stop=None, take=None, period=55, period2=10, period3=20, threshold=20, kind_enter='hl',max_period=55 \n
     kind_enter -> hl | c
