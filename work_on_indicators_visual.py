@@ -14,12 +14,12 @@ from testing.test_constants import *
 # PATH_DF = '_data_for_tests\_before_opt\ALRS_5_1787155697.parquet'
 
 df = simple_load_df(PATH_DF)
-# df = df.iloc[-300:]
+df = df.iloc[-60:]
 period=10
 multiplier=3
 
-
-df = add_supertrend(df)
+df = add_donchan_channel(df,20)
+df = add_assessment_motion_index(df,20,20)
 
 
 # df['stair_pc'] = df['stair']
@@ -31,7 +31,7 @@ fig = draw_bars_chart_wo_vol(df)
 # plt.plot(df['stairl'])
 # plt.plot(df['stairh'])
 # plt.plot(df['stair_pc_windowed'],color='blue')
-# plt.plot(df['stair'],color='green')
-plt.plot(df['supertrend'],color='black')
+plt.plot(df['ami_filter'],color='green')
+plt.plot(df['ami'],color='black')
 # draw_wzp(df)
 plt.show()

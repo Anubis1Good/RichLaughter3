@@ -307,8 +307,10 @@ def add_static_channel(df:pd.DataFrame,period=60):
 
 #check thos
 def add_assessment_motion_index(df:pd.DataFrame,period=100,period_filter=50):
-    """add 'ami', 'ami_filter'"""
-    df['ami'] = (((df['avarege'].diff().rolling(period,1).sum())/ np.abs(df['avarege'].diff()).rolling(period).sum())*100).round(2)
+    """add 'ami', 'ami_filter' \n
+    оценка движения. насколько оно было однонаправленным.
+    измеряется о -100 до 100"""
+    df['ami'] = (((df['avarege'].diff().rolling(period,1).sum())/ np.abs(df['avarege'].diff()).rolling(period).sum())*100)
     df['ami_filter'] = df['ami'].rolling(period_filter).mean()
     return df
 

@@ -247,6 +247,19 @@ group = (
             (max_period, ),
         ]
     ),
+    (
+        PEG19_ANUBARAK, 
+        [
+            (2, max_period, 1),
+            (2, max_period, 1),
+            (2, max_period, 1),
+            (5, 40, 1),
+            (5, 50, 1),
+            (0, 100, 1),
+            (0,1),
+            (max_period, ),
+        ]
+    ),
     # (
     #     PEG19_JOHANNA, 
     #     [

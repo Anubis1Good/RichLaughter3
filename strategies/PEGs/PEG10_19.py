@@ -3,7 +3,7 @@ from strategies.BaseEG import BaseEG
 from for_strategies.classic_indicators import add_rsi,add_chop,add_awesome_oscillator,add_donchan_channel,add_adx,add_supertrend
 from for_strategies.pva_indicators import add_kusuruken_channel,add_velcro_indicator,add_quantile_params,add_benefit,get_all_enter_exit_DC,get_all_lup,add_pc_stair_fast,add_integrity_index,add_assessment_motion_index,add_hope_channel,add_cascade_channel
 from for_strategies.other_indicators import add_vangerchik
-from for_strategies.fix_params import fix_supertrend_params
+from for_strategies.fix_params import fix_supertrend_params,fix_two_periods
 
 # скорее всего сильно чувствтителен к смене тренда
 class PEG11_KUSURUKEN(BaseEG):
@@ -849,23 +849,20 @@ class PEG18_ANDUIN(BaseEG):
 
 class PEG18_BLAZE(BaseEG):
     """stop=None, take=None, period=55, period2=10, period3=55, threshold_enter=40, threshold_exit=20, use_stop=1, max_period=55"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=55, period2=10, period3=55, threshold_enter=40, threshold_exit=20, use_stop=1, max_period=55):
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=75, period2=75, period3=75, threshold_enter=40, threshold_exit=20, use_stop=1, max_period=55):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
         self.period2 = period2
         self.threshold_enter = threshold_enter
         self.threshold_exit = threshold_exit
         self.use_stop = use_stop
-        max_total = (max_period // 3) * 2
-        total = period + period3
-
-        if total > max_total:
-            ratio = max_total / total
-            self.period = int(period * ratio)
-            self.period3 = int(period3 * ratio)
-        else:
-            self.period = period
-            self.period3 = period3
+        self.period,self.period3 = fix_two_periods(period,period3,max_period)
+        total_periods = self.period + self.period2 + self.period3
+        if total_periods > max_period:
+            ratio = max_period / total_periods
+            self.period = int(self.period * ratio)
+            self.period2 = int(self.period2 * ratio)
+            self.period3 = int(self.period3 * ratio)
 
     def preprocessing(self, tdata):
         pdata = {}
@@ -900,6 +897,47 @@ class PEG18_BLAZE(BaseEG):
                 return 'close_long'
         
         return None
+
+class PEG19_ANUBARAK(BaseEG):
+    """stop=None, take=None,period_ami1=10,period_dc=10,period_rsi=10,threshold_enter=30,threshold_exit=40,threshold_ami=50,use_stop=0, max_period=55"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None,period_ami1=10,period_dc=10,period_rsi=10,threshold_enter=30,threshold_exit=40,threshold_ami=50,use_stop=0, max_period=55):
+        super().__init__(symbol, price_step, mult_ps, mode, stop, take)
+        self.period_dc, self.period_ami1 = fix_two_periods(period_dc,period_ami1,max_period)
+        self.period_rsi = period_rsi
+        self.threshold_enter = threshold_enter
+        self.threshold_exit = threshold_exit
+        self.threshold_ami = threshold_ami
+        self.use_stop = use_stop
+
+    def preprocessing(self, tdata):
+        pdata = {}
+        df = tdata['chart']
+        df = add_donchan_channel(df, self.period_dc)
+        df = add_assessment_motion_index(df, self.period_ami1, self.period_ami1)
+        df = add_rsi(df, self.period_rsi)
+        df = self.add_slice_df(df)
+        pdata['chart'] = df
+        return pdata
+
+    def _get_action_from_row(self, row):
+        can_long = row['ami'] > -self.threshold_ami
+        can_short = row['ami'] < self.threshold_ami
+        nearest_long = row['high'] - row['close'] > row['close'] - row['low'] 
+        if row['low'] <= row['min_hb'] and nearest_long:
+            if can_long and row['rsi'] < self.threshold_enter:
+                return 'open_long'
+            if row['rsi'] < self.threshold_exit:
+                return 'close_short'
+        if row['high'] >= row['max_hb'] and not nearest_long:
+            if can_short and row['rsi'] > 100-self.threshold_enter:
+                return 'open_short'
+            if row['rsi'] > 100-self.threshold_exit:
+                return 'close_long'
+        if self.use_stop:
+            if not can_short:
+                return 'close_short'
+            if not can_long:
+                return 'close_long'        
 
 class PEG19_YREL(BaseEG):
     """stop=None, take=None, period=100, n_stairs=3, period2=10, threshold_enter=40, threshold_exit=20, shift=10, use_stop=1"""
