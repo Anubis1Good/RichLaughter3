@@ -17,7 +17,7 @@ symbol = PATH_DF.split('\\')[-1].split('_')[0]
 # ws = [UEG4_FALCON,],
 
 # ws = (PEG17_PHOENIX,(14, 15, 35, 9, 46, 28, 10, 0, 55),2,None)
-ws = (PEG18_BLAZE,[])
+ws = (LEG1_CC2,[])
 # ws = (DebugMean,[])
 cegt = CheckEGTrader(
     PATH_DF,
@@ -37,7 +37,7 @@ cegt.check_strategy_faster()
 # cegt.ws.save_to_csv("faster_actions.csv")
 # cegt.ws.save_to_csv("faster_means.csv")
 cegt.print_statistics()
-cegt.plot_chart_and_sequtity()
+# cegt.plot_chart_and_sequtity()
 ef_fast = cegt.trade_data['step_eq_fee']
 
 # cegt.plot_chart_and_sequtity()

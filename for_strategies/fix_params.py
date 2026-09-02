@@ -20,3 +20,12 @@ def fix_two_periods(period1,period2,max_period):
         period1 = int(period1 * ratio)
         period2 = int(period2 * ratio)
     return period1,period2
+
+def fix_two_periods_hm(period1,period2,max_period):
+    total = period1 + period2
+
+    if total > max_period:
+        ratio = max_period / total
+        period1 = int(period1 * ratio)
+        period2 = int(period2 * ratio)
+    return period1,period2

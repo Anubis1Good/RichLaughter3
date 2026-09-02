@@ -125,12 +125,13 @@ def add_rsi(df:pd.DataFrame, period=14,kind='close'):
     rs = gain / loss
     
     # Вычисляем RSI
-    df['rsi'] = (100 - (100 / (1 + rs))).round(2)
+    df['rsi'] = (100 - (100 / (1 + rs)))
     
     return df
 
 def add_rsi_tw(df:pd.DataFrame, period=14, kind='close'):
     """
+    Слегка Mcfly
     Добавляет колонку 'rsi_tw' в DataFrame с данными о ценах.
     
     :param df: DataFrame с колонкой 'close' (цены закрытия)
@@ -153,7 +154,7 @@ def add_rsi_tw(df:pd.DataFrame, period=14, kind='close'):
     rs = avg_gain / avg_loss
     
     # Вычисляем RSI
-    df['rsi_tw'] = (100 - (100 / (1 + rs))).round(2)
+    df['rsi_tw'] = (100 - (100 / (1 + rs)))
     
     return df
 
@@ -183,8 +184,8 @@ def add_stochastic(df:pd.DataFrame, k_period=14, d_period=3,kind='close'):
     """add 'lowest_so','highest_so','%k','%d' """
     df['lowest_so'] = df[kind].rolling(window=k_period).min()
     df['highest_so'] = df[kind].rolling(window=k_period).max()
-    df['%k'] = (100 * ((df[kind] - df['lowest_so']) / (df['highest_so'] - df['lowest_so']))).round(2)
-    df['%d'] = df['%k'].rolling(window=d_period).mean().round(2)
+    df['%k'] = (100 * ((df[kind] - df['lowest_so']) / (df['highest_so'] - df['lowest_so'])))
+    df['%d'] = df['%k'].rolling(window=d_period).mean()
     return df
 
 def add_atr(df:pd.DataFrame, period=5,kind='close'):
@@ -243,7 +244,7 @@ def add_adx(df:pd.DataFrame,adx_period=14):
 
     # Расчет ADX
     df['dx'] = (abs(df['plus_di'] - df['minus_di']) / (df['plus_di'] + df['minus_di'])) * 100
-    df['adx'] = df['dx'].rolling(window=adx_period, min_periods=adx_period).mean().round(2)
+    df['adx'] = df['dx'].rolling(window=adx_period, min_periods=adx_period).mean()
     cols_to_drop = ['tr', 'plus_dm', 'minus_dm', 'tr_smooth', 
                     'plus_dm_smooth', 'minus_dm_smooth', 
                     'plus_di', 'minus_di', 'dx']
@@ -322,7 +323,7 @@ def add_cci(df:pd.DataFrame, period=20, kind='close'):
     
     # Вычисляем CCI
     df['cci'] = (typical_price - sma) / (0.015 * mean_deviation)
-    df['cci'] = df['cci'].round(2)
+    df['cci'] = df['cci']
 
     return df
 
@@ -341,7 +342,7 @@ def add_williams_r(df:pd.DataFrame, period=14, kind='close'):
     
     # Вычисляем Williams %R
     df['williams_r'] = -100 * (highest_high - df[kind]) / (highest_high - lowest_low)
-    df['williams_r'] = df['williams_r'].round(2)
+    df['williams_r'] = df['williams_r']
     
     return df
 
@@ -372,7 +373,7 @@ def add_mfi(df:pd.DataFrame, period=14):
     
     # Вычисляем MFI
     df['mfi'] = 100 - (100 / (1 + money_flow_ratio))
-    df['mfi'] = df['mfi'].round(2)
+    df['mfi'] = df['mfi']
     return df
 
 def add_awesome_oscillator(df:pd.DataFrame, short_period=5, long_period=34):
@@ -451,7 +452,7 @@ def add_ultimate_oscillator(df:pd.DataFrame, short_period=7, medium_period=14, l
     
     # Вычисляем Ultimate Oscillator
     df['ultimate_oscillator'] = (4 * short_component + 2 * medium_component + long_component) / 7 * 100
-    df['ultimate_oscillator'] = df['ultimate_oscillator'].round(2)
+    df['ultimate_oscillator'] = df['ultimate_oscillator']
 
     return df
 
@@ -477,7 +478,7 @@ def add_cmo(df:pd.DataFrame, period=14, kind='close'):
     
     # Вычисляем CMO
     df['cmo'] = ((sum_gain - sum_loss) / (sum_gain + sum_loss)) * 100
-    df['cmo'] = df['cmo'].round(2)
+    df['cmo'] = df['cmo']
     return df
 
 

@@ -488,13 +488,14 @@ group = (
     ),
 
     (
-        LEG1_BIBI, 
+        LEG1_BIBI2, 
         [
             (2, max_period, 1),
-            (3,period_fractal_max,1),
+            (2, max_period, 1),
             ('cmo','rsi','rsi_tw','williams_r','mfi','ultimate_oscillator','cci','%d'),
             (max_period, ),
             (2,period2s_max,1),
+            (0.01, 0.4, 0.01),
         ]
     ),
     (
@@ -505,37 +506,40 @@ group = (
         ]
     ),
     (
-        LEG1_CC, 
+        LEG1_CC2, 
         [
             (2, max_period, 1),
-            (2, period_fractal_max, 1),
-            (max_period, ),
-            (2, 14, 1),
             (2, max_period, 1),
+            (max_period, ),
+            (2, 13, 1),
             (0.5, 3, 0.1),
             (0, 1),
             (0, 1),
             (2,period2s_max,1),
+            (0.01, 0.4, 0.01),
         ]
     ),
     (
-        LEG1_IGOGOSHA, 
+        LEG1_IGOGOSHA2, 
         [
             (2, max_period, 1),
-            (2,period_fractal_max,1),
-            (max_period, ),
+            (2, max_period, 1),
             ('cmo','rsi','rsi_tw','williams_r','mfi','ultimate_oscillator','cci','%d'),
             (2,period2s_max,1),
+            (0.01, 0.4, 0.01),
+            (2, max_period, 1),
+            (max_period, ),
         ]
     ),
     (
-        LEG1_IRONANNY, 
+        LEG1_IRONANNY2, 
         [
             (2, max_period, 1),
-            (2,period_fractal_max,1),
+            (2, max_period, 1),
             (max_period, ),
-            (2,7,1),
+            (2,8,1),
             (2,period2s_max,1),
+            (0.01, 0.4, 0.01),
         ]
     ),
     (

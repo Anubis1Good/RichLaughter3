@@ -642,6 +642,13 @@ def add_quantile_params(df:pd.DataFrame,period:int=10,kind:str='rsi',quantile:fl
     df['bottom_q'] = roll.quantile(quantile)
     return df
 
+def add_ext_params(df:pd.DataFrame,period:int=10,kind:str='rsi'):
+    """add 'top_q','bottom_q'"""
+    roll = df[kind].rolling(period)
+    df['top_ext'] = roll.max()
+    df['bottom_ext'] = roll.min()
+    return df
+
 def add_bbi(df:pd.DataFrame,period=20,kind='close',multiplier=2):
     "add 'bbi' индекс перепроданности по типу RSI"
     df = df.copy()

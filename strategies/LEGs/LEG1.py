@@ -1,26 +1,24 @@
 import numpy as np
 from strategies.BaseEG import BaseEG
 from for_strategies.classic_indicators import add_rsi,add_rsi_tw,add_williams_r,add_mfi,add_ultimate_oscillator,add_cmo,add_cci,add_stochastic,add_roc,add_fractals,add_bollinger,add_chop,add_supertrend,add_sma
-from for_strategies.pva_indicators import add_integrity_index,add_mean_on_fractals,add_average_fractals,add_ext_on_fractals
+from for_strategies.pva_indicators import add_integrity_index,add_mean_on_fractals,add_average_fractals,add_ext_on_fractals,add_quantile_params,add_ext_params
 from for_strategies.vsa_indicators import add_dvsai,add_cdvsai
-from for_strategies.fix_params import fix_supertrend_params
+from for_strategies.fix_params import fix_supertrend_params,fix_two_periods_hm
 
-class LEG1_CC(BaseEG):
-    """stop=None, take=None, period=15, period_fractal=10, period_max=55, solution=8,period_avfr=30,mult=2,use_stop=1,use_ps=1,period2s = 3 \n
-    Crisis Counter 15 features"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=15, period_fractal=10, period_max=55, solution=8,period_avfr=30,mult=2,use_stop=1,use_ps=1,period2s = 3):
+class LEG1_CC2(BaseEG):
+    """stop=None, take=None, period=15, period_q=10, max_period=55, solution=8,mult=2,use_stop=1,use_ps=1,period2s = 3, quantile=0.3 \n
+    Crisis Counter 13 features"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=15, period_q=10, max_period=55, solution=8,mult=2,use_stop=1,use_ps=1,period2s = 3, quantile=0.3):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart':self.symbol}
-        self.period = period
         self.solution = solution
-        self.period_fractal = period_fractal
-        self.period_max = period_max
+        self.period,self.period_q = fix_two_periods_hm(period,period_q,max_period)
+        self.quantile = quantile
         self.period2s = period2s
         self.mult = mult
         self.use_stop = use_stop
         self.use_ps = use_ps
-        self.period_avfr = period_avfr
-        self.problems = 'Mcfly'
+        self.inds = ('cmo', 'rsi', 'rsi_tw', 'williams_r', 'mfi', 'ultimate_oscillator', 'cci', '%d')
 
     def preprocessing(self, tdata):
         pdata = {}
@@ -35,28 +33,23 @@ class LEG1_CC(BaseEG):
         df = add_stochastic(df,self.period,self.period2s)
         df = add_roc(df,self.period)
         df = add_integrity_index(df,self.period)
-        df = add_fractals(df,self.period_fractal)
-        inds = ('cmo','rsi','rsi_tw','williams_r','mfi','ultimate_oscillator','cci','%d','roc','ii')
         df['oversold'] = 0
         df['overbought'] = 0
-        for i, ind in enumerate(inds):
-            df = add_mean_on_fractals(df,self.period_max,ind,self.period_fractal)
-            df['oversold'] += df[ind] < df['bottom_mean']
-            df['overbought'] += df[ind] > df['top_mean']
+        for i, ind in enumerate(self.inds):
+            df = add_quantile_params(df,self.period_q,ind,self.quantile)
+            df['oversold'] += df[ind] < df['bottom_q']
+            df['overbought'] += df[ind] > df['top_q']
         df = add_bollinger(df,self.period)
         df['oversold'] += df['close'] < df['bbd']
         df['overbought'] += df['close'] > df['bbu']
-        df = add_average_fractals(df,self.period_avfr,self.period_fractal)
-        df['oversold'] += df['close'] <= df['ave_down']
-        df['overbought'] += df['close'] >= df['ave_up']
         df = add_dvsai(df,self.period,self.mult)
         df['oversold'] += df['dvsai'] < df['dvsaid']
         df['overbought'] += df['dvsai'] > df['dvsaiu']
         df = add_cdvsai(df,self.period)
         df = add_rsi(df,self.period,'cum_dvsai')
-        df = add_mean_on_fractals(df,self.period_max,'rsi',self.period_fractal)
-        df['oversold'] += df['rsi'] < df['bottom_mean']
-        df['overbought'] += df['rsi'] > df['top_mean']
+        df = add_quantile_params(df,self.period_q,'rsi',self.quantile)
+        df['oversold'] += df['rsi'] < df['bottom_q']
+        df['overbought'] += df['rsi'] > df['top_q']
         
         df = self.add_slice_df(df)
         pdata['chart'] = df
@@ -185,20 +178,17 @@ class LEG1_PIN(BaseEG):
         
         return None
 
-# Mcfly problem
-class LEG1_BIBI(BaseEG):
-    """stop=None, take=None, period=15, period_fractal=10, kind='rsi',max_period=55,period2s = 3 \n
+class LEG1_BIBI2(BaseEG):
+    """stop=None, take=None, period=15, period_q=10, kind='rsi',max_period=55,period2s = 3, quantile=0.3 \n
     'cmo','rsi','rsi_tw','williams_r','mfi','ultimate_oscillator','cci','%d'
     """
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=15, period_fractal=10, kind='rsi',max_period=55,period2s = 3):
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=15, period_q=10, kind='rsi',max_period=55,period2s = 3, quantile=0.3):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
-        self.period = period
         self.kind = kind
         self.period2s = period2s
-        self.period_fractal = period_fractal
-        self.max_period = max_period
-        self.problems = 'Mcfly'
+        self.period,self.period_q = fix_two_periods_hm(period,period_q,max_period)
+        self.quantile = quantile
 
     def preprocessing(self, tdata):
         pdata = {}
@@ -219,42 +209,43 @@ class LEG1_BIBI(BaseEG):
             df = add_cci(df, self.period)
         if self.kind == '%d':
             df = add_stochastic(df, self.period, self.period2s)
-        df = add_fractals(df, self.period_fractal)
-        df = add_mean_on_fractals(df, self.max_period, self.kind,self.period_fractal)
-        df['oversold'] = df[self.kind] < df['bottom_mean']
-        df['overbought'] = df[self.kind] > df['top_mean']
+        df = add_quantile_params(df,self.period_q,self.kind,self.quantile)
+        df['oversold'] = df[self.kind] < df['bottom_q']
+        df['overbought'] = df[self.kind] > df['top_q']
         df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
     def _get_action_from_row(self, row):
-        if row['top_mean'] > row['bottom_mean']:
+        if row['top_q'] > row['bottom_q']:
             if row['oversold']:
                 return 'open_long'
             if row['overbought']:
                 return 'open_short'
         else:
+            if row['oversold'] and row['overbought']:
+                return 'close_all'
             if row['oversold']:
                 return 'close_short'
             if row['overbought']:
-                return 'close_long'
-        
+                return 'close_long'      
         return None
 
-# Mcfly problem
-class LEG1_IGOGOSHA(BaseEG):
-    """stop=None, take=None, period=15, period_fractal=10, period_max=55, kind='rsi',period2s = 3 \n
+class LEG1_IGOGOSHA2(BaseEG):
+    """stop=None, take=None, period=15, period_q=10, kind='rsi',period2s=3, quantile=0.3,period_ext=10,max_period=55 \n
     'cmo','rsi','rsi_tw','williams_r','mfi','ultimate_oscillator','cci','%d'
     """
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=15, period_fractal=10, period_max=55, kind='rsi',period2s = 3):
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=15, period_q=10, kind='rsi',period2s=3, quantile=0.3,period_ext=10,max_period=55):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
-        self.period = period
         self.kind = kind
-        self.period_fractal = period_fractal
-        self.period_max = period_max
+        self.period, self.period_q = fix_two_periods_hm(period,period_q,max_period)
+        if period_ext + self.period > max_period:
+            self.period_ext = max_period - self.period
+        else:
+            self.period_ext = period_ext
+        self.quantile = quantile
         self.period2s = period2s
-        self.problems = 'Mcfly'
 
     def preprocessing(self, tdata):
         pdata = {}
@@ -275,13 +266,12 @@ class LEG1_IGOGOSHA(BaseEG):
             df = add_cci(df, self.period)
         if self.kind == '%d':
             df = add_stochastic(df, self.period, self.period2s)
-        df = add_fractals(df, self.period_fractal)
-        df = add_ext_on_fractals(df, self.period_max, self.kind, self.period_fractal)
-        df = add_mean_on_fractals(df, self.period_max,self.kind,self.period_fractal)
-        df['oversold1'] = df[self.kind] < df['bottom_mean']
-        df['overbought1'] = df[self.kind] > df['top_mean']
-        df['oversold2'] = df[self.kind] < df['bottom_ext']
-        df['overbought2'] = df[self.kind] > df['top_ext']
+        df = add_quantile_params(df,self.period_q,self.kind,self.quantile)
+        df = add_ext_params(df,self.period_ext)
+        df['oversold1'] = df[self.kind] < df['bottom_q']
+        df['overbought1'] = df[self.kind] > df['top_q']
+        df['oversold2'] = df[self.kind] < df['bottom_ext'].shift(1)
+        df['overbought2'] = df[self.kind] > df['top_ext'].shift(1)
         df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
@@ -292,7 +282,9 @@ class LEG1_IGOGOSHA(BaseEG):
                 return 'open_long'
             if row['overbought2']:
                 return 'open_short'
-        
+                    
+        if row['oversold1'] and row['overbought1']:
+            return 'close_all'
         if row['oversold1']:
             return 'close_short'
         if row['overbought1']:
@@ -300,17 +292,17 @@ class LEG1_IGOGOSHA(BaseEG):
         
         return None
         
-class LEG1_IRONANNY(BaseEG):
-    """stop=None, take=None, period=15, period_fractal=10, period_max=55, solution=5,period2s = 3"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=15, period_fractal=10, period_max=55, solution=5,period2s = 3):
+class LEG1_IRONANNY2(BaseEG):
+    """stop=None, take=None, period=15, period_q=10, max_period=55, solution=5,period2s=3, quantile=0.3 \n
+    8 макс solution"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=15, period_q=10, max_period=55, solution=5,period2s=3, quantile=0.3):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
-        self.period = period
         self.solution = solution
-        self.period_fractal = period_fractal
-        self.period_max = period_max
+        self.period,self.period_q = fix_two_periods_hm(period,period_q,max_period)
+        self.quantile = quantile
         self.period2s = period2s
-        self.problems = 'Mcfly'
+        self.inds = ('cmo', 'rsi', 'rsi_tw', 'williams_r', 'mfi', 'ultimate_oscillator', 'cci', '%d')
 
     def preprocessing(self, tdata):
         pdata = {}
@@ -323,14 +315,12 @@ class LEG1_IRONANNY(BaseEG):
         df = add_cmo(df, self.period)
         df = add_cci(df, self.period)
         df = add_stochastic(df, self.period, self.period2s)
-        df = add_fractals(df, self.period_fractal)
-        inds = ('cmo', 'rsi', 'rsi_tw', 'williams_r', 'mfi', 'ultimate_oscillator', 'cci', '%d')
         df['oversold'] = 0
         df['overbought'] = 0
-        for i, ind in enumerate(inds):
-            df = add_mean_on_fractals(df, self.period_max, ind,self.period_fractal)
-            df['oversold'] += df[ind] < df['bottom_mean']
-            df['overbought'] += df[ind] > df['top_mean']
+        for i, ind in enumerate(self.inds):
+            df = add_quantile_params(df,self.period_q,ind,self.quantile)
+            df['oversold'] += df[ind] < df['bottom_q']
+            df['overbought'] += df[ind] > df['top_q']
         df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
