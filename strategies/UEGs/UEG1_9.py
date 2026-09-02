@@ -158,7 +158,7 @@ class UEG4_FALCON(BaseEG):
                 return 'open_long'
         
         return None
-
+# Нужны версии с adx, есть ощущение, что хорошо работает на тренде и плохо на флете
 class UEG4_PELICAN(BaseEG):
     """stop=None, take=None, period_fractal=5, n_fractals=3, allowance=0.1"""
     def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_fractal=5, n_fractals=3, allowance=0.1):

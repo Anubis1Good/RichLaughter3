@@ -76,6 +76,7 @@ def add_extremes_fractals(df:pd.DataFrame, period=5):
     df['ext_down'] = df['ext_down'].ffill()
     return df
 
+# Need use more
 def add_velcro_indicator(df,period_check=10):
     '''add velcro'''
     df['delta_h'] = df['max_hb'] - df['high']

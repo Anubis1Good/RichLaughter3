@@ -18,12 +18,13 @@ df = simple_load_df(PATH_DF)
 period=10
 multiplier=3
 
-p1,p2 = fix_two_periods_hm(55,55,55)
+# p1,p2 = fix_two_periods_hm(55,55,55)
 # p1,p2 = 31,31
-print(p1,p2)
-df = add_rsi(df, p1)
-df = add_quantile_params(df, p2)
-df = add_ext_params(df, p2)
+# print(p1,p2)
+df = add_donchan_channel(df)
+df = add_velcro_indicator(df)
+# df = add_quantile_params(df, p2)
+# df = add_ext_params(df, p2)
 
 
 
@@ -33,10 +34,10 @@ df = add_ext_params(df, p2)
 print(df.tail(20))
 # fig = draw_bars_chart_wo_vol(df)
 
-# plt.plot(df['stairl'])
+plt.plot(df['velcro'])
 # plt.plot(df['stairh'])
 # plt.plot(df['stair_pc_windowed'],color='blue')
-plt.plot(df['top_ext'],color='green')
-plt.plot(df['bottom_ext'],color='black')
+# plt.plot(df['top_ext'],color='green')
+# plt.plot(df['bottom_ext'],color='black')
 # draw_wzp(df)
 plt.show()

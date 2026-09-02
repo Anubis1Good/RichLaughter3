@@ -63,7 +63,7 @@ bot_on_ticker = {
     'ASTR2':(LEG1_LAKSAe,(None,35,26,6),3,None), #+1 +4
     # 'ASTR2':(PEG17_PHOENIX,(None,None,16,30,47,21,38,1,55),1,None), #
     'CHMF':(VEG1_VENUS,(None,None,0.3,0.8,0.1,2.0,1,0,0),1,None), # +5 -5 +13
-    'CHMF2':(UEG4_PELICAN,(None,17,4,3,0.03),2,None), #+0 -7
+    # 'CHMF2':(UEG4_PELICAN,(None,17,4,3,0.03),2,None), #+0 -7
 
     'FEES':(PEG11_KUSURUKEN,(None,None,25,55,35,9,'c',55),1,None), #-2 +4
     'FEES2':(WEG4_PUPPY,(None,None,16,16,12),1,None), #+1 0 -5

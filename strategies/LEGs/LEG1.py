@@ -1,7 +1,7 @@
 import numpy as np
 from strategies.BaseEG import BaseEG
-from for_strategies.classic_indicators import add_rsi,add_rsi_tw,add_williams_r,add_mfi,add_ultimate_oscillator,add_cmo,add_cci,add_stochastic,add_roc,add_fractals,add_bollinger,add_chop,add_supertrend,add_sma
-from for_strategies.pva_indicators import add_integrity_index,add_mean_on_fractals,add_average_fractals,add_ext_on_fractals,add_quantile_params,add_ext_params
+from for_strategies.classic_indicators import add_rsi,add_rsi_tw,add_williams_r,add_mfi,add_ultimate_oscillator,add_cmo,add_cci,add_stochastic,add_roc,add_bollinger,add_chop,add_supertrend,add_sma
+from for_strategies.pva_indicators import add_integrity_index,add_quantile_params,add_ext_params
 from for_strategies.vsa_indicators import add_dvsai,add_cdvsai
 from for_strategies.fix_params import fix_supertrend_params,fix_two_periods_hm
 
@@ -195,19 +195,19 @@ class LEG1_BIBI2(BaseEG):
         df = tdata['chart']
         if self.kind == 'rsi':
             df = add_rsi(df, self.period)
-        if self.kind == 'rsi_tw':
+        elif self.kind == 'rsi_tw':
             df = add_rsi_tw(df, self.period)
-        if self.kind == 'williams_r':
+        elif self.kind == 'williams_r':
             df = add_williams_r(df, self.period)
-        if self.kind == 'mfi':
+        elif self.kind == 'mfi':
             df = add_mfi(df, self.period)
-        if self.kind == 'ultimate_oscillator':
+        elif self.kind == 'ultimate_oscillator':
             df = add_ultimate_oscillator(df, self.period // 3, self.period // 2, self.period)
-        if self.kind == 'cmo':
+        elif self.kind == 'cmo':
             df = add_cmo(df, self.period)
-        if self.kind == 'cci':
+        elif self.kind == 'cci':
             df = add_cci(df, self.period)
-        if self.kind == '%d':
+        elif self.kind == '%d':
             df = add_stochastic(df, self.period, self.period2s)
         df = add_quantile_params(df,self.period_q,self.kind,self.quantile)
         df['oversold'] = df[self.kind] < df['bottom_q']

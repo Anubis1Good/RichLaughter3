@@ -19,7 +19,7 @@ can_period = max_period // 3
 # 58.056667    55.53666
 period=55
 period2=55
-# df = add_percent_zz190826(df)
+df = add_velcro_indicator(df)
 
 
 # candle_max = df['high'].max()

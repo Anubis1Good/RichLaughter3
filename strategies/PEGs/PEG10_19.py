@@ -846,7 +846,8 @@ class PEG18_ANDUIN(BaseEG):
                 return 'close_short'
             else:
                 return 'close_long'
-# скорее всего лучше работает в тренде
+            
+# скорее всего его выносит смена тенденции
 class PEG18_BLAZE(BaseEG):
     """stop=None, take=None, period=55, period2=10, period3=55, threshold_enter=40, threshold_exit=20, use_stop=1, max_period=55"""
     def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=75, period2=75, period3=75, threshold_enter=40, threshold_exit=20, use_stop=1, max_period=55):
