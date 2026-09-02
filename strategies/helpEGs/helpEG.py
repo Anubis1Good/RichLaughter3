@@ -20,3 +20,10 @@ class TestEG(BaseEG):
     def get_raw_action(self,pdata):
         # return 'level_all_2'
         return 'test'
+    
+class CloseAllEG(BaseEG):
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None):
+        super().__init__(symbol, price_step, mult_ps, mode, stop, take)
+    
+    def get_raw_action(self, pdata):
+        return 'close_all'

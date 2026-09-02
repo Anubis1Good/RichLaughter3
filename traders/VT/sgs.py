@@ -18,12 +18,7 @@ stock_groups= {
         ['VKCO','VKCO2','VTBR','VTBR2'],
 
     ),
-    # 'WORK_LAPTOP':(
-    #     ['NKNCP','APTK','PRMD','ROLO'],
-    #     ['OGKB','GLRX','ENPG','TGKA'],
-    #     ['VSEH','BTBR','MGKL','GECO'],
-    #     ['FIXR','MRKC','GEMC','ELFV'],
-    #     ['ETLN','HYDR','SVAV','DATA'],
-    #     ['DELI','MVID','ABIO','RTKMP'],
-    # ),
+    'CLOSE_4':(
+        ['CLOSEALL','CLOSEALL','CLOSEALL','CLOSEALL'],
+    ),
 }
