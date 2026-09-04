@@ -11,14 +11,15 @@ stock_groups= {
         ['RAGR','RAGR2','ROSN','ROSN2'],
         ['RUAL','RUAL2','SBER','SBER2'],
         ['SBERP','SBERP2','SFIN','SFIN2'],
-        ['SGZH','SGZH2','SIBN','SIBN2'],
-        ['SMLT','SMLT2','SNGSP','SNGSP2'],
+        ['ENPG','ENPG2','SIBN','SIBN2'],
+        ['IRAO','IRAO2','SNGSP','SNGSP2'],
         ['SPBE','SPBE2','T','T2'],
         ['TATN','TATN2','TATNP','TATNP2'],
         ['VKCO','VKCO2','VTBR','VTBR2'],
 
     ),
     'CLOSE_4':(
+        ['CLOSEALL','CLOSEALL','CLOSEALL','CLOSEALL'],
         ['CLOSEALL','CLOSEALL','CLOSEALL','CLOSEALL'],
     ),
 }

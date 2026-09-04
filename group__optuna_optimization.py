@@ -20,7 +20,7 @@ if __name__ == '__main__':
         fee=MAIN_FEE,
         max_period=max_period,
         bottom_limit=60,
-        top_limit=500,
+        top_limit=700,
         save_cores=save_cores,
         n_trials=trials,
         need_plot=False,

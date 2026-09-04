@@ -9,10 +9,12 @@ start_date = str(today - timedelta(days=30))
 # # start_date = '2025-02-01'
 
 
-# tickers = ('SBER','VTBR','T','ROSN','NLMK','CHMF')
-# tickers = ('TATN','SNGSP','SIBN','MTLR','MAGN','ALRS')
-# tickers = ('SBERP','TATNP','AFLT','FEES','RUAL','VKCO')
-tickers = ('BANEP','IRAO','SFIN','RAGR','SPBE','ASTR')
+tickers = (
+    'SBER','VTBR','T','ROSN','NLMK','CHMF',
+    'TATN','SNGSP','SIBN','MTLR','MAGN','ALRS',
+    'SBERP','TATNP','AFLT','FEES','RUAL','VKCO',
+    'ENPG','IRAO','SFIN','RAGR','SPBE','ASTR',
+    )
 # tickers = ('MTLR',)
 folder_save = '_data_for_tests\data_stock_1m'
 for ticker in tickers:
