@@ -638,8 +638,8 @@ class PEG18_UTER(BaseEG):
         return None
     
 class PEG18_UTER2(BaseEG):
-    """stop=None, take=None, period_st=55, mult_st=3, period2=10, threshold_enter=30, threshold_exit=40, threshold_adx=40, period_adx=30, use_stop=0, max_period=55, wddcr_trend=False, wddcr_flat=True"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_st=55, mult_st=3, period2=10, threshold_enter=30, threshold_exit=40, threshold_adx=40, period_adx=30, use_stop=0, max_period=55, wddcr_trend=True, wddcr_flat=True):
+    """stop=None, take=None, period_st=55, mult_st=3, period2=10, threshold_enter=30, threshold_exit=40, threshold_adx=40, period_adx=30, use_stop=0, max_period=55, wddcr_trend=1, wddcr_flat=1"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_st=55, mult_st=3, period2=10, threshold_enter=30, threshold_exit=40, threshold_adx=40, period_adx=30, use_stop=0, max_period=55, wddcr_trend=1, wddcr_flat=1):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
         self.mult_st = mult_st

@@ -125,27 +125,7 @@ group = (
     #         (2, max_period, 1),
     #     ]
     # ),
-    # # (
-    # #     PEG16_LEORIC, 
-    # #     [
-    # #         (2, max_period, 1),
-    # #         (2, max_period, 1),
-    # #     ]
-    # # ),
-    # # (
-    # #     PEG16_CHEN, 
-    # #     [
-    # #         (2, max_period, 1),
-    # #         (2, max_period, 1),
-    # #     ]
-    # # ),
-    # # (
-    # #     PEG16_ARTANIS, 
-    # #     [
-    # #         (2, max_period, 1),
-    # #         (2, max_period, 1),
-    # #     ]
-    # # ),
+
     # (
     #     PEG17_PHOENIX, 
     #     [
@@ -158,682 +138,441 @@ group = (
     #         (max_period,),
     #     ]
     # ),
-    (
-        PEG18_BLAZE, 
-        [
-            (2, max_period, 1),
-            (2, max_period, 1),
-            (2, max_period, 1),
-            (5, 40, 1),
-            (5, 40, 1),
-            (0, 1),
-            (max_period,),
-        ]
-    ),
-    (
-        PEG18_DIABLO2, 
-        [
-            (2, max_period, 1),
-            (0.5,4,0.1),
-            (2, max_period, 1),
-            (5, 40, 1),
-            (0,1),
-            (max_period, ),
-        ]
-    ),
-    (
-        PEG18_REXXAR2, 
-        [
-            (2, max_period, 1),
-            (0.5,4,0.1),
-            (2, max_period, 1),
-            (5, 40, 1),
-            (5, 40, 1),
-            (0,1),
-            (max_period, ),
-        ]
-    ),
-    (
-        PEG18_UTER, 
-        [
-            (2, max_period, 1),
-            (3,10,1),
-            (2, max_period, 1),
-            (5, 40, 1),
-            (5, 90, 1),
-            (2, half_max_period, 1),
-            (0,1),
-        ]
-    ),
-    (
-        PEG18_UTER2, 
-        [
-            (2, max_period, 1),
-            (0.5,4,0.1),
-            (2, max_period, 1),
-            (5, 40, 1),
-            (5, 45, 1),
-            (5, 90, 1),
-            (2, half_max_period, 1),
-            (0,1),
-            (max_period, ),
-            (True,False ),
-            (True,False ),
-        ]
-    ),
-    (
-        PEG18_VARIAN2, 
-        [
-            (2, max_period, 1),
-            (0.5,4,0.1),
-            (2, max_period, 1),
-            (5, 40, 1),
-            (5, 40, 1),
-            (2, max_period, 1),
-            (0,1),
-            (max_period, ),
-        ]
-    ),
-    (
-        PEG18_ANDUIN, 
-        [
-            (2, max_period, 1),
-            (0.5,4,0.1),
-            (2, max_period, 1),
-            (5, 40, 1),
-            (5, 70, 1),
-            (2, half_max_period, 1),
-            (0,1),
-            (max_period, ),
-        ]
-    ),
-    (
-        PEG19_ANUBARAK, 
-        [
-            (2, max_period, 1),
-            (2, max_period, 1),
-            (2, max_period, 1),
-            (5, 40, 1),
-            (5, 50, 1),
-            (0, 100, 1),
-            (0,1),
-            (max_period, ),
-        ]
-    ),
     # (
-    #     PEG19_JOHANNA, 
+    #     PEG18_BLAZE, 
     #     [
     #         (2, max_period, 1),
-    #         (3,10,1),
     #         (2, max_period, 1),
     #         (2, max_period, 1),
     #         (5, 40, 1),
     #         (5, 40, 1),
-    #         (0,1),
+    #         (0, 1),
     #         (max_period,),
     #     ]
     # ),
     # (
-    #     PEG19_CASSIA, 
+    #     PEG18_DIABLO2, 
     #     [
     #         (2, max_period, 1),
-    #         (3,10,1),
+    #         (0.5,4,0.1),
     #         (2, max_period, 1),
+    #         (5, 40, 1),
+    #         (0,1),
+    #         (max_period, ),
+    #     ]
+    # ),
+    # (
+    #     PEG18_REXXAR2, 
+    #     [
+    #         (2, max_period, 1),
+    #         (0.5,4,0.1),
     #         (2, max_period, 1),
     #         (5, 40, 1),
     #         (5, 40, 1),
     #         (0,1),
-    #         (max_period,),
+    #         (max_period, ),
     #     ]
     # ),
     # (
-    #     PEG19_IMPERIUS, 
-    #     [
-    #         (2, max_period, 1),
-    #         (3,10,1),
-    #         (2, max_period, 1),
-    #         (2, max_period, 1),
-    #         (5, 40, 1),
-    #         (5, 40, 1),
-    #         (0,1),
-    #         (max_period,),
-    #     ]
-    # ),
-    # (
-    #     PEG19_VALEERA, 
+    #     PEG18_UTER, 
     #     [
     #         (2, max_period, 1),
     #         (3,10,1),
     #         (2, max_period, 1),
     #         (5, 40, 1),
-    #         (5, 40, 1),
-    #         (0,max_period,1),
-    #         (0,1),
-    #     ]
-    # ),
-    # (
-    #     PEG19_YREL, 
-    #     [
-    #         (2, max_period, 1),
-    #         (3,10,1),
-    #         (2, max_period, 1),
-    #         (5, 40, 1),
-    #         (5, 40, 1),
-    #         (0,max_period,1),
-    #         (0,1),
-    #     ]
-    # ),
-    # (
-    #     PEG19_ZERATUL, 
-    #     [
-    #         (2, max_period, 1),
-    #         (3,10,1),
-    #         (2, max_period, 1),
-    #         (2, max_period, 1),
-    #         (5, 40, 1),
-    #         (5, 40, 1),
-    #         (0,1),
-    #         (max_period,),
-    #     ]
-    # ),
-    (
-        PEG20_HOGGER, 
-        [
-            (2, max_period, 1),
-            (2, max_period, 1),
-            (0.5,3,0.1),
-            (0.5,3,0.1),
-            (5, 40, 1),
-            (5, 40, 1),
-
-        ]
-    ),
-    # (
-    #     PEG21_AURIEL, 
-    #     [
-    #         (2, max_period, 1),
-    #         (2, period_fractal_max, 1),
-    #         (max_period,),
-    #         (1.5,3,0.1),
-    #         (2, 4, 1),
-    #         (0,0.5,0.1),
-    #         (2, max_period, 1),
-    #     ]
-    # ),
-    # (
-    #     PEG21_MALTHAEL, 
-    #     [
-    #         (2, max_period, 1),
-    #         (2, period_fractal_max, 1),
-    #         (max_period,),
-    #         (0.1,max_percent_threshold,0.1),
-    #         (0,1),
-    #     ]
-    # ),
-    # (
-    #     PEG21_WHITEMANE, 
-    #     [
-    #         (2, max_period, 1),
-    #         (2, max_period, 1),
-    #         (2, period_fractal_max, 1),
-    #         (max_period,),
-    #         (1.5,3,0.1),
-    #         (2, 4, 1),
-    #         (0,0.5,0.1),
-    #         (0,1),
-    #         (2, max_period, 1),
-    #     ]
-    # ),
-    # (
-    #     PEG22_BERSERK, 
-    #     [
+    #         (5, 90, 1),
     #         (2, half_max_period, 1),
-    #         (2, period_fractal_max, 1),
-    #         (max_period,),
-    #         (1.5,3,0.1),
-    #         (2, 4, 1),
-    #         (0,0.5,0.1),
-    #         (2, max_period, 1),
-    #         (2, max_period, 1),
-    #         (10,90,1),
-    #         (10,90,1),
-    #         (2, max_period, 1),
+    #         (0,1),
     #     ]
     # ),
     # (
-    #     PEG22_SONYA, 
+    #     PEG18_UTER2, 
     #     [
+    #         (2, max_period, 1),
+    #         (0.5,4,0.1),
+    #         (2, max_period, 1),
+    #         (5, 40, 1),
+    #         (5, 45, 1),
+    #         (5, 90, 1),
     #         (2, half_max_period, 1),
-    #         (2, period_fractal_max, 1),
-    #         (max_period,),
-    #         (2, 4, 1),
-    #         (0,0.5,0.1),
-    #         (2, max_period, 1),
-    #         (2, max_period, 1),
-    #         (10,90,1),
-    #         (10,90,1),
-    #         (0.1,max_percent_threshold,0.1), #Если на крупных тф надо увеличивать
+    #         (0,1),
+    #         (max_period, ),
+    #         (0,1),
+    #         (0,1),
     #     ]
     # ),
     # (
-    #     PEG23_ULTIMATUM, 
+    #     PEG18_VARIAN2, 
     #     [
     #         (2, max_period, 1),
+    #         (0.5,4,0.1),
     #         (2, max_period, 1),
-    #         (2, max_period, 1),
-    #         (2, period_fractal_max, 1),
-    #         (0, 1),
-    #         (max_period,),
-    #         (1.5,3,0.1),
-    #         (2, 4, 1),
-    #         (0,0.5,0.1),
-    #         (0,1,0.1),
-    #         (0, 1),
-    #         (2, max_period, 1),
-    #     ]
-    # ),
-    # (
-    #     PEG24_BRIGHTWING, 
-    #     [
-    #         (2, max_period, 1),
-    #         (2, period_fractal_max, 1),
-    #         (max_period,),
-    #         (0.1, max_percent_threshold, 0.1),
-    #         (0, 1, 0.1),
-    #         (0, 0.5, 0.1),
-    #         (0.5, 10, 0.5),
-    #         (0, 1),
-    #     ]
-    # ),
-    # (
-    #     PEG24_DEATHWING, 
-    #     [
-    #         (2, max_period, 1),
-    #         (2, period_fractal_max, 1),
-    #         (max_period,),
-    #         (0.1, max_percent_threshold, 0.1),
-    #         (0, 1, 0.1),
-    #         (0, 0.5, 0.1),
-    #         (0.5, 10, 0.5),
-    #         (0, 1),
-    #     ]
-    # ),
-    # (
-    #     PEG25_TASSADAR, 
-    #     [
-    #         (2, max_period, 1),
-    #         (2, period_fractal_max, 1),
-    #         (max_period,),
-    #         (0.1, max_percent_threshold, 0.1),
-    #         (0, 1, 0.1),
-    #         (0, 0.5, 0.1),
-    #         (0.5, 10, 0.5),
-    #         (0,40,1),
-    #         (0, 1),
-    #     ]
-    # ),
-    (
-        PEG26_UNKNOWN, 
-        [
-            (2, max_period, 1),
-            (2, max_period, 1),
-            (5, 40, 1),
-            (5, 40, 1),
-            (2, max_period, 1),
-            (2, max_period, 1),
-            (2, max_period, 1),
-            (max_period,),
-            (0, 1),
-        ]
-    ),
-
-    (
-        LEG1_BIBI2, 
-        [
-            (2, max_period, 1),
-            (2, max_period, 1),
-            ('cmo','rsi','rsi_tw','williams_r','mfi','ultimate_oscillator','cci','%d'),
-            (max_period, ),
-            (2,period2s_max,1),
-            (0.01, 0.4, 0.01),
-        ]
-    ),
-    (
-        LEG1_BORSCH, 
-        [
-            (2, max_period, 1),
-            (2, max_period, 1),
-        ]
-    ),
-    (
-        LEG1_CC2, 
-        [
-            (2, max_period, 1),
-            (2, max_period, 1),
-            (max_period, ),
-            (2, 13, 1),
-            (0.5, 3, 0.1),
-            (0, 1),
-            (0, 1),
-            (2,period2s_max,1),
-            (0.01, 0.4, 0.01),
-        ]
-    ),
-    (
-        LEG1_IGOGOSHA2, 
-        [
-            (2, max_period, 1),
-            (2, max_period, 1),
-            ('cmo','rsi','rsi_tw','williams_r','mfi','ultimate_oscillator','cci','%d'),
-            (2,period2s_max,1),
-            (0.01, 0.4, 0.01),
-            (2, max_period, 1),
-            (max_period, ),
-        ]
-    ),
-    (
-        LEG1_IRONANNY2, 
-        [
-            (2, max_period, 1),
-            (2, max_period, 1),
-            (max_period, ),
-            (2,8,1),
-            (2,period2s_max,1),
-            (0.01, 0.4, 0.01),
-        ]
-    ),
-    (
-        LEG1_LAKSAe, 
-        [
-            (2, max_period, 1),
-            (2, max_period, 1),
-        ]
-    ),
-    (
-        LEG1_OKROSHKA, 
-        [
-            (2, max_period, 1),
-            (2, max_period, 1),
-        ]
-    ),
-    (
-        LEG1_PHOBO, 
-        [
-            (2, max_period, 1),
-            (0.5,4,0.1),
-            (max_period, ),
-        ]
-    ),
-    (
-        LEG1_PHOGA, 
-        [
-            (2, max_period, 1),
-            (0.5,4,0.1),
-            (2, max_period, 1),
-            (max_period, ),
-        ]
-    ),
-    (
-        LEG1_PIN, 
-        [
-            (2, max_period, 1),
-            (2, max_period//8, 1),
-            (11,50,1),
-            (3,7,1)
-        ]
-    ),
-    (
-        LEG2_ALKASH, 
-        [
-            (2, max_period, 1),
-            (0.5,3,0.1),
-            (2, max_period, 1),
-            (0,1)
-        ]
-    ),
-    (
-        LEG2_DRG, 
-        [
-            (2, max_period, 1),
-            (0.5,3,0.1),
-            (2, max_period, 1),
-            (11,40,1),
-            (11,40,1),
-            (0,1)
-        ]
-    ),
-    (
-        LEG2_DRINKER, 
-        [
-            (2, max_period, 1),
-            (0.5,3,0.1),
-            (2, max_period, 1),
-            (11,40,1),
-            (11,40,1),
-            (0,1)
-        ]
-    ),
-    (
-        LEG2_FENNEC, 
-        [
-            (2, max_period, 1),
-            (0.5,3,0.1),
-            (2, max_period, 1),
-            (11,40,1),
-            (11,40,1),
-            (0.5,2,0.1),
-            (0,1)
-        ]
-    ),
-    (
-        LEG2_HOTS, 
-        [
-            (2, max_period, 1),
-            (0.5,3,0.1),
-            (2, max_period, 1),
-            (11,40,1),
-            (11,40,1),
-            (0,1)
-        ]
-    ),
-    (
-        LEG2_LOGAN, 
-        [
-            (2, max_period, 1),
-            (2, max_period, 1),
-            (10,50,1),
-        ]
-    ),
-    (
-        LEG2_LYNX, 
-        [
-            (2, max_period, 1),
-            (0.5,3,0.1),
-            (2, max_period, 1),
-            (0.5,2,0.1),
-            (0,1)
-        ]
-    ),
-    (
-        LEG2_MONSTER, 
-        [
-            (2, max_period, 1),
-            (10,90,1),
-            (2, max_period, 1),
-            (0,max_period,1),
-            (2, half_max_period, 1),
-            (max_period,)
-        ]
-    ),
-    (
-        SEG1_LITE, 
-        [
-            (2, max_period, 1),
-            (0.5,3,0.1),
-            (0.1,1,0.1),
-            (2, max_period, 1),
-        ]
-    ),
-    # (
-    #     SEG2, 
-    #     [
-    #         (2, max_period, 1),
-    #         (3,10,1),
-    #         (2, max_period, 1),
-    #         (max_period,)
-    #     ]
-    # ),
-    # (
-    #     SEG2_FAST, 
-    #     [
-    #         (2, half_max_period, 1),
-    #         (3,10,1),
-    #         (2, max_period, 1),
-    #         (10,90,1),
-    #     ]
-    # ),
-    # (
-    #     SEG2_ULTRA, 
-    #     [
-    #         (2, half_max_period, 1),
-    #         (3,10,1),
-    #         (2, max_period, 1),
-    #         (10,90,1),
-    #         (2, max_period, 1),
-    #         (max_period,)
-    #     ]
-    # ),
-    (
-        SEG3_FORCE, 
-        [
-            (2, max_period, 1),
-            (0.5,3,0.1),
-            (1,5,1),
-            (2, half_max_period, 1),
-            (10,90,1),
-            (2, max_period, 1),
-            (0.1, max_percent_threshold, 0.1),
-        ]
-    ),
- 
-    (
-        UEG2_GGD, 
-        [
-            (max_period,),
-            (2,period_fractal_max,1),
-        ]
-    ),
-    (
-        UEG2_DUCK, 
-        [
-            (2,period_fractal_max,1),
-            (2,5,1),
-        ]
-    ),
-    (
-        UEG2_GOOSE, 
-        [
-            (2,period_fractal_max,1),
-            (2,5,1),
-        ]
-    ),
-
-    (
-        UEG4_FALCON, 
-        [
-            (2,period_fractal_max,1),
-            (1,5,1),
-            (0,1,0.01)
-        ]
-    ),
-    (
-        UEG4_PELICAN, 
-        [
-            (2, period_fractal_max, 1),
-            (1,5,1),
-            (0,1,0.01)
-        ]
-    ),
-    # (
-    #     UEG5_HAWK, 
-    #     [
-    #         (2, max_period, 1),
-    #         (2,period_fractal_max,1),
-    #         (1,5,1),
+    #         (5, 40, 1),
+    #         (5, 40, 1),
     #         (2, max_period, 1),
     #         (0,1),
     #         (max_period, ),
-    #         (1,10,0.1),
-    #         (2, 4, 1),
-    #         (0,max_percent_threshold,0.1),
-    #         (0,1,0.01),
+    #     ]
+    # ),
+    # (
+    #     PEG18_ANDUIN, 
+    #     [
+    #         (2, max_period, 1),
+    #         (0.5,4,0.1),
+    #         (2, max_period, 1),
+    #         (5, 40, 1),
+    #         (5, 70, 1),
+    #         (2, half_max_period, 1),
+    #         (0,1),
+    #         (max_period, ),
+    #     ]
+    # ),
+    # (
+    #     PEG19_ANUBARAK, 
+    #     [
+    #         (2, max_period, 1),
+    #         (2, max_period, 1),
+    #         (2, max_period, 1),
+    #         (5, 40, 1),
+    #         (5, 50, 1),
+    #         (0, 100, 1),
+    #         (0,1),
+    #         (max_period, ),
+    #     ]
+    # ),
+
+    # (
+    #     PEG20_HOGGER, 
+    #     [
+    #         (2, max_period, 1),
+    #         (2, max_period, 1),
+    #         (0.5,3,0.1),
+    #         (0.5,3,0.1),
+    #         (5, 40, 1),
+    #         (5, 40, 1),
+
+    #     ]
+    # ),
+
+    # (
+    #     PEG26_UNKNOWN, 
+    #     [
+    #         (2, max_period, 1),
+    #         (2, max_period, 1),
+    #         (5, 40, 1),
+    #         (5, 40, 1),
+    #         (2, max_period, 1),
+    #         (2, max_period, 1),
+    #         (2, max_period, 1),
+    #         (max_period,),
+    #         (0, 1),
+    #     ]
+    # ),
+
+    # (
+    #     LEG1_BIBI2, 
+    #     [
+    #         (2, max_period, 1),
+    #         (2, max_period, 1),
+    #         ('cmo','rsi','rsi_tw','williams_r','mfi','ultimate_oscillator','cci','%d'),
+    #         (max_period, ),
+    #         (2,period2s_max,1),
+    #         (0.01, 0.4, 0.01),
+    #     ]
+    # ),
+    # (
+    #     LEG1_BORSCH, 
+    #     [
+    #         (2, max_period, 1),
+    #         (2, max_period, 1),
+    #     ]
+    # ),
+    # (
+    #     LEG1_CC2, 
+    #     [
+    #         (2, max_period, 1),
+    #         (2, max_period, 1),
+    #         (max_period, ),
+    #         (2, 13, 1),
+    #         (0.5, 3, 0.1),
+    #         (0, 1),
+    #         (0, 1),
+    #         (2,period2s_max,1),
+    #         (0.01, 0.4, 0.01),
+    #     ]
+    # ),
+    # (
+    #     LEG1_IGOGOSHA2, 
+    #     [
+    #         (2, max_period, 1),
+    #         (2, max_period, 1),
+    #         ('cmo','rsi','rsi_tw','williams_r','mfi','ultimate_oscillator','cci','%d'),
+    #         (2,period2s_max,1),
+    #         (0.01, 0.4, 0.01),
+    #         (2, max_period, 1),
+    #         (max_period, ),
+    #     ]
+    # ),
+    # (
+    #     LEG1_IRONANNY2, 
+    #     [
+    #         (2, max_period, 1),
+    #         (2, max_period, 1),
+    #         (max_period, ),
+    #         (2,8,1),
+    #         (2,period2s_max,1),
+    #         (0.01, 0.4, 0.01),
+    #     ]
+    # ),
+    # (
+    #     LEG1_LAKSAe, 
+    #     [
+    #         (2, max_period, 1),
+    #         (2, max_period, 1),
+    #     ]
+    # ),
+    # (
+    #     LEG1_OKROSHKA, 
+    #     [
+    #         (2, max_period, 1),
+    #         (2, max_period, 1),
+    #     ]
+    # ),
+    # (
+    #     LEG1_PHOBO, 
+    #     [
+    #         (2, max_period, 1),
+    #         (0.5,4,0.1),
+    #         (max_period, ),
+    #     ]
+    # ),
+    # (
+    #     LEG1_PHOGA, 
+    #     [
+    #         (2, max_period, 1),
+    #         (0.5,4,0.1),
+    #         (2, max_period, 1),
+    #         (max_period, ),
+    #     ]
+    # ),
+    # (
+    #     LEG1_PIN, 
+    #     [
+    #         (2, max_period, 1),
+    #         (2, max_period//8, 1),
+    #         (11,50,1),
+    #         (3,7,1)
+    #     ]
+    # ),
+    # (
+    #     LEG2_ALKASH, 
+    #     [
+    #         (2, max_period, 1),
+    #         (0.5,3,0.1),
+    #         (2, max_period, 1),
     #         (0,1)
     #     ]
     # ),
-    (
-        UEG6_ADVENTURE, 
-        [
-            (2, max_period, 1),
-            (2, max_period, 1),
-            (2, max_period, 1),
-            (0.1,3,0.1),
-            (0,1)
-        ]
-    ),
-    (
-        UEG6_DODO, 
-        [
-            (2, half_max_period, 1),
-            (2, max_period, 1),
-            (10,70,1),
-            (10,70,1),
-        ]
-    ),
-    (
-        UEG6_DUELDODO, 
-        [
-            (2, max_period, 1),
-            (2, max_period, 1),
-            (10,70,1),
-            (2, max_period, 1),
-            (0,1),
-            (2, half_max_period, 1),
-        ]
-    ),
-    (
-        UEG6_PIGEON, 
-        [
-            (2, max_period, 1),
-            (2, max_period, 1),
-            (2, max_period, 1),
-            (2,period_fractal_max,1),
-            (1,5,1),
-            (0,1,0.01),
-            (0.1,3,0.1),
-            (0,1)
-        ]
-    ),
-    (
-        UEG6_SHERIFF, 
-        [
-            (2, max_period, 1),
-            (2, max_period, 1),
-            (0.1,3,0.1),
-        ]
-    ),
-    (
-        UEG6_VULTURE, 
-        [
-            (2, max_period, 1),
-            (2, max_period, 1),
-            (10,70,1),
-            (2, max_period, 1),
-            (2,period_fractal_max,1),
-            (1,5,1),
-            (0,1,0.01),
-            (2, half_max_period, 1),
-        ]
-    ),
+    # (
+    #     LEG2_DRG, 
+    #     [
+    #         (2, max_period, 1),
+    #         (0.5,3,0.1),
+    #         (2, max_period, 1),
+    #         (11,40,1),
+    #         (11,40,1),
+    #         (0,1)
+    #     ]
+    # ),
+    # (
+    #     LEG2_DRINKER, 
+    #     [
+    #         (2, max_period, 1),
+    #         (0.5,3,0.1),
+    #         (2, max_period, 1),
+    #         (11,40,1),
+    #         (11,40,1),
+    #         (0,1)
+    #     ]
+    # ),
+    # (
+    #     LEG2_FENNEC, 
+    #     [
+    #         (2, max_period, 1),
+    #         (0.5,3,0.1),
+    #         (2, max_period, 1),
+    #         (11,40,1),
+    #         (11,40,1),
+    #         (0.5,2,0.1),
+    #         (0,1)
+    #     ]
+    # ),
+    # (
+    #     LEG2_HOTS, 
+    #     [
+    #         (2, max_period, 1),
+    #         (0.5,3,0.1),
+    #         (2, max_period, 1),
+    #         (11,40,1),
+    #         (11,40,1),
+    #         (0,1)
+    #     ]
+    # ),
+    # (
+    #     LEG2_LOGAN, 
+    #     [
+    #         (2, max_period, 1),
+    #         (2, max_period, 1),
+    #         (10,50,1),
+    #     ]
+    # ),
+    # (
+    #     LEG2_LYNX, 
+    #     [
+    #         (2, max_period, 1),
+    #         (0.5,3,0.1),
+    #         (2, max_period, 1),
+    #         (0.5,2,0.1),
+    #         (0,1)
+    #     ]
+    # ),
+    # (
+    #     LEG2_MONSTER, 
+    #     [
+    #         (2, max_period, 1),
+    #         (10,90,1),
+    #         (2, max_period, 1),
+    #         (0,max_period,1),
+    #         (2, half_max_period, 1),
+    #         (max_period,)
+    #     ]
+    # ),
+    # (
+    #     SEG1_LITE, 
+    #     [
+    #         (2, max_period, 1),
+    #         (0.5,3,0.1),
+    #         (0.1,1,0.1),
+    #         (2, max_period, 1),
+    #     ]
+    # ),
+
+    # (
+    #     SEG3_FORCE, 
+    #     [
+    #         (2, max_period, 1),
+    #         (0.5,3,0.1),
+    #         (1,5,1),
+    #         (2, half_max_period, 1),
+    #         (10,90,1),
+    #         (2, max_period, 1),
+    #         (0.1, max_percent_threshold, 0.1),
+    #     ]
+    # ),
+ 
+    # (
+    #     UEG2_GGD, 
+    #     [
+    #         (max_period,),
+    #         (2,period_fractal_max,1),
+    #     ]
+    # ),
+    # (
+    #     UEG2_DUCK, 
+    #     [
+    #         (2,period_fractal_max,1),
+    #         (2,5,1),
+    #     ]
+    # ),
+    # (
+    #     UEG2_GOOSE, 
+    #     [
+    #         (2,period_fractal_max,1),
+    #         (2,5,1),
+    #     ]
+    # ),
+
+    # (
+    #     UEG4_FALCON, 
+    #     [
+    #         (2,period_fractal_max,1),
+    #         (1,5,1),
+    #         (0,1,0.01)
+    #     ]
+    # ),
+    # (
+    #     UEG4_PELICAN, 
+    #     [
+    #         (2, period_fractal_max, 1),
+    #         (1,5,1),
+    #         (0,1,0.01)
+    #     ]
+    # ),
+
+    # (
+    #     UEG6_ADVENTURE, 
+    #     [
+    #         (2, max_period, 1),
+    #         (2, max_period, 1),
+    #         (2, max_period, 1),
+    #         (0.1,3,0.1),
+    #         (0,1)
+    #     ]
+    # ),
+    # (
+    #     UEG6_DODO, 
+    #     [
+    #         (2, half_max_period, 1),
+    #         (2, max_period, 1),
+    #         (10,70,1),
+    #         (10,70,1),
+    #     ]
+    # ),
+    # (
+    #     UEG6_DUELDODO, 
+    #     [
+    #         (2, max_period, 1),
+    #         (2, max_period, 1),
+    #         (10,70,1),
+    #         (2, max_period, 1),
+    #         (0,1),
+    #         (2, half_max_period, 1),
+    #     ]
+    # ),
+    # (
+    #     UEG6_PIGEON, 
+    #     [
+    #         (2, max_period, 1),
+    #         (2, max_period, 1),
+    #         (2, max_period, 1),
+    #         (2,period_fractal_max,1),
+    #         (1,5,1),
+    #         (0,1,0.01),
+    #         (0.1,3,0.1),
+    #         (0,1)
+    #     ]
+    # ),
+    # (
+    #     UEG6_SHERIFF, 
+    #     [
+    #         (2, max_period, 1),
+    #         (2, max_period, 1),
+    #         (0.1,3,0.1),
+    #     ]
+    # ),
+    # (
+    #     UEG6_VULTURE, 
+    #     [
+    #         (2, max_period, 1),
+    #         (2, max_period, 1),
+    #         (10,70,1),
+    #         (2, max_period, 1),
+    #         (2,period_fractal_max,1),
+    #         (1,5,1),
+    #         (0,1,0.01),
+    #         (2, half_max_period, 1),
+    #     ]
+    # ),
     (
         UEG7_ADVENTURE, 
         [

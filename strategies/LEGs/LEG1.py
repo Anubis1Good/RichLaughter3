@@ -267,7 +267,7 @@ class LEG1_IGOGOSHA2(BaseEG):
         if self.kind == '%d':
             df = add_stochastic(df, self.period, self.period2s)
         df = add_quantile_params(df,self.period_q,self.kind,self.quantile)
-        df = add_ext_params(df,self.period_ext)
+        df = add_ext_params(df,self.period_ext,self.kind)
         df['oversold1'] = df[self.kind] < df['bottom_q']
         df['overbought1'] = df[self.kind] > df['top_q']
         df['oversold2'] = df[self.kind] < df['bottom_ext'].shift(1)
