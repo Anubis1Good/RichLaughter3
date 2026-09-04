@@ -22,7 +22,7 @@ START = WINDOW
 START = 3374
 END = START + WINDOW
 WINDOW_SIZE = END - START
-COLUMNS = ['supertrend']  # <--- СПИСОК КОЛОНОК
+COLUMNS = ['ami_filter','ami']  # <--- СПИСОК КОЛОНОК
 # COLUMNS = []  # <--- СПИСОК КОЛОНОК
 draw_chart = True
 # draw_chart = False
@@ -39,11 +39,8 @@ COLORS_DF2 = ['red', 'orange']  # для zigzag и zigzag_peaks соответс
 def preprocessing(df):
     """Добавляем индикаторы в датафрейм"""
     df = df.copy()
-    df = add_supertrend(df,18,3)
-    # df = add_percent_zz190826(df, percent_threshold=0.8)
-    # df['zigzag_peaks'] = df['zigzag_peaks'].shift(1)
-    # df['zigzag_peaks'] = df['zigzag_peaks'].ffill()
-    # df = add_plus_delta_fc2(df)
+    df = add_donchan_channel(df, 10)
+    df = add_assessment_motion_index(df, 10, 10)
     return df
 # ===== ФУНКЦИЯ ДЛЯ РИСОВАНИЯ ГРАФИКА =====
 def draw_hb_chart_fast_on_ax(ax, df):

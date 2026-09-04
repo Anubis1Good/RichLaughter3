@@ -1,10 +1,10 @@
-from itertools import *
+from for_strategies.fix_params import fix_two_periods
 
-s = '256 159 468 367 127 134 45 39 28'.split()
-v = 'АБ АД АЖ ДЖ ЕК ВГ ГЕ ГК БВ ДЕ ЖИ ИК'.split()
-print(*range(1,10))
+p1 = 2
+p2 = 55
+mp = 55
 
-for p in permutations('АБВГДЕЖИК'):
-    if all(str(p.index(y)+1) in s[p.index(x)] for x,y in v):
-        print(*p)
+p1,p2 = fix_two_periods(p1,p2,mp)
+
+print(p1,p2)
 

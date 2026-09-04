@@ -306,13 +306,34 @@ def add_static_channel(df:pd.DataFrame,period=60):
     df['bottom_line'] = df['close'].rolling(period,1).quantile(0.1)
     return df
 
-#check thos
-def add_assessment_motion_index(df:pd.DataFrame,period=100,period_filter=50):
+# check thos
+# def add_assessment_motion_index(df:pd.DataFrame,period=100,period_filter=50):
+#     """add 'ami', 'ami_filter' \n
+#     оценка движения. насколько оно было однонаправленным.
+#     измеряется о -100 до 100"""
+#     df['ami'] = (((df['avarege'].diff().rolling(period,1).sum())/ np.abs(df['avarege'].diff()).rolling(period).sum())*100)
+#     df['ami_filter'] = df['ami'].rolling(period_filter).mean()
+#     return df
+
+def add_assessment_motion_index(df:pd.DataFrame, period=100, period_filter=50):
     """add 'ami', 'ami_filter' \n
     оценка движения. насколько оно было однонаправленным.
-    измеряется о -100 до 100"""
-    df['ami'] = (((df['avarege'].diff().rolling(period,1).sum())/ np.abs(df['avarege'].diff()).rolling(period).sum())*100)
-    df['ami_filter'] = df['ami'].rolling(period_filter).mean()
+    измеряется от -100 до 100"""
+    
+    diff = df['avarege'].diff()
+    numerator = diff.rolling(period, min_periods=period).sum()
+    denominator = np.abs(diff).rolling(period, min_periods=period).sum()
+    
+    # Защита от деления на ноль
+    # Там где denominator = 0, оставляем NaN (нет движения)
+    df['ami'] = np.where(
+        denominator != 0, 
+        (numerator / denominator * 100), 
+        0
+    )
+    
+    df['ami_filter'] = df['ami'].rolling(period_filter, min_periods=period_filter).mean()
+    
     return df
 
 def add_hope_channel(df: pd.DataFrame, n=3, period=100,shift=10):

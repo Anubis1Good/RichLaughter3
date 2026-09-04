@@ -3,7 +3,7 @@ from strategies.BaseEG import BaseEG
 from for_strategies.classic_indicators import add_rsi,add_chop,add_awesome_oscillator,add_donchan_channel,add_adx,add_supertrend
 from for_strategies.pva_indicators import add_kusuruken_channel,add_velcro_indicator,add_quantile_params,add_benefit,get_all_enter_exit_DC,get_all_lup,add_pc_stair_fast,add_integrity_index,add_assessment_motion_index,add_hope_channel,add_cascade_channel
 from for_strategies.other_indicators import add_vangerchik
-from for_strategies.fix_params import fix_supertrend_params,fix_two_periods
+from for_strategies.fix_params import fix_supertrend_params,fix_two_periods_hm,fix_three_periods_hm
 
 # скорее всего сильно чувствтителен к смене тренда
 class PEG11_KUSURUKEN(BaseEG):
@@ -849,21 +849,17 @@ class PEG18_ANDUIN(BaseEG):
             
 # скорее всего его выносит смена тенденции
 class PEG18_BLAZE(BaseEG):
-    """stop=None, take=None, period=55, period2=10, period3=55, threshold_enter=40, threshold_exit=20, use_stop=1, max_period=55"""
+    """stop=None, take=None, period=75, period2=75, period3=75, threshold_enter=40, threshold_exit=20, use_stop=1, max_period=55"""
     def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=75, period2=75, period3=75, threshold_enter=40, threshold_exit=20, use_stop=1, max_period=55):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
-        self.period2 = period2
         self.threshold_enter = threshold_enter
         self.threshold_exit = threshold_exit
         self.use_stop = use_stop
-        self.period,self.period3 = fix_two_periods(period,period3,max_period)
-        total_periods = self.period + self.period2 + self.period3
-        if total_periods > max_period:
-            ratio = max_period / total_periods
-            self.period = int(self.period * ratio)
-            self.period2 = int(self.period2 * ratio)
-            self.period3 = int(self.period3 * ratio)
+        self.period,self.period2 = fix_two_periods_hm(period,period2,max_period)
+        self.period,self.period2,self.period3 = fix_three_periods_hm(period,period2,period3,max_period)
+        if self.period < self.period3:
+            self.period3 = self.period
 
     def preprocessing(self, tdata):
         pdata = {}
@@ -903,7 +899,7 @@ class PEG19_ANUBARAK(BaseEG):
     """stop=None, take=None,period_ami1=10,period_dc=10,period_rsi=10,threshold_enter=30,threshold_exit=40,threshold_ami=50,use_stop=0, max_period=55"""
     def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None,period_ami1=10,period_dc=10,period_rsi=10,threshold_enter=30,threshold_exit=40,threshold_ami=50,use_stop=0, max_period=55):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
-        self.period_dc, self.period_ami1 = fix_two_periods(period_dc,period_ami1,max_period)
+        self.period_dc, self.period_ami1 = fix_two_periods_hm(period_dc,period_ami1,max_period)
         self.period_rsi = period_rsi
         self.threshold_enter = threshold_enter
         self.threshold_exit = threshold_exit

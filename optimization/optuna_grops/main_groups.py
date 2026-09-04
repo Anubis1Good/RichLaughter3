@@ -13,151 +13,151 @@ from optimization.optuna_grops.opt_params import *
 # (min, max, step)
 
 group = (
-    (
-        PEG2_SDDCr, 
-        [
-            (2,max_period,1),
-            (2,max_period,1),
-            (max_period,),
-        ]
-    ),
-    (
-        PEG4_UNIVERSAL, 
-        [
-            (2,max_period,1),
-            (2,max_period,1),
-            (5,45,1),
-            (5,45,1),
-            ["DC","VG","BB","VC","WC"],
-            ["rsi","rsi_tw","mfi","s","uo"],      
-            (2,period2s_max,1),
-        ]
-    ),
-    (
-        PEG4_U3, 
-        [
-            (2,max_period,1),
-            (2,max_period,1),
-            (2,period_fractal_max,1),
-            (max_period,),
-            ("DC","VG","BB","VC","WC"),
-            ("rsi","rsi_tw","mfi","s","uo"),
-            (2,period2s_max,1),
-        ]
-    ),
-    (
-        PEG8_DOBBY, 
-        [
-            (2,max_period,1),
-            (0.5,3,0.1),   
-        ]
-    ),
-    (
-        PEG8_LOBSTER, 
-        [
-            (2,max_period,1),
-            (0.5,3,0.1),   
-        ]
-    ),
-    (
-        PEG11_KUSURUKEN, 
-        [
-            (5, max_period, 1),
-            (2, max_period, 1),
-            (2, max_period, 1),
-            (5, 40, 1),    
-            ('c', 'hl'),    
-            (max_period,),
-        ]
-    ),
-    (
-        PEG13_DWDDCr, 
-        [
-            (2, max_period, 1),
-            (5, 40, 1),
-            (2, max_period, 1),
-        ]
-    ),
-    (
-        PEG14_RANGER, 
-        [
-            (2, half_max_period, 1),
-            (5, 40, 1),
-            (2, max_period, 1),
-            (2, max_period, 1),
-            (5, 100, 1),
-            (5, 100, 1),
-        ]
-    ),
-    (
-        PEG14_RENEGADE, 
-        [
-            (2, half_max_period, 1),
-            (5, 40, 1),
-            (2, max_period, 1),
-            (2, max_period, 1),
-            (5, 100, 1),
-            (5, 100, 1),
-        ]
-    ),
-    (
-        PEG14_RWDDCr, 
-        [
-            (2, max_period, 1),
-            (5, 40, 1),
-            (2, max_period, 1),
-            (2, max_period, 1),
-            (max_period,),
-        ]
-    ),
-    (
-        PEG15_ANNA, 
-        [
-            (2, max_period, 1),
-            (5, 40, 1),
-        ]
-    ),
-    (
-        PEG15_SILVANA, 
-        [
-            (2, max_period, 1),
-            (5, 40, 1),
-            (2, max_period, 1),
-        ]
-    ),
     # (
-    #     PEG16_LEORIC, 
+    #     PEG2_SDDCr, 
+    #     [
+    #         (2,max_period,1),
+    #         (2,max_period,1),
+    #         (max_period,),
+    #     ]
+    # ),
+    # (
+    #     PEG4_UNIVERSAL, 
+    #     [
+    #         (2,max_period,1),
+    #         (2,max_period,1),
+    #         (5,45,1),
+    #         (5,45,1),
+    #         ["DC","VG","BB","VC","WC"],
+    #         ["rsi","rsi_tw","mfi","s","uo"],      
+    #         (2,period2s_max,1),
+    #     ]
+    # ),
+    # (
+    #     PEG4_U3, 
+    #     [
+    #         (2,max_period,1),
+    #         (2,max_period,1),
+    #         (2,period_fractal_max,1),
+    #         (max_period,),
+    #         ("DC","VG","BB","VC","WC"),
+    #         ("rsi","rsi_tw","mfi","s","uo"),
+    #         (2,period2s_max,1),
+    #     ]
+    # ),
+    # (
+    #     PEG8_DOBBY, 
+    #     [
+    #         (2,max_period,1),
+    #         (0.5,3,0.1),   
+    #     ]
+    # ),
+    # (
+    #     PEG8_LOBSTER, 
+    #     [
+    #         (2,max_period,1),
+    #         (0.5,3,0.1),   
+    #     ]
+    # ),
+    # (
+    #     PEG11_KUSURUKEN, 
+    #     [
+    #         (5, max_period, 1),
+    #         (2, max_period, 1),
+    #         (2, max_period, 1),
+    #         (5, 40, 1),    
+    #         ('c', 'hl'),    
+    #         (max_period,),
+    #     ]
+    # ),
+    # (
+    #     PEG13_DWDDCr, 
     #     [
     #         (2, max_period, 1),
+    #         (5, 40, 1),
     #         (2, max_period, 1),
     #     ]
     # ),
     # (
-    #     PEG16_CHEN, 
+    #     PEG14_RANGER, 
     #     [
+    #         (2, half_max_period, 1),
+    #         (5, 40, 1),
     #         (2, max_period, 1),
     #         (2, max_period, 1),
+    #         (5, 100, 1),
+    #         (5, 100, 1),
     #     ]
     # ),
     # (
-    #     PEG16_ARTANIS, 
+    #     PEG14_RENEGADE, 
+    #     [
+    #         (2, half_max_period, 1),
+    #         (5, 40, 1),
+    #         (2, max_period, 1),
+    #         (2, max_period, 1),
+    #         (5, 100, 1),
+    #         (5, 100, 1),
+    #     ]
+    # ),
+    # (
+    #     PEG14_RWDDCr, 
     #     [
     #         (2, max_period, 1),
+    #         (5, 40, 1),
+    #         (2, max_period, 1),
+    #         (2, max_period, 1),
+    #         (max_period,),
+    #     ]
+    # ),
+    # (
+    #     PEG15_ANNA, 
+    #     [
+    #         (2, max_period, 1),
+    #         (5, 40, 1),
+    #     ]
+    # ),
+    # (
+    #     PEG15_SILVANA, 
+    #     [
+    #         (2, max_period, 1),
+    #         (5, 40, 1),
     #         (2, max_period, 1),
     #     ]
     # ),
-    (
-        PEG17_PHOENIX, 
-        [
-            (2, max_period, 1),
-            (2, max_period, 1),
-            (2, max_period, 1),
-            (2, max_period, 1),
-            (5, 40, 1),
-            (0, 1),
-            (max_period,),
-        ]
-    ),
+    # # (
+    # #     PEG16_LEORIC, 
+    # #     [
+    # #         (2, max_period, 1),
+    # #         (2, max_period, 1),
+    # #     ]
+    # # ),
+    # # (
+    # #     PEG16_CHEN, 
+    # #     [
+    # #         (2, max_period, 1),
+    # #         (2, max_period, 1),
+    # #     ]
+    # # ),
+    # # (
+    # #     PEG16_ARTANIS, 
+    # #     [
+    # #         (2, max_period, 1),
+    # #         (2, max_period, 1),
+    # #     ]
+    # # ),
+    # (
+    #     PEG17_PHOENIX, 
+    #     [
+    #         (2, max_period, 1),
+    #         (2, max_period, 1),
+    #         (2, max_period, 1),
+    #         (2, max_period, 1),
+    #         (5, 40, 1),
+    #         (0, 1),
+    #         (max_period,),
+    #     ]
+    # ),
     (
         PEG18_BLAZE, 
         [
