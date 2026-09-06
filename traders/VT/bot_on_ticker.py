@@ -53,68 +53,113 @@ bot_on_ticker = {
     # 'ABIO':(PEG31_HYPERION,(10,1,2,0,True,20,1,1),1,None), #0
     # 'RTKMP':(PEG31_HYPERION,(10,1,2,0,True,30,5,1),1,None), #+
 
+    #+1 +10 +10 !(35%)
+    'AFLT':(PEG17_PHOENIX,(None,29,29,12,54,42,6,0,55),3,None), 
+    #06.09.26
+    'AFLT2':(LEG2_HOTS,(None,None,43,2.7,6,40,14,0),1,None), 
+    # +16 +0 -0 +5 !(44%)
+    'ALRS':(LEG2_DRINKER,(None,16,5,2.1,5,31,16,0),2,None),
+    #06.09.26
+    'ALRS2':(LEG1_CC2,(None,8,5,19,55,5,0.6,0,0,3,0.24),1,None),
 
-    'AFLT':(PEG17_PHOENIX,(None,29,29,12,54,42,6,0,55),3,None), #+1 +10 +10 !
-    'AFLT2':(PEG13_DWDDCr,(None,None,17,31,9),1,None), #+2 -1 .
-    'ALRS':(LEG2_DRINKER,(None,16,5,2.1,5,31,16,0),2,None), # +16 +0 -0 +5 !
-    'ALRS2':(UEG6_VULTURE,(None,18,51,42,18,6,3,3,0.81,12),2,None),#-2 -0 -4 .
+    #-4 +11 +8 +1 !(40%)
+    'ASTR':(WEG3_BATYA,(None,40,21,2.1,1,1,1),4,None), 
+    #06.09.26
+    'ASTR2':(PEG17_PHOENIX,(None,29,10,5,7,35,13,1,55),3,None),
+    # +5 -5 +13 +1 !(38%)
+    'CHMF':(VEG1_VENUS,(None,None,0.3,0.8,0.1,2.0,1,0,0),1,None), 
+    #06.09.26
+    # 'CHMF2':(PEG18_UTER2,(None,None,51,3.3,6,37,45,85,2,0,55,1,0),1,None),
 
-    'ASTR':(WEG3_BATYA,(None,40,21,2.1,1,1,1),4,None), #-4 +11 +8 +1 !
-    'ASTR2':(LEG1_LAKSAe,(None,35,26,6),3,None), #+1 +4 +1 .
-    'ASTR2':(PEG17_PHOENIX,(None,None,16,30,47,21,38,1,55),1,None), #
-    'CHMF':(VEG1_VENUS,(None,None,0.3,0.8,0.1,2.0,1,0,0),1,None), # +5 -5 +13 +1 !
-    'CHMF2':(UEG4_PELICAN,(None,17,4,3,0.03),2,None), #+0 -7 .
+    #06.09.26
+    'FEES':(PEG18_UTER2,(None,None,50,2.4,8,27,45,90,19,0,55,1,1),1,None),
+    #06.09.26
+    'FEES2':(LEG1_PIN,(None,13,5,2,28,3),2,None),
+    #06.09.26
+    'MAGN':(PEG18_DIABLO2,(None,None,14,2.0,29,26,0,55),1,None),
+    #06.09.26
+    # 'MAGN2':(PEG18_UTER2,(None,None,7,3.7,37,16,20,62,6,0,55,1,0),1,None),
 
-    'FEES':(PEG11_KUSURUKEN,(None,None,25,55,35,9,'c',55),1,None), #-2 +4 -1 .
-    'FEES2':(WEG4_PUPPY,(None,None,16,16,12),1,None), #+1 0 -5 -0 .
-    'MAGN':(PEG18_BLAZE,(None,None,43,10,54,38,20,0,55),1,None), #-3 +3 -3 -15 .
-    'MAGN2':(VEG1_VENUS,(7, 17, 0.5, 0.9, 0.1, 2.0, 0, 0, 0),2,None),#+10 +1 +1 -12 -1 -5 .
+    #+9 +7 -3 !(29%)
+    'MTLR':(PEG11_KUSURUKEN,(None,None,44,8,51,36,'c',55),1,None), 
+    #06.09.26
+    # 'MTLR2':(PEG18_REXXAR2,(None,None,3,1.3,39,31,12,0,55),1,None),
+    #06.09.26
+    # 'NLMK':(LEG2_HOTS,(None,None,30,2.4,3,33,22,0),1,None), 
+    #06.09.26
+    # 'NLMK2':(LEG1_PIN,(None,13,4,4,40,3),2,None),
 
-    'MTLR':(PEG11_KUSURUKEN,(None,None,44,8,51,36,'c',55),1,None), #+9 +7 -3 !
-    'MTLR2':(LEG2_LYNX,(None,17,33,2.0,5,0.6,0),2,None), #-10 НБС .
-    'NLMK':(PEG18_BLAZE,(None,None,22,4,14,32,28,0,55),1,None), #-2 -6 -13 .
-    'NLMK2':(LEG2_LYNX,(None,None,4,1.8,2,1.4,0),1,None), #+1 .
+    #06.09.26
+    'RAGR':(LEG1_BIBI2,(None,None,20,20,'cci',55,4,0.37),1,None),
+    #06.09.26
+    # 'RAGR2':(LEG1_IGOGOSHA2,(None,31,54,12,'williams_r',4,0.24,14,55),3,None),
+    #06.09.26
+    'ROSN':(PEG17_PHOENIX,(None,None,8,50,30,48,5,1,55),1,None),
+    #+5 +2 !(33%)
+    'ROSN2':(PEG14_RENEGADE,(None,None,16,38,52,6,49,30),1,None), 
 
-    'RAGR':(UEG4_FALCON,(None,None,3,4,0.74),1,None), # -7 -5 .
-    'RAGR2':(UEG4_PELICAN,(None,None,3,2,0.34),1,None), #+6 -4 +2 .
-    'ROSN':(LEG2_FENNEC,(None,58,27,2.6,17,39,33,1.4,0),5,None), #-1 -2 +1 +6  .
-    'ROSN2':(PEG14_RENEGADE,(None,None,16,38,52,6,49,30),1,None), #+5 +2 !
+    #06.09.26
+    'RUAL':(PEG18_UTER,(None,34,19,3,4,39,62,13,1),3,None),
+    #06.09.26
+    'RUAL2':(PEG17_PHOENIX,(None,None,4,6,9,47,12,0,55),1,None),
+    #06.09.26
+    'SBER':(LEG2_HOTS,(None,118,13,3.0,8,33,25,0),10,None),
+    #06.09.26
+    'SBER2':(PEG14_RANGER,(None,227,22,33,6,9,8,86),19,None),
 
-    'RUAL':(VEG1_VENUS,(None,None,0.3,1.0,0.1,0.5,0,1,1),1,None), #-6 -3 +6 .
-    'RUAL2':(LEG2_DRG,(None,None,12,2.7,4,15,11,1),1,None), #-3 +1 -10 .
-    'SBER':(PEG14_RENEGADE,(None,None,19,39,31,25,12,46),1,None), #+0 -0 .
-    'SBER2':(PEG4_U3,(112,None,53,23,2,55,'BB','mfi',4),10,None), #+1 +2 +2 +1 !
+    #06.09.26
+    'SBERP':(UEG6_PIGEON,(None,124,9,20,37,5,3,0.66,2.4,0),11,None),
+    #06.09.26
+    'SBERP2':(PEG17_PHOENIX,(None,164,29,11,48,27,15,1,55),14,None),
+    #+22 +6 -9 !(65%)
+    'SFIN':(LEG2_DRINKER,(None,None,42,2.0,4,26,11,0),1,None),
+    #+11 -1 !(89%)
+    'SFIN2':(LEG1_PIN,(None,None,4,6,26,3),1,None), 
 
-    'SBERP':(PEG11_KUSURUKEN,(None,None,36,38,45,10,'c',55),1,None), #-1 -1 -1 -1 .
-    'SBERP2':(PEG26_UNKNOWN,(None,None,46,33,23,39,8,20,4,55,0),1,None), #+1 -1 .
-    'SFIN':(LEG2_DRINKER,(None,None,42,2.0,4,26,11,0),1,None), #+22 +6 -9 !
-    'SFIN2':(LEG1_PIN,(None,None,4,6,26,3),1,None), #+11 -1 !
+    #06.09.26
+    'ENPG':(LEG1_IRONANNY2,(None,59,40,7,55,5,4,0.4),5,None),
+    #06.09.26
+    'ENPG2':(UEG6_VULTURE,(None,None,25,7,57,52,4,1,0.96,11),1,None),
+    #06.09.26
+    'SIBN':(PEG18_ANDUIN,(None,None,2,1.7,28,24,5,19,0,55),1,None),
+    #06.09.26
+    'SIBN2':(PEG17_PHOENIX,(None,None,45,35,5,29,7,0,55),1,None),
 
-    # 'ENPG':(UEG6_DODO,(None,None,27,9,42,66),1,None),#
-    # 'ENPG2':(PEG17_PHOENIX,(None,12,10,10,17,36,10,0,55),1,None), #
-    'SIBN':(WEG3_BATYA,(None,None,18,1.3,0,1,1),1,None), #+1 +3 +1 +0 .
-    'SIBN2':(LEG1_PHOGA,(None,None,2,1.1,18),1,None), #-6 .
+    #06.09.26
+    'IRAO':(PEG19_ANUBARAK,(None,None,17,3,11,39,43,91,0,55),1,None),
+    #06.09.26
+    'IRAO2':(LEG1_CC2,(None,None,51,7,55,6,1.6,0,1,2,0.03),1,None),
+    #06.09.26
+    'SNGSP':(LEG1_CC2,(None,74,6,48,55,3,0.5,0,0,2,0.16),7,None),
+    #06.09.26
+    'SNGSP2':(PEG4_UNIVERSAL,(None,72,18,3,23,42,'VC','rsi_tw',6),6,None),
 
-    # 'IRAO':(VEG1_VENUS,(None,None,0.2,0.8,0.1,0.7,1,1,1),1,None), #
-    # 'IRAO2':(UEG6_PIGEON,(None,None,30,3,2,2,4,0.64,2.0,0),1,None), #
-    'SNGSP':(LEG2_FENNEC,(None,None,9,2.5,2,31,19,1.8,1),1,None), #+1 +1 -1 +1 .
-    'SNGSP2':(WEG3_BATYA,(40, 48, 32, 2.9, 1, 1, 1),4,None), #+2 +3 +5 -3 +3 +2 !
+    #+7 +2 +5 !(54%)
+    'SPBE':(PEG11_KUSURUKEN,(None,None,53,8,29,37,'c',55),1,None), 
+    #06.09.26
+    'SPBE2':(UEG6_VULTURE,(None,None,7,32,69,47,3,1,0.07,12),1,None),
+    #06.09.26
+    'T':(UEG6_ADVENTURE,(None,None,55,55,22,1.6,1),1,None),
+    #06.09.26
+    # 'T2':(UEG7_ADVENTURE,(None,122,54,4,55,1.6,1),11,None),
 
-
-    'SPBE':(PEG11_KUSURUKEN,(None,None,53,8,29,37,'c',55),1,None), #+7 +2 +5 !
-    'SPBE2':(PEG18_BLAZE,(None,None,47,12,40,37,33,0,55),1,None), #+5 0 +6 -12 .
-    'T':(LEG2_LYNX,(None,None,53,1.5,32,0.5,0),1,None), #+0 -1 .
-    'T2':(PEG11_KUSURUKEN,(None,None,47,7,23,8,'c',55),1,None), #-3 -0 -2 0 .
-
-    'TATN':(LEG1_PIN,(20,None,48,3,39,3),2,None), #+5 +9 +11 !
-    'TATN2':(WEG4_PUPPY,(None,None,41,39,11),1,None), #+7 +9 +4 +7 !
-    'TATNP':(LEG2_LYNX,(None,None,5,2.0,6,0.8,0),1,None), #-3 +3 -4 +2 .
-    'TATNP2':(SEG3_FORCE,(None,None,14,3.0,3,9,53,43,0.5),1,None), #+6 +2 +7 !
+    #+5 +9 +11 !(14%)
+    'TATN':(LEG1_PIN,(20,None,48,3,39,3),2,None), 
+    #+7 +9 +4 +7 !(9%)
+    'TATN2':(WEG4_PUPPY,(None,None,41,39,11),1,None), 
+    #06.09.26
+    'TATNP':(WEG3_BATYA,(None,None,10,1.9,1,1,1),1,None),
+    #+6 +2 +7 !(24%)
+    'TATNP2':(SEG3_FORCE,(None,None,14,3.0,3,9,53,43,0.5),1,None), 
     
-    'VKCO':(PEG17_PHOENIX,(None,None,9,12,50,43,26,0,55),1,None), #+14 +10 +2 !
-    'VKCO2':(PEG11_KUSURUKEN,(None,None,21,13,47,20,'c',55),1,None), #+4 -7 +1 -17 .
-    'VTBR':(WEG3_BATYA,(None,None,15,2.0,1,1,1),1,None), #-3 +4 -4 -1 .
-    'VTBR2':(PEG4_UNIVERSAL,(None,None,23,13,12,36,'VG','s',6),1,None), #-2 +1 .
+    #+14 +10 +2 !(46%)
+    'VKCO':(PEG17_PHOENIX,(None,None,9,12,50,43,26,0,55),1,None), 
+    #06.09.26
+    'VKCO2':(PEG17_PHOENIX,(None,24,5,6,13,35,19,1,55),2,None),
+    #06.09.26
+    'VTBR':(LEG2_FENNEC,(None,83,54,3.0,7,40,24,1.5,0),7,None),
+    #06.09.26
+    'VTBR2':(WEG3_BATYA,(None,None,16,2.1,1,1,1),1,None),
     
 }
 # sleep_group = ()
