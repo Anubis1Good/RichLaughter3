@@ -3,6 +3,9 @@ from for_strategies.classic_indicators import add_donchan_channel,add_bollinger,
 from for_strategies.pva_indicators import add_static_channel,add_vodka_channel
 from for_strategies.help_indicators import add_buffer_add
 
+
+# 'SBER':(LEG2_HOTS,(None,118,13,3.0,8,33,25,0),10,None), Почему-то эта вариация постоянно закрывала плохие сделки в самых хаях где явно не могло быть подходящего RSI
+#     'AFLT2':(LEG2_HOTS,(None,None,43,2.7,6,40,14,0),1,None), 
 class LEG2_HOTS(BaseEG):
     """stop=None, take=None,period=100,multiplier=2,period2=10,threshold_enter=40,threshold_exit=20,use_stop=1"""
     def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None,period=55,multiplier=2,period2=10,threshold_enter=40,threshold_exit=20,use_stop=1):
@@ -82,7 +85,8 @@ class LEG2_LOGAN(BaseEG):
             return 'close_all'
         
         return None
-        
+
+# 'SFIN':(LEG2_DRINKER,(None,None,42,2.0,4,26,11,0),1,None), тоже закрывал в хаях шорты. Надо проверить
 class LEG2_DRINKER(BaseEG):
     """stop=None, take=None, period=100, multiplier=2, period2=10, threshold_enter=40, threshold_exit=20, use_stop=1"""
     def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=55, multiplier=2, period2=10, threshold_enter=40, threshold_exit=20, use_stop=1):
@@ -173,7 +177,7 @@ class LEG2_ALKASH(BaseEG):
                 return 'close_long'
         
         return None
-
+#     'VTBR':(LEG2_FENNEC,(None,83,54,3.0,7,40,24,1.5,0),7,None), тоже в хаях закрыт убыток
 class LEG2_FENNEC(BaseEG):
     """stop=None, take=None, period=100, multiplier=2, period2=10, threshold_enter=40, threshold_exit=20, divider=1, use_stop=1"""
     def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=55, multiplier=2, period2=10, threshold_enter=40, threshold_exit=20, divider=1, use_stop=1):

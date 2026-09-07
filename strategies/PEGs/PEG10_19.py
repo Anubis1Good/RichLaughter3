@@ -184,7 +184,7 @@ class PEG14_RANGER(BaseEG):
                 return 'open_short'
         
         return None
-
+#     'ROSN2':(PEG14_RENEGADE,(None,None,16,38,52,6,49,30),1,None), опять странные закртия
 class PEG14_RENEGADE(BaseEG):
     """stop=None, take=None, period_adx=27, threshold_rsi=30, period2=55, period3=20, threshold_chop=50, threshold_adx=20"""
     def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_adx=27, threshold_rsi=30, period2=55, period3=20, threshold_chop=50, threshold_adx=20):
@@ -470,6 +470,9 @@ class PEG16_ARTANIS(BaseEG):
         
         return None
 
+# Возможно нужна вариация с более простым выходом
+    # 'ASTR2':(PEG17_PHOENIX,(None,29,10,5,7,35,13,1,55),3,None), закрыл в хаях
+        # 'RUAL2':(PEG17_PHOENIX,(None,None,4,6,9,47,12,0,55),1,None),
 class PEG17_PHOENIX(BaseEG):
     """stop=None, take=None, period=100, period_dc=20, period_rsi=20, period_velcro=50, threshold_velcro=30, use_stop=0, max_period=55"""
     def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=55, period_dc=20, period_rsi=20, period_velcro=50, threshold_velcro=30, use_stop=0, max_period=55):
@@ -794,7 +797,8 @@ class PEG18_VARIAN2(BaseEG):
                 return 'close_short'
             else:
                 return 'close_long'
-            
+
+# 'SIBN':(PEG18_ANDUIN,(None,None,2,1.7,28,24,5,19,0,55),1,None), заходит в хаях закрывает в лоях (иногда)     
 class PEG18_ANDUIN(BaseEG):
     """stop=None, take=None, period_st=55, mult_st=3, period2=10, threshold=30, threshold_adx=30, period_adx=10, use_stop=0, max_period=55"""
     def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_st=55, mult_st=3, period2=10, threshold=30, threshold_adx=30, period_adx=10, use_stop=0, max_period=55):
@@ -895,10 +899,12 @@ class PEG18_BLAZE(BaseEG):
         
         return None
 
+    # 'IRAO':(PEG19_ANUBARAK,(None,None,17,3,11,39,43,91,0,55),1,None), тоже самое закрывает сделки в хаях плохие
 class PEG19_ANUBARAK(BaseEG):
     """stop=None, take=None,period_ami1=10,period_dc=10,period_rsi=10,threshold_enter=30,threshold_exit=40,threshold_ami=50,use_stop=0, max_period=55"""
     def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None,period_ami1=10,period_dc=10,period_rsi=10,threshold_enter=30,threshold_exit=40,threshold_ami=50,use_stop=0, max_period=55):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
+        self.needs_info = {'chart': self.symbol}
         self.period_dc, self.period_ami1 = fix_two_periods_hm(period_dc,period_ami1,max_period)
         self.period_rsi = period_rsi
         self.threshold_enter = threshold_enter

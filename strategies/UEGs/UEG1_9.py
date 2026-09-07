@@ -340,7 +340,7 @@ class UEG6_DUELDODO(BaseEG):
                     return 'close_short'
         
         return None
-
+# 'ENPG2':(UEG6_VULTURE,(None,None,25,7,57,52,4,1,0.96,11),1,None), хаях закрывает убыток
 class UEG6_VULTURE(BaseEG):
     """stop=None, take=None, period=20, period_smas=2, adx_threshold=30, period_sma=20, period_fractal=5, n_fractals=3, allowance=0.1, period_adx=27
     \n

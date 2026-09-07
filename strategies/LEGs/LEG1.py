@@ -5,6 +5,8 @@ from for_strategies.pva_indicators import add_integrity_index,add_quantile_param
 from for_strategies.vsa_indicators import add_dvsai,add_cdvsai
 from for_strategies.fix_params import fix_supertrend_params,fix_two_periods_hm
 
+
+#     'ALRS2':(LEG1_CC2,(None,8,5,19,55,5,0.6,0,0,3,0.24),1,None), кроет в хаях
 class LEG1_CC2(BaseEG):
     """stop=None, take=None, period=15, period_q=10, max_period=55, solution=8,mult=2,use_stop=1,use_ps=1,period2s = 3, quantile=0.3 \n
     Crisis Counter 13 features"""
