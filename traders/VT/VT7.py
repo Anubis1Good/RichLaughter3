@@ -22,9 +22,10 @@ class VT7:
             conf_data:dict,
             symbols:list[str],
             close_on_time:bool=True,
-            close_map:tuple=((22,30),(22,30),(22,30),(22,30),(22,30),(17,30),(17,30),)
+            close_map:tuple=((22,30),(22,30),(22,30),(22,30),(22,30),(17,30),(17,30),),
+            debug_mode:bool=False
             ):
-        
+        self.debug_mode = debug_mode
         self.can_work = True
         self.symbols = symbols
         self.amount = conf_data['amount']
@@ -78,8 +79,21 @@ class VT7:
         self.error_log = dict()
         for symbol in self.symbols:
             self.error_log[symbol] = os.path.join(folder_error,self.trader_name + '_' + symbol + '.txt')
-        self.time_mode = None
-
+        # self.time_mode = None
+        if self.debug_mode:
+            self.debug_folder_main = os.path.join('_logs', 'debug_vt')
+            os.makedirs(self.debug_folder_main,exist_ok=True)
+            self.debug_folder_screen = os.path.join(self.debug_folder_main,'screens')
+            os.makedirs(self.debug_folder_screen,exist_ok=True)
+            self.debug_folder_log = os.path.join(self.debug_folder_main,'logs')
+            os.makedirs(self.debug_folder_log,exist_ok=True)
+            self.debug_folder_df = os.path.join(self.debug_folder_main,'dfs')
+            os.makedirs(self.debug_folder_df,exist_ok=True)
+            self.last_screen = None
+            self.debug_log_files = [os.path.join(self.debug_folder_log,symbol + '.txt') for symbol in self.symbols]
+            self.last_logs = {symbol:[] for symbol in self.symbols}
+            self.last_dfs = {symbol:None for symbol in self.symbols}
+            self.last_btn = {symbol:None for symbol in self.symbols}
 
     def _color_search(self,img:npt.ArrayLike,color:tuple[int],region:tuple[int]=(None,None,None,None),reverse:bool=False):
         try:
@@ -204,6 +218,8 @@ class VT7:
             button = 's'
         else:
             button = 'f'
+        if self.debug_mode:
+            self.last_btn[symbol] = button
         # need_update = self._update_order(img,direction,symbol,idx)
         # # print(symbol,need_update)
         # if not need_update:
@@ -769,12 +785,15 @@ class VT7:
         action = self._check_close_on_time(action,time_mode)
         price_limit = self._check_price_limit(img,symbol,0)
         if price_limit != 0:
+            # print(symbol,'price_limit')
             if pos != 0:
                 action = 'close_all'
             else:
                 action = None
         if action:
             self._work_action(action,pos,img,symbol,0)
+            if self.debug_mode:
+                self._debug_save(symbol,action,price_limit)
         else:
             self._reset_req(symbol,0)
         return action
@@ -795,6 +814,25 @@ class VT7:
             self._work_action_OC(action,pos,img,symbol,0)
         return action, go_next
     
+    def _debug_save(self,symbol,new_action,price_limit):
+        now = str(datetime.now())
+        now_sec = str(int(time()*1000))
+        filename = symbol + now_sec
+        cv2.imwrite(os.path.join(self.debug_folder_screen,filename+'.png'),self.last_screen)
+        filename = os.path.join(self.debug_folder_df,filename + '.csv')
+        df = self.last_dfs[symbol]
+        if df is None:
+            df = pd.DataFrame()
+        df.to_csv(filename)
+        with open(self.debug_folder_log[symbol],'a') as f:
+            f.write(now + "\n")
+            f.writelines(self.last_logs[symbol])
+            f.write('price_limit: '+str(price_limit)+ "\n")
+            f.write('new_action: '+str(new_action) + "\n")
+            f.write('last_btn: '+str(self.last_btn[symbol])+ "\n")
+            f.write( "================================\n")
+
+
     def _error_processing(self,symbol,err):
         print(self.symbols)
         print(f"!!!! {type(err).__name__}: {err} !!!!")
@@ -815,6 +853,8 @@ class VT7:
                     self._reset_req(symbol,i)
 
     def run(self,img):
+        if self.debug_mode:
+            self.last_screen = img
         if not self.can_work:
             return
         symbol = None
@@ -840,6 +880,12 @@ class VT7:
                     delta = delta_p[symbol][0]
                     action = self.wss[symbol](pdata,pos,delta)
                     # print(symbol,action)    
+                    if self.debug_mode:
+                        self.last_dfs[symbol] = pdata.get('chart',None)
+                        self.last_logs[symbol] = []
+                        self.last_logs[symbol].append('pos_'+str(pos)+ '\n')
+                        self.last_logs[symbol].append('delta_'+str(delta)+ '\n')
+                        self.last_logs[symbol].append('raw_action_'+str(action)+ '\n')
                     if isinstance(action, str) or action is None:
                         action = self._processing_str_action(img,symbol,pos,time_mode,action)
                     elif isinstance(action,dict):

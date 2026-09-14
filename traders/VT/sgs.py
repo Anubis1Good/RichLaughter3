@@ -19,7 +19,6 @@ stock_groups= {
 
     ),
     'CLOSE_4':(
-        ['CLOSEALL','CLOSEALL','CLOSEALL','CLOSEALL'],
-        ['CLOSEALL','CLOSEALL','CLOSEALL','CLOSEALL'],
+        ['CLOSEALL1','CLOSEALL2','CLOSEALL3','CLOSEALL4'],
     ),
 }

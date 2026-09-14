@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -70,6 +71,8 @@ class CheckEGTrader:
         self.check_days_mode(days_mode)
         self.actions = (None,'open_long','open_short','close_long','close_short','close_all','stop_close_long','stop_close_short')
         self.actions_dict = {action: idx for idx, action in enumerate(self.actions)}
+        # print(self.actions)
+        # print(self.actions_dict)
         self.measure_time = measure_time
         self.use_tqdm = use_tqdm
         self.df = self.add_time_features(self.df)
@@ -294,12 +297,17 @@ class CheckEGTrader:
     #         self.update_step_data(price)
 
     @duration_time
-    def check_strategy_faster(self, history_bars=None):
+    def check_strategy_faster(self, history_bars=None,debug=False):
         """
         Быстрый тест для оптимизации.
         """
         self.reload_data()
-        
+        if debug:
+            filepath = '_logs/csf/'
+            os.makedirs(filepath,exist_ok=True)
+            filepath = os.path.join(filepath,self.symbol + '.txt')
+            with open(filepath, 'w', encoding='utf-8') as f:
+                f.write('\n')
         # Подготавливаем данные через preprocessing
         pdata = self.ws.preprocessing(self.tdata)
         df = pdata['chart']
@@ -308,8 +316,13 @@ class CheckEGTrader:
         self.sync_step_data(df)
         
         if self.close_on_time:
-            mask = (df['hour'] >= df['weekday'].map(lambda wd: self.close_map[wd][0])) & \
-                (df['minute'] >= df['weekday'].map(lambda wd: self.close_map[wd][1]))
+            # Создаем временные метки для закрытия
+            close_hours = df['weekday'].map(lambda wd: self.close_map[wd][0])
+            close_minutes = df['weekday'].map(lambda wd: self.close_map[wd][1])
+            
+            # Условие: время >= время_закрытия
+            mask = (df['hour'] > close_hours) | \
+                ((df['hour'] == close_hours) & (df['minute'] >= close_minutes))
             mask_values = mask.values
         else:
             mask_values = None
@@ -326,6 +339,7 @@ class CheckEGTrader:
             row_name = row_names[i]
             
             if self.close_on_time and mask_values[i]:
+                action = 'close_all'
                 signal = self.actions_dict['close_all']
             else:
                 
@@ -370,7 +384,12 @@ class CheckEGTrader:
                 
                 action = self.ws(fast_pdata, pos, delta)
                 signal = self.actions_dict.get(action, 0)
-            
+            if debug:
+                row = df.iloc[i]
+                with open(filepath, 'a', encoding='utf-8') as f:
+                    f.write(row.to_string() + '\n')
+                    f.write(str(row_name) +'_'+str(action) + str(signal)+ '\n')
+                    f.write('-' * 50 + '\n')  # разделитель для читаемости
             self.work_action(signal, price, row_name)
             self.update_step_data(price)
     @duration_time
@@ -399,8 +418,10 @@ class CheckEGTrader:
             if self.close_on_time:
                 last_row = df_slice.iloc[-1]
                 time_close = self.close_map[last_row['weekday']]
-                if last_row['hour'] >= time_close[0] and last_row['minute'] >= time_close[1]:
-                    signal = self.actions_dict['close_all']
+                if (last_row['hour'] > time_close[0]) or \
+                (last_row['hour'] == time_close[0] and last_row['minute'] >= time_close[1]):
+                    action = 'close_all'
+                    signal = self.actions_dict[action]
                     self.work_action(signal, price, row_name)
                     self.update_step_data(price)
                     continue
@@ -653,6 +674,35 @@ class CheckEGTrader:
         # td = self.trade_data
         draw_hb_chart_fast(chart)
         self.plot_transaction()
+        # Добавляем линии
+        chart['date'] = chart['ms'].dt.date
+        
+        for date in chart['date'].unique():
+            # Индексы для этого дня
+            day_indices = chart[chart['date'] == date].index
+            
+            # Начало дня (первый индекс)
+            first_idx = day_indices[0]
+            plt.axvline(x=first_idx, color='green', linestyle='--', alpha=0.3, linewidth=0.8)
+            
+            # Получаем weekday через iloc и преобразуем в int
+            weekday = int(chart.loc[first_idx, 'weekday'])  # <-- ПРЕОБРАЗУЕМ В INT
+            
+            if hasattr(self, 'close_map') and weekday in self.close_map:
+                close_hour, close_minute = self.close_map[weekday]
+                
+                # Ищем время закрытия
+                for idx in day_indices:
+                    hour = int(chart.loc[idx, 'hour'])  # <-- ПРЕОБРАЗУЕМ В INT
+                    minute = int(chart.loc[idx, 'minute'])  # <-- ПРЕОБРАЗУЕМ В INT
+                    
+                    if hour > close_hour or (hour == close_hour and minute >= close_minute):
+                        plt.axvline(x=idx, color='red', linestyle='--', alpha=0.3, linewidth=0.8)
+                        y_min, y_max = plt.ylim()
+                        plt.text(idx, y_max * 0.95, f'{close_hour:02d}:{close_minute:02d}', 
+                                rotation=90, fontsize=7, color='red', alpha=0.5)
+                        break
+
         if show:
             plt.show()
     

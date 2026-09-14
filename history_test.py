@@ -16,7 +16,7 @@ symbol = PATH_DF.split('\\')[-1].split('_')[0]
 # ws = [EG,(100,30,20)]
 # ws = [UEG4_FALCON,],
 
-ws = (PEG17_PHOENIX,(14, 15, 35, 9, 46, 28, 10, 0, 55),2,None)
+ws = (VEG1_VENUS,(None,None,0.3,0.8,0.1,2.0,1,0,0),1,None)
 # ws = (LEG1_BIBI2,[])
 # ws = (DebugMean,[])
 cegt = CheckEGTrader(
@@ -33,18 +33,19 @@ cegt = CheckEGTrader(
 # cegt.df = cegt.df.iloc[-500:]
 # cegt.check_strategy_fast()
 # cegt.print_statistics()
-cegt.check_strategy_faster()
+# cegt.check_strategy_faster()
+cegt.check_strategy_faster(debug=True)
 # cegt.ws.save_to_csv("faster_actions.csv")
 # cegt.ws.save_to_csv("faster_means.csv")
 cegt.print_statistics()
 # cegt.plot_chart_and_sequtity()
 ef_fast = cegt.trade_data['step_eq_fee']
 
-# cegt.plot_chart_and_sequtity()
+cegt.plot_chart_and_sequtity()
 # cegt.ws.debug_data = []
 cegt.check_strategy_window(normalization=True)
 # cegt.check_strategy_window(normalization=False)
-ef_window = cegt.trade_data['step_eq_fee']
+# ef_window = cegt.trade_data['step_eq_fee']
 # cegt.ws.save_to_csv("window_actions.csv")
 # cegt.ws.save_to_csv("window_means.csv")
 # cegt.check_strategy_fast_debug()
@@ -52,16 +53,16 @@ ef_window = cegt.trade_data['step_eq_fee']
 # print(result_row)
 
 cegt.print_statistics()
-# cegt.plot_chart_and_sequtity(help_info='sltp')
-import matplotlib.pyplot as plt
+cegt.plot_chart_and_sequtity()
+# import matplotlib.pyplot as plt
 
 # full_name_img = os.path.join(images_folder, f"{name_file}.png")
-name_bot = 'Vasya'
-plt.figure(figsize=(12, 6))
-plt.plot(ef_window, color='red', label='Equity')
-plt.plot(ef_fast, color='blue', label='Equity with Fees')
-plt.show()
-plt.title(f"{name_bot}")
+# name_bot = 'Vasya'
+# plt.figure(figsize=(12, 6))
+# plt.plot(ef_window, color='red', label='Equity')
+# plt.plot(ef_fast, color='blue', label='Equity with Fees')
+# plt.show()
+# plt.title(f"{name_bot}")
 # plt.legend()
 # plt.savefig(full_name_img, bbox_inches='tight')
 # plt.close()
