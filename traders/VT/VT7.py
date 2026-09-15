@@ -90,7 +90,7 @@ class VT7:
             self.debug_folder_df = os.path.join(self.debug_folder_main,'dfs')
             os.makedirs(self.debug_folder_df,exist_ok=True)
             self.last_screen = None
-            self.debug_log_files = [os.path.join(self.debug_folder_log,symbol + '.txt') for symbol in self.symbols]
+            self.debug_log_files = {symbol : os.path.join(self.debug_folder_log,symbol + '.txt') for symbol in self.symbols}
             self.last_logs = {symbol:[] for symbol in self.symbols}
             self.last_dfs = {symbol:None for symbol in self.symbols}
             self.last_btn = {symbol:None for symbol in self.symbols}
@@ -155,7 +155,8 @@ class VT7:
                     pdi.moveTo(glass_region[0]+11,glass_region[1]+11)
                     pdi.press('z')
                     break
-
+                
+    # Есть проблемы с ложными срабатываниями
     def _check_price_limit(self,img,symbol,idx):
         glass_region = self.glass_region[symbol][idx]
         x,y = self._color_search(img,ColorsBtnBGR.price_limit_bid,glass_region)
@@ -824,7 +825,7 @@ class VT7:
         if df is None:
             df = pd.DataFrame()
         df.to_csv(filename)
-        with open(self.debug_folder_log[symbol],'a') as f:
+        with open(self.debug_log_files[symbol],'a') as f:
             f.write(now + "\n")
             f.writelines(self.last_logs[symbol])
             f.write('price_limit: '+str(price_limit)+ "\n")
