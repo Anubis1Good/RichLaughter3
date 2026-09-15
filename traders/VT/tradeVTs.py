@@ -55,7 +55,7 @@ class TradeWorker(QThread):
                 conf_data = raw_pages[unique_pages[idx]]
             else:
                 conf_data = raw_pages['base']
-            trader = VT(conf_data,s)
+            trader = VT(conf_data,s,debug_mode=True)
             self.work_traders.append(trader)
 
         self.msleep(3000)
