@@ -81,7 +81,8 @@ class VT7:
             self.error_log[symbol] = os.path.join(folder_error,self.trader_name + '_' + symbol + '.txt')
         # self.time_mode = None
         if self.debug_mode:
-            self.debug_folder_main = os.path.join('_logs', 'debug_vt')
+            date_folder = datetime.now().strftime('%d%m%Y')
+            self.debug_folder_main = os.path.join('_logs', 'debug_vt',date_folder)
             os.makedirs(self.debug_folder_main,exist_ok=True)
             self.debug_folder_screen = os.path.join(self.debug_folder_main,'screens')
             os.makedirs(self.debug_folder_screen,exist_ok=True)
@@ -156,21 +157,23 @@ class VT7:
                     pdi.press('z')
                     break
                 
-    # Есть проблемы с ложными срабатываниями
     def _check_price_limit(self,img,symbol,idx):
         glass_region = self.glass_region[symbol][idx]
-        x,y = self._color_search(img,ColorsBtnBGR.price_limit_bid,glass_region)
+        x,_ = self._color_search(img,ColorsBtnBGR.price_limit_bid,glass_region)
         if x >= 0:
             return 1
-        x,y = self._color_search(img,ColorsBtnBGR.price_limit_ask,glass_region)
+        x,_ = self._color_search(img,ColorsBtnBGR.price_limit_ask,glass_region)
         if x >= 0:
             return -1
-        _,fbid = self._color_search(img,ColorsBtnBGR.bid,glass_region)
-        _,fask = self._color_search(img,ColorsBtnBGR.ask,glass_region,reverse=True)
-        if fbid == -1:
-            return -1
-        if fask == -1:
-            return 1
+        _,loss = self._color_search(img,ColorsBtnBGR.loss_glass)
+        _,profit = self._color_search(img,ColorsBtnBGR.profit_glass)
+        if loss != -1 and profit != -1:
+            _,fbid = self._color_search(img,ColorsBtnBGR.bid,glass_region)
+            _,fask = self._color_search(img,ColorsBtnBGR.ask,glass_region,reverse=True)
+            if fbid == -1:
+                return -1
+            if fask == -1:
+                return 1
         return 0
     
     def _check_order(self,img,symbol,idx):
