@@ -90,15 +90,17 @@ class VT7:
             os.makedirs(self.debug_folder_log,exist_ok=True)
             self.debug_folder_df = os.path.join(self.debug_folder_main,'dfs')
             os.makedirs(self.debug_folder_df,exist_ok=True)
+            self.debug_folder_fg = os.path.join(self.debug_folder_main,'fgs')
+            os.makedirs(self.debug_folder_fg,exist_ok=True)
             self.last_screen = None
             self.debug_log_files = {symbol : os.path.join(self.debug_folder_log,symbol + '.txt') for symbol in self.symbols}
             self.last_logs = {symbol:[] for symbol in self.symbols}
             self.last_dfs = {symbol:None for symbol in self.symbols}
-            self.last_btn = {symbol:None for symbol in self.symbols}
+            self.last_btn = {symbol:[] for symbol in self.symbols}
 
     def _color_search(self,img:npt.ArrayLike,color:tuple[int],region:tuple[int]=(None,None,None,None),reverse:bool=False):
         try:
-            roi = img[region[1]:region[3], region[0]:region[2]] #смотри не перепутай координаты региона 1 < 3 && 0 < 2, иначе будет пусть roi
+            roi = img[region[1]:region[3], region[0]:region[2]] #смотри не перепутай координаты региона 1 < 3 && 0 < 2, иначе будет пустой roi
             result = np.argwhere(
                 (roi[:,:,0] == color[0]) & (roi[:,:,1] == color[1]) & (roi[:,:,2] == color[2])
             )
@@ -157,7 +159,7 @@ class VT7:
                     pdi.press('z')
                     break
                 
-    def _check_price_limit(self,img,symbol,idx):
+    def _check_price_limit(self,img,symbol,idx,pos):
         glass_region = self.glass_region[symbol][idx]
         x,_ = self._color_search(img,ColorsBtnBGR.price_limit_bid,glass_region)
         if x >= 0:
@@ -165,9 +167,7 @@ class VT7:
         x,_ = self._color_search(img,ColorsBtnBGR.price_limit_ask,glass_region)
         if x >= 0:
             return -1
-        _,loss = self._color_search(img,ColorsBtnBGR.loss_glass)
-        _,profit = self._color_search(img,ColorsBtnBGR.profit_glass)
-        if loss != -1 and profit != -1:
+        if pos == 0:
             _,fbid = self._color_search(img,ColorsBtnBGR.bid,glass_region)
             _,fask = self._color_search(img,ColorsBtnBGR.ask,glass_region,reverse=True)
             if fbid == -1:
@@ -222,25 +222,31 @@ class VT7:
             button = 's'
         else:
             button = 'f'
-        if self.debug_mode:
-            self.last_btn[symbol] = button
         # need_update = self._update_order(img,direction,symbol,idx)
         # # print(symbol,need_update)
         # if not need_update:
         #     return
         pdi.press('f')
         pdi.press(button)
+        if self.debug_mode:
+            self.last_btn[symbol] += ['f',button]
         if direction == 'all':
             pdi.press('a')
             pdi.press('s')
+            if self.debug_mode:
+                self.last_btn[symbol] += ['a','s']
 
     def _send_close(self,direction,symbol,idx,img):
         rev_direction = 'long' if direction == 'short' else 'short'
         glass_region = self.glass_region[symbol][idx]
         pdi.moveTo(glass_region[0]+11,glass_region[1]+11)
         pdi.press('z')
+        if self.debug_mode:
+            self.last_btn[symbol].append('z')
         self._send_open(rev_direction,symbol,idx,img)
         pdi.press('z')
+        if self.debug_mode:
+            self.last_btn[symbol].append('z')
 
     def _reverse_pos(self,direction,symbol,idx):
         glass_region = self.glass_region[symbol][idx]
@@ -256,6 +262,8 @@ class VT7:
         pdi.press(button)
         pdi.press('z')
         pdi.press(button)
+        if self.debug_mode:
+            self.last_btn[symbol] += ['f','z',button,'z',button]
 
     def _reset_req(self,symbol,idx):
         glass_region = self.glass_region[symbol][idx]
@@ -273,6 +281,16 @@ class VT7:
         pdi.press(btn)
         if press_z:
             pdi.press('z')
+        if self.debug_mode:
+            click_btns = []
+            if press_f:
+                click_btns.append('f')
+            if press_z:
+                click_btns.append('z')
+            click_btns.append(btn + '_left_btn: ' + str(left_btn))
+            if press_z:
+                click_btns.append('z')
+            self.last_btn[symbol] += click_btns
 
     def _send_by_cords(self,symbol,idx,y:int,left_btn:bool,press_f=False,press_z=False):
         y = int(y)
@@ -286,6 +304,16 @@ class VT7:
         pdi.click(glass_region[0]+10,y,button=btn)
         if press_z:
             pdi.press('z')
+        if self.debug_mode:
+            click_btns = []
+            if press_f:
+                click_btns.append('f')
+            if press_z:
+                click_btns.append('z')
+            click_btns.append(btn + '_'+str(y))
+            if press_z:
+                click_btns.append('z')
+            self.last_btn[symbol] += click_btns
     
     def _send_by_smart(self,symbol,idx,left_btn:bool,press_f=False,press_z=False,smart_per=30):
         fg = self.fgs[symbol][idx]
@@ -313,6 +341,8 @@ class VT7:
         glass_region = self.glass_region[symbol][idx]
         btn = 'left' if left_btn else 'right'
         pdi.click(glass_region[2]-5,y,button=btn)
+        if self.debug_mode:
+            self.last_btn[symbol].append(btn + '_'+str(y))
         
     # new_methods
     def _add_level(self,dx,dy,chart_region):
@@ -703,31 +733,39 @@ class VT7:
         if type_order == 'send_cords':
             if can_send:
                 self._send_by_cords(symbol, idx, action.y, left_btn, action.press_f, action.press_z)
+                return True
         elif type_order == 'send_simple':
             if can_send:
                 self._send_by_simple(symbol,idx,left_btn,action.press_f,action.press_z)
+                return True
         elif type_order == 'send_smart':
             if can_send:
                 self._send_by_smart(symbol,idx,left_btn,action.press_f,action.press_z,action.smart_per)
+                return True
         elif type_order == 'reset_cords':
             self._reset_by_cords(symbol,idx,action.y,left_btn)
+            return True
         elif type_order == 'reset_simple':
             self._reset_req(symbol,idx)
+            return True
         elif type_order == 'close_all_simple':
             if pos > 0:
                 # Закрываем лонг - продажа
                 self._send_by_simple(symbol, idx, False, True, True)
+                return True
             elif pos < 0:
                 # Закрываем шорт - покупка
                 self._send_by_simple(symbol, idx, True, True, True)
+                return True
         elif type_order == 'close_all_smart':
             if pos > 0:
                 self._send_by_smart(symbol, idx, False, True, True, action.smart_per)
+                return True
             elif pos < 0:
                 self._send_by_smart(symbol, idx, True, True, True, action.smart_per)
+                return True
+        return False
         
-
-
     def _check_close_on_time(self,action,time_mode):
         if self.close_on_time:
             if time_mode == -1:
@@ -787,7 +825,7 @@ class VT7:
     
     def _processing_str_action(self,img,symbol,pos,time_mode,action):
         action = self._check_close_on_time(action,time_mode)
-        price_limit = self._check_price_limit(img,symbol,0)
+        price_limit = self._check_price_limit(img,symbol,0,pos)
         if price_limit != 0:
             # print(symbol,'price_limit')
             if pos != 0:
@@ -807,7 +845,7 @@ class VT7:
         action, change_action = self._check_close_on_time_OC(action,time_mode)
         if change_action:
             go_next = False
-        price_limit = self._check_price_limit(img,symbol,0)
+        price_limit = self._check_price_limit(img,symbol,0,pos)
         if price_limit != 0:
             go_next = False
             if pos != 0:
@@ -815,8 +853,9 @@ class VT7:
             else:
                 action = None
         if action:
-            self._work_action_OC(action,pos,img,symbol,0)
-        return action, go_next
+            use_action = self._work_action_OC(action,pos,img,symbol,0)
+
+        return action, go_next, price_limit, use_action
     
     def _debug_save(self,symbol,new_action,price_limit):
         now = str(datetime.now())
@@ -830,12 +869,21 @@ class VT7:
         df.to_csv(filename)
         with open(self.debug_log_files[symbol],'a') as f:
             f.write(now + "\n")
+            f.write(now_sec + "\n")
             f.writelines(self.last_logs[symbol])
             f.write('price_limit: '+str(price_limit)+ "\n")
             f.write('new_action: '+str(new_action) + "\n")
             f.write('last_btn: '+str(self.last_btn[symbol])+ "\n")
             f.write( "================================\n")
-
+        return now_sec
+    
+    def _debug_save_OC(self,symbol,now_sec):
+        filename = symbol + now_sec
+        filename = os.path.join(self.debug_folder_fg,filename + '.csv')
+        fg = self.fgs[symbol][0]
+        if fg is None:
+            fg = pd.DataFrame()
+        fg.to_csv(filename)
 
     def _error_processing(self,symbol,err):
         print(self.symbols)
@@ -887,21 +935,29 @@ class VT7:
                     if self.debug_mode:
                         self.last_dfs[symbol] = pdata.get('chart',None)
                         self.last_logs[symbol] = []
+                        self.last_logs[symbol].append(str(symbol)+'_ws_'+type(self.wss[symbol]).__name__+ '\n') #проверить
                         self.last_logs[symbol].append('pos_'+str(pos)+ '\n')
                         self.last_logs[symbol].append('delta_'+str(delta)+ '\n')
-                        self.last_logs[symbol].append('raw_action_'+str(action)+ '\n')
+                        self.last_logs[symbol].append('raw_action_'+str(action)
+                        + '\n')
+                        self.last_btn[symbol] = []
                     if isinstance(action, str) or action is None:
                         action = self._processing_str_action(img,symbol,pos,time_mode,action)
                     elif isinstance(action,dict):
                         ...
                     elif isinstance(action, (tuple, list)):
+                        
                         new_action = []
                         for act in action:
                             if isinstance(act, OrderCords):
-                                act,go_next = self._processing_OC_action(img,symbol,pos,time_mode,act)
-                                new_action.append(act)
+                                act, go_next, price_limit, use_action = self._processing_OC_action(img,symbol,pos,time_mode,act)
+                                if use_action:
+                                    new_action.append(act)
                                 if not go_next:
                                     break
+                        if self.debug_mode and len(new_action) != 0:
+                            now_sec = self._debug_save(symbol,new_action,price_limit)
+                            self._debug_save_OC(symbol,now_sec)
                         action = new_action
                     # print(symbol,action,pos)
 

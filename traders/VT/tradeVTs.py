@@ -71,16 +71,20 @@ class TradeWorker(QThread):
 
     def execute_trade_cycle(self):
         for wt in self.work_traders:
-            for _ in range(20):  # 20 * 100мс = 2 секунды
+            for _ in range(15):  # 15 * 100мс = 1.5 секунды
                 if self.isInterruptionRequested():
                     return
                 self.msleep(100)
             if self.isInterruptionRequested():
                 return
-            keyboard.send('shift')
             if self.isInterruptionRequested():
                 return
             wt.prev_screen_reset()
+            keyboard.send('shift')
+            for _ in range(10):           # 10 * 50мс = 500мс
+                if self.isInterruptionRequested():
+                    return
+                self.msleep(50)
             img = np.array(pag.screenshot()) 
             img = cv2.cvtColor(img,cv2.COLOR_RGB2BGR)
             # cv2.imwrite('test.png',img)
