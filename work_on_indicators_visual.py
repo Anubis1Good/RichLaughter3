@@ -19,30 +19,29 @@ period=10
 multiplier=3
 max_period = 55
 
-p1=10
-p2=10
-p3=25
-p1,p2=fix_two_periods_hm(p1,p2,max_period)
-print(p1,p2,p3)
-p1,p2,p3=fix_three_periods_hm(p1,p2,p3,max_period)
-if p2 < p3:
-    p3 = p2
-print(p1,p2,p3)
-df = add_donchan_channel(df, p1)
-df = add_assessment_motion_index(df, p2, p3)
-# df = add_quantile_params(df, p2)
-# df = add_ext_params(df, p2)
+# p1=10
+# p2=10
+# p3=25
+# p1,p2=fix_two_periods_hm(p1,p2,max_period)
+# print(p1,p2,p3)
+# p1,p2,p3=fix_three_periods_hm(p1,p2,p3,max_period)
+# if p2 < p3:
+#     p3 = p2
+# print(p1,p2,p3)
 
 
+    
 
+df = add_zigzag_window_210926(df)
 # df['stair_pc'] = df['stair']
 # df = add_hl_stair_fast(df)
 
 print(df.tail(20))
-# fig = draw_bars_chart_wo_vol(df)
+fig = draw_bars_chart_wo_vol(df)
+draw_wzp(df,4)
 
-plt.plot(df['ami'])
-plt.plot(df['ami_filter'])
+# plt.plot(df['ami'])
+# plt.plot(df['ami_filter'])
 # plt.plot(df['stair_pc_windowed'],color='blue')
 # plt.plot(df['top_ext'],color='green')
 # plt.plot(df['bottom_ext'],color='black')

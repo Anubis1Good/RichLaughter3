@@ -19,11 +19,11 @@ df = simple_load_df(PATH_DF)
 
 # window = 60
 START = WINDOW
-START = 3374
+START = 700
 END = START + WINDOW
 WINDOW_SIZE = END - START
-COLUMNS = ['ami_filter','ami']  # <--- СПИСОК КОЛОНОК
-# COLUMNS = []  # <--- СПИСОК КОЛОНОК
+# COLUMNS = ['ami_filter','ami']  # <--- СПИСОК КОЛОНОК
+COLUMNS = []  # <--- СПИСОК КОЛОНОК
 draw_chart = True
 # draw_chart = False
 
@@ -39,8 +39,7 @@ COLORS_DF2 = ['red', 'orange']  # для zigzag и zigzag_peaks соответс
 def preprocessing(df):
     """Добавляем индикаторы в датафрейм"""
     df = df.copy()
-    df = add_donchan_channel(df, 10)
-    df = add_assessment_motion_index(df, 10, 10)
+    df = add_zigzag_window_210926(df)
     return df
 # ===== ФУНКЦИЯ ДЛЯ РИСОВАНИЯ ГРАФИКА =====
 def draw_hb_chart_fast_on_ax(ax, df):
@@ -99,8 +98,8 @@ def create_figure(df1, df2, start_idx, end_idx, columns=['rsi'],
     # === Рисуем график ===
     if show_chart:
         draw_hb_chart_fast_on_ax(ax, slice1)
-    # draw_wzp(slice1,color='blue',ax=ax)
-    # draw_wzp(slice2,ax=ax)
+    draw_wzp(slice1,color='blue',ax=ax)
+    draw_wzp(slice2,ax=ax)
     # === Рисуем индикаторы поверх графика ===
     # График DF1 (пунктирные линии)
     for i, col in enumerate(columns):
@@ -220,8 +219,8 @@ def update_plot(new_start):
     # === Рисуем график ===
     if draw_chart:
         draw_hb_chart_fast_on_ax(ax, slice1)
-    # draw_wzp(slice1,color='blue',ax=ax)
-    # draw_wzp(slice2,ax=ax)
+    draw_wzp(slice1,color='blue',ax=ax)
+    draw_wzp(slice2,ax=ax)
     # === Рисуем индикаторы поверх графика ===
     # График DF1 (пунктирные линии)
     for i, col in enumerate(COLUMNS):

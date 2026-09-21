@@ -3,20 +3,22 @@ from for_strategies.classic_indicators import add_fractals,add_rsi,add_adx,add_b
 from for_strategies.pva_indicators import add_average_fractals,add_plus_delta_fc,add_exp_pdfc,add_ext_on_fractals,add_mean_on_fractals
 from for_strategies.zigzag_indicators import add_percent_zz190826,add_dzz_peaks,add_analys_dzz,add_percent_zz_peaks,add_pattern18_dzz_czd,add_stop_loss_p18czd,add_exp_plusdelta_dzz_peaks,add_mean_dzz_peaks,add_plusdelta_dzz_peaks,add_zigzag180826,add_shift_zz_peaks,add_analys_dzz180826
 
-class UEG2_GGD(BaseEG):
-    """stop=None, take=None, max_period=55, period_fractal=5"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, max_period=55, period_fractal=5):
+class UEG4_CANADIAN(BaseEG):
+    """stop=None, take=None, max_period=55, period_fractal=5, allowance=0.1"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, max_period=55, period_fractal=5, allowance=0.1):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
         self.max_period = max_period
         self.period_fractal = period_fractal
-
+        self.allowance = allowance
 
     def preprocessing(self, tdata):
         pdata = {}
         df = tdata['chart']
         df = add_fractals(df, self.period_fractal)
         df = add_average_fractals(df, self.max_period, self.period_fractal)
+        df['ave_diff_percent'] = ((df['ave_up'] - df['ave_down']) / df['ave_down']) * 100
+        df['allowance'] = df['ave_diff_percent'] > self.allowance
         df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
@@ -28,107 +30,7 @@ class UEG2_GGD(BaseEG):
             return 'open_long'
         
         return None
-
-class UEG2_GOOSE(BaseEG):
-    """stop=None, take=None, period_fractal=5, n_fractals=3"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_fractal=5, n_fractals=3):
-        super().__init__(symbol, price_step, mult_ps, mode, stop, take)
-        self.needs_info = {'chart': self.symbol}
-        self.period_fractal = period_fractal
-        self.n_fractals = n_fractals
-        self.problems = 'Mcfly'
-
-    def preprocessing(self, tdata):
-        pdata = {}
-        df = tdata['chart']
-        df = add_fractals(df, self.period_fractal)
-        df = add_exp_pdfc(df, self.n_fractals, self.period_fractal)
-        df = self.add_slice_df(df)
-        pdata['chart'] = df
-        return pdata
-    
-    def _get_action_from_row(self, row):
-        if row['close'] >= row['pdf_up']:
-            return 'open_short'
-        if row['close'] <= row['pdf_down']:
-            return 'open_long'
-        
-        return None
-        
-class UEG2_DUCK(BaseEG):
-    """stop=None, take=None, period_fractal=5, n_fractals=3"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_fractal=5, n_fractals=3):
-        super().__init__(symbol, price_step, mult_ps, mode, stop, take)
-        self.needs_info = {'chart': self.symbol}
-        self.period_fractal = period_fractal
-        self.n_fractals = n_fractals
-        self.problems = 'Mcfly'
-
-    def preprocessing(self, tdata):
-        pdata = {}
-        df = tdata['chart']
-        df = add_fractals(df, self.period_fractal)
-        df = add_plus_delta_fc(df, self.n_fractals, self.period_fractal)
-        df = self.add_slice_df(df)
-        pdata['chart'] = df
-        return pdata
-    
-    def _get_action_from_row(self, row):
-        if row['close'] >= row['pdf_up']:
-            return 'open_short'
-        if row['close'] <= row['pdf_down']:
-            return 'open_long'
-        
-        return None
-        
-class UEG3_ZEUS(BaseEG):
-    """stop=None, take=None, percent_threshold=0.5"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, percent_threshold=0.5):
-        super().__init__(symbol, price_step, mult_ps, mode, stop, take)
-        self.needs_info = {'chart': self.symbol}
-        self.percent_threshold = percent_threshold
-
-    def preprocessing(self, tdata):
-        pdata = {}
-        df = tdata['chart']
-        df = add_percent_zz190826(df, percent_threshold=self.percent_threshold,drop_last=False)
-        # df = self.add_slice_df(df)
-        pdata['chart'] = df
-        return pdata
-    
-    def _get_action_from_row(self, row):
-        if row['zigzag_direction'] == -1:
-            return 'open_short'
-        if row['zigzag_direction'] == 1:
-            return 'open_long'
-        
-        return None
-            
-class UEG3_REVAN(BaseEG):
-    """stop=None, take=None, period=55, n_std=5"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=55, n_std=5):
-        super().__init__(symbol, price_step, mult_ps, mode, stop, take)
-        self.needs_info = {'chart': self.symbol}
-        self.period = period
-        self.n_std = n_std
-        self.problems = 'Mcfly'
-
-    def preprocessing(self, tdata):
-        pdata = {}
-        df = tdata['chart']
-        df = add_dzz_peaks(df, n_std=self.n_std, period=self.period,drop_last=False)
-        df = self.add_slice_df(df)
-        pdata['chart'] = df
-        return pdata
-    
-    def _get_action_from_row(self, row):
-        if row['zigzag_direction'] == -1:
-            return 'open_long'
-        if row['zigzag_direction'] == 1:
-            return 'open_short'
-        
-        return None
-    
+   
 class UEG4_FALCON(BaseEG):
     """stop=None, take=None, period_fractal=5, n_fractals=3, allowance=0.1"""
     def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_fractal=5, n_fractals=3, allowance=0.1):
@@ -340,7 +242,7 @@ class UEG6_DUELDODO(BaseEG):
                     return 'close_short'
         
         return None
-# 'ENPG2':(UEG6_VULTURE,(None,None,25,7,57,52,4,1,0.96,11),1,None), хаях закрывает убыток
+
 class UEG6_VULTURE(BaseEG):
     """stop=None, take=None, period=20, period_smas=2, adx_threshold=30, period_sma=20, period_fractal=5, n_fractals=3, allowance=0.1, period_adx=27
     \n

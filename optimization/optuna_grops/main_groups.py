@@ -471,24 +471,11 @@ group = (
     ),
  
     (
-        UEG2_GGD, 
+        UEG4_CANADIAN, 
         [
             (max_period,),
             (2,period_fractal_max,1),
-        ]
-    ),
-    (
-        UEG2_DUCK, 
-        [
-            (2,period_fractal_max,1),
-            (2,5,1),
-        ]
-    ),
-    (
-        UEG2_GOOSE, 
-        [
-            (2,period_fractal_max,1),
-            (2,5,1),
+            (0,1,0.01)
         ]
     ),
 
