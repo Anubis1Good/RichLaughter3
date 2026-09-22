@@ -14,7 +14,7 @@ from testing.test_constants import *
 # PATH_DF = '_data_for_tests\_before_opt\ALRS_5_1787155697.parquet'
 
 df = simple_load_df(PATH_DF)
-# df = df.iloc[-60:]
+df = df.iloc[-80:]
 period=10
 multiplier=3
 max_period = 55
@@ -32,11 +32,12 @@ max_period = 55
 
     
 
-df = add_zigzag_window_210926(df)
+df = add_zigzag_window_220926(df)
 # df['stair_pc'] = df['stair']
 # df = add_hl_stair_fast(df)
 
 print(df.tail(20))
+print(df[['wzp1','idx_wzp1','wzp2','idx_wzp2','wzp3','idx_wzp3','wzp4','idx_wzp4',   'wzp5',  'idx_wzp5',  'wzp6',  'idx_wzp6',   'wzp7',  'idx_wzp7',   'wzp8',  'idx_wzp8']].tail())
 fig = draw_bars_chart_wo_vol(df)
 draw_wzp(df,4)
 

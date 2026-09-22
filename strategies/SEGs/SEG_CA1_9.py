@@ -4,6 +4,7 @@ from for_strategies.zigzag_indicators import add_percent_zz190826
 from for_strategies.help_indicators import add_big_volume,add_over_bb
 from for_strategies.pva_indicators import add_simple_dynamics_ma,add_pc_stair_fast
 
+# подумать над вариацией SEG со способностью тянуть сделку дольше (может, до противоположной сделки)
 class SEG1_LITE(BaseEG):
     """stop=None, take=None, period=20, multiplier=2, slope=0.5, period2=10"""
     def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=20, multiplier=2, slope=0.5, period2=10):
