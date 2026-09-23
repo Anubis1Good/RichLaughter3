@@ -1907,6 +1907,268 @@ def add_window_zigzag190826(df: pd.DataFrame, period=55):
 """
 # 21092026
 
+# def find_extremum_zzw210926(h, l, from_pos, to_pos, kind):
+#     if to_pos - from_pos < 1:
+#         return None
+#     if kind == 'H':
+#         sub = h[from_pos:to_pos]
+#         k = int(np.argmax(sub))
+#         return (from_pos + k, sub[k], 'H')
+#     else:
+#         sub = l[from_pos:to_pos]
+#         k = int(np.argmin(sub))
+#         return (from_pos + k, sub[k], 'L')
+
+
+# def find_extremum_last_zzw210926(h, l, from_pos, to_pos, kind):
+#     if to_pos - from_pos < 1:
+#         return None
+#     if kind == 'H':
+#         sub = h[from_pos:to_pos][::-1]
+#         k = int(np.argmax(sub))
+#         pos = to_pos - 1 - k
+#         return (pos, h[pos], 'H')
+#     else:
+#         sub = l[from_pos:to_pos][::-1]
+#         k = int(np.argmin(sub))
+#         pos = to_pos - 1 - k
+#         return (pos, l[pos], 'L')
+
+
+# def pick_zone_zzw210926(S_left, S_mid, S_right, tol_frac):
+#     zones = [('left', S_left), ('mid', S_mid), ('right', S_right)]
+#     max_size = max(S_left, S_mid, S_right)
+#     if max_size <= 0:
+#         return 'mid'
+#     candidates = [name for name, size in zones
+#                   if max_size - size <= tol_frac * max_size]
+#     return candidates[-1]
+
+
+# def mid_extras_zzw210926(h, l, L_pos, L_type, R_pos, R_type):
+#     """Логика mid: 2 точки между L и R, чередующиеся с ними."""
+#     p1_type = 'L' if L_type == 'H' else 'H'
+#     p2_type = L_type
+#     mid_pos = (L_pos + R_pos) // 2
+#     p1 = find_extremum_zzw210926(h, l, L_pos + 1, mid_pos + 1, p1_type)
+#     if p1 is None:
+#         p1 = find_extremum_zzw210926(h, l, L_pos + 1, R_pos, p1_type)
+#     if p1 is None:
+#         return []
+#     extras = [p1]
+#     p2 = find_extremum_zzw210926(h, l, p1[0] + 1, R_pos, p2_type)
+#     if p2 is None:
+#         p2 = find_extremum_zzw210926(h, l, L_pos + 1, p1[0], p2_type)
+#     if p2 is not None:
+#         extras.append(p2)
+#     return extras
+
+
+# def add_zigzag_window_210926(df, period=55, tol_frac=0.10):
+#     n = len(df)
+#     high = df['high'].to_numpy(dtype=float)
+#     low = df['low'].to_numpy(dtype=float)
+#     df_index = df.index.to_numpy()
+
+#     wzp_prices = [np.full(n, np.nan) for _ in range(4)]
+#     wzp_idx = [np.full(n, np.nan) for _ in range(4)]
+
+#     for i in range(period - 1, n):
+#         start = i - period + 1
+#         end = i + 1
+
+#         h = high[start:end]
+#         l = low[start:end]
+
+#         # --- Шаг 1: опорные точки ---
+#         pos_max = int(np.argmax(h))
+#         pos_min = int(np.argmin(l))
+
+#         if pos_max == pos_min:
+#             h_masked = h.copy()
+#             l_masked = l.copy()
+#             h_masked[pos_max] = -np.inf
+#             l_masked[pos_min] = np.inf
+#             alt_max = int(np.argmax(h_masked))
+#             alt_min = int(np.argmin(l_masked))
+#             if h[pos_max] - h[alt_max] <= l[alt_min] - l[pos_min]:
+#                 pos_max = alt_max
+#             else:
+#                 pos_min = alt_min
+
+#         if pos_max < pos_min:
+#             L_pos, L_type = pos_max, 'H'
+#             R_pos, R_type = pos_min, 'L'
+#         else:
+#             L_pos, L_type = pos_min, 'L'
+#             R_pos, R_type = pos_max, 'H'
+
+#         L_price = h[L_pos] if L_type == 'H' else l[L_pos]
+#         R_price = h[R_pos] if R_type == 'H' else l[R_pos]
+
+#         # --- Шаг 2: зоны ---
+#         S_left  = L_pos
+#         S_mid   = R_pos - L_pos - 1
+#         S_right = period - 1 - R_pos
+
+#         chosen = pick_zone_zzw210926(S_left, S_mid, S_right, tol_frac)
+
+#         # --- Шаг 3: 2 дополнительные точки ---
+#         extras = []
+
+#         if chosen == 'left':
+#             t1 = 'L' if L_type == 'H' else 'H'
+#             t2 = L_type
+#             p1 = find_extremum_last_zzw210926(h, l, 0, L_pos, t1)
+#             if p1 is not None:
+#                 extras.append(p1)
+#                 p2 = find_extremum_last_zzw210926(h, l, 0, p1[0], t2)
+#                 if p2 is not None:
+#                     extras.append(p2)
+
+#         elif chosen == 'right':
+#             t1 = 'L' if R_type == 'H' else 'H'
+#             t2 = R_type
+#             p1 = find_extremum_zzw210926(h, l, R_pos + 1, period, t1)
+#             if p1 is not None:
+#                 extras.append(p1)
+#                 p2 = find_extremum_zzw210926(h, l, p1[0], period, t2)
+#                 if p2 is not None:
+#                     extras.append(p2)
+
+#         else:  # mid
+#             extras = mid_extras_zzw210926(h, l, L_pos, L_type, R_pos, R_type)
+
+#         # --- Шаг 4: сборка и сортировка ---
+#         op_positions = {L_pos, R_pos}
+#         all_points = [(L_pos, L_price, L_type), (R_pos, R_price, R_type)] + extras
+#         all_points.sort(key=lambda p: (p[0], 0 if p[0] in op_positions else 1))
+
+#         # --- Шаг 5: чередование с дозаполнением между соседями одного типа ---
+#         validated = [all_points[0]]
+#         for p in all_points[1:]:
+#             prev = validated[-1]
+#             if p[2] == prev[2]:
+#                 opposite = 'L' if p[2] == 'H' else 'H'
+#                 extra = find_extremum_zzw210926(h, l, prev[0] + 1, p[0], opposite)
+#                 if extra is not None:
+#                     validated.append(extra)
+#                 validated.append(p)
+#             else:
+#                 validated.append(p)
+
+#         # --- Шаг 5.5: обрезка до 4 с приоритетом опорных ---
+#         if len(validated) > 4:
+#             seen = set()
+#             unique = []
+#             for p in validated:
+#                 key = (p[0], p[2])
+#                 if key not in seen:
+#                     unique.append(p)
+#                     seen.add(key)
+#             validated = unique
+
+#         if len(validated) > 4:
+#             final = validated[:4]
+#             positions_in_final = {p[0] for p in final}
+#             for op_pos in (L_pos, R_pos):
+#                 if op_pos not in positions_in_final:
+#                     op_point = next(p for p in validated if p[0] == op_pos)
+#                     non_op_indices = [idx for idx, p in enumerate(final)
+#                                       if p[0] != L_pos and p[0] != R_pos]
+#                     if non_op_indices:
+#                         final[non_op_indices[-1]] = op_point
+#             final.sort(key=lambda p: (p[0], 0 if p[0] in op_positions else 1))
+#             validated = final
+
+#         # --- Шаг 6: проверка — если меньше 4 или чередование нарушено,
+#         #            переключаемся на mid-логику ---
+#         def has_strict_alternation(pts):
+#             for k in range(len(pts) - 1):
+#                 if pts[k][2] == pts[k + 1][2]:
+#                     return False
+#             return True
+
+#         if len(validated) < 4 or not has_strict_alternation(validated):
+#             extras_mid = mid_extras_zzw210926(h, l, L_pos, L_type, R_pos, R_type)
+#             all_points_mid = [(L_pos, L_price, L_type),
+#                               (R_pos, R_price, R_type)] + extras_mid
+#             all_points_mid.sort(key=lambda p: (p[0], 0 if p[0] in op_positions else 1))
+
+#             validated = [all_points_mid[0]]
+#             for p in all_points_mid[1:]:
+#                 prev = validated[-1]
+#                 if p[2] == prev[2]:
+#                     opposite = 'L' if p[2] == 'H' else 'H'
+#                     extra = find_extremum_zzw210926(h, l, prev[0] + 1, p[0], opposite)
+#                     if extra is not None:
+#                         validated.append(extra)
+#                     validated.append(p)
+#                 else:
+#                     validated.append(p)
+
+#             if len(validated) > 4:
+#                 seen = set()
+#                 unique = []
+#                 for p in validated:
+#                     key = (p[0], p[2])
+#                     if key not in seen:
+#                         unique.append(p)
+#                         seen.add(key)
+#                 validated = unique
+
+#             if len(validated) > 4:
+#                 final = validated[:4]
+#                 positions_in_final = {p[0] for p in final}
+#                 for op_pos in (L_pos, R_pos):
+#                     if op_pos not in positions_in_final:
+#                         op_point = next(p for p in validated if p[0] == op_pos)
+#                         non_op_indices = [idx for idx, p in enumerate(final)
+#                                           if p[0] != L_pos and p[0] != R_pos]
+#                         if non_op_indices:
+#                             final[non_op_indices[-1]] = op_point
+#                 final.sort(key=lambda p: (p[0], 0 if p[0] in op_positions else 1))
+#                 validated = final
+
+#         # --- Шаг 6.5: крайний fallback, если всё ещё меньше 4 ---
+#         while len(validated) < 4:
+#             last = validated[-1]
+#             if last[2] == 'H':
+#                 validated.append((last[0], l[last[0]], 'L'))
+#             else:
+#                 validated.append((last[0], h[last[0]], 'H'))
+
+#         points = validated[:4]
+
+#         # --- Шаг 7: индексы с разрешением коллизий ---
+#         raw_idx = [p[0] for p in points]
+#         final_idx = raw_idx[:]
+#         changed = True
+#         it = 0
+#         while changed and it < 100:
+#             changed = False
+#             it += 1
+#             for k in range(len(final_idx) - 1):
+#                 if final_idx[k] >= final_idx[k + 1]:
+#                     if final_idx[k] - 1 >= 0:
+#                         final_idx[k] -= 1
+#                         changed = True
+#                     elif final_idx[k + 1] + 1 < period:
+#                         final_idx[k + 1] += 1
+#                         changed = True
+
+#         for k in range(min(4, len(points))):
+#             wzp_prices[k][i] = points[k][1]
+#             wzp_idx[k][i] = df_index[start + final_idx[k]]
+
+#     for k in range(4):
+#         df[f'wzp{k+1}'] = wzp_prices[k]
+#         df[f'idx_wzp{k+1}'] = wzp_idx[k]
+
+#     return df
+
+# 21 оптимизированная
+
 def find_extremum_zzw210926(h, l, from_pos, to_pos, kind):
     if to_pos - from_pos < 1:
         return None
@@ -1924,25 +2186,30 @@ def find_extremum_last_zzw210926(h, l, from_pos, to_pos, kind):
     if to_pos - from_pos < 1:
         return None
     if kind == 'H':
-        sub = h[from_pos:to_pos][::-1]
-        k = int(np.argmax(sub))
-        pos = to_pos - 1 - k
-        return (pos, h[pos], 'H')
+        sub = h[from_pos:to_pos]
+        # последнее вхождение максимума без реверса копии
+        m = sub.max()
+        # np.flatnonzero(sub == m)[-1] — без создания полного reversed массива
+        k = int(np.flatnonzero(sub == m)[-1])
+        return (from_pos + k, sub[k], 'H')
     else:
-        sub = l[from_pos:to_pos][::-1]
-        k = int(np.argmin(sub))
-        pos = to_pos - 1 - k
-        return (pos, l[pos], 'L')
+        sub = l[from_pos:to_pos]
+        m = sub.min()
+        k = int(np.flatnonzero(sub == m)[-1])
+        return (from_pos + k, sub[k], 'L')
 
 
 def pick_zone_zzw210926(S_left, S_mid, S_right, tol_frac):
-    zones = [('left', S_left), ('mid', S_mid), ('right', S_right)]
     max_size = max(S_left, S_mid, S_right)
     if max_size <= 0:
         return 'mid'
-    candidates = [name for name, size in zones
-                  if max_size - size <= tol_frac * max_size]
-    return candidates[-1]
+    threshold = max_size - tol_frac * max_size
+    # порядок важен: right -> mid -> left (соответствует candidates[-1])
+    if S_right >= threshold:
+        return 'right'
+    if S_mid >= threshold:
+        return 'mid'
+    return 'left'
 
 
 def mid_extras_zzw210926(h, l, L_pos, L_type, R_pos, R_type):
@@ -1964,21 +2231,78 @@ def mid_extras_zzw210926(h, l, L_pos, L_type, R_pos, R_type):
     return extras
 
 
+# ---------- helpers для устранения дублирования Шагов 5/5.5/6 ----------
+
+def _build_alternating_sequence(all_points, h, l):
+    """Чередование с дозаполнением между соседями одного типа."""
+    validated = [all_points[0]]
+    for p in all_points[1:]:
+        prev = validated[-1]
+        if p[2] == prev[2]:
+            opposite = 'L' if p[2] == 'H' else 'H'
+            extra = find_extremum_zzw210926(h, l, prev[0] + 1, p[0], opposite)
+            if extra is not None:
+                validated.append(extra)
+            validated.append(p)
+        else:
+            validated.append(p)
+    return validated
+
+
+def _dedupe_points(pts):
+    seen = set()
+    unique = []
+    for p in pts:
+        key = (p[0], p[2])
+        if key not in seen:
+            unique.append(p)
+            seen.add(key)
+    return unique
+
+
+def _trim_to_four(validated, L_pos, R_pos, op_positions):
+    """Обрезка до 4 точек с приоритетом опорных L_pos/R_pos."""
+    if len(validated) > 4:
+        validated = _dedupe_points(validated)
+
+    if len(validated) > 4:
+        final = validated[:4]
+        positions_in_final = {p[0] for p in final}
+        for op_pos in (L_pos, R_pos):
+            if op_pos not in positions_in_final:
+                op_point = next(p for p in validated if p[0] == op_pos)
+                non_op_indices = [idx for idx, p in enumerate(final)
+                                  if p[0] != L_pos and p[0] != R_pos]
+                if non_op_indices:
+                    final[non_op_indices[-1]] = op_point
+        final.sort(key=lambda p: (p[0], p[0] not in op_positions))
+        validated = final
+
+    return validated
+
+
+def _has_strict_alternation(pts):
+    for k in range(len(pts) - 1):
+        if pts[k][2] == pts[k + 1][2]:
+            return False
+    return True
+
+
 def add_zigzag_window_210926(df, period=55, tol_frac=0.10):
     n = len(df)
     high = df['high'].to_numpy(dtype=float)
     low = df['low'].to_numpy(dtype=float)
     df_index = df.index.to_numpy()
 
-    wzp_prices = [np.full(n, np.nan) for _ in range(4)]
-    wzp_idx = [np.full(n, np.nan) for _ in range(4)]
+    # 2D-массивы вместо списка массивов
+    wzp_prices = np.full((4, n), np.nan)
+    wzp_idx = np.full((4, n), np.nan)
 
     for i in range(period - 1, n):
         start = i - period + 1
-        end = i + 1
 
-        h = high[start:end]
-        l = low[start:end]
+        h = high[start:start + period]
+        l = low[start:start + period]
 
         # --- Шаг 1: опорные точки ---
         pos_max = int(np.argmax(h))
@@ -2007,8 +2331,8 @@ def add_zigzag_window_210926(df, period=55, tol_frac=0.10):
         R_price = h[R_pos] if R_type == 'H' else l[R_pos]
 
         # --- Шаг 2: зоны ---
-        S_left  = L_pos
-        S_mid   = R_pos - L_pos - 1
+        S_left = L_pos
+        S_mid = R_pos - L_pos - 1
         S_right = period - 1 - R_pos
 
         chosen = pick_zone_zzw210926(S_left, S_mid, S_right, tol_frac)
@@ -2040,97 +2364,25 @@ def add_zigzag_window_210926(df, period=55, tol_frac=0.10):
             extras = mid_extras_zzw210926(h, l, L_pos, L_type, R_pos, R_type)
 
         # --- Шаг 4: сборка и сортировка ---
-        op_positions = {L_pos, R_pos}
+        op_positions = (L_pos, R_pos)
         all_points = [(L_pos, L_price, L_type), (R_pos, R_price, R_type)] + extras
         all_points.sort(key=lambda p: (p[0], 0 if p[0] in op_positions else 1))
 
-        # --- Шаг 5: чередование с дозаполнением между соседями одного типа ---
-        validated = [all_points[0]]
-        for p in all_points[1:]:
-            prev = validated[-1]
-            if p[2] == prev[2]:
-                opposite = 'L' if p[2] == 'H' else 'H'
-                extra = find_extremum_zzw210926(h, l, prev[0] + 1, p[0], opposite)
-                if extra is not None:
-                    validated.append(extra)
-                validated.append(p)
-            else:
-                validated.append(p)
+        # --- Шаг 5 + 5.5 ---
+        validated = _build_alternating_sequence(all_points, h, l)
+        validated = _trim_to_four(validated, L_pos, R_pos, op_positions)
 
-        # --- Шаг 5.5: обрезка до 4 с приоритетом опорных ---
-        if len(validated) > 4:
-            seen = set()
-            unique = []
-            for p in validated:
-                key = (p[0], p[2])
-                if key not in seen:
-                    unique.append(p)
-                    seen.add(key)
-            validated = unique
-
-        if len(validated) > 4:
-            final = validated[:4]
-            positions_in_final = {p[0] for p in final}
-            for op_pos in (L_pos, R_pos):
-                if op_pos not in positions_in_final:
-                    op_point = next(p for p in validated if p[0] == op_pos)
-                    non_op_indices = [idx for idx, p in enumerate(final)
-                                      if p[0] != L_pos and p[0] != R_pos]
-                    if non_op_indices:
-                        final[non_op_indices[-1]] = op_point
-            final.sort(key=lambda p: (p[0], 0 if p[0] in op_positions else 1))
-            validated = final
-
-        # --- Шаг 6: проверка — если меньше 4 или чередование нарушено,
-        #            переключаемся на mid-логику ---
-        def has_strict_alternation(pts):
-            for k in range(len(pts) - 1):
-                if pts[k][2] == pts[k + 1][2]:
-                    return False
-            return True
-
-        if len(validated) < 4 or not has_strict_alternation(validated):
+        # --- Шаг 6: fallback на mid-логику ---
+        if len(validated) < 4 or not _has_strict_alternation(validated):
             extras_mid = mid_extras_zzw210926(h, l, L_pos, L_type, R_pos, R_type)
             all_points_mid = [(L_pos, L_price, L_type),
                               (R_pos, R_price, R_type)] + extras_mid
             all_points_mid.sort(key=lambda p: (p[0], 0 if p[0] in op_positions else 1))
 
-            validated = [all_points_mid[0]]
-            for p in all_points_mid[1:]:
-                prev = validated[-1]
-                if p[2] == prev[2]:
-                    opposite = 'L' if p[2] == 'H' else 'H'
-                    extra = find_extremum_zzw210926(h, l, prev[0] + 1, p[0], opposite)
-                    if extra is not None:
-                        validated.append(extra)
-                    validated.append(p)
-                else:
-                    validated.append(p)
+            validated = _build_alternating_sequence(all_points_mid, h, l)
+            validated = _trim_to_four(validated, L_pos, R_pos, op_positions)
 
-            if len(validated) > 4:
-                seen = set()
-                unique = []
-                for p in validated:
-                    key = (p[0], p[2])
-                    if key not in seen:
-                        unique.append(p)
-                        seen.add(key)
-                validated = unique
-
-            if len(validated) > 4:
-                final = validated[:4]
-                positions_in_final = {p[0] for p in final}
-                for op_pos in (L_pos, R_pos):
-                    if op_pos not in positions_in_final:
-                        op_point = next(p for p in validated if p[0] == op_pos)
-                        non_op_indices = [idx for idx, p in enumerate(final)
-                                          if p[0] != L_pos and p[0] != R_pos]
-                        if non_op_indices:
-                            final[non_op_indices[-1]] = op_point
-                final.sort(key=lambda p: (p[0], 0 if p[0] in op_positions else 1))
-                validated = final
-
-        # --- Шаг 6.5: крайний fallback, если всё ещё меньше 4 ---
+        # --- Шаг 6.5: крайний fallback ---
         while len(validated) < 4:
             last = validated[-1]
             if last[2] == 'H':
@@ -2157,15 +2409,16 @@ def add_zigzag_window_210926(df, period=55, tol_frac=0.10):
                         final_idx[k + 1] += 1
                         changed = True
 
-        for k in range(min(4, len(points))):
-            wzp_prices[k][i] = points[k][1]
-            wzp_idx[k][i] = df_index[start + final_idx[k]]
+        for k in range(4):
+            wzp_prices[k, i] = points[k][1]
+            wzp_idx[k, i] = df_index[start + final_idx[k]]
 
     for k in range(4):
         df[f'wzp{k+1}'] = wzp_prices[k]
         df[f'idx_wzp{k+1}'] = wzp_idx[k]
 
     return df
+
 
 """
 Название главной функции add_zigzag_window_220926, суффикс для доп функций _zzw220926

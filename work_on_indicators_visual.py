@@ -32,7 +32,7 @@ max_period = 55
 
     
 
-df = add_zigzag_window_210926(df,8)
+df = add_zigzag_window_210926(df)
 # df['stair_pc'] = df['stair']
 # df = add_hl_stair_fast(df)
 
