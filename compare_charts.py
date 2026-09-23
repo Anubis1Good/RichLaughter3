@@ -19,7 +19,7 @@ df = simple_load_df(PATH_DF)
 
 # window = 60
 START = WINDOW
-START = 700
+START = 900
 END = START + WINDOW
 WINDOW_SIZE = END - START
 # COLUMNS = ['ami_filter','ami']  # <--- СПИСОК КОЛОНОК
@@ -39,7 +39,7 @@ COLORS_DF2 = ['red', 'orange']  # для zigzag и zigzag_peaks соответс
 def preprocessing(df):
     """Добавляем индикаторы в датафрейм"""
     df = df.copy()
-    df = add_zigzag_window_220926(df)
+    df = add_zigzag_window_210926(df)
     return df
 # ===== ФУНКЦИЯ ДЛЯ РИСОВАНИЯ ГРАФИКА =====
 def draw_hb_chart_fast_on_ax(ax, df):
@@ -89,8 +89,8 @@ def create_figure(df1, df2, start_idx, end_idx, columns=['rsi'],
     print(slice1.tail())
     print("-"*50)
     print("DF2 (расчет на окне) - последние 5 строк:")
-    print(slice2[['wzp1','idx_wzp1','wzp2','idx_wzp2','wzp3','idx_wzp3','wzp4','idx_wzp4',   'wzp5',  'idx_wzp5',  'wzp6',  'idx_wzp6',   'wzp7',  'idx_wzp7',   'wzp8',  'idx_wzp8']].tail())
-    # print(slice2.tail())
+    # print(slice2[['wzp1','idx_wzp1','wzp2','idx_wzp2','wzp3','idx_wzp3','wzp4','idx_wzp4',   'wzp5',  'idx_wzp5',  'wzp6',  'idx_wzp6',   'wzp7',  'idx_wzp7',   'wzp8',  'idx_wzp8']].tail())
+    print(slice2.tail())
     print("="*50)
     
     # Создаем фигуру с одним графиком
@@ -99,8 +99,8 @@ def create_figure(df1, df2, start_idx, end_idx, columns=['rsi'],
     # === Рисуем график ===
     if show_chart:
         draw_hb_chart_fast_on_ax(ax, slice1)
-    draw_wzp(slice1,8,color='blue',ax=ax)
-    draw_wzp(slice2,8,ax=ax)
+    draw_wzp(slice1,color='blue',ax=ax)
+    draw_wzp(slice2,ax=ax)
     # === Рисуем индикаторы поверх графика ===
     # График DF1 (пунктирные линии)
     for i, col in enumerate(columns):
@@ -212,6 +212,7 @@ def update_plot(new_start):
     print("-"*50)
     print("DF2 (расчет на окне) - последние 5 строк:")
     print(slice2.tail())
+    # print(slice2[['wzp1','idx_wzp1','wzp2','idx_wzp2','wzp3','idx_wzp3','wzp4','idx_wzp4',   'wzp5',  'idx_wzp5',  'wzp6',  'idx_wzp6',   'wzp7',  'idx_wzp7',   'wzp8',  'idx_wzp8']].tail())
     print("="*50)
     
     # Очищаем график
@@ -220,8 +221,8 @@ def update_plot(new_start):
     # === Рисуем график ===
     if draw_chart:
         draw_hb_chart_fast_on_ax(ax, slice1)
-    draw_wzp(slice1,8,color='blue',ax=ax)
-    draw_wzp(slice2,8,ax=ax)
+    draw_wzp(slice1,color='blue',ax=ax)
+    draw_wzp(slice2,ax=ax)
     # === Рисуем индикаторы поверх графика ===
     # График DF1 (пунктирные линии)
     for i, col in enumerate(COLUMNS):

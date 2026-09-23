@@ -118,6 +118,8 @@ class VEG1_MERCURY(BaseEG):
 
 # Кажется он очень плохо работает в тренде
 # Сделать вариант VENUS, который работает только в боковике
+# При прорыве структуры может закрывать сделки в хаях с выключенным стопом
+# Пересмотреть работу в тренде!
 class VEG1_VENUS(BaseEG):
     """stop=None, take=None,  percent_threshold=0.2, threshold_dzz=0.2, buff=0.1, divider=2, use_target=0, hard_stop=1, use_stop=1"""
     def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None,  percent_threshold=0.2, threshold_dzz=0.2, buff=0.1, divider=2, use_target=0, hard_stop=1, use_stop=1):
