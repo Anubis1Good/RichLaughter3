@@ -17,7 +17,8 @@ symbol = PATH_DF.split('\\')[-1].split('_')[0]
 # ws = [UEG4_FALCON,],
 
 # ws = (VEG1_VENUS,(None,None,0.3,0.8,0.1,2.0,1,0,0),1,None)
-ws = (UEG4_CANADIAN,[])
+ws = (UEG8_DETECTIVE,[])
+# ws = (UEG8_AVENGER,[])
 # ws = (DebugMean,[])
 cegt = CheckEGTrader(
     PATH_DF,
@@ -43,7 +44,7 @@ ef_fast = cegt.trade_data['step_eq_fee']
 
 cegt.plot_chart_and_sequtity()
 # cegt.ws.debug_data = []
-cegt.check_strategy_window(normalization=True)
+# cegt.check_strategy_window(normalization=True)
 # cegt.check_strategy_window(normalization=False)
 # ef_window = cegt.trade_data['step_eq_fee']
 # cegt.ws.save_to_csv("window_actions.csv")
@@ -52,8 +53,8 @@ cegt.check_strategy_window(normalization=True)
 # result_row = cegt.get_statistics()
 # print(result_row)
 
-cegt.print_statistics()
-cegt.plot_chart_and_sequtity()
+# cegt.print_statistics()
+# cegt.plot_chart_and_sequtity()
 # import matplotlib.pyplot as plt
 
 # full_name_img = os.path.join(images_folder, f"{name_file}.png")

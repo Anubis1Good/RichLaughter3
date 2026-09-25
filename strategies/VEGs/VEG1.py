@@ -1,5 +1,5 @@
 from strategies.BaseEG import BaseEG
-from for_strategies.zigzag_indicators import add_dzz_peaks,add_pattern18_dzz_czd,add_stop_loss_p18czd,add_percent_zz_peaks,add_percent_zz190826
+from for_strategies.zigzag_indicators import add_dzz_peaks,add_pattern18_dzz_czd,add_stop_loss_p18czd,add_percent_zz_peaks,add_percent_zz190826,add_zigzag_window_210926,add_pattern18_zzw_210926,add_stop_loss_p18zzw
 
 # Надо разбираться или не надо, есть Venus, который работает норм
 class VEG1_MERCURY(BaseEG):
@@ -231,3 +231,117 @@ class VEG1_VENUS(BaseEG):
                 return 'open_long'
         
         return self.stop_loss_action(row)
+    
+
+class VEG1_MOON(BaseEG):
+    """stop=None, take=None, divider_buff=5, period_wzz=30, frac_wzz=0.1, threshold_p18=0.1, close_ext_trend=1,close_mid_range=1,close_mid_weak=1,open_reverse_weak=1"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, divider_buff=5, period_wzz=30, frac_wzz=0.1, threshold_p18=0.1, close_ext_trend=1,close_mid_range=1,close_mid_weak=1,open_reverse_weak=1):
+        super().__init__(symbol, price_step, mult_ps, mode, stop, take)
+        self.needs_info = {'chart': self.symbol}
+        self.divider_buff = divider_buff
+        self.period_wzz = period_wzz
+        self.frac_wzz = frac_wzz
+        self.threshold_p18 = threshold_p18
+        self.close_ext_trend = close_ext_trend
+        self.close_mid_range = close_mid_range
+        self.close_mid_weak = close_mid_weak
+        self.open_reverse_weak = open_reverse_weak
+
+    def preprocessing(self, tdata):
+        pdata = {}
+        df = tdata['chart']
+        df = add_zigzag_window_210926(df,self.period_wzz,self.frac_wzz)
+        df = add_pattern18_zzw_210926(df,self.threshold_p18)
+        df['buffer'] = ((df['wzp2'] - df['wzp3']) / self.divider_buff).abs()
+        df['pbzp2'] = df['wzp2'] + df['buffer']
+        df['mbzp2'] = df['wzp2'] - df['buffer']
+        df['pbzp3'] = df['wzp3'] + df['buffer']
+        df['mbzp3'] = df['wzp3'] - df['buffer']
+        df['pbzp4'] = df['wzp4'] + df['buffer']
+        df['mbzp4'] = df['wzp4'] - df['buffer']
+        df['mid_wzp23'] = (df['wzp2']+df['wzp3']) / 2
+        df['mid_wzp34'] = (df['wzp3']+df['wzp4']) / 2
+        df = self.add_slice_df(df)
+        pdata['chart'] = df
+        return pdata
+    
+    def _get_action_from_row(self, row):
+        pattern = row['pattern18']
+        close = row['close']
+        if pattern == 'bui':
+            if close >= row['mbzp2']:
+                return 'open_short'
+            if self.close_ext_trend and close <= row['pbzp4']:
+                return 'close_short'
+        if pattern == 'joc':
+            if close <= row['pbzp2']:
+                return 'open_long'
+            if self.close_ext_trend and close >= row['mbzp4']:
+                return 'close_long'
+        if pattern == 'weak_short':
+            if close >= row['mbzp3']:
+                return 'open_short'
+            if self.close_mid_weak and close <= row['mid_wzp23']:
+                return 'close_short'
+            if self.open_reverse_weak:
+                if close > row['mid_wzp23']:
+                    return 'close_long'
+                if close <= row['pbzp2']:
+                    return 'open_long'
+        if pattern == 'weak_long':
+            if close <= row['pbzp3']:
+                return 'open_long'
+            if self.close_mid_weak and close >= row['mid_wzp23']:
+                return 'close_long'
+            if self.open_reverse_weak:
+                if close < row['mid_wzp23']:
+                    return 'close_short'
+                if close >= row['mbzp2']:
+                    return 'open_short'
+        if pattern == 'narrowing_up':
+            if close >= row['mbzp3']:
+                return 'open_short'
+            if close <= row['mid_wzp23']:
+                return 'open_long'
+        if pattern == 'narrowing_down':
+            if close <= row['pbzp3']:
+                return 'open_long'
+            if close >= row['mid_wzp23']:
+                return 'open_short'
+        if pattern == 'bottom_range' or pattern == 'double_top' or pattern == 'upthrust':
+            if close >= row['mbzp3']:
+                return 'open_short'
+            if close <= row['pbzp2']:
+                return 'open_long'
+            if self.close_mid_range:
+                if close > row['mid_wzp23']:
+                    return 'close_long'
+                else:
+                    return 'close_short'
+        if pattern == 'top_range' or pattern == 'double_bottom' or pattern == 'spring':
+            if close <= row['pbzp3']:
+                return 'open_long'
+            if close >= row['mbzp2']:
+                return 'open_short'
+            if self.close_mid_range:
+                if close < row['mid_wzp23']:
+                    return 'close_short'
+                else:
+                    return 'close_long'
+        if pattern == 'sow':
+            if close >= row['mid_wzp34']:
+                return 'open_short'
+            if self.close_ext_trend and close <= row['pbzp4']:
+                return 'close_short'
+        if pattern == 'sos':
+            if close <= row['mid_wzp34']:
+                return 'open_long'
+            if self.close_ext_trend and close >= row['mbzp4']:
+                return 'close_long'
+        if pattern == 'bti':
+            if close >= row['mid_wzp23']:
+                return 'open_short'
+        if pattern == 'btc':
+            if close <= row['mid_wzp23']:
+                return 'open_long'
+            

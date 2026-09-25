@@ -19,10 +19,10 @@ df = simple_load_df(PATH_DF)
 
 # window = 60
 START = WINDOW
-START = 900
+# START = 900
 END = START + WINDOW
 WINDOW_SIZE = END - START
-# COLUMNS = ['ami_filter','ami']  # <--- СПИСОК КОЛОНОК
+# COLUMNS = ['lsl','ssl']  # <--- СПИСОК КОЛОНОК
 COLUMNS = []  # <--- СПИСОК КОЛОНОК
 draw_chart = True
 # draw_chart = False
@@ -40,6 +40,8 @@ def preprocessing(df):
     """Добавляем индикаторы в датафрейм"""
     df = df.copy()
     df = add_zigzag_window_210926(df)
+    df = add_pattern18_zzw_210926(df)
+    # df = add_stop_loss_p18zzw(df,5)
     return df
 # ===== ФУНКЦИЯ ДЛЯ РИСОВАНИЯ ГРАФИКА =====
 def draw_hb_chart_fast_on_ax(ax, df):
