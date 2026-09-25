@@ -81,22 +81,28 @@ class CheckEGTrader:
         self.reload_data()
 
     def check_days_mode(self,days_mode):
+        "пропускаем дни из списка days_mode"
         if days_mode is not None:
-            if days_mode == 5:
-                # Меняем close_map для выходных на (0, 1)
-                # Индексы 5 и 6 - это суббота и воскресенье
-                close_map_list = list(self.close_map)
-                close_map_list[5] = (0, 0)  # Суббота
-                close_map_list[6] = (0, 0)  # Воскресенье
-                self.close_map = tuple(close_map_list)
-            elif days_mode == 2:
-                # Оставляем только выходные, все будние дни -> (0, 0)
-                close_map_list = list(self.close_map)
-                # Индексы 0-4 - будние дни (пн-пт)
-                for i in range(5):  # 0, 1, 2, 3, 4
-                    close_map_list[i] = (0, 0)
-                # Индексы 5-6 (сб, вс) оставляем как есть
-                self.close_map = tuple(close_map_list)
+            close_map_list = list(self.close_map)
+            for d in days_mode:
+                close_map_list[d] = (0, 0) 
+            self.close_map = tuple(close_map_list)
+            # if days_mode == 5:
+            #     # Меняем close_map для выходных на (0, 1)
+            #     # Индексы 5 и 6 - это суббота и воскресенье
+            #     close_map_list = list(self.close_map)
+            #     close_map_list[5] = (0, 0)  # Суббота
+            #     close_map_list[6] = (0, 0)  # Воскресенье
+            #     self.close_map = tuple(close_map_list)
+            # elif days_mode == 2:
+            #     # Оставляем только выходные, все будние дни -> (0, 0)
+            #     close_map_list = list(self.close_map)
+            #     # Индексы 0-4 - будние дни (пн-пт)
+            #     for i in range(5):  # 0, 1, 2, 3, 4
+            #         close_map_list[i] = (0, 0)
+            #     # Индексы 5-6 (сб, вс) оставляем как есть
+            #     self.close_map = tuple(close_map_list)
+            
 
     def reload_data(self):
         self.trade_data = {

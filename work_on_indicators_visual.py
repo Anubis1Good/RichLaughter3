@@ -14,7 +14,7 @@ from testing.test_constants import *
 # PATH_DF = '_data_for_tests\_before_opt\ALRS_5_1787155697.parquet'
 
 df = simple_load_df(PATH_DF)
-df = df.iloc[-80:]
+# df = df.iloc[-80:]
 period=10
 multiplier=3
 max_period = 55
@@ -32,17 +32,19 @@ max_period = 55
 
     
 
-df = add_zigzag_window_210926(df)
+# df = add_zigzag_window_210926(df)
+df = add_average_fractals_window(df)
 # df['stair_pc'] = df['stair']
 # df = add_hl_stair_fast(df)
 
 print(df.tail(20))
+print(df['ave_up'].isna().sum())
 # print(df[['wzp1','idx_wzp1','wzp2','idx_wzp2','wzp3','idx_wzp3','wzp4','idx_wzp4',   'wzp5',  'idx_wzp5',  'wzp6',  'idx_wzp6',   'wzp7',  'idx_wzp7',   'wzp8',  'idx_wzp8']].tail())
 fig = draw_bars_chart_wo_vol(df)
-draw_wzp(df)
+# draw_wzp(df)
 
-# plt.plot(df['ami'])
-# plt.plot(df['ami_filter'])
+plt.plot(df['ave_up'])
+plt.plot(df['ave_down'])
 # plt.plot(df['stair_pc_windowed'],color='blue')
 # plt.plot(df['top_ext'],color='green')
 # plt.plot(df['bottom_ext'],color='black')

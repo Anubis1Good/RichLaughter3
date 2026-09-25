@@ -22,8 +22,8 @@ START = WINDOW
 # START = 900
 END = START + WINDOW
 WINDOW_SIZE = END - START
-# COLUMNS = ['lsl','ssl']  # <--- СПИСОК КОЛОНОК
-COLUMNS = []  # <--- СПИСОК КОЛОНОК
+COLUMNS = ['ave_up','ave_down']  # <--- СПИСОК КОЛОНОК
+# COLUMNS = []  # <--- СПИСОК КОЛОНОК
 draw_chart = True
 # draw_chart = False
 
@@ -39,9 +39,9 @@ COLORS_DF2 = ['red', 'orange']  # для zigzag и zigzag_peaks соответс
 def preprocessing(df):
     """Добавляем индикаторы в датафрейм"""
     df = df.copy()
-    df = add_zigzag_window_210926(df)
-    df = add_pattern18_zzw_210926(df)
-    # df = add_stop_loss_p18zzw(df,5)
+    # df = add_zigzag_window_210926(df)
+    # df = add_pattern18_zzw_210926(df)
+    df = add_average_fractals_window(df,55,20)
     return df
 # ===== ФУНКЦИЯ ДЛЯ РИСОВАНИЯ ГРАФИКА =====
 def draw_hb_chart_fast_on_ax(ax, df):

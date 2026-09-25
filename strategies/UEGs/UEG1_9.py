@@ -1,6 +1,6 @@
 from strategies.BaseEG import BaseEG
 from for_strategies.classic_indicators import add_fractals,add_rsi,add_adx,add_bollinger
-from for_strategies.pva_indicators import add_average_fractals,add_plus_delta_fc,add_exp_pdfc,add_ext_on_fractals,add_mean_on_fractals
+from for_strategies.pva_indicators import add_average_fractals,add_plus_delta_fc,add_exp_pdfc,add_ext_on_fractals,add_mean_on_fractals,add_average_fractals_window
 from for_strategies.zigzag_indicators import add_percent_zz190826,add_dzz_peaks,add_analys_dzz,add_percent_zz_peaks,add_pattern18_dzz_czd,add_stop_loss_p18czd,add_exp_plusdelta_dzz_peaks,add_mean_dzz_peaks,add_plusdelta_dzz_peaks,add_zigzag180826,add_shift_zz_peaks,add_analys_dzz180826, add_zigzag_window_210926,add_pattern18_zzw_210926,add_stop_loss_p18zzw
 
 class UEG4_CANADIAN(BaseEG):
@@ -437,7 +437,8 @@ class UEG6_SHERIFF(BaseEG):
                 return 'open_short'
         
         return None
-            
+    
+# сделать 7 версии с оконными функциями внутри которых определяются фракталы
 class UEG7_DODO(BaseEG):
     """stop=None, take=None, period_adx=20, period_fractal=5, max_period=55, adx_threshold=30, adx_stop=35, use_stop=0
     \n
@@ -459,6 +460,45 @@ class UEG7_DODO(BaseEG):
         df = add_adx(df, self.period_adx)
         df = add_fractals(df, self.period_fractal)
         df = add_average_fractals(df, self.max_period, self.period_fractal)
+        df = self.add_slice_df(df)
+        pdata['chart'] = df
+        return pdata
+    
+    def _get_action_from_row(self, row):
+        if self.use_stop:
+            if row['adx'] > self.adx_stop:
+                return 'close_all'
+        
+        if row['adx'] < self.adx_threshold:
+            if row['close'] >= row['ave_up']:
+                return 'open_short'
+            if row['close'] <= row['ave_down']:
+                return 'open_long'
+        
+        return None
+    
+class UEG7_LOVERGOOSE(BaseEG):
+    """stop=None, take=None, period_adx=20, period_fractal_free=5, period_window=55,n_fractals=3, adx_threshold=30, adx_stop=35, use_stop=0
+    \n
+    UEG7_DODO на add_average_fractals_window \n
+    фильтрованный по adx GGD быстрых параметров. RANGER + GGD
+    """
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_adx=20, period_fractal_free=5, period_window=55,n_fractals=3, adx_threshold=30, adx_stop=35, use_stop=0):
+        super().__init__(symbol, price_step, mult_ps, mode, stop, take)
+        self.needs_info = {'chart': self.symbol}
+        self.period_adx = period_adx
+        self.period_window = period_window
+        self.period_fractal_free = period_fractal_free
+        self.n_fractals = n_fractals
+        self.adx_threshold = adx_threshold
+        self.adx_stop = adx_stop
+        self.use_stop = use_stop
+
+    def preprocessing(self, tdata):
+        pdata = {}
+        df = tdata['chart']
+        df = add_adx(df, self.period_adx)
+        df = add_average_fractals_window(df,self.period_window,self.period_fractal_free,self.n_fractals)
         df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
@@ -497,6 +537,56 @@ class UEG7_DUELDODO(BaseEG):
         df['sma'] = df['close'].rolling(self.period_sma).mean()
         df = add_fractals(df, self.period_fractal)
         df = add_average_fractals(df, self.max_period, self.period_fractal)
+        df = self.add_slice_df(df)
+        pdata['chart'] = df
+        return pdata
+    
+    def _get_action_from_row(self, row):
+        if row['adx'] < self.adx_threshold:
+            if row['close'] >= row['ave_up']:
+                return 'open_short'
+            if row['close'] <= row['ave_down']:
+                return 'open_long'
+        else:
+            if row['close'] > row['sma']:  # long
+                if row['close'] >= row['ave_up']:
+                    if self.use_stop:
+                        return 'close_all'
+                    return 'close_long'
+                if row['close'] <= row['ave_down']:
+                    return 'open_long'
+            else:
+                if row['close'] >= row['ave_up']:
+                    return 'open_short'
+                if row['close'] <= row['ave_down']:
+                    if self.use_stop:
+                        return 'close_all'
+                    return 'close_short'
+        
+        return None
+    
+class UEG7_LOVERDUCK(BaseEG):
+    """stop=None, take=None, period_adx=20, period_fractal_free=5, period_window=55,n_fractals=3, adx_threshold=30, period_sma=20, use_stop=0
+    \n
+    UEG7_DUELDODO на add_average_fractals_window \n
+    фильтрованный по adx, направленный по sma GGD быстрых параметров."""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_adx=20, period_fractal_free=5, period_window=55,n_fractals=3, adx_threshold=30, period_sma=20, use_stop=0):
+        super().__init__(symbol, price_step, mult_ps, mode, stop, take)
+        self.needs_info = {'chart': self.symbol}
+        self.period_adx = period_adx
+        self.adx_threshold = adx_threshold
+        self.period_sma = period_sma
+        self.use_stop = use_stop
+        self.period_window = period_window
+        self.period_fractal_free = period_fractal_free
+        self.n_fractals = n_fractals
+
+    def preprocessing(self, tdata):
+        pdata = {}
+        df = tdata['chart']
+        df = add_adx(df, self.period_adx)
+        df['sma'] = df['close'].rolling(self.period_sma).mean()
+        df = add_average_fractals_window(df,self.period_window,self.period_fractal_free,self.n_fractals)
         df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
@@ -776,50 +866,9 @@ class UEG8_AVENGER(BaseEG):
                 return 'close_long'
         
         return None
-    
-class UEG8_SOLDIER(BaseEG):
-    """stop=None, take=None, divider_buff=5, period_wzz=30, frac_wzz=0.1, threshold_p18=0.1"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, divider_buff=5, period_wzz=30, frac_wzz=0.1, threshold_p18=0.1):
-        super().__init__(symbol, price_step, mult_ps, mode, stop, take)
-        self.needs_info = {'chart': self.symbol}
-        self.divider_buff = divider_buff
-        self.period_wzz = period_wzz
-        self.frac_wzz = frac_wzz
-        self.threshold_p18 = threshold_p18
-
-
-    def preprocessing(self, tdata):
-        pdata = {}
-        df = tdata['chart']
-        df = add_zigzag_window_210926(df,self.period_wzz,self.frac_wzz)
-        df = add_pattern18_zzw_210926(df,self.threshold_p18)
-        df['buffer'] = ((df['wzp2'] - df['wzp3']) / self.divider_buff).abs()
-        df['pbzp2'] = df['wzp2'] + df['buffer']
-        df['mbzp2'] = df['wzp2'] - df['buffer']
-        df['pbzp3'] = df['wzp3'] + df['buffer']
-        df['mbzp3'] = df['wzp3'] - df['buffer']
-        df = self.add_slice_df(df)
-        pdata['chart'] = df
-        return pdata
-    
-    def _get_action_from_row(self, row):
-        can_long, can_short = None, None
-        
-        if row['pattern18'] in ('bti', 'joc', 'top_range', 'double_top', 'weak_long', 'narrowing_down', 'spring', 'sos'):
-            can_long = row['pbzp3'] >= row['close'] >= row['mbzp3']
-            can_short = row['mbzp2'] <= row['close'] <= row['pbzp2']
-        
-        if row['pattern18'] in ('btc', 'bui', 'bottom_range', 'double_bottom', 'weak_short', 'narrowing_up', 'upthrust', 'sow'):
-            can_short = row['pbzp3'] >= row['close'] >= row['mbzp3']
-            can_long = row['mbzp2'] <= row['close'] <= row['pbzp2']
-        
-        if can_long:
-            return 'open_long'
-        if can_short:
-            return 'open_short'
         
 #UEG8 c автоматической подборкой лонговых и шортовых паттернов 
-class UEG8_DETECTIVE(BaseEG):
+class UEG8_SOLDIER(BaseEG):
     """stop=None, take=None, divider_buff=5, period_wzz=30, frac_wzz=0.1, threshold_p18=0.1,g_joc=99,g_tr=99,g_dt=99,g_wl=99,g_nd=99,g_s=99,g_sos=99,g_bti=99
     \n
     0-2 - ничего,
@@ -912,9 +961,6 @@ class UEG8_DETECTIVE(BaseEG):
         if can_short:
             return self.get_action_by_group(row['pattern18'],'short')
         
-            
-
-
 
 # Это надо переделывать на зигзаге больше 4 точек
 class UEG9_BIRDWATCHER(BaseEG):

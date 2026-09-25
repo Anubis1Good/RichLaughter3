@@ -1,7 +1,7 @@
 # run_optimization.py
 from optimization.OptimizatorOptuna import OptimizatorOptuna
-from optimization.optuna_grops.main_groups import group, max_period
-# from optimization.optuna_grops.exp_groups import group, max_period
+# from optimization.optuna_grops.main_groups import group, max_period
+from optimization.optuna_grops.exp_groups import group, max_period
 from testing.test_constants import *
 # Time test on VEG1_VENUS
 # ⏱ Total time: 0h 0m 37s - 50 trials

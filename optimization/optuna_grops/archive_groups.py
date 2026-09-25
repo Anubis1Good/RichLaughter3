@@ -9,18 +9,46 @@ group = (
             (2,max_period,1),
         ]
     ),
-
     (
-        UEG3_REVAN, 
+        PEG8_LOBSTER, 
         [
-            (2, max_period, 1),
-            (2,20,1),
+            (2,max_period,1),
+            (0.5,3,0.1),   
         ]
     ),
     (
-        UEG3_ZEUS, 
+        LEG1_BORSCH, 
         [
-            (0.1,max_percent_threshold,0.1),
+            (2, max_period, 1),
+            (2, max_period, 1),
+        ]
+    ),
+    (
+        LEG1_PHOBO, 
+        [
+            (2, max_period, 1),
+            (0.5,4,0.1),
+            (max_period, ),
+        ]
+    ),
+    (
+        LEG1_PHOGA, 
+        [
+            (2, max_period, 1),
+            (0.5,4,0.1),
+            (2, max_period, 1),
+            (max_period, ),
+        ]
+    ),
+    (
+        LEG2_MONSTER, 
+        [
+            (2, max_period, 1),
+            (10,90,1),
+            (2, max_period, 1),
+            (0,max_period,1),
+            (2, half_max_period, 1),
+            (max_period,)
         ]
     ),
 

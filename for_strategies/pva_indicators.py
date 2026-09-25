@@ -41,6 +41,96 @@ def add_kusuruken_channel(df:pd.DataFrame, period=20,period2=40):
 #     df['ave_down'] = down_points['low'].rolling(window=period).mean()
 #     df['ave_down'] = df['ave_down'].ffill()
 #     return df
+
+def add_average_fractals_window(df: pd.DataFrame, period=30,
+                                period_fractal=5, n_fractals=5):
+    n = len(df)
+    high = df['high'].to_numpy(dtype=float)
+    low  = df['low'].to_numpy(dtype=float)
+    shift = (period_fractal - 1) // 2
+
+    ave_up   = np.full(n, np.nan)
+    ave_down = np.full(n, np.nan)
+
+    # Для каждой итерации i мы работаем со срезом [i-period+1, i].
+    # Длина окна — w = period + 1, но фактически последний бар i
+    # и все предыдущие period баров, т.е. period+1 значений.
+    # (у вас df.iloc[i-period:i+1] — это ровно period+1 точек)
+
+    for i in range(period, n):
+        s = i - period          # начало окна
+        w = period + 1          # длина окна
+
+        # --- 1. Маска фракталов внутри окна ---
+        # Фрактал up в позиции k окна (0..w-1): high[k] строго больше
+        # high[k-shift..k-1] и high[k+1..k+shift]
+        # Края окна (первые и последние shift точек) не могут быть фракталами,
+        # как и у вас (из-за shift(-idx) на краю — NaN, сравнение даёт False)
+
+        fractal_up   = np.zeros(w, dtype=bool)
+        fractal_down = np.zeros(w, dtype=bool)
+
+        # Локальные массивы для окна
+        h = high[s:i+1]     # длина w
+        l = low[s:i+1]
+
+        if shift > 0 and w > 2 * shift:
+            # Начинаем с shift и до w-shift-1
+            # up: h[k] > h[k-j] и h[k] > h[k+j] для j=1..shift
+            # down: l[k] < l[k-j] и l[k] < l[k+j]
+            for k in range(shift, w - shift):
+                up_ok = True
+                down_ok = True
+                for j in range(1, shift + 1):
+                    if not (h[k] > h[k - j] and h[k] > h[k + j]):
+                        up_ok = False
+                    if not (l[k] < l[k - j] and l[k] < l[k + j]):
+                        down_ok = False
+                    if not up_ok and not down_ok:
+                        break
+                fractal_up[k]   = up_ok
+                fractal_down[k] = down_ok
+
+        # --- 2. Список валидных фракталов (по индексам внутри окна) ---
+        up_idx   = np.flatnonzero(fractal_up)
+        down_idx = np.flatnonzero(fractal_down)
+
+        # --- 3. Среднее последних n_fractals ---
+        # Точная копия: up_points['high'].rolling(n_fractals, min_periods=1).mean().ffill()
+        # Затем берём .iloc[-1]. Если это NaN — fallback.
+        #
+        # rolling(...).mean() на подмножестве = для каждой позиции p в up_points
+        # среднее high[up_points[max(0,p-n_fractals+1)..p]].
+        # .ffill() протягивает последнее значение вперёд (по индексу window).
+        # В итоге window['ave_up'].iloc[-1] = среднее последних n_fractals фракталов
+        # (если они вообще есть в окне), иначе NaN.
+
+        if up_idx.size > 0:
+            last_idx = up_idx[-n_fractals:]           # последние n_fractals
+            last_up_val = h[last_idx].mean()
+        else:
+            last_up_val = np.nan
+
+        if down_idx.size > 0:
+            last_idx = down_idx[-n_fractals:]
+            last_down_val = l[last_idx].mean()
+        else:
+            last_down_val = np.nan
+
+        # --- 4. Fallback как в вашем коде ---
+        if last_up_val != last_up_val:      # NaN check
+            last_up_val = h.max()
+        if last_down_val != last_down_val:
+            last_down_val = l.min()
+
+        ave_up[i]   = last_up_val
+        ave_down[i] = last_down_val
+
+    df['ave_up']   = ave_up
+    df['ave_down'] = ave_down
+    return df
+
+
 def add_average_fractals(df: pd.DataFrame, period=30, period_fractal=5):
     """add 'ave_up', 'ave_down'"""
     df = df.copy()

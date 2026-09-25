@@ -1,13 +1,14 @@
-from strategies.PEGs.PEG1_9 import *
-from strategies.PEGs.PEG10_19 import *
-from strategies.PEGs.PEG20_29 import *
-from strategies.LEGs.LEG1 import *
-from strategies.LEGs.LEG2 import *
-from strategies.WEGs.WEG1_9 import *
-from strategies.UEGs.UEG1_9 import *
-from strategies.SEGs.SEG_CA1_9 import *
-from strategies.SEGs.SEG_ML10_19 import *
-from strategies.VEGs.VEG1 import *
+# from strategies.PEGs.PEG1_9 import *
+# from strategies.PEGs.PEG10_19 import *
+# from strategies.PEGs.PEG20_29 import *
+# from strategies.LEGs.LEG1 import *
+# from strategies.LEGs.LEG2 import *
+# from strategies.WEGs.WEG1_9 import *
+# from strategies.UEGs.UEG1_9 import *
+# from strategies.SEGs.SEG_CA1_9 import *
+# from strategies.SEGs.SEG_ML10_19 import *
+# from strategies.VEGs.VEG1 import *
+from strategies.all_egs import *
 
 from optimization.optuna_grops.opt_params import *
 # (min, max, step)
@@ -52,13 +53,7 @@ group = (
             (0.5,3,0.1),   
         ]
     ),
-    (
-        PEG8_LOBSTER, 
-        [
-            (2,max_period,1),
-            (0.5,3,0.1),   
-        ]
-    ),
+
     (
         PEG11_KUSURUKEN, 
         [
@@ -280,13 +275,7 @@ group = (
             (0.01, 0.4, 0.01),
         ]
     ),
-    (
-        LEG1_BORSCH, 
-        [
-            (2, max_period, 1),
-            (2, max_period, 1),
-        ]
-    ),
+
     (
         LEG1_CC2, 
         [
@@ -338,23 +327,7 @@ group = (
             (2, max_period, 1),
         ]
     ),
-    (
-        LEG1_PHOBO, 
-        [
-            (2, max_period, 1),
-            (0.5,4,0.1),
-            (max_period, ),
-        ]
-    ),
-    (
-        LEG1_PHOGA, 
-        [
-            (2, max_period, 1),
-            (0.5,4,0.1),
-            (2, max_period, 1),
-            (max_period, ),
-        ]
-    ),
+
     (
         LEG1_PIN, 
         [
@@ -436,17 +409,7 @@ group = (
             (0,1)
         ]
     ),
-    (
-        LEG2_MONSTER, 
-        [
-            (2, max_period, 1),
-            (10,90,1),
-            (2, max_period, 1),
-            (0,max_period,1),
-            (2, half_max_period, 1),
-            (max_period,)
-        ]
-    ),
+
     (
         SEG1_LITE, 
         [
@@ -561,6 +524,30 @@ group = (
         ]
     ),
     (
+        UEG7_LOVERGOOSE, 
+        [
+            (2, half_max_period, 1),
+            (2, half_max_period, 1),
+            (10, max_period, 1),
+            (1,10,1),
+            (10,70,1),
+            (10,70,1),
+            (0,1),
+        ]
+    ),
+    (
+        UEG7_LOVERDUCK, 
+        [
+            (2, half_max_period, 1),
+            (2, half_max_period, 1),
+            (10, max_period, 1),
+            (1,10,1),
+            (10,70,1),
+            (2, max_period, 1),
+            (0,1),
+        ]
+    ),
+    (
         UEG7_ADVENTURE, 
         [
             (2, max_period, 1),
@@ -639,19 +626,37 @@ group = (
         ]
     ),
 
-
-    (
-        VEG1_VENUS, 
+   (
+        UEG8_SOLDIER, 
         [
-            (0.1,max_percent_threshold,0.1),
-            (0,1,0.1),
-            (0.1,0.5,0.1),
-            (0.5,2,0.1),
+            (2,20,1),
+            (10,max_period,1),
+            (0,1,0.01),
+            (0,1,0.01),
+            (0,99,1),
+            (0,99,1),
+            (0,99,1),
+            (0,99,1),
+            (0,99,1),
+            (0,99,1),
+            (0,99,1),
+            (0,99,1),
+        ]
+    ),
+    (
+        VEG1_MOON, 
+        [
+            (2,20,1),
+            (10,max_period,1),
+            (0,1,0.01),
+            (0,1,0.01),
+            (0,1),
             (0,1),
             (0,1),
             (0,1),
         ]
     ),
+
     (
         WEG3_BATYA, 
         [

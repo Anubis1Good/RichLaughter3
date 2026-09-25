@@ -2,5 +2,5 @@ PATH_DF = '_data_for_tests\_temp\ALRS_5_1787768897.parquet'
 # WINDOW = 60
 WINDOW = 80
 MAIN_FEE=0.0002
-DAYS_MODE = 5
+DAYS_MODE = (3,5,6) #пропускаем чт, сб, вс
 SLIP_STOP_DELTA = 1
