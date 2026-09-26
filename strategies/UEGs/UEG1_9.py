@@ -1,22 +1,22 @@
 from strategies.BaseEG import BaseEG
 from for_strategies.classic_indicators import add_fractals,add_rsi,add_adx,add_bollinger
-from for_strategies.pva_indicators import add_average_fractals,add_plus_delta_fc,add_exp_pdfc,add_ext_on_fractals,add_mean_on_fractals,add_average_fractals_window
-from for_strategies.zigzag_indicators import add_percent_zz190826,add_dzz_peaks,add_analys_dzz,add_percent_zz_peaks,add_pattern18_dzz_czd,add_stop_loss_p18czd,add_exp_plusdelta_dzz_peaks,add_mean_dzz_peaks,add_plusdelta_dzz_peaks,add_zigzag180826,add_shift_zz_peaks,add_analys_dzz180826, add_zigzag_window_210926,add_pattern18_zzw_210926,add_stop_loss_p18zzw
+from for_strategies.pva_indicators import add_average_fractals,add_plus_delta_fc,add_exp_pdfc,add_ext_on_fractals,add_mean_on_fractals,add_average_fractals_window,add_exp_pdfc_window,add_plus_delta_fc_window
+from for_strategies.zigzag_indicators import add_percent_zz190826,add_dzz_peaks,add_analys_dzz,add_percent_zz_peaks,add_pattern18_dzz_czd,add_stop_loss_p18czd,add_exp_plusdelta_dzz_peaks,add_mean_dzz_peaks,add_plusdelta_dzz_peaks,add_zigzag180826,add_shift_zz_peaks,add_analys_dzz180826, add_zigzag_window_210926,add_pattern18_zzw_210926,add_zigzag_window_260926,add_mean_peaks_wzz260926, add_plusdelta_peaks_wzz260926,add_exp_plusdelta_peaks_wzz260926
 
 class UEG4_CANADIAN(BaseEG):
-    """stop=None, take=None, max_period=55, period_fractal=5, allowance=0.1"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, max_period=55, period_fractal=5, allowance=0.1):
+    """stop=None, take=None, period_window=55,period_fractal_free=5, n_fractals=3, allowance=0.1"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_window=55,period_fractal_free=5, n_fractals=3, allowance=0.1):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
-        self.max_period = max_period
-        self.period_fractal = period_fractal
+        self.period_window = period_window
+        self.period_fractal_free = period_fractal_free
+        self.n_fractals = n_fractals
         self.allowance = allowance
 
     def preprocessing(self, tdata):
         pdata = {}
         df = tdata['chart']
-        df = add_fractals(df, self.period_fractal)
-        df = add_average_fractals(df, self.max_period, self.period_fractal)
+        df = add_average_fractals_window(df,self.period_window,self.period_fractal_free,self.n_fractals)
         df['ave_diff_percent'] = ((df['ave_up'] - df['ave_down']) / df['ave_down']) * 100
         df['allowance'] = df['ave_diff_percent'] > self.allowance
         df = self.add_slice_df(df)
@@ -60,6 +60,35 @@ class UEG4_FALCON(BaseEG):
                 return 'open_long'
         
         return None
+    
+class UEG4_FALCON2(BaseEG):
+    """stop=None, take=None, period_window=55,period_fractal_free=5, n_fractals=3, allowance=0.1"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_window=55,period_fractal_free=5, n_fractals=3, allowance=0.1):
+        super().__init__(symbol, price_step, mult_ps, mode, stop, take)
+        self.needs_info = {'chart': self.symbol}
+        self.period_window = period_window
+        self.period_fractal_free = period_fractal_free
+        self.n_fractals = n_fractals
+        self.allowance = allowance
+
+    def preprocessing(self, tdata):
+        pdata = {}
+        df = tdata['chart']
+        df = add_plus_delta_fc_window(df,self.period_window,self.period_fractal_free,self.n_fractals)
+        df['pdf_diff_percent'] = ((df['pdf_up'] - df['pdf_down']) / df['pdf_down']) * 100
+        df['allowance'] = df['pdf_diff_percent'] > self.allowance
+        df = self.add_slice_df(df)
+        pdata['chart'] = df
+        return pdata
+    
+    def _get_action_from_row(self, row):
+        if row['allowance']:
+            if row['close'] >= row['pdf_up']:
+                return 'open_short'
+            if row['close'] <= row['pdf_down']:
+                return 'open_long'
+        
+        return None
 # Нужны версии с adx, есть ощущение, что хорошо работает на тренде и плохо на флете
 class UEG4_PELICAN(BaseEG):
     """stop=None, take=None, period_fractal=5, n_fractals=3, allowance=0.1"""
@@ -76,6 +105,35 @@ class UEG4_PELICAN(BaseEG):
         df = tdata['chart']
         df = add_fractals(df, self.period_fractal)
         df = add_exp_pdfc(df, self.n_fractals, self.period_fractal)
+        df['pdf_diff_percent'] = ((df['pdf_up'] - df['pdf_down']) / df['pdf_down']) * 100
+        df['allowance'] = df['pdf_diff_percent'] > self.allowance
+        df = self.add_slice_df(df)
+        pdata['chart'] = df
+        return pdata
+    
+    def _get_action_from_row(self, row):
+        if row['allowance']:
+            if row['close'] >= row['pdf_up']:
+                return 'open_short'
+            if row['close'] <= row['pdf_down']:
+                return 'open_long'
+        
+        return None
+    
+class UEG4_PELICAN2(BaseEG):
+    """stop=None, take=None, period_window=55,period_fractal_free=5, n_fractals=3, allowance=0.1"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_window=55,period_fractal_free=5, n_fractals=3, allowance=0.1):
+        super().__init__(symbol, price_step, mult_ps, mode, stop, take)
+        self.needs_info = {'chart': self.symbol}
+        self.period_window = period_window
+        self.period_fractal_free = period_fractal_free
+        self.n_fractals = n_fractals
+        self.allowance = allowance
+
+    def preprocessing(self, tdata):
+        pdata = {}
+        df = tdata['chart']
+        df = add_exp_pdfc_window(df, self.period_window,self.period_fractal_free,self.n_fractals)
         df['pdf_diff_percent'] = ((df['pdf_up'] - df['pdf_down']) / df['pdf_down']) * 100
         df['allowance'] = df['pdf_diff_percent'] > self.allowance
         df = self.add_slice_df(df)
@@ -478,12 +536,12 @@ class UEG7_DODO(BaseEG):
         return None
     
 class UEG7_LOVERGOOSE(BaseEG):
-    """stop=None, take=None, period_adx=20, period_fractal_free=5, period_window=55,n_fractals=3, adx_threshold=30, adx_stop=35, use_stop=0
+    """stop=None, take=None, period_adx=20, period_window=55,period_fractal_free=5, n_fractals=3, adx_threshold=30, adx_stop=35, use_stop=0
     \n
     UEG7_DODO на add_average_fractals_window \n
     фильтрованный по adx GGD быстрых параметров. RANGER + GGD
     """
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_adx=20, period_fractal_free=5, period_window=55,n_fractals=3, adx_threshold=30, adx_stop=35, use_stop=0):
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_adx=20, period_window=55,period_fractal_free=5, n_fractals=3, adx_threshold=30, adx_stop=35, use_stop=0):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
         self.period_adx = period_adx
@@ -566,11 +624,11 @@ class UEG7_DUELDODO(BaseEG):
         return None
     
 class UEG7_LOVERDUCK(BaseEG):
-    """stop=None, take=None, period_adx=20, period_fractal_free=5, period_window=55,n_fractals=3, adx_threshold=30, period_sma=20, use_stop=0
+    """stop=None, take=None, period_adx=20, period_window=55, period_fractal_free=5, n_fractals=3, adx_threshold=30, period_sma=20, use_stop=0
     \n
     UEG7_DUELDODO на add_average_fractals_window \n
     фильтрованный по adx, направленный по sma GGD быстрых параметров."""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_adx=20, period_fractal_free=5, period_window=55,n_fractals=3, adx_threshold=30, period_sma=20, use_stop=0):
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_adx=20, period_window=55, period_fractal_free=5, n_fractals=3, adx_threshold=30, period_sma=20, use_stop=0):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
         self.period_adx = period_adx
@@ -669,15 +727,70 @@ class UEG7_VULTURE(BaseEG):
                         return 'close_all'
         
         return None
-
-class UEG7_PIGEON(BaseEG):
-    """stop=None, take=None, period=60, period_fractal=10, max_period=55, period_fractal2=5, n_fractals2=3, allowance=0.1, mult_bb=1, use_stop=0
+    
+class UEG7_CANNIBAL(BaseEG):
+    """stop=None, take=None, period_sma=20, adx_threshold=30, period_window=55,period_fractal_free=5, n_fractals=5, period_window2=55, period_fractal_free2=5,n_fractals2=3, allowance=0.1, period_adx=27
     \n
-    Что-то типо DRG+VULTURE"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=55, period_fractal=10, max_period=55, period_fractal2=5, n_fractals2=3, allowance=0.1, mult_bb=1, use_stop=0):
+    UEG7_VULTURE на оконных функциях \n
+    фильтрованный по adx, направленный по sma GGD(быстрых параметров) + PELICAN ."""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_sma=20, adx_threshold=30, period_window=55,period_fractal_free=5, n_fractals=5, period_window2=55, period_fractal_free2=5,n_fractals2=3, allowance=0.1, period_adx=27):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
-        self.period = period
+        self.period_sma = period_sma
+        self.period_adx = period_adx
+        self.adx_threshold = adx_threshold
+        self.period_sma = period_sma
+        self.period_window = period_window
+        self.period_fractal_free = period_fractal_free
+        self.n_fractals = n_fractals
+        self.period_window2 = period_window2
+        self.period_fractal_free2 = period_fractal_free2
+        self.n_fractals2 = n_fractals2
+        self.allowance = allowance
+
+
+    def preprocessing(self, tdata):
+        pdata = {}
+        df = tdata['chart']
+        df = add_adx(df, self.period_adx)
+        df['sma'] = df['close'].rolling(self.period_sma).mean()
+        df = add_average_fractals_window(df,self.period_window,self.period_fractal_free,self.n_fractals)
+        df = add_exp_pdfc_window(df, self.period_window2,self.period_fractal_free2,self.n_fractals2)
+        df['pdf_diff_percent'] = ((df['pdf_up'] - df['pdf_down']) / df['pdf_down']) * 100
+        df['allowance'] = df['pdf_diff_percent'] > self.allowance
+        df = self.add_slice_df(df)
+        pdata['chart'] = df
+        return pdata
+    
+    def _get_action_from_row(self, row):
+        if row['adx'] < self.adx_threshold:
+            if row['close'] >= row['ave_up']:
+                return 'open_short'
+            if row['close'] <= row['ave_down']:
+                return 'open_long'
+        else:
+            if row['allowance']:
+                if row['close'] > row['sma']:  # long
+                    if row['close'] >= row['pdf_up']:
+                        return 'close_all'
+                    if row['close'] <= row['pdf_down']:
+                        return 'open_long'
+                else:
+                    if row['close'] >= row['pdf_up']:
+                        return 'open_short'
+                    if row['close'] <= row['pdf_down']:
+                        return 'close_all'
+        
+        return None
+
+class UEG7_PIGEON(BaseEG):
+    """stop=None, take=None, period_bb=60, period_fractal=10, max_period=55, period_fractal2=5, n_fractals2=3, allowance=0.1, mult_bb=1, use_stop=0
+    \n
+    Что-то типо DRG+VULTURE"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_bb=55, period_fractal=10, max_period=55, period_fractal2=5, n_fractals2=3, allowance=0.1, mult_bb=1, use_stop=0):
+        super().__init__(symbol, price_step, mult_ps, mode, stop, take)
+        self.needs_info = {'chart': self.symbol}
+        self.period_bb = period_bb
         self.period_fractal = period_fractal
         self.max_period = max_period
         self.period_fractal2 = period_fractal2
@@ -690,12 +803,68 @@ class UEG7_PIGEON(BaseEG):
     def preprocessing(self, tdata):
         pdata = {}
         df = tdata['chart']
-        df = add_bollinger(df, self.period, multiplier=self.mult_bb)
+        df = add_bollinger(df, self.period_bb, multiplier=self.mult_bb)
         df = add_fractals(df, self.period_fractal)
         df = add_average_fractals(df, self.max_period, self.period_fractal)
         df = df.drop(['fractal_up', 'fractal_down'], axis=1)
         df = add_fractals(df, self.period_fractal2)
         df = add_exp_pdfc(df, self.n_fractals2, self.period_fractal2)
+        df['pdf_diff_percent'] = ((df['pdf_up'] - df['pdf_down']) / df['pdf_down']) * 100
+        df['allowance'] = df['pdf_diff_percent'] > self.allowance
+        df = self.add_slice_df(df)
+        pdata['chart'] = df
+        return pdata
+    
+    def _get_action_from_row(self, row):
+        if row['high'] < row['bbu'] and row['low'] > row['bbd']:
+            if row['close'] >= row['ave_up']:
+                return 'open_short'
+            if row['close'] <= row['ave_down']:
+                return 'open_long'
+        else:
+            if row['allowance']:
+                if row['low'] > row['bbu']:  # long
+                    if row['close'] >= row['pdf_up']:
+                        return 'close_long'
+                    if row['close'] <= row['pdf_down']:
+                        return 'open_long'
+                    if self.use_stop:
+                        return 'close_short'
+                if row['high'] < row['bbd']:  # short
+                    if row['close'] >= row['pdf_up']:
+                        return 'open_short'
+                    if row['close'] <= row['pdf_down']:
+                        return 'close_short'
+                    if self.use_stop:
+                        return 'close_long'
+        
+        return None
+    
+class UEG7_CARRIER(BaseEG):
+    """stop=None, take=None, period_bb=55, period_window=55,period_fractal_free=5, n_fractals=5, period_window2=55, period_fractal_free2=5,n_fractals2=3, allowance=0.1, mult_bb=1, use_stop=0
+    \n
+    UEG7_PIGEON на оконных функциях \n
+    Что-то типо DRG+VULTURE"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_bb=55, period_window=55,period_fractal_free=5, n_fractals=5, period_window2=55, period_fractal_free2=5,n_fractals2=3, allowance=0.1, mult_bb=1, use_stop=0):
+        super().__init__(symbol, price_step, mult_ps, mode, stop, take)
+        self.needs_info = {'chart': self.symbol}
+        self.period_bb = period_bb
+        self.period_window = period_window
+        self.period_fractal_free = period_fractal_free
+        self.n_fractals = n_fractals
+        self.period_window2 = period_window2
+        self.period_fractal_free2 = period_fractal_free2
+        self.n_fractals2 = n_fractals2
+        self.allowance = allowance
+        self.mult_bb = mult_bb
+        self.use_stop = use_stop
+
+    def preprocessing(self, tdata):
+        pdata = {}
+        df = tdata['chart']
+        df = add_bollinger(df, self.period_bb, multiplier=self.mult_bb)
+        df = add_average_fractals_window(df,self.period_window,self.period_fractal_free,self.n_fractals)
+        df = add_exp_pdfc_window(df, self.period_window2,self.period_fractal_free2,self.n_fractals2)
         df['pdf_diff_percent'] = ((df['pdf_up'] - df['pdf_down']) / df['pdf_down']) * 100
         df['allowance'] = df['pdf_diff_percent'] > self.allowance
         df = self.add_slice_df(df)
@@ -773,6 +942,54 @@ class UEG7_ADVENTURE(BaseEG):
                     return 'close_long'
         
         return None
+    
+class UEG7_CELEBRITY(BaseEG):
+    """stop=None, take=None, period_bb=55, period_window=55,period_fractal_free=5, n_fractals=5, mult_bb=1, use_stop=0
+    \n
+    UEG7_ADVENTURE на оконных функциях \n
+    DRG+DUELDODO"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_bb=55, period_window=55,period_fractal_free=5, n_fractals=5, mult_bb=1, use_stop=0):
+        super().__init__(symbol, price_step, mult_ps, mode, stop, take)
+        self.needs_info = {'chart': self.symbol}
+        self.period_bb = period_bb
+        self.period_window = period_window
+        self.period_fractal_free = period_fractal_free
+        self.n_fractals = n_fractals
+        self.mult_bb = mult_bb
+        self.use_stop = use_stop
+
+    def preprocessing(self, tdata):
+        pdata = {}
+        df = tdata['chart']
+        df = add_bollinger(df, self.period_bb, multiplier=self.mult_bb)
+        df = add_average_fractals_window(df,self.period_window,self.period_fractal_free,self.n_fractals)
+        df = self.add_slice_df(df)
+        pdata['chart'] = df
+        return pdata
+    
+    def _get_action_from_row(self, row):
+        if row['high'] < row['bbu'] and row['low'] > row['bbd']:
+            if row['close'] >= row['ave_up']:
+                return 'open_short'
+            if row['close'] <= row['ave_down']:
+                return 'open_long'
+        else:
+            if row['low'] > row['bbu']:  # long
+                if row['close'] >= row['ave_up']:
+                    return 'close_long'
+                if row['close'] <= row['ave_down']:
+                    return 'open_long'
+                if self.use_stop:
+                    return 'close_short'
+            if row['high'] < row['bbd']:  # short
+                if row['close'] >= row['ave_up']:
+                    return 'open_short'
+                if row['close'] <= row['ave_down']:
+                    return 'close_short'
+                if self.use_stop:
+                    return 'close_long'
+        
+        return None
 
 class UEG7_SHERIFF(BaseEG):
     """stop=None, take=None, period=55, period_fractal=5, max_period=55, mult_bb=2
@@ -792,6 +1009,43 @@ class UEG7_SHERIFF(BaseEG):
         df = add_bollinger(df, self.period, multiplier=self.mult_bb)
         df = add_fractals(df, self.period_fractal)
         df = add_average_fractals(df, self.max_period, self.period_fractal)
+        df = self.add_slice_df(df)
+        pdata['chart'] = df
+        return pdata
+    
+    def _get_action_from_row(self, row):
+        if row['high'] < row['bbu'] and row['low'] > row['bbd']:
+            if row['close'] >= row['ave_up']:
+                return 'open_short'
+            if row['close'] <= row['ave_down']:
+                return 'open_long'
+        else:
+            if row['low'] > row['bbu']:  # long
+                return 'open_long'
+            if row['high'] < row['bbd']:  # short
+                return 'open_short'
+        
+        return None
+    
+class UEG7_DETECTIVE(BaseEG):
+    """stop=None, take=None, period_bb=55, period_window=55,period_fractal_free=5, n_fractals=5, mult_bb=2
+    \n
+    UEG7_SHERIFF на оконными функциями
+    GGD+PUBG"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_bb=55, period_window=55,period_fractal_free=5, n_fractals=5, mult_bb=2):
+        super().__init__(symbol, price_step, mult_ps, mode, stop, take)
+        self.needs_info = {'chart': self.symbol}
+        self.period_bb = period_bb
+        self.period_window = period_window
+        self.period_fractal_free = period_fractal_free
+        self.n_fractals = n_fractals
+        self.mult_bb = mult_bb
+
+    def preprocessing(self, tdata):
+        pdata = {}
+        df = tdata['chart']
+        df = add_bollinger(df, self.period_bb, multiplier=self.mult_bb)
+        df = add_average_fractals_window(df,self.period_window,self.period_fractal_free,self.n_fractals)
         df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
@@ -1005,6 +1259,48 @@ class UEG9_BIRDWATCHER(BaseEG):
             return None
         
         return None
+    
+class UEG9_BIRDWATCHER2(BaseEG):
+    '''
+    stop=None, take=None, period_wzz=55, frac_wzz=0.1, n_wzp=8, buffer_pd=0.1, mult_stop=0.5, allowance=0.1, use_exp=0, use_stop=0
+    '''
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_wzz=55, frac_wzz=0.1, n_wzp=8, buffer_pd=0.1, mult_stop=0.5, allowance=0.1, use_exp=0, use_stop=0):
+        super().__init__(symbol, price_step, mult_ps, mode, stop, take)
+        self.needs_info = {'chart': self.symbol}
+        self.period_wzz = period_wzz
+        self.frac_wzz = frac_wzz
+        self.n_wzp = n_wzp
+        self.buffer_pd = buffer_pd
+        self.mult_stop = mult_stop
+        self.plusdelta_func = add_exp_plusdelta_peaks_wzz260926 if use_exp else add_plusdelta_peaks_wzz260926
+        self.use_stop = use_stop
+        self.allowance = allowance
+
+    def preprocessing(self, tdata):
+        pdata = {}
+        df = tdata['chart']
+        df = add_zigzag_window_260926(df,self.period_wzz,self.frac_wzz,self.n_wzp)
+        df = self.plusdelta_func(df, self.buffer_pd)
+        df['top_stop'] = df['top_pd'] + df['delta_pd'] * self.mult_stop
+        df['bottom_stop'] = df['bottom_pd'] - df['delta_pd'] * self.mult_stop
+        df['pdf_diff_percent'] = ((df['top_pd'] - df['bottom_pd']) / df['bottom_pd']) * 100
+        df['allowance'] = df['pdf_diff_percent'] > self.allowance
+        df = self.add_slice_df(df)
+        pdata['chart'] = df
+        return pdata
+    
+    def _get_action_from_row(self, row):
+        if row['allowance']:
+            if row['top_stop'] > row['close'] >= row['top_pd']:
+                return 'open_short'
+            if row['bottom_stop'] < row['close'] <= row['bottom_pd']:
+                return 'open_long'
+            if self.use_stop:
+                if row['close'] > row['top_stop']:
+                    return 'close_short'
+                if row['close'] < row['bottom_stop']:
+                    return 'close_long'
+
 
 class UEG9_GRAVY(BaseEG):
     '''
@@ -1026,6 +1322,44 @@ class UEG9_GRAVY(BaseEG):
         df = add_percent_zz190826(df, percent_threshold=self.percent_threshold)
         df['zigzag_peaks'] = df['zigzag_peaks'].shift(1)
         df = add_mean_dzz_peaks(df, self.period_mean, self.buffer_mean)
+        df['top_stop'] = df['top_mean'] + df['delta_mean'] * self.mult_stop
+        df['bottom_stop'] = df['bottom_mean'] - df['delta_mean'] * self.mult_stop
+        df = self.add_slice_df(df)
+        pdata['chart'] = df
+        return pdata
+    
+    def _get_action_from_row(self, row):
+        if row['top_stop'] > row['close'] >= row['top_mean']:
+            return 'open_short'
+        if row['bottom_stop'] < row['close'] <= row['bottom_mean']:
+            return 'open_long'
+        if self.use_stop:
+            if row['close'] > row['top_stop']:
+                return 'close_short'
+            if row['close'] < row['bottom_stop']:
+                return 'close_long'
+        
+        return None
+    
+class UEG9_GRAVY2(BaseEG):
+    '''
+    stop=None, take=None, period_wzz=55, frac_wzz=0.1, n_wzp=8, buffer_mean=0.1, mult_stop=0.5, use_stop=1
+    '''
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_wzz=55, frac_wzz=0.1, n_wzp=8, buffer_mean=0.1, mult_stop=0.5, use_stop=1):
+        super().__init__(symbol, price_step, mult_ps, mode, stop, take)
+        self.needs_info = {'chart': self.symbol}
+        self.period_wzz = period_wzz
+        self.frac_wzz = frac_wzz
+        self.n_wzp = n_wzp
+        self.buffer_mean = buffer_mean
+        self.mult_stop = mult_stop
+        self.use_stop = use_stop
+
+    def preprocessing(self, tdata):
+        pdata = {}
+        df = tdata['chart']
+        df = add_zigzag_window_260926(df,self.period_wzz,self.frac_wzz,self.n_wzp)
+        df = add_mean_peaks_wzz260926(df,self.buffer_mean)
         df['top_stop'] = df['top_mean'] + df['delta_mean'] * self.mult_stop
         df['bottom_stop'] = df['bottom_mean'] - df['delta_mean'] * self.mult_stop
         df = self.add_slice_df(df)

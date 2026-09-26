@@ -741,6 +741,206 @@ def add_exp_pdfc(df:pd.DataFrame, period=1,period_fractal=5):
     df['pdf_down'] = df['pdf_down'].shift(shift)
     return df
 
+
+def add_plus_delta_fc_window(df: pd.DataFrame, period=55,
+                             period_fractal=5, n_fractals=5):
+    """add 'pdf_up', 'pdf_down'
+
+    plus delta fractal channel window
+    Mcfly
+
+    В каждом окне [i-period, i]:
+      - ищем фракталы up/down (period_fractal),
+      - считаем delta между соседними фракталами внутри окна,
+      - rolling(n_fractals).mean() по дельтам (min_periods=n_fractals),
+      - берём последнее значение high + dhm в окне.
+      - fallback на h.max() / l.min(), если фракталов мало.
+    """
+    n = len(df)
+    high = df['high'].to_numpy(dtype=float)
+    low  = df['low'].to_numpy(dtype=float)
+    shift = (period_fractal - 1) // 2
+
+    pdf_up   = np.full(n, np.nan)
+    pdf_down = np.full(n, np.nan)
+
+    # окно rolling по дельтам
+    win = int(n_fractals) if n_fractals and n_fractals >= 1 else 1
+
+    for i in range(period, n):
+        s = i - period          # начало окна
+        w = period + 1          # длина окна
+
+        fractal_up   = np.zeros(w, dtype=bool)
+        fractal_down = np.zeros(w, dtype=bool)
+
+        h = high[s:i + 1]
+        l = low[s:i + 1]
+
+        if shift > 0 and w > 2 * shift:
+            for k in range(shift, w - shift):
+                up_ok = True
+                down_ok = True
+                for j in range(1, shift + 1):
+                    if not (h[k] > h[k - j] and h[k] > h[k + j]):
+                        up_ok = False
+                    if not (l[k] < l[k - j] and l[k] < l[k + j]):
+                        down_ok = False
+                    if not up_ok and not down_ok:
+                        break
+                fractal_up[k]   = up_ok
+                fractal_down[k] = down_ok
+
+        up_idx   = np.flatnonzero(fractal_up)
+        down_idx = np.flatnonzero(fractal_down)
+
+        # ---------- up ----------
+        last_up_val = np.nan
+        if up_idx.size >= 2:
+            # дельты между соседними фракталами up
+            highs_at_fr = h[up_idx]                 # длины len(up_idx)
+            deltas = np.diff(highs_at_fr)           # длины len(up_idx) - 1
+
+            # rolling mean последних win дельт (min_periods=win)
+            if deltas.size >= win:
+                dhm = deltas[-win:].mean()
+                last_up_val = highs_at_fr[-1] + dhm
+            else:
+                # дельт меньше, чем окно — rolling дал бы NaN
+                last_up_val = np.nan
+
+        # fallback: мало фракталов, либо dhm = NaN
+        if np.isnan(last_up_val):
+            last_up_val = h.max()
+
+        # ---------- down ----------
+        last_down_val = np.nan
+        if down_idx.size >= 2:
+            lows_at_fr = l[down_idx]
+            deltas = np.diff(lows_at_fr)
+
+            if deltas.size >= win:
+                dlm = deltas[-win:].mean()
+                last_down_val = lows_at_fr[-1] + dlm
+            else:
+                last_down_val = np.nan
+
+        if np.isnan(last_down_val):
+            last_down_val = l.min()
+
+        pdf_up[i]   = last_up_val
+        pdf_down[i] = last_down_val
+
+    df['pdf_up']   = pdf_up
+    df['pdf_down'] = pdf_down
+    return df
+
+def add_exp_pdfc_window(df: pd.DataFrame, period=55,
+                        period_fractal=5, n_fractals=5):
+    """add 'pdf_up', 'pdf_down'
+
+    exponential plus delta fractal channel window
+
+    В каждом окне [i-period, i]:
+      - ищем фракталы up/down (period_fractal),
+      - считаем delta между соседними фракталами внутри окна,
+      - EWM(span=n_fractals, adjust=True) по дельтам,
+      - берём последнее значение high + dhm в окне.
+      - если фракталов нет или он один (dhm = NaN) — fallback на h.max()/l.min().
+    """
+    n = len(df)
+    high = df['high'].to_numpy(dtype=float)
+    low  = df['low'].to_numpy(dtype=float)
+    shift = (period_fractal - 1) // 2
+
+    pdf_up   = np.full(n, np.nan)
+    pdf_down = np.full(n, np.nan)
+
+    # alpha для ewm(span=n_fractals), adjust=True
+    if n_fractals is None or n_fractals < 1:
+        alpha = 1.0
+    else:
+        alpha = 2.0 / (n_fractals + 1.0)
+    one_m_alpha = 1.0 - alpha
+
+    for i in range(period, n):
+        s = i - period          # начало окна
+        w = period + 1          # длина окна
+
+        fractal_up   = np.zeros(w, dtype=bool)
+        fractal_down = np.zeros(w, dtype=bool)
+
+        # Локальные массивы для окна
+        h = high[s:i + 1]       # длина w
+        l = low[s:i + 1]
+
+        if shift > 0 and w > 2 * shift:
+            # up:   h[k] > h[k-j] и h[k] > h[k+j] для j=1..shift
+            # down: l[k] < l[k-j] и l[k] < l[k+j] для j=1..shift
+            for k in range(shift, w - shift):
+                up_ok = True
+                down_ok = True
+                for j in range(1, shift + 1):
+                    if not (h[k] > h[k - j] and h[k] > h[k + j]):
+                        up_ok = False
+                    if not (l[k] < l[k - j] and l[k] < l[k + j]):
+                        down_ok = False
+                    if not up_ok and not down_ok:
+                        break
+                fractal_up[k]   = up_ok
+                fractal_down[k] = down_ok
+
+        up_idx   = np.flatnonzero(fractal_up)
+        down_idx = np.flatnonzero(fractal_down)
+
+        # --- EWM по дельтам между соседними фракталами up (внутри окна) ---
+        last_up_val = np.nan
+        if up_idx.size > 0:
+            num = 0.0
+            den = 0.0
+            prev_h = np.nan
+            dhm = np.nan
+            for k in up_idx:
+                if not np.isnan(prev_h):
+                    delta = h[k] - prev_h
+                    num = delta + one_m_alpha * num
+                    den = 1.0 + one_m_alpha * den
+                    dhm = num / den
+                    last_up_val = h[k] + dhm
+                # первый фрактал: delta=NaN → dhm=NaN → pdf_up=NaN, пропускаем
+                prev_h = h[k]
+
+        # fallback: нет фракталов up или всего один (dhm остался NaN)
+        if np.isnan(last_up_val):
+            last_up_val = h.max()
+
+        # --- то же для down ---
+        last_down_val = np.nan
+        if down_idx.size > 0:
+            num = 0.0
+            den = 0.0
+            prev_l = np.nan
+            dlm = np.nan
+            for k in down_idx:
+                if not np.isnan(prev_l):
+                    delta = l[k] - prev_l
+                    num = delta + one_m_alpha * num
+                    den = 1.0 + one_m_alpha * den
+                    dlm = num / den
+                    last_down_val = l[k] + dlm
+                prev_l = l[k]
+
+        # fallback
+        if np.isnan(last_down_val):
+            last_down_val = l.min()
+
+        pdf_up[i]   = last_up_val
+        pdf_down[i] = last_down_val
+
+    df['pdf_up']   = pdf_up
+    df['pdf_down'] = pdf_down
+    return df
+
 def add_stable_ma_direction(df:pd.DataFrame,period=10,kind:str='sma'):
     """add 'dir_ma'"""
     df['diff_ma'] = np.sign(df[kind].diff())
