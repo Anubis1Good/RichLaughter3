@@ -436,8 +436,9 @@ group = (
     (
         UEG4_CANADIAN, 
         [
-            (max_period,),
-            (2,period_fractal_max,1),
+            (10, max_period, 1),
+            (2, half_max_period, 1),
+            (1,10,1),
             (0,1,0.01)
         ]
     ),
@@ -455,6 +456,24 @@ group = (
         [
             (2, period_fractal_max, 1),
             (1,5,1),
+            (0,1,0.01)
+        ]
+    ),
+    (
+        UEG4_FALCON2, 
+        [
+            (10, max_period, 1),
+            (2, half_max_period, 1),
+            (1,10,1),
+            (0,1,0.01)
+        ]
+    ),
+    (
+        UEG4_PELICAN2, 
+        [
+            (10, max_period, 1),
+            (2, half_max_period, 1),
+            (1,10,1),
             (0,1,0.01)
         ]
     ),
@@ -523,12 +542,12 @@ group = (
             (2, half_max_period, 1),
         ]
     ),
-    (
+   (
         UEG7_LOVERGOOSE, 
         [
             (2, half_max_period, 1),
-            (2, half_max_period, 1),
             (10, max_period, 1),
+            (2, half_max_period, 1),
             (1,10,1),
             (10,70,1),
             (10,70,1),
@@ -539,12 +558,63 @@ group = (
         UEG7_LOVERDUCK, 
         [
             (2, half_max_period, 1),
-            (2, half_max_period, 1),
             (10, max_period, 1),
+            (2, half_max_period, 1),
             (1,10,1),
             (10,70,1),
             (2, max_period, 1),
             (0,1),
+        ]
+    ),
+    (
+        UEG7_CELEBRITY, 
+        [
+            (2, max_period, 1),
+            (10, max_period, 1),
+            (2, half_max_period, 1),
+            (1,10,1),
+            (0.1,3,0.1),
+            (0,1)
+        ]
+    ),
+    (
+        UEG7_CARRIER, 
+        [
+            (2, max_period, 1),
+            (10, max_period, 1),
+            (2, half_max_period, 1),
+            (1,10,1),
+            (10, max_period, 1),
+            (2, half_max_period, 1),
+            (1,10,1),
+            (0,1,0.01),
+            (0.1,3,0.1),
+            (0,1)
+        ]
+    ),
+    (
+        UEG7_DETECTIVE, 
+        [
+            (2, max_period, 1),
+            (10, max_period, 1),
+            (2, half_max_period, 1),
+            (1,10,1),
+            (0.1,3,0.1),
+        ]
+    ),
+    (
+        UEG7_CANNIBAL, 
+        [
+            (2, max_period, 1),
+            (10,70,1),
+            (10, max_period, 1),
+            (2, half_max_period, 1),
+            (1,10,1),
+            (10, max_period, 1),
+            (2, half_max_period, 1),
+            (1,10,1),
+            (0,1,0.01),
+            (2, half_max_period, 1),
         ]
     ),
     (
@@ -641,6 +711,30 @@ group = (
             (0,99,1),
             (0,99,1),
             (0,99,1),
+        ]
+    ),
+    (
+        UEG9_BIRDWATCHER2, 
+        [
+            (20,max_period,1),
+            (0,1,0.01),
+            (4,20,2),
+            (0,0.5,0.01),
+            (0.1,2,0.05),
+            (0,1,0.01),
+            (0,1),
+            (0,1),
+        ]
+    ),
+    (
+        UEG9_GRAVY2, 
+        [
+            (20,max_period,1),
+            (0,1,0.01),
+            (4,20,2),
+            (0,0.5,0.01),
+            (0.1,2,0.05),
+            (0,1),
         ]
     ),
     (
