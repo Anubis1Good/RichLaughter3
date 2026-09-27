@@ -149,7 +149,8 @@ class PEG4_UNIVERSAL(BaseEG):
                     return 'close_long'
         
         return None
-                
+
+# Надо чинить Mcfly
 class PEG4_U3(BaseEG):
     '''
     stop=None, take=None, period=20, period_rsi=20, period_fractal=10, period_max=55, kind_channel='DC', kind_rsi='rsi',period2s = 3 \n

@@ -15,7 +15,7 @@ tickers = (
     'SBERP','TATNP','AFLT','FEES','RUAL','VKCO',
     'ENPG','IRAO','SFIN','RAGR','SPBE','ASTR',
     )
-# tickers = ('MTLR',)
+# tickers = ('ASTR',)
 folder_save = '_data_for_tests\data_stock_1m'
 for ticker in tickers:
     # loader = ApiMoexLoader(ticker,'RFUD','forts','futures')

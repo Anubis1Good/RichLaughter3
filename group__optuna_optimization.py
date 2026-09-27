@@ -1,7 +1,7 @@
 # run_optimization.py
 from optimization.OptimizatorOptuna import OptimizatorOptuna
-# from optimization.optuna_grops.main_groups import group, max_period
-from optimization.optuna_grops.exp_groups import group, max_period
+from optimization.optuna_grops.main_groups import group, max_period
+# from optimization.optuna_grops.exp_groups import group, max_period
 from testing.test_constants import *
 # Time test on VEG1_VENUS
 # ⏱ Total time: 0h 0m 37s - 50 trials
@@ -19,8 +19,8 @@ if __name__ == '__main__':
         test_folder='_data_for_tests/data_stock_5m',
         fee=MAIN_FEE,
         max_period=max_period,
-        bottom_limit=60,
-        top_limit=700,
+        bottom_limit=50,
+        top_limit=600,
         save_cores=save_cores,
         n_trials=trials,
         need_plot=False,

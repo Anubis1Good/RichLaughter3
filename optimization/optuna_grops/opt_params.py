@@ -1,4 +1,4 @@
-max_period = 55
+max_period = 60
 max_percent_threshold = 0.5
 period_fractal_max = 5
 

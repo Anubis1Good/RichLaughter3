@@ -3,10 +3,8 @@ from strategies.all_egs import *
 from strategies.helpEGs.debugEG import DebugAction,DebugMean
 from testing.test_constants import *
 
-# path_df = '_data_for_tests\\before_opt\MTLR_5_1786793053.parquet'
-# path_df = '_data_for_tests\_before_opt\ALRS_5_1787328168.parquet'
-# path_df = '_data_for_tests\data_stock_5m\MTLR_5_1785876346.parquet'
-# path_df = '_data_for_tests\data_stock_5m\MTLR_5_1785977685.parquet'
+
+# PATH_DF = '_data_for_tests\data_stock_5m\AFLT_5_1790444114.parquet'
 symbol = PATH_DF.split('\\')[-1].split('_')[0]
 # fee = 0.001
 # window = 60
@@ -16,8 +14,8 @@ symbol = PATH_DF.split('\\')[-1].split('_')[0]
 # ws = [EG,(100,30,20)]
 # ws = [UEG4_FALCON,],
 
-# ws = (VEG1_VENUS,(None,None,0.3,0.8,0.1,2.0,1,0,0),1,None)
-ws = (UEG7_LOVERGOOSE,[])
+ws = (LEG2_DRG,(None,None,12,2.1,5,30,34,0,))
+# ws = (UEG7_LOVERGOOSE,[])
 # ws = (UEG7_LOVERDUCK,[])
 # ws = (DebugMean,[])
 cegt = CheckEGTrader(
