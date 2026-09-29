@@ -119,7 +119,8 @@ class UEG4_PELICAN(BaseEG):
                 return 'open_long'
         
         return None
-    
+
+# Честно очень плохие результаты. Как будто можно прощаться с этим роботом
 class UEG4_PELICAN2(BaseEG):
     """stop=None, take=None, period_window=55,period_fractal_free=5, n_fractals=3, allowance=0.1"""
     def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_window=55,period_fractal_free=5, n_fractals=3, allowance=0.1):
@@ -412,6 +413,7 @@ class UEG6_PIGEON(BaseEG):
         
         return None
 
+# Подумать над расширение области между скользящими средними
 class UEG6_ADVENTURE(BaseEG):
     """stop=None, take=None, period=60, period_smas=2, period_sma=20, mult_bb=1, use_stop=0
     \n
@@ -535,6 +537,7 @@ class UEG7_DODO(BaseEG):
         
         return None
     
+# Надо думать над фильтром тренда
 class UEG7_LOVERGOOSE(BaseEG):
     """stop=None, take=None, period_adx=20, period_window=55,period_fractal_free=5, n_fractals=3, adx_threshold=30, adx_stop=35, use_stop=0
     \n
@@ -839,7 +842,7 @@ class UEG7_PIGEON(BaseEG):
                         return 'close_long'
         
         return None
-    
+# слишком частит. В итоге в тренде закрывает убыток в лоях и переобувается. После чего получает люлей на откате.
 class UEG7_CARRIER(BaseEG):
     """stop=None, take=None, period_bb=55, period_window=55,period_fractal_free=5, n_fractals=5, period_window2=55, period_fractal_free2=5,n_fractals2=3, allowance=0.1, mult_bb=1, use_stop=0
     \n
@@ -1122,6 +1125,7 @@ class UEG8_AVENGER(BaseEG):
         return None
         
 #UEG8 c автоматической подборкой лонговых и шортовых паттернов 
+#TODO Нужна версия без ограничения сверху и низу. Так как он порой теряет прибыль из-за узкого диапазона.
 class UEG8_SOLDIER(BaseEG):
     """stop=None, take=None, divider_buff=5, period_wzz=30, frac_wzz=0.1, threshold_p18=0.1,g_joc=99,g_tr=99,g_dt=99,g_wl=99,g_nd=99,g_s=99,g_sos=99,g_bti=99
     \n
@@ -1259,7 +1263,8 @@ class UEG9_BIRDWATCHER(BaseEG):
             return None
         
         return None
-    
+
+# Очень плохой результат, открывает сделки в лой.
 class UEG9_BIRDWATCHER2(BaseEG):
     '''
     stop=None, take=None, period_wzz=55, frac_wzz=0.1, n_wzp=8, buffer_pd=0.1, mult_stop=0.5, allowance=0.1, use_exp=0, use_stop=0
