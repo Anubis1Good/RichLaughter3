@@ -1,27 +1,9 @@
-# from strategies.PEGs.PEG1_9 import *
-# from strategies.PEGs.PEG10_19 import *
-# from strategies.PEGs.PEG20_29 import *
-# from strategies.LEGs.LEG1 import *
-# from strategies.LEGs.LEG2 import *
-# from strategies.WEGs.WEG1_9 import *
-# from strategies.UEGs.UEG1_9 import *
-# from strategies.SEGs.SEG_CA1_9 import *
-# from strategies.SEGs.SEG_ML10_19 import *
-# from strategies.VEGs.VEG1 import *
 from strategies.all_egs import *
 
 from optimization.optuna_grops.opt_params import *
 # (min, max, step)
 
 group = (
-    (
-        PEG2_SDDCr, 
-        [
-            (2,max_period,1),
-            (2,max_period,1),
-            (max_period,),
-        ]
-    ),
     (
         PEG4_UNIVERSAL, 
         [
@@ -35,26 +17,6 @@ group = (
         ]
     ),
     (
-        PEG4_U3, 
-        [
-            (2,max_period,1),
-            (2,max_period,1),
-            (2,period_fractal_max,1),
-            (max_period,),
-            ("DC","VG","BB","VC","WC"),
-            ("rsi","rsi_tw","mfi","s","uo"),
-            (2,period2s_max,1),
-        ]
-    ),
-    (
-        PEG8_DOBBY, 
-        [
-            (2,max_period,1),
-            (0.5,3,0.1),   
-        ]
-    ),
-
-    (
         PEG11_KUSURUKEN, 
         [
             (5, max_period, 1),
@@ -65,14 +27,7 @@ group = (
             (max_period,),
         ]
     ),
-    (
-        PEG13_DWDDCr, 
-        [
-            (2, max_period, 1),
-            (5, 40, 1),
-            (2, max_period, 1),
-        ]
-    ),
+
     (
         PEG14_RANGER, 
         [
@@ -95,31 +50,8 @@ group = (
             (5, 100, 1),
         ]
     ),
-    (
-        PEG14_RWDDCr, 
-        [
-            (2, max_period, 1),
-            (5, 40, 1),
-            (2, max_period, 1),
-            (2, max_period, 1),
-            (max_period,),
-        ]
-    ),
-    (
-        PEG15_ANNA, 
-        [
-            (2, max_period, 1),
-            (5, 40, 1),
-        ]
-    ),
-    (
-        PEG15_SILVANA, 
-        [
-            (2, max_period, 1),
-            (5, 40, 1),
-            (2, max_period, 1),
-        ]
-    ),
+
+
 
     (
         PEG17_PHOENIX, 
@@ -145,70 +77,7 @@ group = (
             (max_period,),
         ]
     ),
-    (
-        PEG18_DIABLO2, 
-        [
-            (2, max_period, 1),
-            (0.5,4,0.1),
-            (2, max_period, 1),
-            (5, 40, 1),
-            (0,1),
-            (max_period, ),
-        ]
-    ),
-    (
-        PEG18_REXXAR2, 
-        [
-            (2, max_period, 1),
-            (0.5,4,0.1),
-            (2, max_period, 1),
-            (5, 40, 1),
-            (5, 40, 1),
-            (0,1),
-            (max_period, ),
-        ]
-    ),
-    (
-        PEG18_UTER, 
-        [
-            (2, max_period, 1),
-            (3,10,1),
-            (2, max_period, 1),
-            (5, 40, 1),
-            (5, 90, 1),
-            (2, half_max_period, 1),
-            (0,1),
-        ]
-    ),
-    (
-        PEG18_UTER2, 
-        [
-            (2, max_period, 1),
-            (0.5,4,0.1),
-            (2, max_period, 1),
-            (5, 40, 1),
-            (5, 45, 1),
-            (5, 90, 1),
-            (2, half_max_period, 1),
-            (0,1),
-            (max_period, ),
-            (0,1),
-            (0,1),
-        ]
-    ),
-    (
-        PEG18_VARIAN2, 
-        [
-            (2, max_period, 1),
-            (0.5,4,0.1),
-            (2, max_period, 1),
-            (5, 40, 1),
-            (5, 40, 1),
-            (2, max_period, 1),
-            (0,1),
-            (max_period, ),
-        ]
-    ),
+
     (
         PEG18_ANDUIN, 
         [
@@ -236,18 +105,7 @@ group = (
         ]
     ),
 
-    (
-        PEG20_HOGGER, 
-        [
-            (2, max_period, 1),
-            (2, max_period, 1),
-            (0.5,3,0.1),
-            (0.5,3,0.1),
-            (5, 40, 1),
-            (5, 40, 1),
 
-        ]
-    ),
 
     (
         PEG26_UNKNOWN, 
@@ -353,15 +211,7 @@ group = (
             (3,7,1)
         ]
     ),
-    (
-        LEG2_ALKASH, 
-        [
-            (2, max_period, 1),
-            (0.5,3,0.1),
-            (2, max_period, 1),
-            (0,1)
-        ]
-    ),
+
     (
         LEG2_DRG, 
         [
@@ -468,26 +318,7 @@ group = (
             (0,1)
         ]
     ),
-    (
-        UEG6_DODO, 
-        [
-            (2, half_max_period, 1),
-            (2, max_period, 1),
-            (10,70,1),
-            (10,70,1),
-        ]
-    ),
-    (
-        UEG6_DUELDODO, 
-        [
-            (2, max_period, 1),
-            (2, max_period, 1),
-            (10,70,1),
-            (2, max_period, 1),
-            (0,1),
-            (2, half_max_period, 1),
-        ]
-    ),
+
     (
         UEG6_PIGEON, 
         [
@@ -597,84 +428,6 @@ group = (
             (2, half_max_period, 1),
         ]
     ),
-    (
-        UEG7_ADVENTURE, 
-        [
-            (2, max_period, 1),
-            (2,period_fractal_max,1),
-            (max_period,),
-            (0.1,3,0.1),
-            (0,1)
-        ]
-    ),
-    (
-        UEG7_DODO, 
-        [
-            (2, half_max_period, 1),
-            (2, period_fractal_max, 1),
-            (max_period,),
-            (10,70,1),
-            (10,70,1),
-            (0,1),
-        ]
-    ),
-    (
-        UEG7_DUELDODO, 
-        [
-            (2, half_max_period, 1),
-            (2, period_fractal_max, 1),
-            (max_period,),
-            (10,70,1),
-            (2, max_period, 1),
-            (0,1)
-        ]
-    ),
-    (
-        UEG7_PIGEON, 
-        [
-            (2, max_period, 1),
-            (2, period_fractal_max, 1),
-            (max_period,),
-            (2, period_fractal_max, 1),
-            (1,5,1),
-            (0,1,0.01),
-            (0.1,3,0.1),
-            (0,1)
-        ]
-    ),
-    (
-        UEG7_SHERIFF, 
-        [
-            (2, max_period, 1),
-            (2,period_fractal_max,1),
-            (max_period,),
-            (0.1,3,0.1),
-        ]
-    ),
-    (
-        UEG7_VULTURE, 
-        [
-            (2, max_period, 1),
-            (10,70,1),
-            (2, period_fractal_max, 1),
-            (2,5,1),
-            (2, period_fractal_max, 1),
-            (max_period,),
-            (0,1,0.01),
-            (2, half_max_period, 1),
-        ]
-    ),
-    (
-        UEG8_AVENGER, 
-        [
-            (2,20,1),
-            (0,max_percent_threshold,0.1),
-            (0,1,0.1),
-            (0.1,1,0.1),
-            (0.5,10,0.5),
-            (0,1)
-        ]
-    ),
 
    (
         UEG8_SOLDIER, 
@@ -697,19 +450,7 @@ group = (
             (0,99,1),
         ]
     ),
-    (
-        UEG9_BIRDWATCHER2, 
-        [
-            (12,max_period,1),
-            (0,1,0.01),
-            (4,12,2),
-            (0,0.5,0.01),
-            (0.1,2,0.05),
-            (0,1,0.01),
-            (0,1),
-            (0,1),
-        ]
-    ),
+
     (
         UEG9_GRAVY2, 
         [

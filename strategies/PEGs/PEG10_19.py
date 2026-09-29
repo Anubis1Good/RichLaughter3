@@ -512,7 +512,7 @@ class PEG17_PHOENIX(BaseEG):
         df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
-    
+    # Изучи этот. Тут есть странные подозрения
     def _get_action_from_row(self, row):
         if row['velcro'] > 100 - self.threshold_velcro:  # long
             if row['low'] <= row["avarege"]:

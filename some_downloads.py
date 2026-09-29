@@ -15,6 +15,11 @@ tickers = (
     'SBERP','TATNP','AFLT','FEES','RUAL','VKCO',
     'ENPG','IRAO','SFIN','RAGR','SPBE','ASTR',
     )
+# tickers = (
+#     'OGKB','ETLN','TGKA','DELI','FIXR','VSEH',
+#     'PRMD','LSRG','SOFL','MTLR','APTK','HYDR',
+
+#     )
 # tickers = ('ASTR',)
 folder_save = '_data_for_tests\data_stock_1m'
 for ticker in tickers:
