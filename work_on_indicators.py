@@ -28,8 +28,7 @@ print(p1,p2,p3)
 # if p2 < p3:
 #     p3 = p2
 print(p1,p2,p3)
-df = add_donchan_channel(df, p1)
-df = add_assessment_motion_index(df, p2, p3)
+
 
 
 # candle_max = df['high'].max()

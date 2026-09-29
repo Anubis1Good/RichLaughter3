@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import re
 
 # GOOD INDICATOR
 def add_precent_zigzag(df:pd.DataFrame, source='high_low', reversal=0.1, use_pct=True):
@@ -1843,7 +1844,7 @@ def add_exp_plusdelta_peaks_wzz260926(df, buffer=0.1):
     df['bottom_pd'] = df['bottom_pd'] + df['buffer_pd']
 
     return df
-
+# проверить
 def add_van_zigzag(df, period=7):
     """add swing_high  swing_low  zigzag  zigzag_high  zigzag_low  zigzag_line"""
     # Создаем копию DataFrame и сбрасываем индекс
@@ -1970,158 +1971,6 @@ def add_shift_zz_peaks(df, shift=1, add_lust_fake_peak=True):
     df.loc[zz.index, 'zp_istop'] = zz['zp_istop'].astype('boolean')
     
     return df
-
-# Долгий, не всегда правильные точки выбирает
-def add_wzz3p(df: pd.DataFrame, period=55):
-    """ add 'wzp1''wzp2''wzp3''idx_wzp1''idx_wzp2''idx_wzp3' \n
-    создает 3 точки зигзага в окне
-    19.08.2026
-    """
-    # Инициализация колонок одной строкой
-    df[['wzp1', 'wzp2', 'wzp3', 'idx_wzp1', 'idx_wzp2', 'idx_wzp3']] = np.nan
-    
-    for i in range(period, len(df)):
-        start_pos = i - period
-        slice1 = df.iloc[start_pos:i]
-        
-        # Находим экстремумы
-        idx_h1 = slice1['high'].idxmax()
-        idx_l1 = slice1['low'].idxmin()
-        
-        pos_h1 = df.index.get_loc(idx_h1)
-        pos_l1 = df.index.get_loc(idx_l1)
-        
-        # Определяем паттерн
-        if pos_h1 > pos_l1 or (pos_h1 == pos_l1 and slice1.loc[idx_h1, 'direction'] == 1):
-            # Паттерн "рост": l1 -> h1 -> l2
-            first_idx, first_val = idx_l1, slice1.loc[idx_l1, 'low']
-            second_idx, second_val = idx_h1, slice1.loc[idx_h1, 'high']
-            pos_second = pos_h1
-            search_min = True
-        else:
-            # Паттерн "падение": h1 -> l1 -> h2
-            first_idx, first_val = idx_h1, slice1.loc[idx_h1, 'high']
-            second_idx, second_val = idx_l1, slice1.loc[idx_l1, 'low']
-            pos_second = pos_l1
-            search_min = False
-        
-        # Сохраняем первые две точки
-        df.loc[df.index[i], ['idx_wzp1', 'wzp1']] = first_idx, first_val
-        df.loc[df.index[i], ['idx_wzp2', 'wzp2']] = second_idx, second_val
-        
-        # Ищем третью точку
-        if pos_second + 1 < len(df):
-            slice2 = df.iloc[pos_second + 1:i + 1]
-            if len(slice2) > 0:
-                col = 'low' if search_min else 'high'
-                third_idx = slice2[col].idxmin() if search_min else slice2[col].idxmax()
-                third_val = slice2.loc[third_idx, col]
-                
-                df.loc[df.index[i], ['idx_wzp3', 'wzp3']] = third_idx, third_val
-    
-    # Приводим к Int64
-    df[['idx_wzp1', 'idx_wzp2', 'idx_wzp3']] = df[['idx_wzp1', 'idx_wzp2', 'idx_wzp3']].astype('Int64')
-    
-    return df
-
-# Долгий, не всегда правильные точки выбирает
-def add_wzz5p(df: pd.DataFrame, period=55):
-    """ add 'wzp1''wzp2''wzp3''wzp4''wzp5' и их индексы \n
-    создает 5 точек зигзага в окне
-    Точки: 1 -> 2 -> 3 -> 4 -> 5
-    где 3 и 4 - промежуточные экстремумы между 2 и 5
-    """
-    # Инициализация колонок
-    cols = ['wzp1', 'wzp2', 'wzp3', 'wzp4', 'wzp5',
-            'idx_wzp1', 'idx_wzp2', 'idx_wzp3', 'idx_wzp4', 'idx_wzp5']
-    df[cols] = np.nan
-    
-    for i in range(period, len(df)):
-        start_pos = i - period
-        slice1 = df.iloc[start_pos:i]
-        
-        # Находим экстремумы в первом окне
-        idx_h1 = slice1['high'].idxmax()
-        idx_l1 = slice1['low'].idxmin()
-        
-        pos_h1 = df.index.get_loc(idx_h1)
-        pos_l1 = df.index.get_loc(idx_l1)
-        
-        # Определяем паттерн для первых двух точек
-        if pos_h1 > pos_l1 or (pos_h1 == pos_l1 and slice1.loc[idx_h1, 'direction'] == 1):
-            # Паттерн "рост": l1 -> h1 -> ... -> l2
-            first_idx, first_val = idx_l1, slice1.loc[idx_l1, 'low']
-            second_idx, second_val = idx_h1, slice1.loc[idx_h1, 'high']
-            pos_second = pos_h1
-            is_up = True
-        else:
-            # Паттерн "падение": h1 -> l1 -> ... -> h2
-            first_idx, first_val = idx_h1, slice1.loc[idx_h1, 'high']
-            second_idx, second_val = idx_l1, slice1.loc[idx_l1, 'low']
-            pos_second = pos_l1
-            is_up = False
-        
-        # Сохраняем первые две точки
-        df.loc[df.index[i], ['idx_wzp1', 'wzp1']] = first_idx, first_val
-        df.loc[df.index[i], ['idx_wzp2', 'wzp2']] = second_idx, second_val
-        
-        # Ищем пятую точку (последний экстремум)
-        if pos_second + 1 < len(df):
-            slice_last = df.iloc[pos_second + 1:i + 1]
-            if len(slice_last) > 0:
-                if is_up:
-                    # Для роста ищем минимум после максимума (точка 5)
-                    fifth_idx = slice_last['low'].idxmin()
-                    fifth_val = slice_last.loc[fifth_idx, 'low']
-                else:
-                    # Для падения ищем максимум после минимума (точка 5)
-                    fifth_idx = slice_last['high'].idxmax()
-                    fifth_val = slice_last.loc[fifth_idx, 'high']
-                
-                pos_fifth = df.index.get_loc(fifth_idx)
-                
-                # Сохраняем пятую точку
-                df.loc[df.index[i], ['idx_wzp5', 'wzp5']] = fifth_idx, fifth_val
-                
-                # Теперь ищем точки 3 и 4 между точкой 2 и точкой 5
-                if pos_second + 1 < pos_fifth:
-                    # Разделяем промежуток между точкой 2 и точкой 5 пополам
-                    mid_pos = (pos_second + pos_fifth) // 2
-                    
-                    # Первая половина: от точки 2 до середины
-                    slice3 = df.iloc[pos_second + 1:mid_pos + 1]
-                    if len(slice3) > 0:
-                        if is_up:
-                            # После максимума ищем минимум (точка 3)
-                            third_idx = slice3['low'].idxmin()
-                            third_val = slice3.loc[third_idx, 'low']
-                        else:
-                            # После минимума ищем максимум (точка 3)
-                            third_idx = slice3['high'].idxmax()
-                            third_val = slice3.loc[third_idx, 'high']
-                        
-                        df.loc[df.index[i], ['idx_wzp3', 'wzp3']] = third_idx, third_val
-                    
-                    # Вторая половина: от середины до точки 5
-                    slice4 = df.iloc[mid_pos + 1:pos_fifth + 1]
-                    if len(slice4) > 0:
-                        if is_up:
-                            # Ищем максимум перед минимумом (точка 4)
-                            fourth_idx = slice4['high'].idxmax()
-                            fourth_val = slice4.loc[fourth_idx, 'high']
-                        else:
-                            # Ищем минимум перед максимумом (точка 4)
-                            fourth_idx = slice4['low'].idxmin()
-                            fourth_val = slice4.loc[fourth_idx, 'low']
-                        
-                        df.loc[df.index[i], ['idx_wzp4', 'wzp4']] = fourth_idx, fourth_val
-    
-    # Приводим индексы к Int64
-    idx_cols = ['idx_wzp1', 'idx_wzp2', 'idx_wzp3', 'idx_wzp4', 'idx_wzp5']
-    df[idx_cols] = df[idx_cols].astype('Int64')
-    
-    return df
-
 
 def get_rolling_extremes_indices(series: pd.Series, period: int, extremum: str):
     """Получает индексы экстремумов для скользящего окна"""
@@ -2670,6 +2519,224 @@ def add_stop_loss_p18zzw(df, divider=2):
     df['ssl'] = max_zp - cur_range / divider
 
     return df
+
+def _get_wzp_numbers(df: pd.DataFrame) -> list[int]:
+    """Возвращает отсортированный список номеров N, для которых есть колонка wzpN."""
+    ns = []
+    for col in df.columns:
+        m = re.fullmatch(r'wzp(\d+)', col)
+        if m:
+            ns.append(int(m.group(1)))
+    return sorted(ns)
+
+
+def _last_wzp_cols(df: pd.DataFrame, count: int) -> list[str]:
+    """
+    Возвращает список имён последних `count` колонок wzpN
+    в порядке возрастания N: ['wzp5', 'wzp6', 'wzp7', 'wzp8'] для count=4 и maxN=8.
+    """
+    ns = _get_wzp_numbers(df)
+    if len(ns) < count:
+        raise ValueError(f"В df найдено только {len(ns)} колонок wzpN, нужно минимум {count}")
+    last_ns = ns[-count:]
+    return [f'wzp{n}' for n in last_ns]
+
+
+def _last_idx_wzp_cols(df: pd.DataFrame, count: int) -> list[str]:
+    """Аналогично для idx_wzpN."""
+    ns = []
+    for col in df.columns:
+        m = re.fullmatch(r'idx_wzp(\d+)', col)
+        if m:
+            ns.append(int(m.group(1)))
+    ns = sorted(ns)
+    if len(ns) < count:
+        raise ValueError(f"В df найдено только {len(ns)} колонок idx_wzpN, нужно минимум {count}")
+    return [f'idx_wzp{n}' for n in ns[-count:]]
+
+def add_pattern18_zzw_260926(
+    df: pd.DataFrame,
+    threshold: float = 0.2,
+    add_codes: bool = False,
+) -> pd.DataFrame:
+    """
+    Добавляет pattern18 на основе 4 последних wzp.
+    Если максимальный wzp = 8, берутся wzp5, wzp6, wzp7, wzp8.
+    """
+
+    cols = _last_wzp_cols(df, 4)
+    zp1, zp2, zp3, zp4 = (df[c].to_numpy(dtype=float) for c in cols)
+
+    n = len(df)
+    patterns = np.full(n, 'none_pattern', dtype=object)
+
+    p1_2 = zp1 - zp2
+    p2_3 = zp2 - zp3
+    p3_4 = zp3 - zp4
+
+    valid = (
+        ~np.isnan(zp1) & ~np.isnan(zp2) & ~np.isnan(zp3) & ~np.isnan(zp4)
+        & (p2_3 != 0) & (p3_4 != 0)
+    )
+
+    with np.errstate(divide='ignore', invalid='ignore'):
+        r12_23 = np.abs(p1_2 / p2_3)
+        r23_34 = np.abs(p2_3 / p3_4)
+
+    big = 1 + threshold
+    small = 1 - threshold
+    p1_2_pos = p1_2 > 0
+
+    conds = [
+        ((r12_23 > big) & (r23_34 > big),                          'weak'),
+        ((r12_23 > big) & (r23_34 < small),                        'r12big_r23small'),
+        ((r12_23 > big) & (r23_34 >= small) & (r23_34 <= big),     'r12big_r23mid'),
+        ((r12_23 < small) & (r23_34 > big),                        'r12small_r23big'),
+        ((r12_23 < small) & (r23_34 < small),                      'r12small_r23small'),
+        ((r12_23 < small) & (r23_34 >= small) & (r23_34 <= big),   'r12small_r23mid'),
+        ((r12_23 >= small) & (r12_23 <= big) & (r23_34 > big),     'r12mid_r23big'),
+        ((r12_23 >= small) & (r12_23 <= big) & (r23_34 < small),   'r12mid_r23small'),
+        ((r12_23 >= small) & (r12_23 <= big) & (r23_34 >= small) & (r23_34 <= big), 'both_mid'),
+    ]
+
+    table = {
+        ('weak',                True):  'weak_short',
+        ('weak',                False): 'weak_long',
+        ('r12big_r23small',     True):  'bui',
+        ('r12big_r23small',     False): 'joc',
+        ('r12big_r23mid',       True):  'double_bottom',
+        ('r12big_r23mid',       False): 'double_top',
+        ('r12small_r23big',     True):  'btc',
+        ('r12small_r23big',     False): 'bti',
+        ('r12small_r23small',   True):  'sow',
+        ('r12small_r23small',   False): 'sos',
+        ('r12small_r23mid',     True):  'upthrust',
+        ('r12small_r23mid',     False): 'spring',
+        ('r12mid_r23big',       True):  'narrowing_up',
+        ('r12mid_r23big',       False): 'narrowing_down',
+        ('r12mid_r23small',     True):  'bui',
+        ('r12mid_r23small',     False): 'joc',
+        ('both_mid',            True):  'bottom_range',
+        ('both_mid',            False): 'top_range',
+    }
+
+    assigned = np.zeros(n, dtype=bool)
+    for mask, name in conds:
+        m = mask & valid & ~assigned
+        if not m.any():
+            continue
+        idx = np.flatnonzero(m)
+        pos_sel = p1_2_pos[idx]
+        vals = np.array(
+            [table[(name, bool(p))] for p in pos_sel],
+            dtype=object,
+        )
+        patterns[idx] = vals
+        assigned |= m
+
+    df['pattern18'] = patterns
+
+    if add_codes:
+        codes = sorted(set(patterns.tolist()))
+        mapping = {name: i for i, name in enumerate(codes)}
+        df['pattern18_code'] = np.array(
+            [mapping[p] for p in patterns], dtype=np.int16
+        )
+    return df
+
+def add_zzw_levels_260926(df: pd.DataFrame, buffer_percent: float = 0.1) -> pd.DataFrame:
+    """
+    Добавляет bzp1..bzp4, target, btarget, mzp на основе 4 последних wzp.
+    """
+    cols = _last_wzp_cols(df, 4)
+    zp1, zp2, zp3, zp4 = (df[c].to_numpy(dtype=float) for c in cols)
+
+    p1_2 = zp1 - zp2
+    p2_3 = zp2 - zp3
+    p3_4 = zp3 - zp4
+    df['zp1'] = zp1
+    df['zp2'] = zp2
+    df['zp3'] = zp3
+    df['zp4'] = zp4
+    df['bzp1'] = zp1 - np.sign(p2_3) * np.abs(p2_3) * buffer_percent
+    df['bzp2'] = zp2 + np.sign(p2_3) * np.abs(p2_3) * buffer_percent
+    df['bzp3'] = zp3 - np.sign(p3_4) * np.abs(p3_4) * buffer_percent
+    df['bzp4'] = zp4 + np.sign(p3_4) * np.abs(p3_4) * buffer_percent
+
+    df['target']  = zp4 - p2_3
+    df['btarget'] = zp4 - p2_3 * (1 - buffer_percent / 2)
+    df['mzp']     = (zp3 + zp4) / 2
+
+    return df
+
+def add_stop_loss_p18zzw_260926(df, divider=2):
+    """
+    Добавляет 'lsl' и 'ssl' на основе 2 последних точек зигзага.
+    Например, если max wzp = 8, берутся wzp7 и wzp8.
+    """
+
+    c3, c4 = _last_wzp_cols(df, 2)
+    zp3 = df[c3]
+    zp4 = df[c4]
+
+    cur_range = (zp3 - zp4).abs()
+
+    min_zp = pd.concat([zp3, zp4], axis=1).min(axis=1)
+    max_zp = pd.concat([zp3, zp4], axis=1).max(axis=1)
+
+    df['cur_range'] = cur_range
+    df['lsl'] = min_zp + cur_range / divider
+    df['ssl'] = max_zp - cur_range / divider
+
+    return df
+
+def add_drop_last_wzp(
+    df: pd.DataFrame,
+    also_idx: bool = True,
+    also_derived: bool = False,
+) -> pd.DataFrame:
+    """
+    Удаляет последнюю колонку wzpN (с максимальным N) и, опционально,
+    связанные колонки.
+
+    Параметры:
+        also_idx     — если True, удаляет также idx_wzpN (парную к wzpN).
+        also_derived — если True, удаляет производные колонки, привязанные
+                       к последним 4 wzp: bzp1..bzp4, target, btarget, mzp,
+                       cur_range, lsl, ssl, pattern18, pattern18_code.
+
+    Возвращает новый df (не мутирует исходный).
+    """
+    # находим все номера wzpN
+    ns = []
+    for col in df.columns:
+        m = re.fullmatch(r'wzp(\d+)', col)
+        if m:
+            ns.append(int(m.group(1)))
+
+    if not ns:
+        return df
+
+    last_n = max(ns)
+    if last_n < 5:
+        return df
+    to_drop = [f'wzp{last_n}']
+    if also_idx and f'idx_wzp{last_n}' in df.columns:
+        to_drop.append(f'idx_wzp{last_n}')
+
+    if also_derived:
+        derived = [
+            'bzp1', 'bzp2', 'bzp3', 'bzp4',
+            'target', 'btarget', 'mzp',
+            'cur_range', 'lsl', 'ssl',
+            'pattern18', 'pattern18_code',
+        ]
+        to_drop += [c for c in derived if c in df.columns]
+
+    # на всякий случай убираем дубликаты
+    to_drop = list(dict.fromkeys(to_drop))
+
+    return df.drop(columns=to_drop)
 """
 Название главной функции add_zigzag_window_220926, суффикс для доп функций _zzw220926
 Параметры главной функиции df, n_points=8, period=55
@@ -2685,479 +2752,6 @@ def add_stop_loss_p18zzw(df, divider=2):
 8. Все это выполняется в цикле, пока точек меньше, чем n_points. При этом расстояние мы проверяемся между всеми уже добавленными точками и ищем самом большое
 """
 
-# 22092026
-# def add_zigzag_window_220926(df:pd.DataFrame, n_points=4, period=55):
-    
-#     for k in range(1,n_points+1):
-#         df[f'wzp{k}'] = np.nan
-#         df[f'idx_wzp{k}'] = np.nan
-
-#     for i in range(period, len(df)):
-#         points = []
-#         start = i-period
-#         end = i+1
-#         window = df.iloc[start:end]
-#         max_h = window['high'].max()
-#         min_l = window['low'].min()
-#         idx_max = window['high'].idxmax()
-#         idx_min = window['low'].idxmin()
-#         points.append([idx_max,max_h,True])
-#         points.append([idx_min,min_l,False])
-#         points.sort(key=lambda x: x[0])
-
-#         while len(points) < n_points:
-#             zones = [start]
-#             for p in points:
-#                 zones.append(p[0])
-#             zones.append(end)
-#             # разницы между соседними точками
-#             diffs = [zones[i+1] - zones[i] for i in range(len(zones) - 1)]
-
-#             # максимальный диапазон
-#             max_diff = max(diffs)
-#             max_idx = diffs.index(max_diff)
-
-#             # границы самого большого диапазона
-#             zone_start = zones[max_idx]
-#             zone_end = zones[max_idx + 1]
-
-#             small_window = window.iloc[zone_start:zone_end+1]
-#             if zone_start == start:
-#                 right_point = next(p for p in points if p[0] == zone_end)
-#                 if right_point[2]:
-#                     local_min_l = small_window['low'].min()
-#                     local_idx_min = small_window['low'].idxmin()
-#                     micro_window = small_window.iloc[zone_start:local_idx_min+1]
-#                     local_max_h = micro_window['high'].max()
-#                     local_idx_max = micro_window['high'].idxmax()
-#                 else:
-#                     local_max_h = small_window['high'].max()
-#                     local_idx_max = small_window['high'].idxmax()
-#                     micro_window = small_window.iloc[zone_start:local_idx_max+1]
-#                     local_min_l = micro_window['low'].min()
-#                     local_idx_min = micro_window['low'].idxmin()
-#             elif zone_end == end:
-#                 left_point = next(p for p in points if p[0] == zone_start)
-#                 if left_point[2]:
-#                     local_min_l = small_window['low'].min()
-#                     local_idx_min = small_window['low'].idxmin()
-#                     micro_window = small_window.iloc[local_idx_min:zone_end+1]
-#                     local_max_h = micro_window['high'].max()
-#                     local_idx_max = micro_window['high'].idxmax()
-#                 else:
-#                     local_max_h = small_window['high'].max()
-#                     local_idx_max = small_window['high'].idxmax()
-#                     micro_window = small_window.iloc[local_idx_min:zone_end+1]
-#                     local_min_l = micro_window['low'].min()
-#                     local_idx_min = micro_window['low'].idxmin()
-#             else:
-#                 left_point = next(p for p in points if p[0] == zone_start)
-#                 right_point = next(p for p in points if p[0] == zone_end)
-#                 x0, y0, lpT = left_point    # p[0] = индекс, p[1] = цена
-#                 x1, y1, rpT = right_point
-
-#                 # приращение на один шаг по индексу
-#                 slope = (y1 - y0) / (x1 - x0)
-#                 x = np.arange(zone_start, zone_end + 1)
-#                 yh = window.iloc[zone_start:zone_end+1]['high'].to_numpy()
-#                 y_line = y0 + slope * (x - x0)
-#                 diffs_h = yh - y_line
-#                 local_pos_h = np.argmax(diffs_h)
-#                 max_diff_h = diffs_h[local_pos_h]
-#                 global_pos_in_df_h = start + zone_start + local_pos_h   # <-- аккуратно с offset
-#                 yl = window.iloc[zone_start:zone_end+1]['low'].to_numpy()
-#                 y_line = y0 + slope * (x - x0)
-#                 diffs_l = y_line - yl 
-#                 local_pos_l = np.argmax(diffs_l)
-#                 max_diff_l = diffs_l[local_pos_l]
-#                 global_pos_in_df_l = start + zone_start + local_pos_l   # <-- аккуратно с offset
-#                 if max_diff_h > max_diff_l:
-#                     a_point = [global_pos_in_df_h, small_window.iloc[global_pos_in_df_h]['high'], True]
-#                 else:
-#                     a_point = [global_pos_in_df_l, small_window.iloc[global_pos_in_df_l]['low'], False]
-                
-#                 if lpT == a_point[2]:
-#                     micro_window = small_window.iloc[x0:a_point[0]+1] 
-#                     x1, y1, rpT = a_point
-#                     # приращение на один шаг по индексу
-#                     slope = (y1 - y0) / (x1 - x0)
-#                     x = np.arange(zone_start, zone_end + 1)
-#                     yh = window.iloc[zone_start:zone_end+1]['high'].to_numpy()
-#                     y_line = y0 + slope * (x - x0)
-#                     diffs_h = yh - y_line
-#                     local_pos_h = np.argmax(diffs_h)
-#                     max_diff_h = diffs_h[local_pos_h]
-#                     global_pos_in_df_h = start + zone_start + local_pos_h   # <-- аккуратно с offset
-#                     yl = window.iloc[zone_start:zone_end+1]['low'].to_numpy()
-#                     y_line = y0 + slope * (x - x0)
-#                     diffs_l = y_line - yl 
-#                     local_pos_l = np.argmax(diffs_l)
-#                     max_diff_l = diffs_l[local_pos_l]
-#                     global_pos_in_df_l = start + zone_start + local_pos_l   # <-- аккуратно с offset
-#                     if max_diff_h > max_diff_l:
-#                         b_point = [global_pos_in_df_h, small_window.iloc[global_pos_in_df_h]['high'], True]
-#                     else:
-#                         b_point = [global_pos_in_df_l, small_window.iloc[global_pos_in_df_l]['low'], False]
-#                 else:
-#                     micro_window = small_window.iloc[a_point[0]:x1+1]
-#                     x0, y0, lpT = a_point
-#                     # приращение на один шаг по индексу
-#                     slope = (y1 - y0) / (x1 - x0)
-#                     x = np.arange(zone_start, zone_end + 1)
-#                     yh = window.iloc[zone_start:zone_end+1]['high'].to_numpy()
-#                     y_line = y0 + slope * (x - x0)
-#                     diffs_h = yh - y_line
-#                     local_pos_h = np.argmax(diffs_h)
-#                     max_diff_h = diffs_h[local_pos_h]
-#                     global_pos_in_df_h = start + zone_start + local_pos_h   # <-- аккуратно с offset
-#                     yl = window.iloc[zone_start:zone_end+1]['low'].to_numpy()
-#                     y_line = y0 + slope * (x - x0)
-#                     diffs_l = y_line - yl 
-#                     local_pos_l = np.argmax(diffs_l)
-#                     max_diff_l = diffs_l[local_pos_l]
-#                     global_pos_in_df_l = start + zone_start + local_pos_l   # <-- аккуратно с offset
-#                     if max_diff_h > max_diff_l:
-#                         b_point = [global_pos_in_df_h, small_window.iloc[global_pos_in_df_h]['high'], True]
-#                     else:
-#                         b_point = [global_pos_in_df_l, small_window.iloc[global_pos_in_df_l]['low'], False]
-#                 average_idx = (a_point[0] + b_point[0]) // 2
-#                 if a_point[0] < b_point[0]:
-#                     micro_window1 = small_window.iloc[a_point[0]:average_idx+1]
-#                     micro_window2 = small_window.iloc[average_idx:b_point[0]+1]
-#                     if a_point[2]:
-#                         local_max_h = micro_window1['high'].max()
-#                         local_idx_max = micro_window1['high'].idxmax() 
-#                         local_min_l = micro_window2['low'].min()
-#                         local_idx_min = micro_window2['low'].idxmin()
-#                     else:
-#                         local_min_l = micro_window1['low'].min()
-#                         local_idx_min = micro_window1['low'].idxmin()
-#                         local_max_h = micro_window2['high'].max()
-#                         local_idx_max = micro_window2['high'].idxmax() 
-
-#                 else:
-#                     micro_window1 = small_window.iloc[b_point[0]:average_idx+1]
-#                     micro_window2 = small_window.iloc[average_idx:a_point[0]+1]
-#                     if a_point[2]:
-#                         local_min_l = micro_window1['low'].min()
-#                         local_idx_min = micro_window1['low'].idxmin()
-#                         local_max_h = micro_window2['high'].max()
-#                         local_idx_max = micro_window2['high'].idxmax() 
-#                     else:
-#                         local_max_h = micro_window1['high'].max()
-#                         local_idx_max = micro_window1['high'].idxmax() 
-#                         local_min_l = micro_window2['low'].min()
-#                         local_idx_min = micro_window2['low'].idxmin()
-
-#             points.append([local_idx_max,local_max_h,True])
-#             points.append([local_idx_min,local_min_l,False])
-
-#         for k, (idx, val, _) in enumerate(points, start=1):
-#             df.loc[df.index[i], f'wzp{k}'] = val
-#             df.loc[df.index[i], f'idx_wzp{k}'] = idx
-    
-#     return df
-
-
-
-# 23092026
-
-# def add_zigzag_window_230926(df:pd.DataFrame, n_points=8, period=55):
-#     for k in range(1,n_points+1):
-#         df[f'wzp{k}'] = np.nan
-#         df[f'idx_wzp{k}'] = np.nan
-
-#     for i in range(period, len(df)):
-#         points = []
-#         start = i-period
-#         end = i
-#         window = df.iloc[start+1:end]
-#         max_h = window['high'].max()
-#         min_l = window['low'].min()
-#         idx_max = window['high'].idxmax()
-#         idx_min = window['low'].idxmin()
-#         points.append([idx_max,max_h,True])
-#         points.append([idx_min,min_l,False])
-
-#         if idx_max < idx_min:
-#             p_row = df.iloc[start] 
-#             points.append([p_row['x'],p_row['low'],False])
-#             p_row = df.iloc[end] 
-#             points.append([p_row['x'],p_row['high'],True])
-#         else:
-#             p_row = df.iloc[start]
-#             points.append([p_row['x'],p_row['high'],True])
-#             p_row = df.iloc[end] 
-#             points.append([p_row['x'],p_row['low'],False])
-
-#         while len(points) < n_points+2:
-#             points.sort(key=lambda x: x[0])
-#             idxs = [p[0] for p in points]
-#             arr = np.asarray(idxs)
-#             gaps = np.diff(arr)
-#             j = int(np.argmax(gaps))
-#             left_point  = points[j]
-#             right_point = points[j + 1]
-#             # print(max_gap,left_point,right_point)
-#             x0, y0, lpT = left_point    # p[0] = индекс, p[1] = цена
-#             x1, y1, rpT = right_point
-
-#             slope = (y1 - y0) / (x1 - x0)
-#             x = np.arange(x0, x1 + 1)                    # метки, шаг 1 — ок
-#             y_line = y0 + slope * (x - x0)
-
-#             yh = df.loc[x0:x1, 'high'].to_numpy()        # 27 значений — ок
-#             diffs_h = yh - y_line
-#             diffs_h =diffs_h[1:-1]
-#             local_pos_h = int(np.argmax(diffs_h))          # 0..26
-#             # print(diffs_h,local_pos_h)                       # 27 vs 27 — ок
-#             max_diff_h  = diffs_h[local_pos_h]
-
-#             yl = df.loc[x0:x1, 'low'].to_numpy()        # 27 значений — ок
-#             diffs_l = y_line - yl
-#             diffs_l = diffs_l[1:-1]                        # 27 vs 27 — ок
-#             local_pos_l = int(np.argmax(diffs_l))          # 0..26
-#             # print(diffs_l,local_pos_l)                       # 27 vs 27 — ок
-#             max_diff_l  = diffs_l[local_pos_l]
-
-#             if max_diff_h > max_diff_l:
-#                 point_pos = x0+1 + local_pos_h
-#                 # print('h')
-#                 if lpT:
-#                     mw = df.loc[x0:point_pos]
-#                     min_l = mw['low'].min()
-#                     idx_min = mw['low'].idxmin()
-#                     a_point = [idx_min,min_l,False]
-#                     mw = df.loc[idx_min:x1]
-#                     max_h = mw['high'].max()
-#                     idx_max = mw['high'].idxmax()
-#                     b_point = [idx_max,max_h,True]
-#                 else:
-#                     mw = df.loc[point_pos:x1]
-#                     min_l = mw['low'].min()
-#                     idx_min = mw['low'].idxmin()
-#                     a_point = [idx_min,min_l,False]
-#                     mw = df.loc[x0:idx_min]
-#                     max_h = mw['high'].max()
-#                     idx_max = mw['high'].idxmax()
-#                     b_point = [idx_max,max_h,True]
-
-#             else:
-#                 point_pos = x0+1 + local_pos_l
-#                 # print('l',point_pos)
-#                 if rpT:
-#                     mw = df.loc[x0:point_pos]
-#                     max_h = mw['high'].max()
-#                     idx_max = mw['high'].idxmax()
-#                     b_point = [idx_max,max_h,True]
-#                     mw = df.loc[idx_max:x1]
-#                     min_l = mw['low'].min()
-#                     idx_min = mw['low'].idxmin()
-#                     a_point = [idx_min,min_l,False]
-#                 else:
-#                     mw = df.loc[point_pos:x1]
-#                     max_h = mw['high'].max()
-#                     idx_max = mw['high'].idxmax()
-#                     b_point = [idx_max,max_h,True]
-#                     mw = df.loc[x0:idx_max]
-#                     min_l = mw['low'].min()
-#                     idx_min = mw['low'].idxmin()
-#                     a_point = [idx_min,min_l,False]
-
-#             points.append(a_point)
-#             points.append(b_point)
-
-#         # print(points)
-#         points.sort(key=lambda x: x[0])
-#         new_points = []
-#         for index,p in enumerate(points):
-#             if index == 0 or index == len(points)-1:
-#                 last_dir = p[2]
-#                 continue
-#             if p[0] == points[index+1][0]:
-#                 if last_dir != p[2]:
-#                     p[0] -= 1
-#                 else:
-#                     p[0] += 1
-#             new_points.append(p)
-#             last_dir = p[2]
-#         new_points.sort(key=lambda x: x[0])
-#         points = new_points
-#         # points = points[1:-1]
-#         for k, (idx, val, _) in enumerate(points, start=1):
-#             df.loc[df.index[i], f'wzp{k}'] = val
-#             df.loc[df.index[i], f'idx_wzp{k}'] = idx
-    
-#     return df
-
-# def add_zigzag_window_230926(df: pd.DataFrame, n_points=8, period=55):
-#     n = len(df)
-#     high = df['high'].to_numpy(dtype=np.float64)
-#     low  = df['low'].to_numpy(dtype=np.float64)
-#     x_labels = df['x'].to_numpy() if 'x' in df.columns else df.index.to_numpy()
-
-#     out_wzp    = np.full((n, n_points), np.nan)
-#     out_idxwzp = np.full((n, n_points), np.nan)
-
-#     NEG_INF = -np.inf
-#     POS_INF =  np.inf
-
-#     for i in range(period, n):
-#         start = i - period
-#         end   = i
-
-#         # окно start+1 : end (не включая end) — как у вас
-#         w_high = high[start + 1:end]
-#         w_low  = low[start + 1:end]
-#         if w_high.size == 0:
-#             continue
-
-#         pos_max = start + 1 + int(np.argmax(w_high))
-#         pos_min = start + 1 + int(np.argmin(w_low))
-
-#         p_pos  = [pos_max, pos_min]
-#         p_val  = [high[pos_max], low[pos_min]]
-#         p_high = [True, False]
-
-#         if pos_max < pos_min:
-#             p_pos  += [start, end]
-#             p_val  += [low[start], high[end]]
-#             p_high += [False, True]
-#         else:
-#             p_pos  += [start, end]
-#             p_val  += [high[start], low[end]]
-#             p_high += [True, False]
-
-#         while len(p_pos) < n_points + 2:
-#             order = np.argsort(p_pos)
-#             p_pos  = [p_pos[k]  for k in order]
-#             p_val  = [p_val[k]  for k in order]
-#             p_high = [p_high[k] for k in order]
-
-#             gaps = np.diff(p_pos)
-#             j = int(np.argmax(gaps))
-#             x0, x1 = p_pos[j], p_pos[j + 1]
-#             y0, y1 = p_val[j], p_val[j + 1]
-#             lpT, rpT = p_high[j], p_high[j + 1]
-
-#             if x1 - x0 <= 2:
-#                 break
-
-#             xs = np.arange(x0, x1 + 1, dtype=np.float64)
-#             y_line = y0 + (y1 - y0) * (xs - x0) / (x1 - x0)
-
-#             seg_high = high[x0:x1 + 1]
-#             seg_low  = low[x0:x1 + 1]
-
-#             diffs_h = seg_high - y_line
-#             diffs_l = y_line - seg_low
-#             # обрезка краёв — как у вас
-#             diffs_h = diffs_h[1:-1]
-#             diffs_l = diffs_l[1:-1]
-#             if diffs_h.size == 0:
-#                 break
-
-#             local_pos_h = int(np.argmax(diffs_h))
-#             local_pos_l = int(np.argmax(diffs_l))
-#             max_diff_h  = diffs_h[local_pos_h]
-#             max_diff_l  = diffs_l[local_pos_l]
-
-#             if max_diff_h > max_diff_l:
-#                 point_pos = x0 + 1 + local_pos_h
-#                 if lpT:
-#                     # min на [x0, point_pos]
-#                     seg = low[x0:point_pos + 1]
-#                     k = int(np.argmin(seg))
-#                     idx_min = x0 + k; min_l = seg[k]
-#                     a_point = [idx_min, min_l, False]
-#                     # max на [idx_min, x1]
-#                     seg = high[idx_min:x1 + 1]
-#                     k = int(np.argmax(seg))
-#                     idx_max = idx_min + k; max_h = seg[k]
-#                     b_point = [idx_max, max_h, True]
-#                 else:
-#                     # min на [point_pos, x1]
-#                     seg = low[point_pos:x1 + 1]
-#                     k = int(np.argmin(seg))
-#                     idx_min = point_pos + k; min_l = seg[k]
-#                     a_point = [idx_min, min_l, False]
-#                     # max на [x0, idx_min]
-#                     seg = high[x0:idx_min + 1]
-#                     k = int(np.argmax(seg))
-#                     idx_max = x0 + k; max_h = seg[k]
-#                     b_point = [idx_max, max_h, True]
-#             else:
-#                 point_pos = x0 + 1 + local_pos_l
-#                 if rpT:
-#                     # max на [x0, point_pos]
-#                     seg = high[x0:point_pos + 1]
-#                     k = int(np.argmax(seg))
-#                     idx_max = x0 + k; max_h = seg[k]
-#                     b_point = [idx_max, max_h, True]
-#                     # min на [idx_max, x1]
-#                     seg = low[idx_max:x1 + 1]
-#                     k = int(np.argmin(seg))
-#                     idx_min = idx_max + k; min_l = seg[k]
-#                     a_point = [idx_min, min_l, False]
-#                 else:
-#                     # max на [point_pos, x1]
-#                     seg = high[point_pos:x1 + 1]
-#                     k = int(np.argmax(seg))
-#                     idx_max = point_pos + k; max_h = seg[k]
-#                     b_point = [idx_max, max_h, True]
-#                     # min на [x0, idx_max]
-#                     seg = low[x0:idx_max + 1]
-#                     k = int(np.argmin(seg))
-#                     idx_min = x0 + k; min_l = seg[k]
-#                     a_point = [idx_min, min_l, False]
-
-#             p_pos.append(a_point[0]);  p_val.append(a_point[1]);  p_high.append(a_point[2])
-#             p_pos.append(b_point[0]);  p_val.append(b_point[1]);  p_high.append(b_point[2])
-
-#         # финальная сортировка
-#         order = np.argsort(p_pos)
-#         p_pos  = [p_pos[k]  for k in order]
-#         p_val  = [p_val[k]  for k in order]
-#         p_high = [p_high[k] for k in order]
-
-#         # ваша логика обрезки + чистки дублей со сдвигом
-#         new_pos, new_val, new_high = [], [], []
-#         last_dir = None
-#         L = len(p_pos)
-#         for idx in range(L):
-#             if idx == 0 or idx == L - 1:
-#                 last_dir = p_high[idx]
-#                 continue
-#             pos = p_pos[idx]
-#             # если следующая точка совпадает по x — сдвигаем
-#             if idx + 1 < L and pos == p_pos[idx + 1]:
-#                 if last_dir != p_high[idx]:
-#                     pos -= 1
-#                 else:
-#                     pos += 1
-#             new_pos.append(pos)
-#             new_val.append(p_val[idx])
-#             new_high.append(p_high[idx])
-#             last_dir = p_high[idx]
-
-#         # ещё раз отсортировать (сдвиг мог поменять порядок)
-#         order = np.argsort(new_pos)
-#         new_pos  = [new_pos[k]  for k in order]
-#         new_val  = [new_val[k]  for k in order]
-
-#         m = min(len(new_pos), n_points)
-#         for k in range(m):
-#             out_wzp[i, k]    = new_val[k]
-#             out_idxwzp[i, k] = x_labels[new_pos[k]]
-
-#     for k in range(n_points):
-#         df[f'wzp{k+1}']     = out_wzp[:, k]
-#         df[f'idx_wzp{k+1}'] = out_idxwzp[:, k]
-
-#     return df
-
-# 260926
-# ---------- поиск экстремумов ----------
 
 def find_extremum_zzw260926(h, l, from_pos, to_pos, kind):
     """Первый экстремум в [from_pos, to_pos). kind: 'H' или 'L'."""
@@ -3383,7 +2977,7 @@ def _expand_to_n_points_260926(h, l, validated, L_pos, R_pos,
 
 # ---------- основной пайплайн ----------
 
-def add_zigzag_window_260926(df, period=55, tol_frac=0.10, n_points=4):
+def add_zigzag_window_260926(df, period=55, tol_frac=0.10, n_points=6):
     """
     Хорошая оконная версия
     n_points — желаемое количество точек в окне (кратно 2, минимум 4).
@@ -3536,4 +3130,186 @@ def add_zigzag_window_260926(df, period=55, tol_frac=0.10, n_points=4):
         df[f'wzp{k+1}'] = wzp_prices[k]
         df[f'idx_wzp{k+1}'] = wzp_idx[k]
 
+    return df
+
+def _get_wzp_cols(df):
+    """Возвращает (wzp_cols, idx_cols, n) — упорядоченные по номеру N."""
+    wzp_map = {}
+    idx_map = {}
+    for col in df.columns:
+        m = re.fullmatch(r'wzp(\d+)', col)
+        if m:
+            wzp_map[int(m.group(1))] = col
+            continue
+        m = re.fullmatch(r'idx_wzp(\d+)', col)
+        if m:
+            idx_map[int(m.group(1))] = col
+
+    # берём только те N, для которых есть обе колонки
+    common_ns = sorted(set(wzp_map) & set(idx_map))
+    wzp_cols = [wzp_map[n] for n in common_ns]
+    idx_cols = [idx_map[n] for n in common_ns]
+    return wzp_cols, idx_cols, common_ns
+
+
+def add_mean_ind_wzz_peaks(df, kind='rsi'):
+    """
+    Добавляет колонки:
+      - mean_H_<kind> : среднее <kind> в точках-максимумах (H)
+      - mean_L_<kind> : среднее <kind> в точках-минимумах (L)
+    Тип точки определяется чередованием H/L. Чередование выводится из
+    соотношения первых двух валидных wzp-точек.
+    """
+    mean_H_col = f'mean_H_{kind}'
+    mean_L_col = f'mean_L_{kind}'
+
+    wzp_cols, idx_cols, ns = _get_wzp_cols(df)
+    if len(ns) < 2:
+        # нечего считать
+        df[mean_H_col] = np.nan
+        df[mean_L_col] = np.nan
+        return df
+
+    kind_values = df[kind].to_numpy()
+    wzp_arr = df[wzp_cols].to_numpy(dtype=float)   # (N, K)
+    idx_arr = df[idx_cols].to_numpy(dtype=float)   # (N, K)
+
+    N, K = wzp_arr.shape
+    mean_H = np.full(N, np.nan)
+    mean_L = np.full(N, np.nan)
+
+    for i in range(N):
+        w = wzp_arr[i]
+        idx = idx_arr[i]
+
+        mask = ~np.isnan(w) & ~np.isnan(idx)
+        valid_positions = np.where(mask)[0]
+        if valid_positions.size < 2:
+            continue
+
+        # определяем чередование по первым двум валидным точкам
+        p0, p1 = valid_positions[0], valid_positions[1]
+        # если p0 выше p1 -> p0=H, далее чередуем
+        # шаблон типов по позициям 0..K-1
+        start_type = 'H' if w[p0] > w[p1] else 'L'
+        # если p0 нечётная позиция, шаблон сдвигается — проще задать
+        # тип для каждой валидной точки от её позиции относительно p0
+        def type_at(p):
+            # p0 -> start_type, p0+1 -> противоположный, и т.д.
+            return start_type if (p - p0) % 2 == 0 else ('L' if start_type == 'H' else 'H')
+
+        hs, ls = [], []
+        for p in valid_positions:
+            k = int(round(idx[p]))
+            if 0 <= k < N:
+                val = kind_values[k]
+                if not np.isnan(val):
+                    if type_at(p) == 'H':
+                        hs.append(val)
+                    else:
+                        ls.append(val)
+
+        if hs:
+            mean_H[i] = float(np.mean(hs))
+        if ls:
+            mean_L[i] = float(np.mean(ls))
+
+    df[mean_H_col] = mean_H
+    df[mean_L_col] = mean_L
+    return df
+
+def add_extreme_ind_wzz_peaks(df, kind='rsi', window_mode='between', half_window=3):
+    """
+    Для каждой строки считает среднее <kind> в точках H (максимумы) и L (минимумы),
+    где под H понимается локальный МАКСИМУМ <kind> в окне вокруг idx_wzpN,
+    а под L — локальный МИНИМУМ.
+
+    window_mode:
+      'between' — окно между соседними противоположными точками (H между двумя L,
+                  L между двумя H). Для крайних точек — от края df до соседней точки.
+      'fixed'   — фиксированное окно ±half_window вокруг idx_wzpN.
+
+    Добавляет колонки:
+      - max_H_<kind> : среднее <kind> в H-точках
+      - min_L_<kind> : среднее <kind> в L-точках
+    """
+    max_H_col = f'max_H_{kind}'
+    min_L_col = f'min_L_{kind}'
+
+    wzp_cols, idx_cols, ns = _get_wzp_cols(df)
+    if len(ns) < 2:
+        df[max_H_col] = np.nan
+        df[min_L_col] = np.nan
+        return df
+
+    kind_values = df[kind].to_numpy(dtype=float)
+    wzp_arr = df[wzp_cols].to_numpy(dtype=float)
+    idx_arr = df[idx_cols].to_numpy(dtype=float)
+
+    N, K = wzp_arr.shape
+    max_H = np.full(N, np.nan)
+    min_L = np.full(N, np.nan)
+
+    for i in range(N):
+        w = wzp_arr[i]
+        idx = idx_arr[i]
+
+        mask = ~np.isnan(w) & ~np.isnan(idx)
+        valid_positions = np.where(mask)[0]
+        if valid_positions.size < 2:
+            continue
+
+        p0, p1 = valid_positions[0], valid_positions[1]
+        start_type = 'H' if w[p0] > w[p1] else 'L'
+
+        def type_at(p):
+            return start_type if (p - p0) % 2 == 0 else ('L' if start_type == 'H' else 'H')
+
+        # позиции в df для валидных точек
+        pos_in_df = np.array([int(round(idx[p])) for p in valid_positions])
+        # фильтруем выходящие за пределы df
+        ok = (pos_in_df >= 0) & (pos_in_df < N)
+        valid_positions = valid_positions[ok]
+        pos_in_df = pos_in_df[ok]
+
+        if valid_positions.size < 2:
+            continue
+
+        hs, ls = [], []
+        for j, p in enumerate(valid_positions):
+            k = pos_in_df[j]
+            t = type_at(p)
+
+            if window_mode == 'fixed':
+                lo = max(0, k - half_window)
+                hi = min(N, k + half_window + 1)
+            else:  # 'between'
+                if j == 0:
+                    # левая крайняя: окно от 0 до соседней точки
+                    lo = 0
+                    hi = pos_in_df[j + 1] + 1
+                elif j == valid_positions.size - 1:
+                    lo = pos_in_df[j - 1]
+                    hi = N
+                else:
+                    lo = pos_in_df[j - 1]
+                    hi = pos_in_df[j + 1] + 1
+
+            segment = kind_values[lo:hi]
+            segment = segment[~np.isnan(segment)]
+            if segment.size == 0:
+                continue
+
+            if t == 'H':
+                hs.append(float(np.max(segment)))
+            else:
+                ls.append(float(np.min(segment)))
+
+        if hs:
+            max_H[i] = float(np.mean(hs))
+        if ls:
+            min_L[i] = float(np.mean(ls))
+
+    df[max_H_col] = max_H
+    df[min_L_col] = min_L
     return df

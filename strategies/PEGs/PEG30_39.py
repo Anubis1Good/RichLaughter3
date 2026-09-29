@@ -57,6 +57,57 @@ class PEG30_MURKY(BaseEG):
                             return 'open_short'
                 else:
                     return 'close_all'
+                
+class PEG30_ETC(BaseEG):
+    """stop=None, take=None, \n
+      work_trend=1,min_spred=5,use_long=1,use_short=1,period_adx=14,period_chop=14,period_sma_l=30,period_sma_s=15,thr_adx=30,thr_chop=40"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, work_trend=1,min_spred=5,use_long=1,use_short=1,period_adx=14,period_chop=14,period_sma_l=30,period_sma_s=15,thr_adx=30,thr_chop=40):
+        super().__init__(symbol, price_step, mult_ps, mode, stop, take)
+        self.needs_info = {'chart':self.symbol}
+        self.period_adx = period_adx
+        self.period_chop = period_chop
+        self.period_sma_l = period_sma_l
+        self.period_sma_s = period_sma_s
+        self.thr_adx = thr_adx
+        self.thr_chop = thr_chop
+        self.work_trend = work_trend
+        self.min_spred = min_spred
+        self.use_long = use_long
+        self.use_short = use_short
+    
+    def preprocessing(self, tdata):
+        pdata = {}
+        df = tdata['chart']
+        df = add_adx(df,self.period_adx)
+        df = add_chop(df,self.period_chop)
+        df['sma_s'] = df['close'].rolling(self.period_sma_s).mean()
+        df['sma_l'] = df['close'].rolling(self.period_sma_l).mean()
+        df = self.add_slice_df(df)
+        pdata['chart'] = df
+        return pdata
+    
+    def _get_action_from_row(self, row):
+        if row['adx'] < self.thr_adx and row['chop'] > self.thr_chop:
+            # print('range')
+            if not self.use_long:
+                return 'open_short_step_' +str(self.min_spred)
+            if not self.use_short:
+                return 'open_long_step_' +str(self.min_spred)
+            return 'open_all_step_' +str(self.min_spred)
+        # trend
+        else:
+            if self.work_trend:
+                # long
+                if row['sma_s'] > row['sma_l'] and self.use_long:
+                    # print('long')
+                    return 'open_long_step_' +str(self.min_spred)
+                # short
+                else:
+                    # print('short')
+                    if self.use_short:
+                        return 'open_short_step_' +str(self.min_spred)
+            else:
+                return 'close_all'
 
 class PEG31_HYPERION(BaseEG):
     """stop=None, take=None, min_spred=3, work_direction = 0, work_trend=1, large_open=100,large_close=50, n_order=1, min_step=3, period_adx=14, period_chop=14, period_sma_l=30, period_sma_s=15, thr_adx=25, thr_chop=40"""
@@ -124,4 +175,5 @@ class PEG31_HYPERION(BaseEG):
         else:
             actions = [OrderCords(type_order='close_all_smart', is_open=False,smart_per=self.large_close)]
         return actions
+
 

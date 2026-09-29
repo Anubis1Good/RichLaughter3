@@ -50,7 +50,8 @@ class VT7:
                     self.cluster_region[symbol].append(dom['clusters'][i])
 
                     self.fgs[symbol].append(None)
-        
+
+        self.empty_fgs = self.fgs.copy()
         # Распаковка charts
         self.chart_region = {symbol: [] for symbol in symbols}
         self.offset = {symbol: [] for symbol in symbols}
@@ -65,9 +66,11 @@ class VT7:
 
         self.price_step = conf_data['price_step']
         self.wss: dict[str, BaseEG] = dict()
+        self.mults_ps: dict[str, int] = dict()
         for symbol in self.symbols:
             ws = init_trader(symbol)
             self.wss[symbol] = ws[0](symbol,self.price_step,ws[2],ws[3],*ws[1])
+            self.mults_ps[symbol] = ws[2]
         now = datetime.now()
         cwd = now.weekday()
         self.close_on_time = close_on_time
@@ -685,12 +688,12 @@ class VT7:
     
     def _work_action(self,action,pos,img,symbol,idx):
         # print(self.name,pos,action) 
-        if 'close_long' in action:
+        if 'close_long' == action:
             if pos == 1:
                 self._send_close('long',symbol,idx,img)
             else:
                 self._reset_req(symbol,idx)
-        elif 'close_short' in action:
+        elif 'close_short' == action:
             if pos == -1:
                 self._send_close('short',symbol,idx,img)
             else:
@@ -705,7 +708,7 @@ class VT7:
                 self._reverse_pos('short',symbol,idx)
             elif pos == 0:
                 self._send_open('short',symbol,idx,img)
-        elif 'close_all' in action:
+        elif 'close_all' == action:
             if pos == -1:
                 self._send_close('short',symbol,idx,img)
             elif pos == 1:
@@ -719,10 +722,42 @@ class VT7:
                 self._reverse_pos('short',symbol,idx)
             else:
                 self._send_open('all',symbol,idx,img)
+        elif 'step' in action:
+            fg = self.fgs[symbol][0]
+            if fg is None:
+                fg = self._get_full_glass(img,symbol,0)
+            self._work_step_action_str(action,symbol,idx,pos,fg)
         elif 'test' == action:
             # print(self.symbols)
             # print(symbol,pos)
             ...
+
+    def _work_step_action_str(self,action:str,symbol,idx,pos,fg):
+        parts_action = action.split('_')
+        type_action = parts_action[0]
+        dir_action = parts_action[1]
+        step = int(parts_action[3]) // self.mults_ps[symbol]
+        y_bbid = fg[fg['type_cell'] == 'bbid']['middle'].iloc[0]
+        y_bask = fg[fg['type_cell'] == 'bask']['middle'].iloc[0]
+        if type_action == 'open':
+            if (dir_action == 'long' or dir_action == 'all') and pos != 1:
+                y_order = y_bask+step*self.price_step
+                if pos < 0:
+                    self._send_by_cords(symbol,idx,y_order,True,True,True)
+                self._send_by_cords(symbol,idx,y_order,True,False,False)
+
+            if (dir_action == 'short' or dir_action == 'all') and pos != -1:
+                y_order = y_bbid-step*self.price_step
+                if pos < 0:
+                    self._send_by_cords(symbol,idx,y_order,False,True,True)
+                self._send_by_cords(symbol,idx,y_order,False,False,False)
+        else:
+            if (dir_action == 'long' or dir_action == 'all') and pos == 1:
+                y_order = y_bbid-step*self.price_step
+                self._send_by_cords(symbol,idx,y_order,False,True,True)
+            if (dir_action == 'short' or dir_action == 'all') and pos == -1:
+                y_order = y_bask+step*self.price_step
+                self._send_by_cords(symbol,idx,y_order,True,False,False)
 
     def _work_action_OC(self,action:OrderCords,pos,img,symbol,idx):
         type_order = action.type_order
@@ -732,6 +767,16 @@ class VT7:
         can_send = (pos == 0 and action.is_open) or (pos == 1 and not left_btn) or (pos == -1 and left_btn)
         if type_order == 'send_cords':
             if can_send:
+                fg = self.fgs[symbol][idx]
+                idx_y = fg[fg['middle'] == action.y].index[0]
+                if left_btn:
+                    if idx_y - 1 in fg.index and fg['type_cell'].loc[idx_y-1] == 'bask':
+                        self._send_by_simple(symbol,idx,left_btn,action.press_f,action.press_z)
+                        return True
+                else:
+                    if idx_y + 1 in fg.index and fg['type_cell'].loc[idx_y+1] == 'bbid':
+                        self._send_by_simple(symbol,idx,left_btn,action.press_f,action.press_z)
+                        return True
                 self._send_by_cords(symbol, idx, action.y, left_btn, action.press_f, action.press_z)
                 return True
         elif type_order == 'send_simple':
@@ -766,16 +811,16 @@ class VT7:
                 return True
         return False
         
-    def _check_close_on_time(self,action,time_mode):
+    def _check_close_on_time(self,action:str,time_mode):
         if self.close_on_time:
             if time_mode == -1:
                 action = 'close_all'
             elif time_mode == -2:
                 if action is not None:
-                    if action == 'open_long':
-                        action = 'close_short'
-                    elif action == 'open_short':
-                        action = 'close_long'
+                    if 'open_long' in action:
+                        action = action.replace('open_long','close_short')
+                    elif 'open_short' in action:
+                        action = action.replace('open_short','close_long')
         return action
     
     def _check_close_on_time_OC(self,action:OrderCords,time_mode):
@@ -920,7 +965,7 @@ class VT7:
             delta_p = {symbol: [self._get_delta_p(img, symbol, idx, poss) 
                                 for idx in range(len(regions))]
                 for symbol, regions in self.position_region.items()}
-            
+            self.fgs = self.empty_fgs.copy()
             for symbol in self.symbols:
                 try:
                     self._check_z_tape(img,symbol)

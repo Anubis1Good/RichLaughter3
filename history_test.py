@@ -14,8 +14,8 @@ symbol = PATH_DF.split('\\')[-1].split('_')[0]
 # ws = [EG,(100,30,20)]
 # ws = [UEG4_FALCON,],
 
-ws = (LEG2_DRG,(None,None,12,2.1,5,30,34,0,))
-# ws = (UEG7_LOVERGOOSE,[])
+ws = (UEG8_SOLDIER,(None,9,5,66,53,0.77,12,0.77,45,1,44,94,10,7,14,29,33,55),1,None)
+# ws = (PEG30_test,[])
 # ws = (UEG7_LOVERDUCK,[])
 # ws = (DebugMean,[])
 cegt = CheckEGTrader(
@@ -42,7 +42,7 @@ ef_fast = cegt.trade_data['step_eq_fee']
 
 cegt.plot_chart_and_sequtity()
 # cegt.ws.debug_data = []
-# cegt.check_strategy_window(normalization=True)
+cegt.check_strategy_window(normalization=True)
 # cegt.check_strategy_window(normalization=False)
 # ef_window = cegt.trade_data['step_eq_fee']
 # cegt.ws.save_to_csv("window_actions.csv")
@@ -51,7 +51,7 @@ cegt.plot_chart_and_sequtity()
 # result_row = cegt.get_statistics()
 # print(result_row)
 
-# cegt.print_statistics()
+cegt.print_statistics()
 # cegt.plot_chart_and_sequtity()
 # import matplotlib.pyplot as plt
 

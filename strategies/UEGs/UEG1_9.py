@@ -1,7 +1,7 @@
 from strategies.BaseEG import BaseEG
 from for_strategies.classic_indicators import add_fractals,add_rsi,add_adx,add_bollinger
 from for_strategies.pva_indicators import add_average_fractals,add_plus_delta_fc,add_exp_pdfc,add_ext_on_fractals,add_mean_on_fractals,add_average_fractals_window,add_exp_pdfc_window,add_plus_delta_fc_window
-from for_strategies.zigzag_indicators import add_percent_zz190826,add_dzz_peaks,add_analys_dzz,add_percent_zz_peaks,add_pattern18_dzz_czd,add_stop_loss_p18czd,add_exp_plusdelta_dzz_peaks,add_mean_dzz_peaks,add_plusdelta_dzz_peaks,add_zigzag180826,add_shift_zz_peaks,add_analys_dzz180826, add_zigzag_window_210926,add_pattern18_zzw_210926,add_zigzag_window_260926,add_mean_peaks_wzz260926, add_plusdelta_peaks_wzz260926,add_exp_plusdelta_peaks_wzz260926
+from for_strategies.zigzag_indicators import add_percent_zz190826,add_dzz_peaks,add_analys_dzz,add_percent_zz_peaks,add_pattern18_dzz_czd,add_stop_loss_p18czd,add_exp_plusdelta_dzz_peaks,add_mean_dzz_peaks,add_plusdelta_dzz_peaks,add_zigzag180826,add_shift_zz_peaks,add_analys_dzz180826, add_zigzag_window_210926,add_pattern18_zzw_210926,add_zigzag_window_260926,add_mean_peaks_wzz260926, add_plusdelta_peaks_wzz260926,add_exp_plusdelta_peaks_wzz260926,add_mean_ind_wzz_peaks,add_extreme_ind_wzz_peaks,add_pattern18_zzw_260926,add_drop_last_wzp
 
 class UEG4_CANADIAN(BaseEG):
     """stop=None, take=None, period_window=55,period_fractal_free=5, n_fractals=3, allowance=0.1"""
@@ -30,37 +30,7 @@ class UEG4_CANADIAN(BaseEG):
             return 'open_long'
         
         return None
-   
-class UEG4_FALCON(BaseEG):
-    """stop=None, take=None, period_fractal=5, n_fractals=3, allowance=0.1"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_fractal=5, n_fractals=3, allowance=0.1):
-        super().__init__(symbol, price_step, mult_ps, mode, stop, take)
-        self.needs_info = {'chart': self.symbol}
-        self.period_fractal = period_fractal
-        self.n_fractals = n_fractals
-        self.allowance = allowance
-        self.problems = 'Mcfly'
-
-    def preprocessing(self, tdata):
-        pdata = {}
-        df = tdata['chart']
-        df = add_fractals(df, self.period_fractal)
-        df = add_plus_delta_fc(df, self.n_fractals, self.period_fractal)
-        df['pdf_diff_percent'] = ((df['pdf_up'] - df['pdf_down']) / df['pdf_down']) * 100
-        df['allowance'] = df['pdf_diff_percent'] > self.allowance
-        df = self.add_slice_df(df)
-        pdata['chart'] = df
-        return pdata
-    
-    def _get_action_from_row(self, row):
-        if row['allowance']:
-            if row['close'] >= row['pdf_up']:
-                return 'open_short'
-            if row['close'] <= row['pdf_down']:
-                return 'open_long'
-        
-        return None
-    
+     
 class UEG4_FALCON2(BaseEG):
     """stop=None, take=None, period_window=55,period_fractal_free=5, n_fractals=3, allowance=0.1"""
     def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_window=55,period_fractal_free=5, n_fractals=3, allowance=0.1):
@@ -89,37 +59,8 @@ class UEG4_FALCON2(BaseEG):
                 return 'open_long'
         
         return None
+
 # Нужны версии с adx, есть ощущение, что хорошо работает на тренде и плохо на флете
-class UEG4_PELICAN(BaseEG):
-    """stop=None, take=None, period_fractal=5, n_fractals=3, allowance=0.1"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_fractal=5, n_fractals=3, allowance=0.1):
-        super().__init__(symbol, price_step, mult_ps, mode, stop, take)
-        self.needs_info = {'chart': self.symbol}
-        self.period_fractal = period_fractal
-        self.n_fractals = n_fractals
-        self.allowance = allowance
-        self.problems = 'Mcfly'
-
-    def preprocessing(self, tdata):
-        pdata = {}
-        df = tdata['chart']
-        df = add_fractals(df, self.period_fractal)
-        df = add_exp_pdfc(df, self.n_fractals, self.period_fractal)
-        df['pdf_diff_percent'] = ((df['pdf_up'] - df['pdf_down']) / df['pdf_down']) * 100
-        df['allowance'] = df['pdf_diff_percent'] > self.allowance
-        df = self.add_slice_df(df)
-        pdata['chart'] = df
-        return pdata
-    
-    def _get_action_from_row(self, row):
-        if row['allowance']:
-            if row['close'] >= row['pdf_up']:
-                return 'open_short'
-            if row['close'] <= row['pdf_down']:
-                return 'open_long'
-        
-        return None
-
 # Честно очень плохие результаты. Как будто можно прощаться с этим роботом
 class UEG4_PELICAN2(BaseEG):
     """stop=None, take=None, period_window=55,period_fractal_free=5, n_fractals=3, allowance=0.1"""
@@ -1066,7 +1007,7 @@ class UEG7_DETECTIVE(BaseEG):
                 return 'open_short'
         
         return None
-            
+               
 class UEG8_AVENGER(BaseEG):
     '''
     stop=None, take=None, divider_buff=10, percent_threshold=0.2, threshold_dzz=0.2, buff=0.1, divider_stop=2, use_stop=1
@@ -1104,12 +1045,12 @@ class UEG8_AVENGER(BaseEG):
         can_long, can_short = None, None
         
         if row['pattern18'] in ('bti', 'joc', 'top_range', 'double_top', 'weak_long', 'narrowing_down', 'spring', 'sos'):
-            can_long = row['pbzp3'] >= row['close'] >= row['mbzp3']
-            can_short = row['mbzp2'] <= row['close'] <= row['pbzp2']
+            can_long = row['pbzp3'] >= row['close']
+            can_short = row['mbzp2'] <= row['close']
         
         if row['pattern18'] in ('btc', 'bui', 'bottom_range', 'double_bottom', 'weak_short', 'narrowing_up', 'upthrust', 'sow'):
-            can_short = row['pbzp3'] >= row['close'] >= row['mbzp3']
-            can_long = row['mbzp2'] <= row['close'] <= row['pbzp2']
+            can_short = row['close'] >= row['mbzp3']
+            can_long = row['close'] <= row['pbzp2']
         
         if can_long:
             return 'open_long'
@@ -1123,21 +1064,22 @@ class UEG8_AVENGER(BaseEG):
                 return 'close_long'
         
         return None
-        
-#UEG8 c автоматической подборкой лонговых и шортовых паттернов 
-#TODO Нужна версия без ограничения сверху и низу. Так как он порой теряет прибыль из-за узкого диапазона.
+               
 class UEG8_SOLDIER(BaseEG):
-    """stop=None, take=None, divider_buff=5, period_wzz=30, frac_wzz=0.1, threshold_p18=0.1,g_joc=99,g_tr=99,g_dt=99,g_wl=99,g_nd=99,g_s=99,g_sos=99,g_bti=99
+    """stop=None, take=None, \n
+    divider_buff=5, period_rsi=14, period_wzz=30, frac_wzz=0.1, n_wzp=6, threshold_p18=0.1, threshold_rsi=30, use_rsi=0, g_joc=99,g_tr=99,g_dt=99,g_wl=99,g_nd=99,g_s=99,g_sos=99,g_bti=99
     \n
     0-2 - ничего,
     3-6 - противоположную,
     7-9 - все"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, divider_buff=5, period_wzz=30, frac_wzz=0.1, threshold_p18=0.1,g_joc=99,g_tr=99,g_dt=99,g_wl=99,g_nd=99,g_s=99,g_sos=99,g_bti=99):
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, divider_buff=5, period_rsi=14, period_wzz=30, frac_wzz=0.1, n_wzp=6, threshold_p18=0.1, threshold_rsi=30, use_rsi=0, g_joc=99,g_tr=99,g_dt=99,g_wl=99,g_nd=99,g_s=99,g_sos=99,g_bti=99):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
         self.divider_buff = divider_buff
+        self.period_rsi = period_rsi
         self.period_wzz = period_wzz
         self.frac_wzz = frac_wzz
+        self.n_wzp = n_wzp
         self.threshold_p18 = threshold_p18
         self.g_joc = g_joc
         self.g_tr = g_tr
@@ -1147,6 +1089,10 @@ class UEG8_SOLDIER(BaseEG):
         self.g_s = g_s
         self.g_sos = g_sos
         self.g_bti = g_bti
+        self.use_rsi=use_rsi
+        self.threshold_rsi=threshold_rsi
+        self.wzp2 = f'wzp{n_wzp - 2}'
+        self.wzp3 = f'wzp{n_wzp - 1}'
         self.long_group = ('bti', 'joc', 'top_range', 'double_top', 'weak_long', 'narrowing_down', 'spring', 'sos')
         self.short_group = ('btc', 'bui', 'bottom_range', 'double_bottom', 'weak_short', 'narrowing_up', 'upthrust', 'sow')
 
@@ -1168,7 +1114,6 @@ class UEG8_SOLDIER(BaseEG):
         if pattern == 'bti' or pattern == 'btc':
             return self.g_bti
         return 0
-
 
     def get_action_by_group(self,pattern,can):
         group = self.get_group(pattern)
@@ -1192,77 +1137,38 @@ class UEG8_SOLDIER(BaseEG):
     def preprocessing(self, tdata):
         pdata = {}
         df = tdata['chart']
-        df = add_zigzag_window_210926(df,self.period_wzz,self.frac_wzz)
-        df = add_pattern18_zzw_210926(df,self.threshold_p18)
-        df['buffer'] = ((df['wzp2'] - df['wzp3']) / self.divider_buff).abs()
-        df['pbzp2'] = df['wzp2'] + df['buffer']
-        df['mbzp2'] = df['wzp2'] - df['buffer']
-        df['pbzp3'] = df['wzp3'] + df['buffer']
-        df['mbzp3'] = df['wzp3'] - df['buffer']
+        df = add_rsi(df,self.period_rsi)
+        df = add_zigzag_window_260926(df,self.period_wzz,self.frac_wzz,self.n_wzp)
+        df = add_pattern18_zzw_260926(df,self.threshold_p18)
+        df['buffer'] = ((df[self.wzp2] - df[self.wzp3]) / self.divider_buff).abs()
+        df['pbzp2'] = df[self.wzp2] + df['buffer']
+        df['mbzp2'] = df[self.wzp2] - df['buffer']
+        df['pbzp3'] = df[self.wzp3] + df['buffer']
+        df['mbzp3'] = df[self.wzp3] - df['buffer']
         df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
     def _get_action_from_row(self, row):
         can_long, can_short = None, None
-        
         if row['pattern18'] in self.long_group:
-            can_long = row['pbzp3'] >= row['close'] >= row['mbzp3']
-            can_short = row['mbzp2'] <= row['close'] <= row['pbzp2']
+            can_long = row['pbzp3'] >= row['close']
+            can_short = row['mbzp2'] <= row['close']
         
         if row['pattern18'] in self.short_group:
-            can_short = row['pbzp3'] >= row['close'] >= row['mbzp3']
-            can_long = row['mbzp2'] <= row['close'] <= row['pbzp2']
-        
+            can_short = row['close'] >= row['mbzp3']
+            can_long = row['close'] <= row['pbzp2']
+        if self.use_rsi:
+            rsi = row['rsi']
+            oversold = rsi <= self.threshold_rsi
+            overbought = rsi >= 100 - self.threshold_rsi
+            can_short = can_short and overbought
+            can_long = can_long and oversold
         if can_long:
             return self.get_action_by_group(row['pattern18'],'long')
         if can_short:
             return self.get_action_by_group(row['pattern18'],'short')
         
-
-# Это надо переделывать на зигзаге больше 4 точек
-class UEG9_BIRDWATCHER(BaseEG):
-    '''
-    stop=None, take=None, percent_threshold=0.2, period_pd=2, buffer_pd=0.1, mult_stop=0.5, use_exp=1, use_stop=1
-    '''
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, percent_threshold=0.2, period_pd=2, buffer_pd=0.1, mult_stop=0.5, use_exp=1, use_stop=1):
-        super().__init__(symbol, price_step, mult_ps, mode, stop, take)
-        self.needs_info = {'chart': self.symbol}
-        self.percent_threshold = percent_threshold
-        self.period_pd = period_pd
-        self.buffer_pd = buffer_pd
-        self.mult_stop = mult_stop
-        self.plusdelta_func = add_exp_plusdelta_dzz_peaks if use_exp else add_plusdelta_dzz_peaks
-        self.use_stop = use_stop
-        self.problems = 'Mcfly'
-
-    def preprocessing(self, tdata):
-        pdata = {}
-        df = tdata['chart']
-        df = add_percent_zz190826(df, percent_threshold=self.percent_threshold)
-        df['zigzag_peaks'] = df['zigzag_peaks'].shift(1)
-        df = self.plusdelta_func(df, self.period_pd, self.buffer_pd)
-        df['top_stop'] = df['top_pd'] + df['delta_pd'] * self.mult_stop
-        df['bottom_stop'] = df['bottom_pd'] - df['delta_pd'] * self.mult_stop
-        df = self.add_slice_df(df)
-        pdata['chart'] = df
-        return pdata
-    
-    def _get_action_from_row(self, row):
-        try:
-            if row['top_stop'] > row['close'] >= row['top_pd']:
-                return 'open_short'
-            if row['bottom_stop'] < row['close'] <= row['bottom_pd']:
-                return 'open_long'
-            if self.use_stop:
-                if row['close'] > row['top_stop']:
-                    return 'close_short'
-                if row['close'] < row['bottom_stop']:
-                    return 'close_long'
-        except:
-            return None
-        
-        return None
 
 # Очень плохой результат, открывает сделки в лой.
 class UEG9_BIRDWATCHER2(BaseEG):
@@ -1305,46 +1211,6 @@ class UEG9_BIRDWATCHER2(BaseEG):
                     return 'close_short'
                 if row['close'] < row['bottom_stop']:
                     return 'close_long'
-
-
-class UEG9_GRAVY(BaseEG):
-    '''
-    stop=None, take=None, percent_threshold=0.3, period_mean=2, buffer_mean=0.1, mult_stop=0.5, use_stop=1
-    '''
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, percent_threshold=0.3, period_mean=2, buffer_mean=0.1, mult_stop=0.5, use_stop=1):
-        super().__init__(symbol, price_step, mult_ps, mode, stop, take)
-        self.needs_info = {'chart': self.symbol}
-        self.percent_threshold = percent_threshold
-        self.period_mean = period_mean
-        self.buffer_mean = buffer_mean
-        self.mult_stop = mult_stop
-        self.use_stop = use_stop
-        self.problems = 'Mcfly'
-
-    def preprocessing(self, tdata):
-        pdata = {}
-        df = tdata['chart']
-        df = add_percent_zz190826(df, percent_threshold=self.percent_threshold)
-        df['zigzag_peaks'] = df['zigzag_peaks'].shift(1)
-        df = add_mean_dzz_peaks(df, self.period_mean, self.buffer_mean)
-        df['top_stop'] = df['top_mean'] + df['delta_mean'] * self.mult_stop
-        df['bottom_stop'] = df['bottom_mean'] - df['delta_mean'] * self.mult_stop
-        df = self.add_slice_df(df)
-        pdata['chart'] = df
-        return pdata
-    
-    def _get_action_from_row(self, row):
-        if row['top_stop'] > row['close'] >= row['top_mean']:
-            return 'open_short'
-        if row['bottom_stop'] < row['close'] <= row['bottom_mean']:
-            return 'open_long'
-        if self.use_stop:
-            if row['close'] > row['top_stop']:
-                return 'close_short'
-            if row['close'] < row['bottom_stop']:
-                return 'close_long'
-        
-        return None
     
 class UEG9_GRAVY2(BaseEG):
     '''
