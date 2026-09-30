@@ -233,6 +233,7 @@ class VEG1_VENUS(BaseEG):
         return self.stop_loss_action(row)
 
 # TODO надо лучше поработать над паттернами. Может стоит учитывать предыдущий паттерн. Пока странно выглядит.
+# Порой слишком мельчит. Возможно стоит ограничить оптимизацию period_wzz=55
 class VEG1_EARTH(BaseEG):
     """stop=None, take=None, \n
         period_wzz=55, frac_wzz=0.1, n_wzp=8, threshold_p18=0.1, drop_last=1, buff=0.1, divider=2, use_target=0, hard_stop=0, use_stop=0"""
@@ -351,7 +352,7 @@ class VEG1_EARTH(BaseEG):
         
         return self.stop_loss_action(row)
     
-
+# Возможно стоит ограничить нижний лимит на period_wzz
 class VEG1_MOON(BaseEG):
     """stop=None, take=None, \n
     divider_buff=5, period_wzz=30, frac_wzz=0.1, n_wzp=6, threshold_p18=0.1, close_ext_trend=1,close_mid_range=1,close_mid_weak=1,open_reverse_weak=1"""

@@ -52,7 +52,8 @@ class LEG2_HOTS(BaseEG):
                 return 'close_long'
         
         return None
-            
+
+# подумать над новой версией на основе Логана
 class LEG2_LOGAN(BaseEG):
     """stop=None, take=None, period=100, period2=50, threshold=50"""
     def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=55, period2=50, threshold=50):

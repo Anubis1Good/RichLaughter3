@@ -471,8 +471,7 @@ class PEG16_ARTANIS(BaseEG):
         return None
 
 # Возможно нужна вариация с более простым выходом
-    # 'ASTR2':(PEG17_PHOENIX,(None,29,10,5,7,35,13,1,55),3,None), закрыл в хаях
-        # 'RUAL2':(PEG17_PHOENIX,(None,None,4,6,9,47,12,0,55),1,None),
+# 30.09.26 мне не нравится моменты со входами в хаях. Надо подумать над вариацией без этого. Скорее всего дело в работе по тренду. У нас там он смотри на low, а надо на close хотя бы
 class PEG17_PHOENIX(BaseEG):
     """stop=None, take=None, period=100, period_dc=20, period_rsi=20, period_velcro=50, threshold_velcro=30, use_stop=0, max_period=55"""
     def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=55, period_dc=20, period_rsi=20, period_velcro=50, threshold_velcro=30, use_stop=0, max_period=55):
@@ -798,7 +797,8 @@ class PEG18_VARIAN2(BaseEG):
             else:
                 return 'close_long'
 
-# 'SIBN':(PEG18_ANDUIN,(None,None,2,1.7,28,24,5,19,0,55),1,None), заходит в хаях закрывает в лоях (иногда)     
+# 'SIBN':(PEG18_ANDUIN,(None,None,2,1.7,28,24,5,19,0,55),1,None), заходит в хаях закрывает в лоях (иногда)
+# плохо работает на разворотах тренда  
 class PEG18_ANDUIN(BaseEG):
     """stop=None, take=None, period_st=55, mult_st=3, period2=10, threshold=30, threshold_adx=30, period_adx=10, use_stop=0, max_period=55"""
     def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_st=55, mult_st=3, period2=10, threshold=30, threshold_adx=30, period_adx=10, use_stop=0, max_period=55):

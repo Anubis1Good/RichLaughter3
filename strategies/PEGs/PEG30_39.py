@@ -57,7 +57,8 @@ class PEG30_MURKY(BaseEG):
                             return 'open_short'
                 else:
                     return 'close_all'
-                
+
+#Нет закрытия кроме тейка! Изменить надо! 
 class PEG30_ETC(BaseEG):
     """stop=None, take=None, \n
       work_trend=1,min_spred=5,use_long=1,use_short=1,period_adx=14,period_chop=14,period_sma_l=30,period_sma_s=15,thr_adx=30,thr_chop=40"""
@@ -109,6 +110,7 @@ class PEG30_ETC(BaseEG):
             else:
                 return 'close_all'
 
+# большие проблемы. Выбрирает самый дальний аск и счетает спред от него.
 class PEG31_HYPERION(BaseEG):
     """stop=None, take=None, \n
       min_spred=3, work_direction = 0, work_trend=1, large_open=100,large_close=50, n_order=1, min_step=3, \n

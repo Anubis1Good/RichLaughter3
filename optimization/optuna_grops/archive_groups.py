@@ -297,7 +297,7 @@ group = (
         (
         UEG9_BIRDWATCHER2, 
         [
-            (12,max_period,1),
+            (30,max_period,1),
             (0,1,0.01),
             (4,12,2),
             (0,0.5,0.01),
