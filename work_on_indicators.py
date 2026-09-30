@@ -9,7 +9,7 @@ from for_strategies.fix_params import *
 from testing.test_constants import *
 from utils.work_dfs.load_df import simple_load_df
 
-# PATH_DF = '_data_for_tests\_before_opt\ALRS_5_1787155697.parquet'
+# PATH_DF = '_data_for_tests\data_stock_5m\ALRS_5_1790716855.parquet'
 
 df = simple_load_df(PATH_DF)
 # df = df.iloc[-WINDOW:]

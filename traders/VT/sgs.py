@@ -1,7 +1,7 @@
 stock_groups= { 
     'MAIN_PC_TEST': (
-        ['OGKB0','ETLN0','TGKA0','DELI0'],
-        ['FIXR0','VSEH0','PRMD0','BTBR0'],
+        ['APTK0','DELI0','ETLN0','FIXR0'],
+        ['HYDR0','SOFL0','TGKA0','VSEH0'],
     ),
     'WORK_LAPTOP':(
         ['AFLT','AFLT2','ALRS','ALRS2'],

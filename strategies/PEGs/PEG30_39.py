@@ -110,7 +110,9 @@ class PEG30_ETC(BaseEG):
                 return 'close_all'
 
 class PEG31_HYPERION(BaseEG):
-    """stop=None, take=None, min_spred=3, work_direction = 0, work_trend=1, large_open=100,large_close=50, n_order=1, min_step=3, period_adx=14, period_chop=14, period_sma_l=30, period_sma_s=15, thr_adx=25, thr_chop=40"""
+    """stop=None, take=None, \n
+      min_spred=3, work_direction = 0, work_trend=1, large_open=100,large_close=50, n_order=1, min_step=3, \n
+        period_adx=14, period_chop=14, period_sma_l=30, period_sma_s=15, thr_adx=25, thr_chop=40"""
     def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, min_spred=3, work_direction = 0, work_trend=1, large_open=100,large_close=50, n_order=1, min_step=3, period_adx=14, period_chop=14, period_sma_l=30, period_sma_s=15, thr_adx=25, thr_chop=40):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart':True,'full_glass':True}
