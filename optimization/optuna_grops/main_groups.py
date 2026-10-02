@@ -22,17 +22,34 @@ group = (
             (5, max_period, 1),
             (2, max_period, 1),
             (2, max_period, 1),
-            (5, 40, 1),    
+            (5, 45, 1),    
             ('c', 'hl'),    
             (max_period,),
         ]
     ),
-
+        (
+        PEG13_DWDDCr, 
+        [
+            (2, max_period, 1),
+            (5, 45, 1),
+            (2, max_period, 1),
+        ]
+    ),
+    (
+        PEG14_RWDDCr, 
+        [
+            (2, max_period, 1),
+            (5, 45, 1),
+            (2, max_period, 1),
+            (2, max_period, 1),
+            (max_period,),
+        ]
+    ),
     (
         PEG14_RANGER, 
         [
             (2, half_max_period, 1),
-            (5, 40, 1),
+            (5, 45, 1),
             (2, max_period, 1),
             (2, max_period, 1),
             (5, 100, 1),
@@ -43,14 +60,28 @@ group = (
         PEG14_RENEGADE, 
         [
             (2, half_max_period, 1),
-            (5, 40, 1),
+            (5, 45, 1),
             (2, max_period, 1),
             (2, max_period, 1),
             (5, 100, 1),
             (5, 100, 1),
         ]
     ),
-
+    (
+        PEG15_ANNA, 
+        [
+            (2, max_period, 1),
+            (5, 45, 1),
+        ]
+    ),
+    (
+        PEG15_SILVANA, 
+        [
+            (2, max_period, 1),
+            (5, 45, 1),
+            (2, max_period, 1),
+        ]
+    ),
 
 
     (
@@ -60,7 +91,7 @@ group = (
             (2, max_period, 1),
             (2, max_period, 1),
             (2, max_period, 1),
-            (5, 40, 1),
+            (5, 45, 1),
             (0, 1),
             (max_period,),
         ]
@@ -124,6 +155,21 @@ group = (
     
     (
         PEG30_ETC, 
+        [   
+            (0,1),
+            (2,200,1),
+            (1,),
+            (1,),
+            (2,half_max_period,1),
+            (2,max_period,1),
+            (2,max_period,1),
+            (2,max_period,1),
+            (5,95,1),
+            (5,95,1),  
+        ]
+    ),
+    (
+        PEG30_ETC2, 
         [   
             (0,1),
             (2,200,1),

@@ -402,7 +402,9 @@ class UEG6_ADVENTURE(BaseEG):
                     return 'close_long'
         
         return None
-                
+
+# 02.10.2026 подумать над вариантом адаптивного периода. Что бы при низкой волатильности период уменьшался, при высокой увеличивался.
+# 02.10.2026 при настройках на большое количество сделок, знатно пиздит.
 class UEG6_SHERIFF(BaseEG):
     """stop=None, take=None, period=60, period_smas=2, mult_bb=2
     \n
@@ -671,7 +673,8 @@ class UEG7_VULTURE(BaseEG):
                         return 'close_all'
         
         return None
-    
+
+# 02.10.2026 при настройке на большое количество сделок может пиздеть
 class UEG7_CANNIBAL(BaseEG):
     """stop=None, take=None, period_sma=20, adx_threshold=30, period_window=55,period_fractal_free=5, n_fractals=5, period_window2=55, period_fractal_free2=5,n_fractals2=3, allowance=0.1, period_adx=27
     \n
@@ -785,6 +788,7 @@ class UEG7_PIGEON(BaseEG):
         return None
 # слишком частит. В итоге в тренде закрывает убыток в лоях и переобувается. После чего получает люлей на откате.
 #30.09.26 может весь день просидеть с убыточной сделкой, если рынок +- однонаправлен
+# 2.10.26 откровенно вызывает вопросы. опять тупо весь день с убыточной сделкой.
 class UEG7_CARRIER(BaseEG):
     """stop=None, take=None, period_bb=55, period_window=55,period_fractal_free=5, n_fractals=5, period_window2=55, period_fractal_free2=5,n_fractals2=3, allowance=0.1, mult_bb=1, use_stop=0
     \n

@@ -12,8 +12,8 @@ from utils.work_dfs.load_df import simple_load_df
 # PATH_DF = '_data_for_tests\data_stock_5m\ALRS_5_1790716855.parquet'
 
 df = simple_load_df(PATH_DF)
-# df = df.iloc[-WINDOW:]
-df = df.iloc[-60:]
+df = df.iloc[-WINDOW:]
+# df = df.iloc[-80:]
 # df = add_fractals(df)
 # df = add_rsi(df)
 max_period = 55
@@ -29,7 +29,16 @@ print(p1,p2,p3)
 #     p3 = p2
 print(p1,p2,p3)
 
+p1 = 70
+p2 = 57
+p3 = 10
 
+df = add_sma(df, p2)
+df = df.rename(columns={'sma': 'sma2'})
+df = add_bollinger(df, p1, multiplier=0.7)
+df = add_big_volume(df, p1)
+df = add_over_bb(df)
+df = add_simple_dynamics_ma(df, p3)
 
 # candle_max = df['high'].max()
 # if candle_max > 0:

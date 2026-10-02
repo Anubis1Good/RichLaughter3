@@ -96,7 +96,7 @@ class PEG13_DWDDCr(BaseEG):
             else:
                 return 'close_short'
         
-        if row['high'] >= row['max_hb'] and row['rsi'] > 100 - self.threshold:
+        if row['high'] >= row['max_hb'] and not nearest_long and row['rsi'] > 100 - self.threshold:
             if row['ao'] < 0:
                 return 'open_short'
             else:
@@ -143,7 +143,7 @@ class PEG14_RWDDCr(BaseEG):
             
             if row['low'] <= row['min_hb'] and nearest_long and row['rsi'] < self.threshold:
                 return 'open_long'
-            if row['high'] >= row['max_hb'] and row['rsi'] > 100 - self.threshold:
+            if row['high'] >= row['max_hb'] and not nearest_long and row['rsi'] > 100 - self.threshold:
                 return 'open_short'
         
         return None
@@ -239,7 +239,7 @@ class PEG15_ANNA(BaseEG):
         df = add_rsi(df, self.period)
         df['end_up'] = np.where((df['high'].shift(1) >= df['max_hb'].shift(1)) & (df['high'] < df['max_hb']), df['high'], np.nan)
         df['end_down'] = np.where((df['low'].shift(1) <= df['min_hb'].shift(1)) & (df['low'] > df['min_hb']), df['low'], np.nan)
-        df = self.add_slice_df(df, period=self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
@@ -253,7 +253,7 @@ class PEG15_ANNA(BaseEG):
                 return 'close_short'
         
         if not np.isnan(row['end_up']):
-            if row['rsi'] > 100 - self.threshold:
+            if not nearest_long and row['rsi'] > 100 - self.threshold:
                 return 'open_short'
             else:
                 return 'close_long'
@@ -279,16 +279,11 @@ class PEG15_SILVANA(BaseEG):
         df = add_rsi(df, self.period2)
         df['end_up'] = np.where((df['high'].shift(1) >= df['max_hb'].shift(1)) & (df['high'] < df['max_hb']), df['high'], np.nan)
         df['end_down'] = np.where((df['low'].shift(1) <= df['min_hb'].shift(1)) & (df['low'] > df['min_hb']), df['low'], np.nan)
-        df = self.add_slice_df(df, period=self.period)
+        df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
     def _get_action_from_row(self, row):
-        if row['low'] < row['min_hb']:
-            return 'close_long'
-        if row['high'] > row['max_hb']:
-            return 'close_short'
-        
         nearest_long = row['high'] - row['close'] > row['close'] - row['low']
         
         if not np.isnan(row['end_down']):
@@ -298,15 +293,20 @@ class PEG15_SILVANA(BaseEG):
                 return 'close_short'
         
         if not np.isnan(row['end_up']):
-            if row['rsi'] > 100 - self.threshold:
+            if not nearest_long and row['rsi'] > 100 - self.threshold:
                 return 'open_short'
             else:
                 return 'close_long'
         
-        return None
+        if row['low'] < row['min_hb']:
+            return 'close_long'
+        if row['high'] > row['max_hb']:
+            return 'close_short'
+
 
 #Долгий, но использовать можно
 # TODO решить проблему с индикаторами. Заглядывают слишком сильнов историю
+# 02.10.2026, что если поробоать из него сделать ходячий оптимизатор? Каждое окно он будет оптимизацией выбирать из нескольких стратегий и выбирать лучший результат?
 class PEG16_LEORIC(BaseEG):
     """stop=None, take=None, period=30, period2=10"""
     def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=50, period2=10):

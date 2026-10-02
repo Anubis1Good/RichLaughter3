@@ -226,7 +226,43 @@ class CheckEGTrader:
         type_action = parts_action[0]
         dir_action = parts_action[1]
         step = int(parts_action[3])
-        if type_action == 'open':
+
+        if type_action == 'spred':
+            if dir_action == 'long':
+                if self.trade_data['pos'] == 1:
+                    price_order = price+step*self.price_step
+                    self.orders.append(Order(False,price_order))
+                else:
+                    price_order = price-step*self.price_step
+                    if self.trade_data['pos'] < 0:
+                        self.orders.append(Order(True,price_order))
+                    self.orders.append(Order(True,price_order))
+
+            elif dir_action == 'short':
+                if self.trade_data['pos'] == -1:
+                    price_order = price-step*self.price_step
+                    self.orders.append(Order(True,price_order))
+                else:
+                    price_order = price+step*self.price_step
+                    if self.trade_data['pos'] > 0: 
+                        self.orders.append(Order(False,price_order))
+                    self.orders.append(Order(False,price_order))
+            else:
+                if self.trade_data['pos'] == 1:
+                    price_order = price+step*self.price_step
+                    self.orders.append(Order(False,price_order))
+                    self.orders.append(Order(False,price_order))
+                elif self.trade_data['pos'] == -1:
+                    price_order = price-step*self.price_step
+                    self.orders.append(Order(True,price_order))
+                    self.orders.append(Order(True,price_order))
+                else:
+                    price_order = price+step*self.price_step
+                    self.orders.append(Order(False,price_order))              
+                    price_order = price-step*self.price_step
+                    self.orders.append(Order(True,price_order))
+                    
+        elif type_action == 'open':
             if (dir_action == 'long' or dir_action == 'all') and self.trade_data['pos'] != 1:
                 price_order = price-step*self.price_step
                 if self.trade_data['pos'] < 0:

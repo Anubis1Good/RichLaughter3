@@ -33,6 +33,10 @@ action = (
     'open_short_step',
     'open_all_step',
 
+    'spred_long_step',
+    'spred_short_step',
+    'spred_all_step',
+
     'close_long_step',
     'close_short_step',
     'close_all_step',

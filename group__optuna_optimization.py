@@ -15,13 +15,15 @@ trials = 200
 # trials = 100
 # trials = 50
 save_cores = 0
-bottom_limit = 60
-top_limit = 600
-# top_limit = 1000
+bottom_limit = 80
+top_limit = 400
+# top_limit = 2000
+test_folder = '_data_for_tests/data_stock_5m'
+# test_folder = '_data_for_tests/data_stock_5m_spred'
 
 if __name__ == '__main__':
     optimizer = OptimizatorOptuna(
-        test_folder='_data_for_tests/data_stock_5m',
+        test_folder=test_folder,
         fee=MAIN_FEE,
         max_period=max_period,
         bottom_limit=bottom_limit,

@@ -84,6 +84,7 @@ class WEG4_RAT(BaseEG):
         if row['overbought']:  
             return 'open_short'
 
+# 02.10.2026 Разобраться! Почему-то может открывать сделки и закрывать сделки в экструмумах!
 class WEG7_PARADOX(BaseEG):
     """stop=None, take=None, period=14, mult=1"""
     def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=14, mult=1):

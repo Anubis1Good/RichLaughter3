@@ -5,6 +5,8 @@ from for_strategies.help_indicators import add_big_volume,add_over_bb
 from for_strategies.pva_indicators import add_simple_dynamics_ma,add_pc_stair_fast
 
 # подумать над вариацией SEG со способностью тянуть сделку дольше (может, до противоположной сделки)
+# (SEG1_LITE,(None,108,70,0.7,0.7,57),9,None) #add_simple_dynamics_ma из-за этого не было сделок в оконном тесте
+# 02.10.2026 нужно заменить add_simple_dynamics_ma на оконный аналог и упросить выход из сделки
 class SEG1_LITE(BaseEG):
     """stop=None, take=None, period=20, multiplier=2, slope=0.5, period2=10"""
     def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=20, multiplier=2, slope=0.5, period2=10):

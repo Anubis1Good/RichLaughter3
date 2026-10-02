@@ -1118,6 +1118,7 @@ def get_all_lup(df,kind_top,kind_bottom):
     all_ends = np.where((df['low'].shift(1) <= df[kind_bottom].shift(1))&(df['low'] > df[kind_bottom]), df['low'], np.nan)
     return all_starts,all_ends
 
+# Создать аналог для окна
 def add_simple_dynamics_ma(df: pd.DataFrame, period: int = 20, 
                            kind: str = 'sma', divider_period: int = 1,
                            epsilon: float = 1e-10) -> pd.DataFrame:

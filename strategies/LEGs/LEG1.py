@@ -180,6 +180,7 @@ class LEG1_PIN(BaseEG):
         
         return None
 
+# Надо тоже подумать над адаптивным периодом
 class LEG1_BIBI2(BaseEG):
     """stop=None, take=None, period=15, period_q=10, kind='rsi',max_period=55,period2s = 3, quantile=0.3 \n
     'cmo','rsi','rsi_tw','williams_r','mfi','ultimate_oscillator','cci','%d'

@@ -78,39 +78,7 @@ group = (
             (0.5,3,0.1),   
         ]
     ),
-        (
-        PEG13_DWDDCr, 
-        [
-            (2, max_period, 1),
-            (5, 40, 1),
-            (2, max_period, 1),
-        ]
-    ),
-        (
-        PEG14_RWDDCr, 
-        [
-            (2, max_period, 1),
-            (5, 40, 1),
-            (2, max_period, 1),
-            (2, max_period, 1),
-            (max_period,),
-        ]
-    ),
-        (
-        PEG15_ANNA, 
-        [
-            (2, max_period, 1),
-            (5, 40, 1),
-        ]
-    ),
-    (
-        PEG15_SILVANA, 
-        [
-            (2, max_period, 1),
-            (5, 40, 1),
-            (2, max_period, 1),
-        ]
-    ),
+
         (
         PEG18_REXXAR2, 
         [

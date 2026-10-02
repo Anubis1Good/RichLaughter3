@@ -366,9 +366,9 @@ class WindowTester:
 
 if __name__ == "__main__":
     DATA_FOLDER = "_data_for_tests/data_stock_5m"
+    # DATA_FOLDER = '_data_for_tests/data_stock_5m_spred'
     RESULTS_EXCEL = "_test_results/optuna/total_optuna.xlsx"
     OUTPUT_FOLDER = "_test_results/window_test"
-    
     # TICKERS = ["ASTR","MAGN","MTLR"]
     TICKERS = []
     

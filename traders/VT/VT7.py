@@ -688,12 +688,12 @@ class VT7:
     
     def _work_action(self,action,pos,img,symbol,idx):
         # print(self.name,pos,action) 
-        if 'close_long' == action:
+        if 'close_long' == action or action == 'stop_close_long':
             if pos == 1:
                 self._send_close('long',symbol,idx,img)
             else:
                 self._reset_req(symbol,idx)
-        elif 'close_short' == action:
+        elif 'close_short' == action or action == 'stop_close_short':
             if pos == -1:
                 self._send_close('short',symbol,idx,img)
             else:
@@ -739,25 +739,65 @@ class VT7:
         step = int(parts_action[3]) // self.mults_ps[symbol]
         y_bbid = fg[fg['type_cell'] == 'bbid']['middle'].iloc[0]
         y_bask = fg[fg['type_cell'] == 'bask']['middle'].iloc[0]
-        if type_action == 'open':
+        press_f = True
+        if type_action == 'spred':
+            if dir_action == 'long':
+                if pos == 1:
+                    y_order = y_bbid-step*self.price_step
+                    self._send_by_cords(symbol,idx,y_order,False,True,True)
+                else:
+                    y_order = y_bask+step*self.price_step
+                    if pos == -1:
+                        self._send_by_cords(symbol,idx,y_order,True,True,True)
+                        press_f = False
+                    self._send_by_cords(symbol,idx,y_order,True,press_f,False)
+
+            elif dir_action == 'short':
+                if pos == -1:
+                    y_order = y_bask+step*self.price_step
+                    self._send_by_cords(symbol,idx,y_order,True,True,True)
+                else:
+                    y_order = y_bbid-step*self.price_step
+                    if pos == 1:
+                        self._send_by_cords(symbol,idx,y_order,False,True,True)
+                        press_f = False
+                    self._send_by_cords(symbol,idx,y_order,False,press_f,False)
+            else:
+                if pos == 1:
+                    y_order = y_bbid-step*self.price_step
+                    self._send_by_cords(symbol,idx,y_order,False,True,True)
+                    self._send_by_cords(symbol,idx,y_order,False,False,False)
+                elif pos == -1:
+                    y_order = y_bask+step*self.price_step
+                    self._send_by_cords(symbol,idx,y_order,True,True,True)
+                    self._send_by_cords(symbol,idx,y_order,True,False,False)
+                else:
+                    y_order = y_bbid-step*self.price_step
+                    self._send_by_cords(symbol,idx,y_order,False,True,False)
+                    y_order = y_bask+step*self.price_step
+                    self._send_by_cords(symbol,idx,y_order,True,False,False)
+        elif type_action == 'open':
             if (dir_action == 'long' or dir_action == 'all') and pos != 1:
                 y_order = y_bask+step*self.price_step
-                if pos < 0:
+                if pos == -1:
                     self._send_by_cords(symbol,idx,y_order,True,True,True)
-                self._send_by_cords(symbol,idx,y_order,True,False,False)
+                    press_f = False
+                self._send_by_cords(symbol,idx,y_order,True,press_f,False)
+                press_f = False
 
             if (dir_action == 'short' or dir_action == 'all') and pos != -1:
                 y_order = y_bbid-step*self.price_step
-                if pos < 0:
+                if pos == 1:
                     self._send_by_cords(symbol,idx,y_order,False,True,True)
-                self._send_by_cords(symbol,idx,y_order,False,False,False)
+                    press_f = False
+                self._send_by_cords(symbol,idx,y_order,False,press_f,False)
         else:
             if (dir_action == 'long' or dir_action == 'all') and pos == 1:
                 y_order = y_bbid-step*self.price_step
                 self._send_by_cords(symbol,idx,y_order,False,True,True)
-            if (dir_action == 'short' or dir_action == 'all') and pos == -1:
+            elif (dir_action == 'short' or dir_action == 'all') and pos == -1:
                 y_order = y_bask+step*self.price_step
-                self._send_by_cords(symbol,idx,y_order,True,False,False)
+                self._send_by_cords(symbol,idx,y_order,True,True,True)
 
     def _work_action_OC(self,action:OrderCords,pos,img,symbol,idx):
         type_order = action.type_order
