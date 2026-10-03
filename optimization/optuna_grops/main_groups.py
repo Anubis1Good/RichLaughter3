@@ -97,6 +97,60 @@ group = (
         ]
     ),
     (
+        PEG17_PROBIUS, 
+        [
+            (2, max_period, 1),
+            (2, max_period, 1),
+            (2, max_period, 1),
+            (2, max_period, 1),
+            (0, 50, 1),
+            (max_period,),
+            (0, 50, 1),
+        ]
+    ),
+    (
+        PEG17_ZEALOT, 
+        [
+            (2, max_period, 1),
+            (2, max_period, 1),
+            (2, max_period, 1),
+            (2, max_period, 1),
+            (0, 50, 1),
+            (max_period,),
+        ]
+    ),
+    (
+        PEG17_SELENDIS, 
+        [
+            (2, max_period, 1),
+            (2, max_period, 1),
+            (2, max_period, 1),
+            (2, max_period, 1),
+            (0, 50, 1),
+            (max_period,),
+        ]
+    ),
+    (
+        PEG17_ARCHON, 
+        [
+            (2, max_period, 1),
+            (2, max_period, 1),
+            (0, 50, 1),
+            (max_period,),
+        ]
+    ),
+    (
+        PEG17_TEMPLAR, 
+        [
+            (2, max_period, 1),
+            (2, max_period, 1),
+            (2, max_period, 1),
+            (2, max_period, 1),
+            (0, 50, 1),
+            (max_period,),
+        ]
+    ),
+    (
         PEG18_BLAZE, 
         [
             (2, max_period, 1),
@@ -480,7 +534,7 @@ group = (
         [
             (1,20,1),
             (2,max_period,1),
-            (30,max_period,1),
+            (half_max_period,max_period,1),
             (0,1,0.01),
             (4,12,2),
             (0,1,0.01),
@@ -500,7 +554,7 @@ group = (
     (
         UEG9_GRAVY2, 
         [
-            (30,max_period,1),
+            (half_max_period,max_period,1),
             (0,1,0.01),
             (4,12,2),
             (0,0.5,0.01),
@@ -512,7 +566,7 @@ group = (
         VEG1_MOON, 
         [
             (2,20,1),
-            (30,max_period,1),
+            (half_max_period,max_period,1),
             (0,1,0.01),
             (4,12,2),
             (0,1,0.01),
@@ -525,7 +579,7 @@ group = (
     (
         VEG1_EARTH, 
         [   
-            (30,max_period,1),
+            (half_max_period,max_period,1),
             (0,1,0.01),
             (4,12,2),
             (0,1,0.01),
