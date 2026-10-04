@@ -84,7 +84,7 @@ bot_on_ticker = {
     #30.09.26 ?18% +7.9 +0.1 $
     'ALRS':(LEG1_LAKSAe,(None,15,17,9),2,None),
     #04.10.26 ?19%
-    'ALRS2':(LEG2_HOTS,(None,13,58,2.6,14,35,14,1),2,None),
+    'ALRS2':(LEG2_HOTS,(None,13,58,2.6,14,35,14,1),1,None),
 
     #04.10.26 ?37%
     'ASTR':(UEG9_GRAVY2,(None,None,41,0.93,12,0.35,1.2,0),1,None),
