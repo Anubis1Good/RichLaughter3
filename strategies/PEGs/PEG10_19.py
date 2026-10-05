@@ -6,6 +6,10 @@ from for_strategies.other_indicators import add_vangerchik
 from for_strategies.fix_params import fix_supertrend_params,fix_two_periods_hm,fix_three_periods_hm
 
 # скорее всего сильно чувствтителен к смене тренда
+# 05.10.2026 сделать версию без открытий по:            
+# if row[self.kind_enter_l] <= row['avarege2']:
+    # return 'open_long'
+# из-за этого может открывать на самом дне.
 class PEG11_KUSURUKEN(BaseEG):
     """stop=None, take=None, period=55, period2=10, period3=20, threshold=20, kind_enter='hl',max_period=55 \n
     kind_enter -> hl | c
@@ -474,6 +478,7 @@ class PEG16_ARTANIS(BaseEG):
 
 # Возможно нужна вариация с более простым выходом
 # 30.09.26 мне не нравится моменты со входами в хаях. Надо подумать над вариацией без этого. Скорее всего дело в работе по тренду. У нас там он смотри на low, а надо на close хотя бы
+# 05.10.2026 сделать версию с входом по low
 class PEG17_PHOENIX(BaseEG):
     """stop=None, take=None, period=100, period_dc=20, period_rsi=20, period_velcro=50, threshold_velcro=30, use_stop=0, max_period=55"""
     def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_quantile=55, period_dc=20, period_rsi=20, period_velcro=50, threshold_velcro=30, use_stop=0, max_period=55):
@@ -535,7 +540,6 @@ class PEG17_PROBIUS(BaseEG):
         df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
-    # Изучи этот. Тут есть странные подозрения
     def _get_action_from_row(self, row):
         if row['velcro'] > 100 - self.threshold_velcro:  # long
             if row['high'] >= row['max_hb'] and row['rsi'] >= 100-self.thersh_rsi_trend:
@@ -569,14 +573,14 @@ class PEG17_ZEALOT(BaseEG):
         df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
-    # Изучи этот. Тут есть странные подозрения
     def _get_action_from_row(self, row):
         if self.threshold_velcro < row['velcro'] < 100 - self.threshold_velcro:  # long
             if row['low'] <= row['min_hb'] and row['rsi'] <= row['bottom_q']:
                 return 'open_long'
             if row['high'] >= row['max_hb'] and row['rsi'] >= row['top_q']:
                 return 'open_short'
-            
+
+# 05.10.2026 пока большые вопросы. Кажется одного велкро для входа не достаочно. Может зайти и в локальном хае   
 class PEG17_TEMPLAR(BaseEG):
     """stop=None, take=None, period_quantile=55, period_dc=20, period_rsi=20, period_velcro=50, threshold_velcro=30, max_period=55"""
     def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_quantile=55, period_dc=20, period_rsi=20, period_velcro=50, threshold_velcro=30, max_period=55):
@@ -596,7 +600,6 @@ class PEG17_TEMPLAR(BaseEG):
         df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
-    # Изучи этот. Тут есть странные подозрения
     def _get_action_from_row(self, row):
         if row['velcro'] > 100 - self.threshold_velcro:  # long
             return 'open_short'
@@ -625,14 +628,13 @@ class PEG17_ARCHON(BaseEG):
         df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
-    # Изучи этот. Тут есть странные подозрения
     def _get_action_from_row(self, row):
         if row['velcro'] > 100 - self.threshold_velcro:  # long
             return 'open_short'
         if row['velcro'] < self.threshold_velcro:  # short
             return 'open_long'
 
-            
+# 05.10.2026 надо подумать над трендовой частью. Из-за нее порой открывает странные сделки в хаях
 class PEG17_SELENDIS(BaseEG):
     """stop=None, take=None, period_quantile=55, period_dc=20, period_rsi=20, period_velcro=50, threshold_velcro=30, max_period=55"""
     def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_quantile=55, period_dc=20, period_rsi=20, period_velcro=50, threshold_velcro=30, max_period=55):
@@ -934,7 +936,8 @@ class PEG18_VARIAN2(BaseEG):
                 return 'close_long'
 
 # 'SIBN':(PEG18_ANDUIN,(None,None,2,1.7,28,24,5,19,0,55),1,None), заходит в хаях закрывает в лоях (иногда)
-# плохо работает на разворотах тренда  
+# плохо работает на разворотах тренда
+# 05.10.2026 попробовать сделать без avarege
 class PEG18_ANDUIN(BaseEG):
     """stop=None, take=None, period_st=55, mult_st=3, period2=10, threshold=30, threshold_adx=30, period_adx=10, use_stop=0, max_period=55"""
     def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_st=55, mult_st=3, period2=10, threshold=30, threshold_adx=30, period_adx=10, use_stop=0, max_period=55):

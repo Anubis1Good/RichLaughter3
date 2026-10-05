@@ -481,6 +481,7 @@ class UEG7_DODO(BaseEG):
         return None
     
 # Надо думать над фильтром тренда
+# 05.10.2026 как будто тоже надо установить минимальный period_window выше
 class UEG7_LOVERGOOSE(BaseEG):
     """stop=None, take=None, period_adx=20, period_window=55,period_fractal_free=5, n_fractals=3, adx_threshold=30, adx_stop=35, use_stop=0
     \n
@@ -675,6 +676,7 @@ class UEG7_VULTURE(BaseEG):
         return None
 
 # 02.10.2026 при настройке на большое количество сделок может пиздеть
+# 05.10.2026 сделать версию без закрытия в хаях
 class UEG7_CANNIBAL(BaseEG):
     """stop=None, take=None, period_sma=20, adx_threshold=30, period_window=55,period_fractal_free=5, n_fractals=5, period_window2=55, period_fractal_free2=5,n_fractals2=3, allowance=0.1, period_adx=27
     \n
@@ -1219,6 +1221,7 @@ class UEG9_BIRDWATCHER2(BaseEG):
                     return 'close_long'
 
 # В боковике ахуенно работает. Надо подумать над версией, которая включается, только в боковике
+# 05.10.2026 нужна версия с отдельной работой для боковика и тренда
 class UEG9_GRAVY2(BaseEG):
     '''
     stop=None, take=None, period_wzz=55, frac_wzz=0.1, n_wzp=8, buffer_mean=0.1, mult_stop=0.5, use_stop=1
