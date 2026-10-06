@@ -1073,6 +1073,7 @@ class UEG8_AVENGER(BaseEG):
         return None
 
 # Нужна версия вариантом с использования rsi на каждом паттерне
+# 06.10.2026 ограничения оптимизации привели к тому, что сделок как-будто как-то очень мало
 class UEG8_SOLDIER(BaseEG):
     """stop=None, take=None, \n
     divider_buff=5, period_rsi=14, period_wzz=30, frac_wzz=0.1, n_wzp=6, threshold_p18=0.1, threshold_rsi=30, use_rsi=0, g_joc=99,g_tr=99,g_dt=99,g_wl=99,g_nd=99,g_s=99,g_sos=99,g_bti=99

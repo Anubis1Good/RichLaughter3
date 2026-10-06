@@ -534,7 +534,7 @@ group = (
         [
             (1,20,1),
             (2,max_period,1),
-            (half_max_period,max_period,1),
+            (20,max_period,1),
             (0,1,0.01),
             (4,12,2),
             (0,1,0.01),
@@ -554,7 +554,7 @@ group = (
     (
         UEG9_GRAVY2, 
         [
-            (half_max_period,max_period,1),
+            (20,max_period,1),
             (0,1,0.01),
             (4,12,2),
             (0,0.5,0.01),
@@ -566,7 +566,7 @@ group = (
         VEG1_MOON, 
         [
             (2,20,1),
-            (half_max_period,max_period,1),
+            (20,max_period,1),
             (0,1,0.01),
             (4,12,2),
             (0,1,0.01),
@@ -579,7 +579,7 @@ group = (
     (
         VEG1_EARTH, 
         [   
-            (half_max_period,max_period,1),
+            (20,max_period,1),
             (0,1,0.01),
             (4,12,2),
             (0,1,0.01),

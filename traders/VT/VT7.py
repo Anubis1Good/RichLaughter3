@@ -628,18 +628,16 @@ class VT7:
         _,l_min = self._color_search(img,ColorsBtnBGR.loss_glass,glass_region,reverse=False)
         return l_max,l_min
     
+    # возможно в эти два метода нужно добавить обработку ситуаций с полной дельтой. Можно определять есть ли профит или убыток и плясать от него
     def _get_best_ask(self,img,symbol,idx):
         glass_region = self.glass_region[symbol][idx]
         _,y_max = self._color_search(img,ColorsBtnBGR.best_ask,glass_region,reverse=True)
         if y_max != -1:
             return y_max
         _,y_max_level = self._color_search(img,ColorsBtnBGR.best_ask_level,glass_region,reverse=True)
-        _,y_test = self._color_search(img,ColorsBtnBGR.ask,glass_region,reverse=True)
         if y_max_level >= 0:
             return y_max_level
-        if y_max >= 0:
-            if y_max > y_test:
-                return y_max
+        _,y_test = self._color_search(img,ColorsBtnBGR.ask,glass_region,reverse=True)
         return y_test
             
     def _get_best_bid(self,img,symbol,idx):
@@ -648,12 +646,9 @@ class VT7:
         if y_min != -1:
             return y_min
         _,y_min_level = self._color_search(img,ColorsBtnBGR.best_bid_level,glass_region)
-        _,y_test = self._color_search(img,ColorsBtnBGR.bid,glass_region)
         if y_min_level >= 0:
             return y_min_level
-        if y_min >= 0:
-            if y_min < y_test:
-                return y_min
+        _,y_test = self._color_search(img,ColorsBtnBGR.bid,glass_region)
         return y_test
     
     def _get_delta_p(self,img,symbol,idx,poss):
