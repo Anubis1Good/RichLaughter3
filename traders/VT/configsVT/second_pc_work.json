@@ -3,21 +3,21 @@
         "doms":[
             {
                 "direction": "row",
-                "dom_field_xyxy":[1,57,1917,517],
-                "f_cluster_e_x":150,
-                "f_tape_se_xx":[155,345],
-                "f_glass_s_x":350
+                "dom_field_xyxy":[1,57,1358,431],
+                "f_cluster_e_x":80,
+                "f_tape_se_xx":[85,220],
+                "f_glass_s_x":225
         }
     ],
         "charts":[
             {
                 "direction":"row",
-                "field":[1,551,1917,1011]
+                "field":[1,463,1358,700]
         }
     ],
         "amount": 4,
         "price_step":12,
         "pos_offset":25
     },
-    "first_tab_xy":[11,1025]
+    "first_tab_xy":[11,716]
 }

@@ -62,5 +62,6 @@
         "amount": 3,
         "price_step":12,
         "pos_offset":25
-    }
+    },
+    "first_tab_xy":[31,716]
 }

@@ -1016,7 +1016,7 @@ class VT7:
                     pos = poss[symbol][0]
                     delta = delta_p[symbol][0]
                     action = self.wss[symbol](pdata,pos,delta)
-                    # print(symbol,action)    
+                    print(symbol,action)    
                     if self.debug_mode:
                         self.last_dfs[symbol] = pdata.get('chart',None)
                         self.last_logs[symbol] = []

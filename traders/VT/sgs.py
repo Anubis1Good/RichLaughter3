@@ -3,6 +3,10 @@ stock_groups= {
         ['APTK0','DELI0','ETLN0','FIXR0'],
         ['HYDR0','SOFL0','TGKA0','VSEH0'],
     ),
+    'SECOND_PC_WORK': (
+        ['APTK0','DELI0','ETLN0','FIXR0'],
+        ['HYDR0','SOFL0','TGKA0','VSEH0'],
+    ),
     'WORK_LAPTOP':(
         ['AFLT','AFLT2','ALRS','ALRS2'],
         ['ASTR','ASTR2','CHMF','CHMF2'],

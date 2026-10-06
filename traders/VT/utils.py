@@ -4,7 +4,12 @@ import json
 def get_pages(filename:str):
     with open(filename, 'r', encoding='utf-8') as f:
         data = json.load(f)
-        return tuple(data.keys())
+        pages = []
+        for p in data:
+            if p == 'first_tab_xy':
+                continue
+            pages.append(p)
+        return pages
 
 def open_configuration_traiders(filename):
     with open(filename, 'r', encoding='utf-8') as f:

@@ -32,7 +32,7 @@ class OrderCords:
 class OrderManager:
     def __init__(self):
         pass
-
+    # TODO Надо переделать под новые action
     def translate_old_action(self,action,smart_per=10,idx_chart=0):
         new_actions = []
         if action is not None:
@@ -278,11 +278,14 @@ class OrderManager:
             reverse: True - сортировка от большего к меньшему (для ask),
                     False - сортировка от меньшего к большему (для bid)
         """
-        if not indices or min_step <= 1:
+        if not indices:
             return indices
         
-        # Сортируем индексы
+        # Сортируем индексы (даже если min_step <= 1)
         indices_sorted = sorted(indices, reverse=reverse)
+        
+        if min_step <= 1:
+            return indices_sorted
         
         filtered = []
         last_idx = None

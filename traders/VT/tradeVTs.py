@@ -2,6 +2,7 @@ import shutil
 import keyboard
 import cv2
 import pyautogui as pag
+import pydirectinput as pdi
 import numpy as np
 import json
 from PyQt5.QtCore import QThread, pyqtSignal,QMutex
@@ -32,22 +33,26 @@ class TradeWorker(QThread):
             data = json.load(f)
             raw_pages = {}
             unique_pages = {}
+            # print(data)
+            first_tab = data['first_tab_xy']
             for raw_page in data:
+                if raw_page == 'first_tab_xy':
+                    continue
                 raw_pages[raw_page] = get_configuration_traiders(data, raw_page)
                 if raw_page != 'base':
                     pages = raw_page.split('_')
                     for page in pages:
                         unique_pages[int(page)] = raw_page
-            return raw_pages,unique_pages
+            return raw_pages,unique_pages,first_tab
 
-    def run(self,):
+    def run(self):
         try:
             shutil.rmtree(error_folder)
         except Exception as e:
             pass
         self.work_traders:list[VT] = []
         sg = stock_groups[self.sg_key]
-        raw_pages,unique_pages = self.get_full_config()
+        raw_pages,unique_pages,first_tab = self.get_full_config()
         # print(raw_pages)
         # print(unique_pages)
         for idx,s in enumerate(sg):
@@ -66,6 +71,7 @@ class TradeWorker(QThread):
             
             if not active:
                 break
+            pdi.click(first_tab[0],first_tab[1])
             self.execute_trade_cycle()
             self.msleep(50)
 
