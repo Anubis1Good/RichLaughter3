@@ -510,7 +510,7 @@ class VT7:
             combined_mask = combined_mask | mask
         
         return combined_mask
-
+    #TODO надо чинить. если есть убыток или прибыль на всю линию, то будет пустой стакан.
     def _get_full_glass(self,img,symbol,idx):
         glass_region = self.glass_region[symbol][idx]
         start_tape = self.tape_region[symbol][idx][0]
@@ -631,6 +631,8 @@ class VT7:
     def _get_best_ask(self,img,symbol,idx):
         glass_region = self.glass_region[symbol][idx]
         _,y_max = self._color_search(img,ColorsBtnBGR.best_ask,glass_region,reverse=True)
+        if y_max != -1:
+            return y_max
         _,y_max_level = self._color_search(img,ColorsBtnBGR.best_ask_level,glass_region,reverse=True)
         _,y_test = self._color_search(img,ColorsBtnBGR.ask,glass_region,reverse=True)
         if y_max_level >= 0:
@@ -643,6 +645,8 @@ class VT7:
     def _get_best_bid(self,img,symbol,idx):
         glass_region = self.glass_region[symbol][idx]
         _,y_min = self._color_search(img,ColorsBtnBGR.best_bid,glass_region)
+        if y_min != -1:
+            return y_min
         _,y_min_level = self._color_search(img,ColorsBtnBGR.best_bid_level,glass_region)
         _,y_test = self._color_search(img,ColorsBtnBGR.bid,glass_region)
         if y_min_level >= 0:
@@ -1016,7 +1020,7 @@ class VT7:
                     pos = poss[symbol][0]
                     delta = delta_p[symbol][0]
                     action = self.wss[symbol](pdata,pos,delta)
-                    print(symbol,action)    
+                    # print(symbol,action)    
                     if self.debug_mode:
                         self.last_dfs[symbol] = pdata.get('chart',None)
                         self.last_logs[symbol] = []
