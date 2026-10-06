@@ -86,9 +86,10 @@ class OrderManager:
         
         # 2. Проверяем текущие заявки в стакане
         current_orders = self._get_current_order_positions(fg)
-
+        top_y = fg['middle'].min()
+        bottom_y = fg['middle'].max()
         # Определяем, какие заявки нужно снять, а какие оставить
-        reset_orders, keep_orders = self._get_reset_orders(current_orders, planned_orders)
+        reset_orders, keep_orders = self._get_reset_orders(current_orders, planned_orders,top_y,bottom_y)
 
         # Добавляем заявки на снятие
         if reset_orders:
@@ -329,7 +330,9 @@ class OrderManager:
     def _get_reset_orders(
         self, 
         current_orders: List[int], 
-        planned_orders: List[Tuple[int, bool, bool, bool]]
+        planned_orders: List[Tuple[int, bool, bool, bool]],
+        top_y:int,
+        bottom_y:int
     ) -> Tuple[List[int], List[int]]:
         """
         Определяет, какие текущие заявки нужно снять, а какие оставить
@@ -348,6 +351,8 @@ class OrderManager:
         keep_orders = []    # заявки, которые нужно оставить (есть и в current, и в planned)
         
         for y in current_orders:
+            if y == top_y or y == bottom_y:
+                return current_orders,[]
             if y in planned_y:
                 keep_orders.append(y)
             else:
