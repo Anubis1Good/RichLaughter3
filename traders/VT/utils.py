@@ -41,8 +41,9 @@ def get_configuration_traiders(data,page):
         end_tape = raw_dom['f_tape_se_xx'][1] - start_dom
         start_glass = raw_dom['f_glass_s_x'] - start_dom
         end_glass = start_dom + width_dom - 2
-        start_pos = start_dom + width_dom//3
-        end_pos = start_pos + width_dom//3
+        buff_tape = (end_tape - start_tape)//10
+        start_pos = start_tape + buff_tape
+        end_pos = end_tape - buff_tape
         high_dom = dom_field[1]
         if raw_dom['direction'] == 'column':
             heigh_dom = (dom_field[3]-dom_field[1])//amount
@@ -54,7 +55,7 @@ def get_configuration_traiders(data,page):
                 dom['tapes'].append((start_tape,y1,end_tape,y2))
                 dom['glasses'].append((start_glass,y1,end_glass,y2))
 
-                dom['poses'].append((start_pos,y2+pos_offset-6,end_pos,y2+pos_offset-1))
+                dom['poses'].append((start_pos,y2+pos_offset-10,end_pos,y2+pos_offset-1))
         else:
             low_dom = dom_field[3] - pos_offset
             for i in range(amount):
@@ -62,7 +63,7 @@ def get_configuration_traiders(data,page):
                 dom['clusters'].append((start_dom+offset_x1,high_dom,end_cluster+offset_x1,low_dom))
                 dom['tapes'].append((start_tape+offset_x1,high_dom,end_tape+offset_x1,low_dom))
                 dom['glasses'].append((start_glass+offset_x1,high_dom,end_glass+offset_x1,low_dom))
-                dom['poses'].append((start_pos+offset_x1,dom_field[3]-6,end_pos+offset_x1,dom_field[3]-1))
+                dom['poses'].append((start_pos+offset_x1,dom_field[3]-10,end_pos+offset_x1,dom_field[3]-1))
         doms.append(dom)
     for raw_charts in data['charts']:
         field = raw_charts['field']
