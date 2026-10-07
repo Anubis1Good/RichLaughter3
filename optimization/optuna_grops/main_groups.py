@@ -618,10 +618,28 @@ group = (
     ),
 
     (
-        WEG7_PARADOX, 
+        WEG7_PARADOX2, 
         [
             (2, max_period, 1),
             (0.3,3,0.1),
+            (2, max_period, 1),
+            (0.3,3,0.1),
+        ]
+    ),
+    (
+        WEG8_MOUSE, 
+        [
+            (2, max_period, 1),
+            (2, max_period, 1),
+            (5, 45, 1),
+            (2, max_period, 1),
+            (2, max_period, 1),
+            (2, max_period, 1),
+            (2, half_max_period, 1),
+            (5, 80, 1),
+            (max_period,),
+            (0.01, 0.4, 0.01),
+
         ]
     ),
 )

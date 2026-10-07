@@ -33,22 +33,56 @@ max_period = 55
     
 
 # df = add_zigzag_window_210926(df)
-df = add_zigzag_window_260926(df,80)
-df = add_pattern18_zzw_260926(df)
+# df = add_zigzag_window_260926(df,80)
 # df = add_pattern18_zzw_260926(df)
+# df = add_pattern18_zzw_260926(df)
+def add_reversal_patterns(df:pd.DataFrame,rails_thresh=1.5):
+    df['size_bar'] = df['high'] - df['low']
+    df['ratio_prev'] = df['size_bar'] / df['size_bar'].shift(1)
+    df['rev_pat'] = np.where(
+        (df['direction'] == 1)&
+        (df['direction'] != df['direction'].shift(1))&
+        (df['high'] >= df['high'].shift(1))&
+        (df['close'] >= df['open'].shift(1))&
+        (df['ratio_prev'] < rails_thresh)&
+        (df['close'] > df['open']),
+        2,0)
+    df['rev_pat'] = np.where(
+        (df['direction'] == -1)&
+        (df['direction'] != df['direction'].shift(1))&
+        (df['low'] <= df['low'].shift(1))&
+        (df['close'] <= df['open'].shift(1))&
+        (df['ratio_prev'] < rails_thresh),
+        -2,df['rev_pat'])
+    df['c_o'] = abs(df['close'] - df['open'])
+    df['l_o'] = abs(df['low'] - df['open'])
+    df['l_c'] = abs(df['low'] - df['close'])
+    df['h_o'] = abs(df['high'] - df['open'])
+    df['h_c'] = abs(df['high'] - df['close'])
+    df['rev_pat'] = np.where(
+        (df['low'] < df['low'].shift(1)) 
+        ,
+        1,df['rev_pat'])
+    return df
+df = add_reversal_patterns(df)
 # df['stair_pc'] = df['stair']
 # df = add_hl_stair_fast(df)
 
 print(df.tail(20))
 # print(df['ave_up'].isna().sum())
 # print(df[['wzp1','idx_wzp1','wzp2','idx_wzp2','wzp3','idx_wzp3','wzp4','idx_wzp4',   'wzp5',  'idx_wzp5',  'wzp6',  'idx_wzp6',   'wzp7',  'idx_wzp7',   'wzp8',  'idx_wzp8']].tail())
-fig = draw_bars_chart_wo_vol(df)
-draw_wzp(df)
+fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 10), sharex=True)
 
+draw_bars_chart_wo_vol(df, ax=ax1)
+
+# for kind in ('dvsai', 'dvsaima', 'dvsaiu', 'dvsaid'):
+#     ax2.plot(df[kind])
+ax2.plot(df['rev_pat'])
 # plt.plot(df['ave_up'])
 # plt.plot(df['ave_down'])
 # plt.plot(df['stair_pc_windowed'],color='blue')
 # plt.plot(df['top_ext'],color='green')
 # plt.plot(df['bottom_ext'],color='black')
 # draw_wzp(df)
+plt.tight_layout()
 plt.show()

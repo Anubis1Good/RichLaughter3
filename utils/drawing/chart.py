@@ -56,44 +56,34 @@ def draw_bars_chart(df):
     fig.canvas.draw()
     return fig
 
-def draw_bars_chart_wo_vol(df):
-    fig, ax_price = plt.subplots(figsize=(12, 6))
+def draw_bars_chart_wo_vol(df, ax=None):
+    if ax is None:
+        fig, ax = plt.subplots(figsize=(12, 6))
+    else:
+        fig = ax.figure
+
     longs = df[df['direction'] == 1]
     shorts = df[df['direction'] != 1]
-    
-    tick_width = 1.5
+
+    tick_width = 0.3
     longs_index = longs['x']
     short_index = shorts['x']
 
-    # Рисуем вертикальные линии (high-low)
-    ax_price.vlines(longs_index, longs['low'], longs['high'], 
-                    colors='#b7ea00', linewidth=1.5)
-    ax_price.vlines(short_index, shorts['low'], shorts['high'], 
-                    colors='#ff0013', linewidth=1.5)
-    
-    # Рисуем горизонтальные линии open
-    ax_price.hlines(longs['open'], 
-                    longs_index - tick_width,
-                    longs_index, 
-                    colors='#b7ea00', linewidth=2)
-    ax_price.hlines(shorts['open'], 
-                    short_index - tick_width,
-                    short_index, 
-                    colors='#ff0013', linewidth=2)
-    
-    # Рисуем горизонтальные линии close
-    ax_price.hlines(longs['close'], 
-                    longs_index, 
-                    longs_index + tick_width,
-                    colors='#b7ea00', linewidth=2)
-    ax_price.hlines(shorts['close'], 
-                    short_index, 
-                    short_index + tick_width,
-                    colors='#ff0013', linewidth=2)
-    
-    ax_price.grid(True, alpha=0.3)
-    ax_price.autoscale_view()
-    
-    plt.tight_layout()
-    fig.canvas.draw()
+    ax.vlines(longs_index, longs['low'], longs['high'],
+              colors='#b7ea00', linewidth=1.5)
+    ax.vlines(short_index, shorts['low'], shorts['high'],
+              colors='#ff0013', linewidth=1.5)
+
+    ax.hlines(longs['open'], longs_index - tick_width, longs_index,
+              colors='#b7ea00', linewidth=2)
+    ax.hlines(shorts['open'], short_index - tick_width, short_index,
+              colors='#ff0013', linewidth=2)
+
+    ax.hlines(longs['close'], longs_index, longs_index + tick_width,
+              colors='#b7ea00', linewidth=2)
+    ax.hlines(shorts['close'], short_index, short_index + tick_width,
+              colors='#ff0013', linewidth=2)
+
+    ax.grid(True, alpha=0.3)
+    ax.autoscale_view()
     return fig

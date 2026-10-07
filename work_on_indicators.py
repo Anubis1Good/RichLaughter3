@@ -33,22 +33,5 @@ p1 = 70
 p2 = 57
 p3 = 10
 
-df = add_sma(df, p2)
-df = df.rename(columns={'sma': 'sma2'})
-df = add_bollinger(df, p1, multiplier=0.7)
-df = add_big_volume(df, p1)
-df = add_over_bb(df)
-df = add_simple_dynamics_ma(df, p3)
 
-# candle_max = df['high'].max()
-# if candle_max > 0:
-#     df['volume'] = df['volume'] / df['volume'].max() if df['volume'].max() > 0 else 0
-#     df['close'] = df['close'] / candle_max
-#     df['open'] = df['open'] / candle_max
-#     df['low'] = df['low'] / candle_max
-#     df['high'] = df['high'] / candle_max
-#     df['middle'] = df['middle'] / candle_max
-# # df = add_percent_zz190826(df)
-# df = add_ultimate_oscillator(df, period // 3, period // 2, period)
-# print(55 // 8)
 print(df.tail(20))

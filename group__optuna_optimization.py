@@ -2,7 +2,7 @@
 from optimization.OptimizatorOptuna import OptimizatorOptuna
 from optimization.optuna_grops.main_groups import group, max_period
 # from optimization.optuna_grops.best_groups import group, max_period
-# from optimization.optuna_grops.exp_groups import group, max_period
+from optimization.optuna_grops.exp_groups import group, max_period
 # from optimization.optuna_grops.spread_groups import group, max_period
 from testing.test_constants import *
 # Time test on VEG1_VENUS
@@ -16,7 +16,7 @@ trials = 200
 # trials = 50
 save_cores = 0
 bottom_limit = 80
-top_limit = 400
+top_limit = 500
 # top_limit = 2000
 test_folder = '_data_for_tests/data_stock_5m'
 # test_folder = '_data_for_tests/data_stock_5m_spred'

@@ -1074,6 +1074,8 @@ class UEG8_AVENGER(BaseEG):
 
 # Нужна версия вариантом с использования rsi на каждом паттерне
 # 06.10.2026 ограничения оптимизации привели к тому, что сделок как-будто как-то очень мало
+# 07.10.2026 открыл лонг в хаях     'SIBN':(UEG8_SOLDIER,(None,20,18,21,40,0.57,4,0.76,24,0,92,2,2,97,75,19,79,43),2,None),
+# 07.10.2026 почему-то открывал вообще не правильные сделки. Все наоборот 'IRAO':(UEG8_SOLDIER,(None,30,18,57,48,0.95,10,0.72,30,0,73,21,69,0,90,82,73,95),3,None),
 class UEG8_SOLDIER(BaseEG):
     """stop=None, take=None, \n
     divider_buff=5, period_rsi=14, period_wzz=30, frac_wzz=0.1, n_wzp=6, threshold_p18=0.1, threshold_rsi=30, use_rsi=0, g_joc=99,g_tr=99,g_dt=99,g_wl=99,g_nd=99,g_s=99,g_sos=99,g_bti=99
@@ -1223,6 +1225,7 @@ class UEG9_BIRDWATCHER2(BaseEG):
 
 # В боковике ахуенно работает. Надо подумать над версией, которая включается, только в боковике
 # 05.10.2026 нужна версия с отдельной работой для боковика и тренда
+# 07.10.2026 нужна версия без входа в канале (без top_stop and bottom_stop)
 class UEG9_GRAVY2(BaseEG):
     '''
     stop=None, take=None, period_wzz=55, frac_wzz=0.1, n_wzp=8, buffer_mean=0.1, mult_stop=0.5, use_stop=1

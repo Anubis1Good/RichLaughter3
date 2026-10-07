@@ -479,6 +479,7 @@ class PEG16_ARTANIS(BaseEG):
 # Возможно нужна вариация с более простым выходом
 # 30.09.26 мне не нравится моменты со входами в хаях. Надо подумать над вариацией без этого. Скорее всего дело в работе по тренду. У нас там он смотри на low, а надо на close хотя бы
 # 05.10.2026 сделать версию с входом по low
+# 07.10.2026 при малом периоде велкро может творить жесть. Открыл в хаях, закрыл в лоях 'T2':(PEG17_PHOENIX,(None,None,18,23,33,2,15,0,60),1,None),
 class PEG17_PHOENIX(BaseEG):
     """stop=None, take=None, period=100, period_dc=20, period_rsi=20, period_velcro=50, threshold_velcro=30, use_stop=0, max_period=55"""
     def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_quantile=55, period_dc=20, period_rsi=20, period_velcro=50, threshold_velcro=30, use_stop=0, max_period=55):
