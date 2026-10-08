@@ -444,3 +444,49 @@ def add_cdvsai(df:pd.DataFrame,period=20,period_ma1=10,period_ma2=5):
     df['ma_cdv1'] = df['cum_dvsai'].rolling(period_ma1).mean()
     df['ma_cdv2'] = df['cum_dvsai'].rolling(period_ma2).mean()
     return df
+
+def add_reversal_patterns(df:pd.DataFrame):
+    "add 'rev_pat'"
+    df['rev_pat'] = np.where(
+        (df['direction'] == 1)&
+        (df['direction'].shift(1) == -1)&
+        (df['high'] >= df['high'].shift(1))&
+        (df['close'] >= df['open'].shift(1))&
+        (df['low'].shift(1) < df['low'].shift(2))&
+        (df['high'].shift(2) < df['high'].shift(3))&
+        (df['close'] > df['open']),
+        2,0)
+
+    df['rev_pat'] = np.where(
+        (df['direction'] == -1)&
+        (df['direction'].shift(1) == 1)&
+        (df['low'] <= df['low'].shift(1))&
+        (df['close'] <= df['open'].shift(1))&
+        (df['high'].shift(1) > df['high'].shift(2))&
+        (df['low'].shift(2) > df['low'].shift(3)),
+        -2,df['rev_pat'])
+
+    df['c_o'] = abs(df['close'] - df['open'])
+    df['l_o'] = abs(df['low'] - df['open'])
+    df['l_c'] = abs(df['low'] - df['close'])
+    df['h_o'] = abs(df['high'] - df['open'])
+    df['h_c'] = abs(df['high'] - df['close'])
+    df['rev_pat'] = np.where(
+        (df['low'] < df['low'].shift(1)) &
+        (df['low'].shift(1) < df['low'].shift(2)) &
+        (df['high'] < df['high'].shift(1)) &
+        (df['l_c'] / df['h_c'] > 2) &
+        (df['l_o'] / df['h_o'] > 2) &
+        (df['close'] >= df['open'])
+        ,
+        1,df['rev_pat'])
+    df['rev_pat'] = np.where(
+        (df['high'] > df['high'].shift(1)) &
+        (df['high'].shift(1) > df['high'].shift(2)) &
+        (df['low'] > df['low'].shift(1)) &
+        (df['h_c'] / df['l_c'] > 2) &
+        (df['h_o'] / df['l_o'] > 2) &
+        (df['close'] <= df['open'])
+        ,
+        -1,df['rev_pat'])
+    return df
