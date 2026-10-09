@@ -33,5 +33,5 @@ p1 = 70
 p2 = 57
 p3 = 10
 
-
+df = add_supertrend(df)
 print(df.tail(20))

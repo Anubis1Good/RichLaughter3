@@ -383,6 +383,53 @@ class LEG1_PHOGA(BaseEG):
             return 'open_short'
         
         return None
+    
+class LEG1_PHOGA2(BaseEG):
+    """stop=None, take=None, period=10, multiplier=3, period_mvol=10, max_period=55"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=10, multiplier=3, period_mvol=10, max_period=55):
+        super().__init__(symbol, price_step, mult_ps, mode, stop, take)
+        self.needs_info = {'chart': self.symbol}
+        self.period = fix_supertrend_params(period, multiplier, max_period)
+        self.multiplier = multiplier
+        self.period_mvol = period_mvol
+        self.type_eg = 1
+        self.problems = 'Mcfly'
+
+    def preprocessing(self, tdata):
+        pdata = {}
+        df = tdata['chart'].copy()
+
+        df = add_supertrend(df, self.period, self.multiplier)
+        df['mean_volume'] = df['volume'].rolling(self.period_mvol).mean()
+
+        # Приводим in_uptrend к bool и заполняем NaN
+        df['in_uptrend'] = df['in_uptrend'].fillna(False).astype(bool)
+
+        # Предыдущее значение тренда — ВАЖНО: fillna/astype ПОСЛЕ shift
+        prev_uptrend = df['in_uptrend'].shift(1).fillna(False).astype(bool)
+        curr_uptrend = df['in_uptrend']
+
+        vol_ok = df['volume'] > df['mean_volume']
+
+        # Сигналы: используем np.select, чтобы одно условие не затирало другое
+        conditions = [
+            curr_uptrend & ~prev_uptrend & vol_ok,   # переход вверх
+            ~curr_uptrend & prev_uptrend & vol_ok,   # переход вниз
+        ]
+        choices = [1, -1]
+
+        df['signal'] = np.select(conditions, choices, default=0)
+
+        df = self.add_slice_df(df)
+        pdata['chart'] = df
+        return pdata
+
+    def _get_action_from_row(self, row):
+        if row['signal'] == 1:
+            return 'open_long'
+        if row['signal'] == -1:
+            return 'open_short'
+
         
 class LEG1_BORSCH(BaseEG):
     """stop=None, take=None, period=20, period_mvol=20"""

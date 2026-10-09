@@ -15,7 +15,7 @@ symbol = PATH_DF.split('\\')[-1].split('_')[0]
 # ws = [UEG4_FALCON,],
 
 # ws = (SEG1_LITE,(None,108,70,0.7,0.7,57),9,None) #проверить! 0 сделок в окне!
-ws = (WEG7_PARADOX2,[])
+ws = (PEG4_WSDDCr,[])
 # ws = (UEG7_LOVERDUCK,[])
 # ws = (DebugMean,[])
 cegt = CheckEGTrader(

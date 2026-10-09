@@ -5,6 +5,7 @@ from strategies.PEGs.PEG30_39 import *
 from strategies.LEGs.LEG1 import *
 from strategies.LEGs.LEG2 import *
 from strategies.WEGs.WEG1_9 import *
+from strategies.WEGs.WEG10_19 import *
 from strategies.UEGs.UEG1_9 import *
 from strategies.SEGs.SEG_CA1_9 import *
 from strategies.SEGs.SEG_ML10_19 import *

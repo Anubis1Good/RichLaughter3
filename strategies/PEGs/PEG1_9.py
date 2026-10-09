@@ -1,8 +1,9 @@
 from strategies.BaseEG import BaseEG
 from for_strategies.classic_indicators import add_donchan_channel,add_bollinger,add_rsi_tw,add_mfi,add_stochastic,add_ultimate_oscillator,add_rsi,add_fractals
-from for_strategies.pva_indicators import add_smooth_channel,add_vodka_channel,add_mean_on_fractals
+from for_strategies.pva_indicators import add_smooth_channel,add_vodka_channel,add_mean_on_fractals,add_velcro_indicator
 from for_strategies.other_indicators import add_vangerchik
 from for_strategies.help_indicators import add_buffer_add,add_over_bb,add_big_volume
+from for_strategies.fix_params import fix_supertrend_params,fix_two_periods_hm,fix_three_periods_hm
         
 class PEG2_DDCrWork(BaseEG):
     "stop=None, take=None,period=20"
@@ -27,7 +28,7 @@ class PEG2_DDCrWork(BaseEG):
             return 'open_long'
         if row['high'] >= row['max_hb'] and not nearest_long:
             return 'open_short'
-        return None
+
     
 class PEG2_SDDCr(BaseEG):
     """stop=None, take=None, period=55, period2=55, max_period=55"""
@@ -62,7 +63,49 @@ class PEG2_SDDCr(BaseEG):
             return 'open_long'
         if row['high'] >= row['max_hb']:
             return 'open_short'
-        return None
+        
+class PEG4_WSDDCr(BaseEG):
+    """stop=None, take=None, period=55, period2=55, max_period=55"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_dc=20, period_sc=20, period_rsi=30,thresh_rsi_enter=30, thresh_rsi_exit=40, threshold_velcro=20, max_period=70):
+        super().__init__(symbol, price_step, mult_ps, mode, stop, take)
+        self.needs_info = {'chart': self.symbol}
+        self.period_dc, self.period_sc = fix_two_periods_hm(period_dc,period_sc,max_period)
+        self.period_rsi = period_rsi
+        self.thresh_rsi_enter = thresh_rsi_enter
+        self.thresh_rsi_exit = thresh_rsi_exit
+        self.threshold_velcro = threshold_velcro
+
+
+    def preprocessing(self, tdata):
+        pdata = {}
+        df = tdata['chart']
+        df = add_rsi(df,self.period_rsi)
+        df = add_donchan_channel(df, self.period_dc)
+        df = add_smooth_channel(df, self.period_sc)
+        df = add_velcro_indicator(df, self.period_sc)
+        df = self.add_slice_df(df)
+        pdata['chart'] = df
+        return pdata
+    
+    def _get_action_from_row(self, row):
+        nearest_long = row['high'] - row['close'] > row['close'] - row['low']
+        if self.threshold_velcro < row['velcro'] < 100 - self.threshold_velcro:
+            
+            if row['low'] <= row['min_hb'] and nearest_long:
+                if row['rsi'] <= self.thresh_rsi_enter:
+                    return 'open_long'
+
+            if row['high'] >= row['max_hb'] and not nearest_long:
+                if row['rsi'] >= 100 - self.thresh_rsi_enter:
+                    return 'open_short'
+                
+        if row['high'] >= row['max_hb'] and not nearest_long:
+            if row['rsi'] >= 100 - self.thresh_rsi_exit:
+                return 'close_long'
+        if row['low'] <= row['min_hb'] and nearest_long:
+            if row['rsi'] <= self.thresh_rsi_exit:
+                return 'close_short'
+
     
 class PEG4_UNIVERSAL(BaseEG):
     '''
