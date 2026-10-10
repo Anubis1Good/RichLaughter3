@@ -1,6 +1,7 @@
 from strategies.BaseEG import BaseEG
 from for_strategies.classic_indicators import add_donchan_channel,add_bollinger,add_rsi_tw,add_mfi,add_stochastic,add_ultimate_oscillator,add_rsi,add_fractals
-from for_strategies.pva_indicators import add_smooth_channel,add_vodka_channel,add_mean_on_fractals,add_velcro_indicator
+from for_strategies.pva_indicators import add_smooth_channel,add_vodka_channel,add_mean_on_fractals,add_velcro_indicator,add_quantile_params
+from for_strategies.pva2_indicators import add_perdirlong,add_real_perdirlong
 from for_strategies.other_indicators import add_vangerchik
 from for_strategies.help_indicators import add_buffer_add,add_over_bb,add_big_volume
 from for_strategies.fix_params import fix_supertrend_params,fix_two_periods_hm,fix_three_periods_hm
@@ -63,50 +64,7 @@ class PEG2_SDDCr(BaseEG):
             return 'open_long'
         if row['high'] >= row['max_hb']:
             return 'open_short'
-        
-class PEG4_WSDDCr(BaseEG):
-    """stop=None, take=None, period=55, period2=55, max_period=55"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_dc=20, period_sc=20, period_rsi=30,thresh_rsi_enter=30, thresh_rsi_exit=40, threshold_velcro=20, max_period=70):
-        super().__init__(symbol, price_step, mult_ps, mode, stop, take)
-        self.needs_info = {'chart': self.symbol}
-        self.period_dc, self.period_sc = fix_two_periods_hm(period_dc,period_sc,max_period)
-        self.period_rsi = period_rsi
-        self.thresh_rsi_enter = thresh_rsi_enter
-        self.thresh_rsi_exit = thresh_rsi_exit
-        self.threshold_velcro = threshold_velcro
-
-
-    def preprocessing(self, tdata):
-        pdata = {}
-        df = tdata['chart']
-        df = add_rsi(df,self.period_rsi)
-        df = add_donchan_channel(df, self.period_dc)
-        df = add_smooth_channel(df, self.period_sc)
-        df = add_velcro_indicator(df, self.period_sc)
-        df = self.add_slice_df(df)
-        pdata['chart'] = df
-        return pdata
-    
-    def _get_action_from_row(self, row):
-        nearest_long = row['high'] - row['close'] > row['close'] - row['low']
-        if self.threshold_velcro < row['velcro'] < 100 - self.threshold_velcro:
-            
-            if row['low'] <= row['min_hb'] and nearest_long:
-                if row['rsi'] <= self.thresh_rsi_enter:
-                    return 'open_long'
-
-            if row['high'] >= row['max_hb'] and not nearest_long:
-                if row['rsi'] >= 100 - self.thresh_rsi_enter:
-                    return 'open_short'
-                
-        if row['high'] >= row['max_hb'] and not nearest_long:
-            if row['rsi'] >= 100 - self.thresh_rsi_exit:
-                return 'close_long'
-        if row['low'] <= row['min_hb'] and nearest_long:
-            if row['rsi'] <= self.thresh_rsi_exit:
-                return 'close_short'
-
-    
+           
 class PEG4_UNIVERSAL(BaseEG):
     '''
     stop=None, take=None, period=20, period_rsi=20, threshold_long=30, threshold_short=30, kind_channel='DC', kind_rsi='rsi',period2s = 3 \n
@@ -271,6 +229,305 @@ class PEG4_U3(BaseEG):
         if row['high'] >= row[self.up] and row['overbought']:
             return 'open_short'
         return None
+    
+class PEG4_U4(BaseEG):
+    '''
+    stop=None, take=None, period_channel=20, period_rsi=20, period_q=10, max_period=70, kind_channel='DC', kind_rsi='rsi',period2s = 3, quantile=0.01 \n
+    kind_channel in ["DC","VG","BB","VC","WC","SC"]
+    kind_rsi in ["rsi","mfi","s","uo","velcro","pedal","wpedal","diff_pedals","real_pedal", "real_wpedal", "real_diff_pedals"]
+    '''
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_channel=20, period_rsi=20, period_q=10, max_period=70, kind_channel='VG', kind_rsi='pedal',period2s = 3, quantile=0.2):
+        super().__init__(symbol, price_step, mult_ps, mode, stop, take)
+        self.needs_info = {'chart': self.symbol}
+        self.period_rsi,self.period_q = fix_two_periods_hm(period_rsi,period_q,period_rsi)
+        self.quantile = quantile
+        self.period2s = period2s
+        self.kind_channel = kind_channel
+        self.kind_rsi = kind_rsi
+        if kind_channel == "SC":
+            self.period_channel,self.period_smooth = fix_two_periods_hm(period_channel,period_channel,max_period)
+        else:
+            self.period_channel = period_channel
+            self.period_smooth = None
+        if kind_rsi == "velcro":
+            self.period_channel,self.period_rsi = fix_two_periods_hm(self.period_channel,self.period_rsi,max_period)
+        self.up = 'max_hb'
+        self.down = 'min_hb'
+
+
+    def add_channel(self, df):
+        if self.kind_channel == 'VG':
+            df = add_donchan_channel(df, self.period_channel)
+            df = add_vangerchik(df)
+            df = df.drop([self.up,self.down],axis=1)
+            df = df.rename({'max_vg': self.up, 'min_vg': self.down}, axis=1)
+        elif self.kind_channel == 'BB':
+            df = add_bollinger(df, self.period_channel)
+            df = df.rename({'bbu': self.up, 'bbd': self.down}, axis=1)
+        elif self.kind_channel == 'VC':
+            df = add_vodka_channel(df, self.period_channel)
+            df = df.rename({'top_mean': self.up, 'bottom_mean': self.down}, axis=1)
+        elif self.kind_channel == 'WC':
+            df = add_vodka_channel(df, self.period_channel)
+            df = add_buffer_add(df, 'top_mean', 'bottom_mean', 2)
+            df = df.rename({'top_buff': self.up, 'bottom_buff': self.down}, axis=1)
+        else:
+            df = add_donchan_channel(df, self.period_channel)
+            if self.kind_channel == 'SC':
+                df = add_smooth_channel(df, self.period_smooth)
+        return df
+    
+    def add_rsi(self, df):
+        if self.kind_rsi == 'velcro':
+            df = add_velcro_indicator(df,self.period_rsi)
+            df = df.rename({'velcro': 'rsi'}, axis=1)
+        elif self.kind_rsi == 'pedal':
+            df = add_perdirlong(df,self.period_rsi,use_v=False)
+            df = df.rename({'pedal': 'rsi'}, axis=1)
+        elif self.kind_rsi == 'wpedal':
+            df = add_perdirlong(df,self.period_rsi,use_s=False)
+            df = df.rename({'wpedal': 'rsi'}, axis=1)
+        elif self.kind_rsi == 'diff_pedals':
+            df = add_perdirlong(df,self.period_rsi)
+            df = df.rename({'diff_pedals': 'rsi'}, axis=1)
+        elif self.kind_rsi == 'real_pedal':
+            df = add_real_perdirlong(df,self.period_rsi,use_v=False)
+            df = df.rename({'real_pedal': 'rsi'}, axis=1)
+        elif self.kind_rsi == 'real_wpedal':
+            df = add_real_perdirlong(df,self.period_rsi,use_s=False)
+            df = df.rename({'real_wpedal': 'rsi'}, axis=1)
+        elif self.kind_rsi == 'real_diff_pedals':
+            df = add_real_perdirlong(df,self.period_rsi)
+            df = df.rename({'real_diff_pedals': 'rsi'}, axis=1)
+        elif self.kind_rsi == 'mfi':
+            df = add_mfi(df, self.period_rsi)
+            df = df.rename({'mfi': 'rsi'}, axis=1)
+        elif self.kind_rsi == 's':
+            df = add_stochastic(df, self.period_rsi, self.period2s)
+            df = df.rename({'%d': 'rsi'}, axis=1)
+        elif self.kind_rsi == 'uo':
+            df = add_ultimate_oscillator(df, self.period_rsi // 3, self.period_rsi // 2, self.period_rsi)
+            df = df.rename({'ultimate_oscillator': 'rsi'}, axis=1)
+        else:
+            df = add_rsi(df, self.period_rsi)
+        return df
+    
+    def preprocessing(self, tdata):
+        pdata = {}
+        df = tdata['chart']
+        df = self.add_channel(df)
+        df = self.add_rsi(df)
+        df = add_quantile_params(df,self.period_q,'rsi',self.quantile)
+        df['oversold'] = df['rsi'] < df['bottom_q']
+        df['overbought'] = df['rsi'] > df['top_q']
+        df = self.add_slice_df(df)
+        pdata['chart'] = df
+        return pdata
+    
+    def _get_action_from_row(self, row):
+        if row['low'] <= row[self.down] and row['oversold']:
+            return 'open_long'
+        if row['high'] >= row[self.up] and row['overbought']:
+            return 'open_short'
+
+    
+class PEG4_U5(BaseEG):
+    '''
+    stop=None, take=None, period=20, period_rsi=20, period_fractal=10, period_max=55, kind_channel='DC', kind_rsi='rsi',period2s = 3 \n
+    kind_channel in ["DC","VG","BB","VC","WC","SC"]
+    kind_rsi in ["rsi","mfi","s","uo","velcro","pedal","wpedal","real_pedal", "real_wpedal"]
+    '''
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_channel=20, period_rsi=20, max_period=70, kind_channel='DC', kind_rsi='real_wpedal',period2s = 3, thresh_enter=30,thresh_exit=40):
+        super().__init__(symbol, price_step, mult_ps, mode, stop, take)
+        self.needs_info = {'chart': self.symbol}
+        self.period_rsi = period_rsi
+        self.period2s = period2s
+        self.kind_channel = kind_channel
+        self.kind_rsi = kind_rsi
+        if kind_channel == "SC":
+            self.period_channel,self.period_smooth = fix_two_periods_hm(period_channel,period_channel,max_period)
+        else:
+            self.period_channel = period_channel
+            self.period_smooth = None
+        if kind_rsi == "velcro":
+            self.period_channel,self.period_rsi = fix_two_periods_hm(self.period_channel,self.period_rsi,max_period)
+        self.up = 'max_hb'
+        self.down = 'min_hb'
+        self.thresh_enter = thresh_enter
+        self.thresh_exit = thresh_exit
+
+
+    def add_channel(self, df):
+        if self.kind_channel == 'VG':
+            df = add_donchan_channel(df, self.period_channel)
+            df = add_vangerchik(df)
+            df = df.drop([self.up,self.down],axis=1)
+            df = df.rename({'max_vg': self.up, 'min_vg': self.down}, axis=1)
+        elif self.kind_channel == 'BB':
+            df = add_bollinger(df, self.period_channel)
+            df = df.rename({'bbu': self.up, 'bbd': self.down}, axis=1)
+        elif self.kind_channel == 'VC':
+            df = add_vodka_channel(df, self.period_channel)
+            df = df.rename({'top_mean': self.up, 'bottom_mean': self.down}, axis=1)
+        elif self.kind_channel == 'WC':
+            df = add_vodka_channel(df, self.period_channel)
+            df = add_buffer_add(df, 'top_mean', 'bottom_mean', 2)
+            df = df.rename({'top_buff': self.up, 'bottom_buff': self.down}, axis=1)
+        else:
+            df = add_donchan_channel(df, self.period_channel)
+            if self.kind_channel == 'SC':
+                df = add_smooth_channel(df, self.period_smooth)
+        return df
+    
+    def add_rsi(self, df):
+        if self.kind_rsi == 'velcro':
+            df = add_velcro_indicator(df,self.period_rsi)
+            df = df.rename({'velcro': 'rsi'}, axis=1)
+        elif self.kind_rsi == 'pedal':
+            df = add_perdirlong(df,self.period_rsi,use_v=False)
+            df = df.rename({'pedal': 'rsi'}, axis=1)
+        elif self.kind_rsi == 'wpedal':
+            df = add_perdirlong(df,self.period_rsi,use_s=False)
+            df = df.rename({'wpedal': 'rsi'}, axis=1)
+        elif self.kind_rsi == 'real_pedal':
+            df = add_real_perdirlong(df,self.period_rsi,use_v=False)
+            df = df.rename({'real_pedal': 'rsi'}, axis=1)
+        elif self.kind_rsi == 'real_wpedal':
+            df = add_real_perdirlong(df,self.period_rsi,use_s=False)
+            df = df.rename({'real_wpedal': 'rsi'}, axis=1)
+        elif self.kind_rsi == 'mfi':
+            df = add_mfi(df, self.period_rsi)
+            df = df.rename({'mfi': 'rsi'}, axis=1)
+        elif self.kind_rsi == 's':
+            df = add_stochastic(df, self.period_rsi, self.period2s)
+            df = df.rename({'%d': 'rsi'}, axis=1)
+        elif self.kind_rsi == 'uo':
+            df = add_ultimate_oscillator(df, self.period_rsi // 3, self.period_rsi // 2, self.period_rsi)
+            df = df.rename({'ultimate_oscillator': 'rsi'}, axis=1)
+        else:
+            df = add_rsi(df, self.period_rsi)
+        return df
+    
+    def preprocessing(self, tdata):
+        pdata = {}
+        df = tdata['chart']
+        df = self.add_channel(df)
+        df = self.add_rsi(df)
+        df['nl'] = df['high'] - df['close'] > df['close'] - df['low']
+        df = self.add_slice_df(df)
+        pdata['chart'] = df
+        return pdata
+    
+    def _get_action_from_row(self, row):
+        if row['low'] <= row[self.down] and row['nl']:
+            if row['rsi'] <= self.thresh_enter:
+                return 'open_long'
+            if row['rsi'] <= self.thresh_exit:
+                return 'close_short'
+        if row['high'] >= row[self.up] and not row['nl']:
+            if row['rsi'] >= 100 - self.thresh_enter:
+                return 'open_short'
+            if row['rsi'] >= 100 - self.thresh_exit:
+                return 'close_long'
+            
+class PEG4_U6(BaseEG):
+    '''
+    stop=None, take=None, period_channel=20, period_rsi=20, max_period=70, kind_channel='DC', kind_rsi='wpedal',period2s = 3, thresh_enter=30,thresh_exit=40,threshold_velcro=20 \n
+    kind_channel in ["DC","VG","BB","VC","WC","SC"]
+    kind_rsi in ["rsi","mfi","s","uo","pedal","wpedal","real_pedal", "real_wpedal"]
+    '''
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_channel=20, period_rsi=20, max_period=70, kind_channel='DC', kind_rsi='real_wpedal',period2s = 3, thresh_enter=30,thresh_exit=40,threshold_velcro=20):
+        super().__init__(symbol, price_step, mult_ps, mode, stop, take)
+        self.needs_info = {'chart': self.symbol}
+        self.period_rsi = period_rsi
+        self.period2s = period2s
+        self.kind_channel = kind_channel
+        self.kind_rsi = kind_rsi
+        self.period_channel,self.period_smooth = fix_two_periods_hm(period_channel,period_channel,max_period)
+        self.up = 'max_hb'
+        self.down = 'min_hb'
+        self.thresh_enter = thresh_enter
+        self.thresh_exit = thresh_exit
+        self.threshold_velcro = threshold_velcro
+
+
+    def add_channel(self, df):
+        if self.kind_channel == 'VG':
+            df = add_donchan_channel(df, self.period_channel)
+            df = add_vangerchik(df)
+            df = df.drop([self.up,self.down],axis=1)
+            df = df.rename({'max_vg': self.up, 'min_vg': self.down}, axis=1)
+        elif self.kind_channel == 'BB':
+            df = add_bollinger(df, self.period_channel)
+            df = df.rename({'bbu': self.up, 'bbd': self.down}, axis=1)
+        elif self.kind_channel == 'VC':
+            df = add_vodka_channel(df, self.period_channel)
+            df = df.rename({'top_mean': self.up, 'bottom_mean': self.down}, axis=1)
+        elif self.kind_channel == 'WC':
+            df = add_vodka_channel(df, self.period_channel)
+            df = add_buffer_add(df, 'top_mean', 'bottom_mean', 2)
+            df = df.rename({'top_buff': self.up, 'bottom_buff': self.down}, axis=1)
+        else:
+            df = add_donchan_channel(df, self.period_channel)
+            if self.kind_channel == 'SC':
+                df = add_smooth_channel(df, self.period_smooth)
+        return df
+    
+    def add_rsi(self, df):
+        if self.kind_rsi == 'velcro':
+            df = add_velcro_indicator(df,self.period_rsi)
+            df = df.rename({'velcro': 'rsi'}, axis=1)
+        elif self.kind_rsi == 'pedal':
+            df = add_perdirlong(df,self.period_rsi,use_v=False)
+            df = df.rename({'pedal': 'rsi'}, axis=1)
+        elif self.kind_rsi == 'wpedal':
+            df = add_perdirlong(df,self.period_rsi,use_s=False)
+            df = df.rename({'wpedal': 'rsi'}, axis=1)
+        elif self.kind_rsi == 'real_pedal':
+            df = add_real_perdirlong(df,self.period_rsi,use_v=False)
+            df = df.rename({'real_pedal': 'rsi'}, axis=1)
+        elif self.kind_rsi == 'real_wpedal':
+            df = add_real_perdirlong(df,self.period_rsi,use_s=False)
+            df = df.rename({'real_wpedal': 'rsi'}, axis=1)
+        elif self.kind_rsi == 'mfi':
+            df = add_mfi(df, self.period_rsi)
+            df = df.rename({'mfi': 'rsi'}, axis=1)
+        elif self.kind_rsi == 's':
+            df = add_stochastic(df, self.period_rsi, self.period2s)
+            df = df.rename({'%d': 'rsi'}, axis=1)
+        elif self.kind_rsi == 'uo':
+            df = add_ultimate_oscillator(df, self.period_rsi // 3, self.period_rsi // 2, self.period_rsi)
+            df = df.rename({'ultimate_oscillator': 'rsi'}, axis=1)
+        else:
+            df = add_rsi(df, self.period_rsi)
+        return df
+    
+    def preprocessing(self, tdata):
+        pdata = {}
+        df = tdata['chart']
+        df = self.add_channel(df)
+        df = self.add_rsi(df)
+        df = add_velcro_indicator(df, self.period_smooth)
+        df['nl'] = df['high'] - df['close'] > df['close'] - df['low']
+        df = self.add_slice_df(df)
+        pdata['chart'] = df
+        return pdata
+    
+    def _get_action_from_row(self, row):
+        if self.threshold_velcro < row['velcro'] < 100 - self.threshold_velcro:
+            if row['low'] <= row[self.down] and row['nl']:
+                if row['rsi'] <= self.thresh_enter:
+                    return 'open_long'
+            if row['high'] >= row[self.up] and not row['nl']:
+                if row['rsi'] >= 100 - self.thresh_enter:
+                    return 'open_short'
+        if row['high'] >= row[self.up] and not row['nl']:
+            if row['rsi'] >= 100 - self.thresh_exit:
+                return 'close_long'
+        if row['low'] <= row[self.down] and row['nl']:
+            if row['rsi'] <= self.thresh_exit:
+                return 'close_short'
+
 
 class PEG8_DOBBY(BaseEG):
     """stop=None, take=None, period=20, multiplier=2"""
