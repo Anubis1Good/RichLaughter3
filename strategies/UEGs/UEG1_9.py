@@ -2,6 +2,7 @@ from strategies.BaseEG import BaseEG
 from for_strategies.classic_indicators import add_fractals,add_rsi,add_adx,add_bollinger
 from for_strategies.pva_indicators import add_average_fractals,add_plus_delta_fc,add_exp_pdfc,add_ext_on_fractals,add_mean_on_fractals,add_average_fractals_window,add_exp_pdfc_window,add_plus_delta_fc_window
 from for_strategies.zigzag_indicators import add_percent_zz190826,add_dzz_peaks,add_analys_dzz,add_percent_zz_peaks,add_pattern18_dzz_czd,add_stop_loss_p18czd,add_exp_plusdelta_dzz_peaks,add_mean_dzz_peaks,add_plusdelta_dzz_peaks,add_zigzag180826,add_shift_zz_peaks,add_analys_dzz180826, add_zigzag_window_210926,add_pattern18_zzw_210926,add_zigzag_window_260926,add_mean_peaks_wzz260926, add_plusdelta_peaks_wzz260926,add_exp_plusdelta_peaks_wzz260926,add_mean_ind_wzz_peaks,add_extreme_ind_wzz_peaks,add_pattern18_zzw_260926,add_drop_last_wzp
+from for_strategies.help_indicators import add_buffer_add
 
 class UEG4_CANADIAN(BaseEG):
     """stop=None, take=None, period_window=55,period_fractal_free=5, n_fractals=3, allowance=0.1"""
@@ -400,8 +401,60 @@ class UEG6_ADVENTURE(BaseEG):
                     return 'close_short'
                 if self.use_stop:
                     return 'close_long'
+                
+class UEG6_SURVIVALIST(BaseEG):
+    """stop=None, take=None, period_bb=55, period_smas=2, mult_bb=1, use_stop=0,div_buff=2,period_rsi=30,thresh_rsi=30,use_rsi=0
+    \n
+    UEG6_ADVENTURE с буфером и rsi
+    """
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_bb=55, period_smas=2, mult_bb=1, use_stop=0,div_buff=2,period_rsi=30,thresh_rsi=30,use_rsi=0):
+        super().__init__(symbol, price_step, mult_ps, mode, stop, take)
+        self.needs_info = {'chart': self.symbol}
+        self.period_bb = period_bb
+        self.period_smas = period_smas
+        self.mult_bb = mult_bb
+        self.use_stop = use_stop
+        self.div_buff = div_buff
+        self.period_rsi = period_rsi
+        self.thresh_rsi = thresh_rsi
+        self.use_rsi = use_rsi
+
+    def preprocessing(self, tdata):
+        pdata = {}
+        df = tdata['chart']
+        df = add_bollinger(df, self.period_bb, multiplier=self.mult_bb)
+        df['high_sma'] = df['high'].rolling(self.period_smas).mean()
+        df['low_sma'] = df['low'].rolling(self.period_smas).mean()
+        df = add_buffer_add(df, 'high_sma', 'low_sma', self.div_buff)
+        df = add_rsi(df,self.period_rsi)
+        df['can_long'] = df['rsi'] < self.thresh_rsi if self.use_rsi else True        
+        df['can_short'] = df['rsi'] > 100 - self.thresh_rsi if self.use_rsi else True        
+        df = self.add_slice_df(df)
+        pdata['chart'] = df
+        return pdata
+    
+    def _get_action_from_row(self, row):
+        if row['high'] < row['bbu'] and row['low'] > row['bbd']:
+            if row['close'] >= row['top_buff'] and row['can_short']:
+                return 'open_short'
+            if row['close'] <= row['bottom_buff'] and row['can_long']:
+                return 'open_long'
+        else:
+            if row['low'] > row['bbu']:  # long
+                if row['close'] <= row['bottom_buff'] and row['can_long']:
+                    return 'open_long'
+                if row['close'] >= row['top_buff']:
+                    return 'close_long'
+                if self.use_stop:
+                    return 'close_short'
+            if row['high'] < row['bbd']:  # short
+                if row['close'] >= row['top_buff'] and row['can_short']:
+                    return 'open_short'
+                if row['close'] <= row['bottom_buff']:
+                    return 'close_short'
+                if self.use_stop:
+                    return 'close_long'
         
-        return None
 
 # 02.10.2026 подумать над вариантом адаптивного периода. Что бы при низкой волатильности период уменьшался, при высокой увеличивался.
 # 02.10.2026 при настройках на большое количество сделок, знатно пиздит.
@@ -1262,5 +1315,42 @@ class UEG9_GRAVY2(BaseEG):
                 return 'close_short'
             if row['close'] < row['bottom_stop']:
                 return 'close_long'
+            
+class UEG9_POLITICIAN(BaseEG):
+    '''
+    stop=None, take=None, period_wzz=55, frac_wzz=0.1, n_wzp=8, buffer_mean=0.1,use_rsi=0,period_rsi=30,thresh_rsi=30
+    '''
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_wzz=55, frac_wzz=0.1, n_wzp=8, buffer_mean=0.1,use_rsi=0,period_rsi=30,thresh_rsi=30):
+        super().__init__(symbol, price_step, mult_ps, mode, stop, take)
+        self.needs_info = {'chart': self.symbol}
+        self.period_wzz = period_wzz
+        self.frac_wzz = frac_wzz
+        self.n_wzp = n_wzp
+        self.buffer_mean = buffer_mean
+        self.use_rsi = use_rsi
+        self.period_rsi = period_rsi
+        self.thresh_rsi = thresh_rsi
+
+    def preprocessing(self, tdata):
+        pdata = {}
+        df = tdata['chart']
+        df = add_zigzag_window_260926(df,self.period_wzz,self.frac_wzz,self.n_wzp)
+        df = add_mean_peaks_wzz260926(df,self.buffer_mean)
+        if self.use_rsi:
+            df = add_rsi(df,self.period_rsi)
+            df['can_long'] = df['rsi'] <= self.thresh_rsi
+            df['can_short'] = df['rsi'] >= 100 - self.thresh_rsi
+        else:
+            df['can_long'] = True
+            df['can_short'] = True
+        df = self.add_slice_df(df)
+        pdata['chart'] = df
+        return pdata
+    
+    def _get_action_from_row(self, row):
+        if row['close'] >= row['top_mean'] and row['can_short']:
+            return 'open_short'
+        if row['close'] <= row['bottom_mean'] and row['can_long']:
+            return 'open_long'
+
         
-        return None

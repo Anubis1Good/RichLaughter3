@@ -57,6 +57,97 @@ group = (
         ]
     ),
         (
+        PEG11_RAYMIYAMOTO,
+        [
+            (5,max_period,1),
+            (5,max_period,1),
+            (0.5,5,0.1),
+            (0.5,5,0.1),
+            (5,max_period,1),
+            (5,max_period,1),
+            ("rsi","mfi","s","uo","velcro","pedal","wpedal","real_pedal", "real_wpedal"),
+            ("rsi","mfi","s","uo","velcro","pedal","wpedal","real_pedal", "real_wpedal"),
+            (2,period2s_max,1),
+            (max_period,),
+            (5,max_period,1),
+            (10,90,1),
+            (1,50,1),
+            (1,50,1),
+            (1,50,1),
+            (1,50,1),
+            (0,1),
+            (0,20,1),
+        ]
+    ),
+    (
+        PEG11_SAYATAKAGI,
+        [
+            (5,max_period,1),
+            (5,max_period,1),
+            (0.5,5,0.1),
+            (0.5,5,0.1),
+            (5,max_period,1),
+            (5,max_period,1),
+            ("rsi","mfi","s","uo","velcro","pedal","wpedal","real_pedal", "real_wpedal"),
+            ("rsi","mfi","s","uo","velcro","pedal","wpedal","real_pedal", "real_wpedal"),
+            (2,period2s_max,1),
+            (max_period,),
+            (5,max_period,1),
+            (10,90,1),
+            (1,50,1),
+            (1,50,1),
+            (1,50,1),
+            (0,1),
+            (0,20,1),
+        ]
+    ),
+    (
+        PEG11_ALICEMARASATO,
+        [
+            (5,max_period,1),
+            (5,max_period,1),
+            (0.5,5,0.1),
+            (0.5,5,0.1),
+            (5,max_period,1),
+            (5,max_period,1),
+            ("rsi","mfi","s","uo","velcro","pedal","wpedal","real_pedal", "real_wpedal"),
+            ("rsi","mfi","s","uo","velcro","pedal","wpedal","real_pedal", "real_wpedal"),
+            (2,period2s_max,1),
+            (max_period,),
+            (5,max_period,1),
+            (10,90,1),
+            (1,50,1),
+            (1,50,1),
+            (1,50,1),
+            (0,1),
+            (0,20,1),
+            (0,1),
+        ]
+    ),
+    (
+        PEG11_SHIZUKAMARIKAWA,
+        [
+            (5,max_period,1),
+            (5,max_period,1),
+            (0.5,5,0.1),
+            (0.5,5,0.1),
+            (5,max_period,1),
+            (5,max_period,1),
+            ("rsi","mfi","s","uo","velcro","pedal","wpedal","real_pedal", "real_wpedal"),
+            ("rsi","mfi","s","uo","velcro","pedal","wpedal","real_pedal", "real_wpedal"),
+            (2,period2s_max,1),
+            (max_period,),
+            (5,max_period,1),
+            (10,90,1),
+            (1,50,1),
+            (1,50,1),
+            (1,50,1),
+            (0,1),
+            (0,20,1),
+            (0,1),
+        ]
+    ),
+        (
         PEG13_DWDDCr, 
         [
             (2, max_period, 1),
@@ -65,10 +156,35 @@ group = (
         ]
     ),
     (
+        PEG13_DUNE, 
+        [
+            (2, max_period, 1),
+            (2, max_period, 1),
+            (2, max_period, 1),
+            (2, max_period, 1),
+            (0.01,0.4,0.01),
+            (max_period,),
+            (2, max_period, 1),
+            (0,0.3,0.01),
+        ]
+    ),
+    (
         PEG14_RWDDCr, 
         [
             (2, max_period, 1),
             (5, 45, 1),
+            (2, max_period, 1),
+            (2, max_period, 1),
+            (max_period,),
+        ]
+    ),
+    (
+        PEG14_REGAL, 
+        [
+            (2, max_period, 1),
+            (2, max_period, 1),
+            (5, 50, 1),
+            (2, max_period, 1),
             (2, max_period, 1),
             (2, max_period, 1),
             (max_period,),
@@ -447,7 +563,19 @@ group = (
             (0,1)
         ]
     ),
-
+    (
+        UEG6_SURVIVALIST, 
+        [
+            (2, max_period, 1),
+            (2, max_period, 1),
+            (0.1,3,0.1),
+            (0,1),
+            (0.1,10,0.1),
+            (2, max_period, 1),
+            (5,50,1),
+            (0,1),
+        ]
+    ),
     (
         UEG6_PIGEON, 
         [
@@ -589,6 +717,19 @@ group = (
             (0,0.5,0.01),
             (0.1,2,0.05),
             (0,1),
+        ]
+    ),
+    
+    (
+        UEG9_POLITICIAN, 
+        [
+            (20,max_period,1),
+            (0,1,0.01),
+            (4,12,2),
+            (0,0.5,0.01),
+            (0,1),
+            (5,max_period,1),
+            (5,50,1),
         ]
     ),
     (

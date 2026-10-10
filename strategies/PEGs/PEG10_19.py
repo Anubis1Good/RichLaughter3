@@ -1,7 +1,8 @@
 import numpy as np
 from strategies.BaseEG import BaseEG
-from for_strategies.classic_indicators import add_rsi,add_chop,add_awesome_oscillator,add_donchan_channel,add_adx,add_supertrend
-from for_strategies.pva_indicators import add_kusuruken_channel,add_velcro_indicator,add_quantile_params,add_benefit,get_all_enter_exit_DC,get_all_lup,add_pc_stair_fast,add_integrity_index,add_assessment_motion_index,add_hope_channel,add_cascade_channel
+from for_strategies.classic_indicators import add_rsi,add_chop,add_awesome_oscillator,add_donchan_channel,add_adx,add_supertrend,add_mfi,add_stochastic,add_ultimate_oscillator
+from for_strategies.pva_indicators import add_kusuruken_channel,add_velcro_indicator,add_quantile_params,add_benefit,get_all_enter_exit_DC,get_all_lup,add_pc_stair_fast,add_integrity_index,add_assessment_motion_index,add_hope_channel,add_cascade_channel,add_kusuruken_bb
+from for_strategies.pva2_indicators import add_perdirlong,add_real_perdirlong
 from for_strategies.other_indicators import add_vangerchik
 from for_strategies.fix_params import fix_supertrend_params,fix_two_periods_hm,fix_three_periods_hm
 
@@ -69,8 +70,483 @@ class PEG11_KUSURUKEN(BaseEG):
                 return 'open_long'
             if row['high'] >= row['max_hb'] and not nearest_long and row['rsi'] > 100 - self.threshold:
                 return 'open_short'
-        
-        return None
+            
+class PEG11_RAYMIYAMOTO(BaseEG):
+    """stop=None, take=None, period_bkb=55, period_skb=10, mult_bkb=3,mult_skb=1.5, period_rsi_big=10, period_rsi_small=20, kind_rsi_big='rsi',kind_rsi_small='rsi',period2s=3,max_period=70,period_chop=50,thresh_chop=60,thresh_rs_enter=30,thresh_rs_exit=40,thresh_rb_enter=30,thresh_rb_exit=40,use_safe=1,offset_chop=10
+    \n
+    kind_rsi in ["rsi","mfi","s","uo","velcro","pedal","wpedal","real_pedal", "real_wpedal"]
+    """
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_bkb=55, period_skb=10, mult_bkb=3,mult_skb=1.5, period_rsi_big=10, period_rsi_small=20, kind_rsi_big='rsi',kind_rsi_small='rsi',period2s=3,max_period=70,period_chop=50,thresh_chop=60,thresh_rs_enter=30,thresh_rs_exit=40,thresh_rb_enter=30,thresh_rb_exit=40,use_safe=1,offset_chop=10):
+        super().__init__(symbol, price_step, mult_ps, mode, stop, take)
+        self.needs_info = {'chart': self.symbol}
+        self.period_bkb = period_bkb
+        self.period_skb = period_skb
+        self.mult_bkb = mult_bkb
+        self.mult_skb = mult_skb
+        self.period_rsi_big = period_rsi_big
+        self.period_rsi_small = period_rsi_small
+        self.period_chop = period_chop
+        if kind_rsi_big == 'velcro' and self.period_rsi_big*2 > max_period:
+            self.period_rsi_big = max_period // 2
+        if kind_rsi_small == 'velcro' and self.period_rsi_small*2 > max_period:
+            self.period_rsi_small = max_period // 2
+
+        self.kind_rsi_big = kind_rsi_big
+        self.kind_rsi_small = kind_rsi_small
+        self.period2s = period2s
+        self.thresh_chop = thresh_chop
+        self.thresh_rs_enter = thresh_rs_enter
+        self.thresh_rs_exit = thresh_rs_exit
+        self.thresh_rb_enter = thresh_rb_enter
+        self.thresh_rb_exit = thresh_rb_exit
+        self.use_safe = use_safe
+        self.offset_chop = offset_chop
+
+    def add_rsi(self, df, kind_rsi, period_rsi, rename):
+        if kind_rsi == 'velcro':
+            df['max_hb'] = df['high'].rolling(period_rsi).max()
+            df['min_hb'] = df['low'].rolling(period_rsi).min()
+            df = add_velcro_indicator(df,period_rsi)
+            df = df.rename({'velcro': rename}, axis=1)
+        elif kind_rsi == 'pedal':
+            df = add_perdirlong(df,period_rsi,use_v=False)
+            df = df.rename({'pedal': rename}, axis=1)
+        elif kind_rsi == 'wpedal':
+            df = add_perdirlong(df,period_rsi,use_s=False)
+            df = df.rename({'wpedal': rename}, axis=1)
+        elif kind_rsi == 'real_pedal':
+            df = add_real_perdirlong(df,period_rsi,use_v=False)
+            df = df.rename({'real_pedal': rename}, axis=1)
+        elif kind_rsi == 'real_wpedal':
+            df = add_real_perdirlong(df,period_rsi,use_s=False)
+            df = df.rename({'real_wpedal': rename}, axis=1)
+        elif kind_rsi == 'mfi':
+            df = add_mfi(df, period_rsi)
+            df = df.rename({'mfi': rename}, axis=1)
+        elif kind_rsi == 's':
+            df = add_stochastic(df, period_rsi, self.period2s)
+            df = df.rename({'%d': rename}, axis=1)
+        elif kind_rsi == 'uo':
+            df = add_ultimate_oscillator(df, period_rsi // 3, period_rsi // 2, period_rsi)
+            df = df.rename({'ultimate_oscillator': rename}, axis=1)
+        else:
+            df = add_rsi(df, period_rsi)
+            df = df.rename({'rsi': rename}, axis=1)
+        return df
+    
+    def preprocessing(self, tdata):
+        pdata = {}
+        df = tdata['chart']
+        df = add_kusuruken_bb(df, self.period_bkb,self.period_skb,self.mult_bkb,self.mult_skb)
+        df = self.add_rsi(df,self.kind_rsi_big,self.period_rsi_big,'rsi_big')
+        df = self.add_rsi(df,self.kind_rsi_small,self.period_rsi_small,'rsi_small')
+        df = add_chop(df, self.period_chop)
+        df = self.add_slice_df(df)
+        pdata['chart'] = df
+        return pdata
+    
+    def _get_action_from_row(self, row):
+        # trend_context
+        if row['chop'] < self.thresh_chop-self.offset_chop:
+            if row['close'] >= row['bbu_big'] and row['rsi_big'] >= 100 - self.thresh_rb_enter:
+                return 'open_short'
+            if row['close'] >= row['bbu_big'] and row['rsi_big'] >= 100 - self.thresh_rb_exit:
+                return 'close_long'
+            if row['close'] <= row['bbd_big'] and row['rsi_big'] <= self.thresh_rb_enter:
+                return 'open_long'
+            if row['close'] <= row['bbd_big'] and row['rsi_big'] <= self.thresh_rb_exit:
+                return 'close_short'
+            # long_context
+            if row["sma_small"] > row['sma_big']:
+                if row['close'] <= row["sma_small"]:
+                    return 'open_long'
+            # short_context
+            else:
+                if row['close'] >= row["sma_small"]:
+                    return 'open_short'
+        # range_context
+        elif row['chop'] >= self.thresh_chop+self.offset_chop:
+            if row['close'] >= row['bbu_big']:
+                if not self.use_safe:
+                    return 'open_short'
+            if row['close'] <= row['bbd_big']:
+                if not self.use_safe:
+                    return 'open_long'
+            if row['close'] >= row['bbu_small']:
+                if row['rsi_small'] >= 100 - self.thresh_rs_enter:
+                    return 'open_short' 
+                if row['rsi_small'] >= 100 - self.thresh_rs_exit:
+                    return 'close_long' 
+            if row['close'] <= row['bbd_small']:
+                if row['rsi_small'] <= self.thresh_rs_enter:
+                    return 'open_long' 
+                if row['rsi_small'] <= self.thresh_rs_exit:
+                    return 'close_short'
+        else:
+            if row['close'] >= row['bbu_small']:
+                if row['rsi_small'] >= 100 - self.thresh_rs_exit:
+                    return 'close_long' 
+            if row['close'] <= row['bbd_small']:
+                if row['rsi_small'] <= self.thresh_rs_exit:
+                    return 'close_short'
+            if row['close'] >= row['bbu_big'] and row['rsi_big'] >= 100 - self.thresh_rb_exit:
+                return 'close_long'
+            if row['close'] <= row['bbd_big'] and row['rsi_big'] <= self.thresh_rb_exit:
+                return 'close_short'
+            
+class PEG11_SHIZUKAMARIKAWA(BaseEG):
+    """stop=None, take=None, period_bkb=55, period_skb=10, mult_bkb=3,mult_skb=1.5, period_rsi_big=10, period_rsi_small=20, kind_rsi_big='rsi',kind_rsi_small='rsi',period2s=3,max_period=70,period_chop=10,thresh_chop=30,thresh_rs_enter=30,thresh_rs_exit=40,thresh_rb_exit=40,use_safe=1,offset_chop=10,close_trend=1
+    \n
+    kind_rsi in ["rsi","mfi","s","uo","velcro","pedal","wpedal","real_pedal", "real_wpedal"]
+    """
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_bkb=55, period_skb=10, mult_bkb=3,mult_skb=1.5, period_rsi_big=10, period_rsi_small=20, kind_rsi_big='rsi',kind_rsi_small='rsi',period2s=3,max_period=70,period_chop=10,thresh_chop=30,thresh_rs_enter=30,thresh_rs_exit=40,thresh_rb_exit=40,use_safe=1,offset_chop=10,close_trend=1):
+        super().__init__(symbol, price_step, mult_ps, mode, stop, take)
+        self.needs_info = {'chart': self.symbol}
+        self.period_bkb = period_bkb
+        self.period_skb = period_skb
+        self.mult_bkb = mult_bkb
+        self.mult_skb = mult_skb
+        self.period_rsi_big = period_rsi_big
+        self.period_rsi_small = period_rsi_small
+        self.period_chop = period_chop
+        if kind_rsi_big == 'velcro' and self.period_rsi_big*2 > max_period:
+            self.period_rsi_big = max_period // 2
+        if kind_rsi_small == 'velcro' and self.period_rsi_small*2 > max_period:
+            self.period_rsi_small = max_period // 2
+
+        self.kind_rsi_big = kind_rsi_big
+        self.kind_rsi_small = kind_rsi_small
+        self.period2s = period2s
+        self.thresh_chop = thresh_chop
+        self.thresh_rs_enter = thresh_rs_enter
+        self.thresh_rs_exit = thresh_rs_exit
+        self.thresh_rb_exit = thresh_rb_exit
+        self.use_safe = use_safe
+        self.offset_chop = offset_chop
+        self.close_trend = close_trend
+
+    def add_rsi(self, df, kind_rsi, period_rsi, rename):
+        if kind_rsi == 'velcro':
+            df['max_hb'] = df['high'].rolling(period_rsi).max()
+            df['min_hb'] = df['low'].rolling(period_rsi).min()
+            df = add_velcro_indicator(df,period_rsi)
+            df = df.rename({'velcro': rename}, axis=1)
+        elif kind_rsi == 'pedal':
+            df = add_perdirlong(df,period_rsi,use_v=False)
+            df = df.rename({'pedal': rename}, axis=1)
+        elif kind_rsi == 'wpedal':
+            df = add_perdirlong(df,period_rsi,use_s=False)
+            df = df.rename({'wpedal': rename}, axis=1)
+        elif kind_rsi == 'real_pedal':
+            df = add_real_perdirlong(df,period_rsi,use_v=False)
+            df = df.rename({'real_pedal': rename}, axis=1)
+        elif kind_rsi == 'real_wpedal':
+            df = add_real_perdirlong(df,period_rsi,use_s=False)
+            df = df.rename({'real_wpedal': rename}, axis=1)
+        elif kind_rsi == 'mfi':
+            df = add_mfi(df, period_rsi)
+            df = df.rename({'mfi': rename}, axis=1)
+        elif kind_rsi == 's':
+            df = add_stochastic(df, period_rsi, self.period2s)
+            df = df.rename({'%d': rename}, axis=1)
+        elif kind_rsi == 'uo':
+            df = add_ultimate_oscillator(df, period_rsi // 3, period_rsi // 2, period_rsi)
+            df = df.rename({'ultimate_oscillator': rename}, axis=1)
+        else:
+            df = add_rsi(df, period_rsi)
+            df = df.rename({'rsi': rename}, axis=1)
+        return df
+    
+    def preprocessing(self, tdata):
+        pdata = {}
+        df = tdata['chart']
+        df = add_kusuruken_bb(df, self.period_bkb,self.period_skb,self.mult_bkb,self.mult_skb)
+        df = self.add_rsi(df,self.kind_rsi_big,self.period_rsi_big,'rsi_big')
+        df = self.add_rsi(df,self.kind_rsi_small,self.period_rsi_small,'rsi_small')
+        df = add_chop(df, self.period_chop)
+        df = self.add_slice_df(df)
+        pdata['chart'] = df
+        return pdata
+    
+    def _get_action_from_row(self, row):
+        # trend_context
+        if row['chop'] < self.thresh_chop-self.offset_chop:
+            if self.close_trend:
+                if row['close'] >= row['bbu_big'] and row['rsi_big'] >= 100 - self.thresh_rb_exit:
+                    return 'close_long'
+                if row['close'] <= row['bbd_big'] and row['rsi_big'] <= self.thresh_rb_exit:
+                    return 'close_short'
+            # long_context
+            if row["sma_small"] > row['sma_big']:
+                if row['close'] <= row["sma_small"]:
+                    return 'close_short'
+            # short_context
+            else:
+                if row['close'] >= row["sma_small"]:
+                    return 'close_long'
+        # range_context
+        elif row['chop'] >= self.thresh_chop+self.offset_chop:
+            if row['close'] >= row['bbu_big']:
+                if not self.use_safe:
+                    return 'open_short'
+            if row['close'] <= row['bbd_big']:
+                if not self.use_safe:
+                    return 'open_long'
+            if row['close'] >= row['bbu_small']:
+                if row['rsi_small'] >= 100 - self.thresh_rs_enter:
+                    return 'open_short' 
+                if row['rsi_small'] >= 100 - self.thresh_rs_exit:
+                    return 'close_long' 
+            if row['close'] <= row['bbd_small']:
+                if row['rsi_small'] <= self.thresh_rs_enter:
+                    return 'open_long' 
+                if row['rsi_small'] <= self.thresh_rs_exit:
+                    return 'close_short'
+        else:
+            if row['close'] >= row['bbu_small']:
+                if row['rsi_small'] >= 100 - self.thresh_rs_exit:
+                    return 'close_long' 
+            if row['close'] <= row['bbd_small']:
+                if row['rsi_small'] <= self.thresh_rs_exit:
+                    return 'close_short'
+            if row['close'] >= row['bbu_big'] and row['rsi_big'] >= 100 - self.thresh_rb_exit:
+                return 'close_long'
+            if row['close'] <= row['bbd_big'] and row['rsi_big'] <= self.thresh_rb_exit:
+                return 'close_short'
+            
+class PEG11_SAYATAKAGI(BaseEG):
+    """stop=None, take=None, period_bkb=55, period_skb=10, mult_bkb=3,mult_skb=1.5, period_rsi_big=10, period_rsi_small=20, kind_rsi_big='rsi',kind_rsi_small='rsi',period2s=3,max_period=70,period_chop=50,thresh_chop=60,thresh_rs_enter=30,thresh_rs_exit=40,thresh_rb_exit=40,use_safe=1,offset_chop=10
+    \n
+    kind_rsi in ["rsi","mfi","s","uo","velcro","pedal","wpedal","real_pedal", "real_wpedal"]
+    """
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_bkb=55, period_skb=10, mult_bkb=3,mult_skb=1.5, period_rsi_big=10, period_rsi_small=20, kind_rsi_big='rsi',kind_rsi_small='rsi',period2s=3,max_period=70,period_chop=50,thresh_chop=60,thresh_rs_enter=30,thresh_rs_exit=40,thresh_rb_exit=40,use_safe=1,offset_chop=10):
+        super().__init__(symbol, price_step, mult_ps, mode, stop, take)
+        self.needs_info = {'chart': self.symbol}
+        self.period_bkb = period_bkb
+        self.period_skb = period_skb
+        self.mult_bkb = mult_bkb
+        self.mult_skb = mult_skb
+        self.period_rsi_big = period_rsi_big
+        self.period_rsi_small = period_rsi_small
+        self.period_chop = period_chop
+        if kind_rsi_big == 'velcro' and self.period_rsi_big*2 > max_period:
+            self.period_rsi_big = max_period // 2
+        if kind_rsi_small == 'velcro' and self.period_rsi_small*2 > max_period:
+            self.period_rsi_small = max_period // 2
+
+        self.kind_rsi_big = kind_rsi_big
+        self.kind_rsi_small = kind_rsi_small
+        self.period2s = period2s
+        self.thresh_chop = thresh_chop
+        self.thresh_rs_enter = thresh_rs_enter
+        self.thresh_rs_exit = thresh_rs_exit
+        self.thresh_rb_exit = thresh_rb_exit
+        self.use_safe = use_safe
+        self.offset_chop = offset_chop
+
+    def add_rsi(self, df, kind_rsi, period_rsi, rename):
+        if kind_rsi == 'velcro':
+            df['max_hb'] = df['high'].rolling(period_rsi).max()
+            df['min_hb'] = df['low'].rolling(period_rsi).min()
+            df = add_velcro_indicator(df,period_rsi)
+            df = df.rename({'velcro': rename}, axis=1)
+        elif kind_rsi == 'pedal':
+            df = add_perdirlong(df,period_rsi,use_v=False)
+            df = df.rename({'pedal': rename}, axis=1)
+        elif kind_rsi == 'wpedal':
+            df = add_perdirlong(df,period_rsi,use_s=False)
+            df = df.rename({'wpedal': rename}, axis=1)
+        elif kind_rsi == 'real_pedal':
+            df = add_real_perdirlong(df,period_rsi,use_v=False)
+            df = df.rename({'real_pedal': rename}, axis=1)
+        elif kind_rsi == 'real_wpedal':
+            df = add_real_perdirlong(df,period_rsi,use_s=False)
+            df = df.rename({'real_wpedal': rename}, axis=1)
+        elif kind_rsi == 'mfi':
+            df = add_mfi(df, period_rsi)
+            df = df.rename({'mfi': rename}, axis=1)
+        elif kind_rsi == 's':
+            df = add_stochastic(df, period_rsi, self.period2s)
+            df = df.rename({'%d': rename}, axis=1)
+        elif kind_rsi == 'uo':
+            df = add_ultimate_oscillator(df, period_rsi // 3, period_rsi // 2, period_rsi)
+            df = df.rename({'ultimate_oscillator': rename}, axis=1)
+        else:
+            df = add_rsi(df, period_rsi)
+            df = df.rename({'rsi': rename}, axis=1)
+        return df
+    
+    def preprocessing(self, tdata):
+        pdata = {}
+        df = tdata['chart']
+        df = add_kusuruken_bb(df, self.period_bkb,self.period_skb,self.mult_bkb,self.mult_skb)
+        df = self.add_rsi(df,self.kind_rsi_big,self.period_rsi_big,'rsi_big')
+        df = self.add_rsi(df,self.kind_rsi_small,self.period_rsi_small,'rsi_small')
+        df = add_chop(df, self.period_chop)
+        df = self.add_slice_df(df)
+        pdata['chart'] = df
+        return pdata
+    
+    def _get_action_from_row(self, row):
+        # trend_context
+        if row['chop'] < self.thresh_chop-self.offset_chop:
+            # long_context
+            if row['close'] >= row["bbu_small"] and row['rsi_small'] < 100 - self.thresh_rs_enter:
+                return 'open_long'
+            # short_context
+            if row['close'] <= row["bbd_small"] and row['rsi_small'] > self.thresh_rs_enter:
+                return 'open_short'
+            
+        # range_context
+        elif row['chop'] >= self.thresh_chop+self.offset_chop:
+            if row['close'] >= row['bbu_big']:
+                if not self.use_safe:
+                    return 'open_short'
+            if row['close'] <= row['bbd_big']:
+                if not self.use_safe:
+                    return 'open_long'
+            if row['close'] >= row['bbu_small']:
+                if row['rsi_small'] >= 100 - self.thresh_rs_enter:
+                    return 'open_short' 
+                if row['rsi_small'] >= 100 - self.thresh_rs_exit:
+                    return 'close_long' 
+            if row['close'] <= row['bbd_small']:
+                if row['rsi_small'] <= self.thresh_rs_enter:
+                    return 'open_long' 
+                if row['rsi_small'] <= self.thresh_rs_exit:
+                    return 'close_short'
+        else:
+            if row['close'] >= row['bbu_small']:
+                if row['rsi_small'] >= 100 - self.thresh_rs_exit:
+                    return 'close_long' 
+            if row['close'] <= row['bbd_small']:
+                if row['rsi_small'] <= self.thresh_rs_exit:
+                    return 'close_short'
+            if row['close'] >= row['bbu_big'] and row['rsi_big'] >= 100 - self.thresh_rb_exit:
+                return 'close_long'
+            if row['close'] <= row['bbd_big'] and row['rsi_big'] <= self.thresh_rb_exit:
+                return 'close_short'
+            
+class PEG11_ALICEMARASATO(BaseEG):
+    """stop=None, take=None, period_bkb=55, period_skb=10, mult_bkb=3,mult_skb=1.5, period_rsi_big=10, period_rsi_small=20, kind_rsi_big='rsi',kind_rsi_small='rsi',period2s=3,max_period=70,period_chop=50,thresh_chop=60,thresh_rs_enter=30,thresh_rs_exit=40,thresh_rb_exit=40,use_safe=1,offset_chop=10,go_on_trend=0
+    \n
+    kind_rsi in ["rsi","mfi","s","uo","velcro","pedal","wpedal","real_pedal", "real_wpedal"]
+    """
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_bkb=55, period_skb=10, mult_bkb=3,mult_skb=1.5, period_rsi_big=10, period_rsi_small=20, kind_rsi_big='rsi',kind_rsi_small='rsi',period2s=3,max_period=70,period_chop=50,thresh_chop=60,thresh_rs_enter=30,thresh_rs_exit=40,thresh_rb_exit=40,use_safe=1,offset_chop=10,go_on_trend=0):
+        super().__init__(symbol, price_step, mult_ps, mode, stop, take)
+        self.needs_info = {'chart': self.symbol}
+        self.period_bkb = period_bkb
+        self.period_skb = period_skb
+        self.mult_bkb = mult_bkb
+        self.mult_skb = mult_skb
+        self.period_rsi_big = period_rsi_big
+        self.period_rsi_small = period_rsi_small
+        self.period_chop = period_chop
+        if kind_rsi_big == 'velcro' and self.period_rsi_big*2 > max_period:
+            self.period_rsi_big = max_period // 2
+        if kind_rsi_small == 'velcro' and self.period_rsi_small*2 > max_period:
+            self.period_rsi_small = max_period // 2
+
+        self.kind_rsi_big = kind_rsi_big
+        self.kind_rsi_small = kind_rsi_small
+        self.period2s = period2s
+        self.thresh_chop = thresh_chop
+        self.thresh_rs_enter = thresh_rs_enter
+        self.thresh_rs_exit = thresh_rs_exit
+        self.thresh_rb_exit = thresh_rb_exit
+        self.use_safe = use_safe
+        self.offset_chop = offset_chop
+        self.go_on_trend = go_on_trend
+
+    def add_rsi(self, df, kind_rsi, period_rsi, rename):
+        if kind_rsi == 'velcro':
+            df['max_hb'] = df['high'].rolling(period_rsi).max()
+            df['min_hb'] = df['low'].rolling(period_rsi).min()
+            df = add_velcro_indicator(df,period_rsi)
+            df = df.rename({'velcro': rename}, axis=1)
+        elif kind_rsi == 'pedal':
+            df = add_perdirlong(df,period_rsi,use_v=False)
+            df = df.rename({'pedal': rename}, axis=1)
+        elif kind_rsi == 'wpedal':
+            df = add_perdirlong(df,period_rsi,use_s=False)
+            df = df.rename({'wpedal': rename}, axis=1)
+        elif kind_rsi == 'real_pedal':
+            df = add_real_perdirlong(df,period_rsi,use_v=False)
+            df = df.rename({'real_pedal': rename}, axis=1)
+        elif kind_rsi == 'real_wpedal':
+            df = add_real_perdirlong(df,period_rsi,use_s=False)
+            df = df.rename({'real_wpedal': rename}, axis=1)
+        elif kind_rsi == 'mfi':
+            df = add_mfi(df, period_rsi)
+            df = df.rename({'mfi': rename}, axis=1)
+        elif kind_rsi == 's':
+            df = add_stochastic(df, period_rsi, self.period2s)
+            df = df.rename({'%d': rename}, axis=1)
+        elif kind_rsi == 'uo':
+            df = add_ultimate_oscillator(df, period_rsi // 3, period_rsi // 2, period_rsi)
+            df = df.rename({'ultimate_oscillator': rename}, axis=1)
+        else:
+            df = add_rsi(df, period_rsi)
+            df = df.rename({'rsi': rename}, axis=1)
+        return df
+    
+    def preprocessing(self, tdata):
+        pdata = {}
+        df = tdata['chart']
+        df = add_kusuruken_bb(df, self.period_bkb,self.period_skb,self.mult_bkb,self.mult_skb)
+        df = self.add_rsi(df,self.kind_rsi_big,self.period_rsi_big,'rsi_big')
+        df = self.add_rsi(df,self.kind_rsi_small,self.period_rsi_small,'rsi_small')
+        df = add_chop(df, self.period_chop)
+        df = self.add_slice_df(df)
+        pdata['chart'] = df
+        return pdata
+    
+    def _get_action_from_row(self, row):
+        # trend_context
+        if row['chop'] < self.thresh_chop-self.offset_chop:
+            # long_context
+            if row['close'] >= row["bbu_small"] and row['rsi_small'] < 100 - self.thresh_rs_enter:
+                if not self.go_on_trend and row["bbu_small"] < row['sma_big']:
+                    return 'open_long'
+                if self.go_on_trend and row["bbu_small"] > row['sma_big']:
+                    return 'open_long'
+            # short_context
+            if row['close'] <= row["bbd_small"] and row['rsi_small'] > self.thresh_rs_enter:
+                if not self.go_on_trend and row["bbd_small"] > row['sma_big']:
+                    return 'open_short'
+                if self.go_on_trend and row["bbd_small"] < row['sma_big']:
+                    return 'open_short'
+        # range_context
+        elif row['chop'] >= self.thresh_chop+self.offset_chop:
+            if row['close'] >= row['bbu_big']:
+                if not self.use_safe:
+                    return 'open_short'
+            if row['close'] <= row['bbd_big']:
+                if not self.use_safe:
+                    return 'open_long'
+            if row['close'] >= row['bbu_small']:
+                if row['rsi_small'] >= 100 - self.thresh_rs_enter:
+                    return 'open_short' 
+                if row['rsi_small'] >= 100 - self.thresh_rs_exit:
+                    return 'close_long' 
+            if row['close'] <= row['bbd_small']:
+                if row['rsi_small'] <= self.thresh_rs_enter:
+                    return 'open_long' 
+                if row['rsi_small'] <= self.thresh_rs_exit:
+                    return 'close_short'
+        else:
+            if row['close'] >= row['bbu_small']:
+                if row['rsi_small'] >= 100 - self.thresh_rs_exit:
+                    return 'close_long' 
+            if row['close'] <= row['bbd_small']:
+                if row['rsi_small'] <= self.thresh_rs_exit:
+                    return 'close_short'
+            if row['close'] >= row['bbu_big'] and row['rsi_big'] >= 100 - self.thresh_rb_exit:
+                return 'close_long'
+            if row['close'] <= row['bbd_big'] and row['rsi_big'] <= self.thresh_rb_exit:
+                return 'close_short'
+            
+
 
 class PEG13_DWDDCr(BaseEG):
     """stop=None, take=None, period=60, threshold=30, period2=20"""
@@ -105,8 +581,51 @@ class PEG13_DWDDCr(BaseEG):
                 return 'open_short'
             else:
                 return 'close_long'
+            
+class PEG13_DUNE(BaseEG):
+    """stop=None, take=None, period_dc=55, period_ao=20,period_rsi=20,period_q=20,quantile=0.2,max_period=70,period_ao_roll=20,offset_range=0.1"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_dc=55, period_ao=20,period_rsi=20,period_q=20,quantile=0.2,max_period=70,period_ao_roll=20,offset_range=0.1):
+        super().__init__(symbol, price_step, mult_ps, mode, stop, take)
+        self.needs_info = {'chart': self.symbol}
+        self.period_dc = period_dc
+        self.period_rsi,self.period_q = fix_two_periods_hm(period_rsi,period_q,max_period)
+        self.quantile = quantile
+        self.period_ao,self.period_ao_roll = fix_two_periods_hm(period_ao,period_ao_roll,max_period)
+        self.offset_range = offset_range
+
+    def preprocessing(self, tdata):
+        pdata = {}
+        df = tdata['chart']
+        df = add_donchan_channel(df, self.period_dc)
+        df = add_awesome_oscillator(df, long_period=self.period_ao)
+        df = add_rsi(df, self.period_rsi)
+        df = add_quantile_params(df,self.period_q,'rsi',self.quantile)
+        ao_roll = df['ao'].rolling(self.period_ao_roll)
+        df['top_range'] = ao_roll.quantile(0.5+self.offset_range)
+        df['bottom_range'] = ao_roll.quantile(0.5-self.offset_range)
+        df['nl'] = df['high'] - df['close'] > df['close'] - df['low']
+        df = self.add_slice_df(df)
+        pdata['chart'] = df
+        return pdata
+    
+    def _get_action_from_row(self, row):
+        if row['ao'] > row['top_range']: #long
+            if row['low'] <= row['min_hb'] and row['nl'] and row['rsi'] < row['bottom_q']:
+                return 'open_long'
+            if row['high'] >= row['max_hb'] and not row['nl'] and row['rsi'] > row['top_q']:
+                return 'close_long'
+        elif row['ao'] < row['bottom_range']:
+            if row['low'] <= row['min_hb'] and row['nl'] and row['rsi'] < row['bottom_q']:
+                return 'close_short'
+            if row['high'] >= row['max_hb'] and not row['nl'] and row['rsi'] > row['top_q']:
+                return 'open_short'
+        else:
+            if row['low'] <= row['min_hb'] and row['nl'] and row['rsi'] < row['bottom_q']:
+                return 'open_long'
+            if row['high'] >= row['max_hb'] and not row['nl'] and row['rsi'] > row['top_q']:
+                return 'open_short'
+
         
-        return None
 
 class PEG14_RWDDCr(BaseEG):
     """stop=None, take=None, period=20, threshold=30, period2=10, period3=20,max_period=55"""
@@ -149,8 +668,45 @@ class PEG14_RWDDCr(BaseEG):
                 return 'open_long'
             if row['high'] >= row['max_hb'] and not nearest_long and row['rsi'] > 100 - self.threshold:
                 return 'open_short'
+            
+class PEG14_REGAL(BaseEG):
+    """stop=None, take=None, period_dc=20, period_rsi=20, threshold=30, period_chop=30, period_sc1=10,period_sc2=20,max_period=70"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_dc=20, period_rsi=20, threshold=30, period_chop=30, period_sc1=10,period_sc2=20,max_period=70):
+        super().__init__(symbol, price_step, mult_ps, mode, stop, take)
+        self.needs_info = {'chart': self.symbol}
+        self.period_dc = period_dc
+        self.period_rsi = period_rsi
+        self.threshold = threshold
+        self.period_chop,self.period_sc1,self.period_sc2 = fix_three_periods_hm(period_chop,period_sc1,period_sc2,max_period)
+        if self.period_sc1 == self.period_sc2:
+            self.period_sc2 -= 1
+
+    def preprocessing(self, tdata):
+        pdata = {}
+        df = tdata['chart']
+        df = add_donchan_channel(df, self.period_dc)
+        df = add_rsi(df, self.period_rsi)
+        df = add_chop(df, self.period_chop)
+        df['sma_chop1'] = df['chop'].rolling(window=self.period_sc1).mean()
+        df['sma_chop2'] = df['chop'].rolling(window=self.period_sc2).mean()
+        df['nl'] = df['high'] - df['close'] > df['close'] - df['low']
+        df = self.add_slice_df(df)
+        pdata['chart'] = df
+        return pdata
+    
+    def _get_action_from_row(self, row):
+        if row['sma_chop1'] > row['sma_chop2']:
+            if row['low'] <= row['min_hb']:
+                return 'close_short'
+            if row['high'] >= row['max_hb']:
+                return 'close_long'
+        else:            
+            if row['low'] <= row['min_hb'] and row['nl'] and row['rsi'] < self.threshold:
+                return 'open_long'
+            if row['high'] >= row['max_hb'] and not row['nl'] and row['rsi'] > 100 - self.threshold:
+                return 'open_short'
         
-        return None
+
 
 class PEG14_RANGER(BaseEG):
     """stop=None, take=None, period_adx=55, threshold_rsi=30, period2=55, period3=20, threshold_chop=50, threshold_adx=20"""
@@ -186,8 +742,8 @@ class PEG14_RANGER(BaseEG):
                 return 'open_long'
             if row['high'] >= row['max_hb'] and row['rsi'] > 100 - self.threshold_rsi:
                 return 'open_short'
+            
         
-        return None
 #     'ROSN2':(PEG14_RENEGADE,(None,None,16,38,52,6,49,30),1,None), опять странные закртия
 class PEG14_RENEGADE(BaseEG):
     """stop=None, take=None, period_adx=27, threshold_rsi=30, period2=55, period3=20, threshold_chop=50, threshold_adx=20"""

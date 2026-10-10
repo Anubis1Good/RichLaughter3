@@ -14,7 +14,7 @@ from testing.test_constants import *
 # PATH_DF = '_data_for_tests\_before_opt\ALRS_5_1787155697.parquet'
 
 df = simple_load_df(PATH_DF)
-df = df.iloc[-80:]
+# df = df.iloc[-80:]
 period=10
 multiplier=3
 max_period = 55
@@ -36,35 +36,9 @@ max_period = 55
 # df = add_zigzag_window_260926(df,80)
 # df = add_pattern18_zzw_260926(df)
 # df = add_pattern18_zzw_260926(df)
-def add_reversal_patterns(df:pd.DataFrame,rails_thresh=1.5):
-    df['size_bar'] = df['high'] - df['low']
-    df['ratio_prev'] = df['size_bar'] / df['size_bar'].shift(1)
-    df['rev_pat'] = np.where(
-        (df['direction'] == 1)&
-        (df['direction'] != df['direction'].shift(1))&
-        (df['high'] >= df['high'].shift(1))&
-        (df['close'] >= df['open'].shift(1))&
-        (df['ratio_prev'] < rails_thresh)&
-        (df['close'] > df['open']),
-        2,0)
-    df['rev_pat'] = np.where(
-        (df['direction'] == -1)&
-        (df['direction'] != df['direction'].shift(1))&
-        (df['low'] <= df['low'].shift(1))&
-        (df['close'] <= df['open'].shift(1))&
-        (df['ratio_prev'] < rails_thresh),
-        -2,df['rev_pat'])
-    df['c_o'] = abs(df['close'] - df['open'])
-    df['l_o'] = abs(df['low'] - df['open'])
-    df['l_c'] = abs(df['low'] - df['close'])
-    df['h_o'] = abs(df['high'] - df['open'])
-    df['h_c'] = abs(df['high'] - df['close'])
-    df['rev_pat'] = np.where(
-        (df['low'] < df['low'].shift(1)) 
-        ,
-        1,df['rev_pat'])
-    return df
-df = add_reversal_patterns(df)
+df['high_sma'] = df['high'].rolling(20).mean()
+df['low_sma'] = df['low'].rolling(20).mean()
+df = add_buffer_add(df, 'high_sma', 'low_sma', 0.5)
 # df['stair_pc'] = df['stair']
 # df = add_hl_stair_fast(df)
 
@@ -74,10 +48,12 @@ print(df.tail(20))
 fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 10), sharex=True)
 
 draw_bars_chart_wo_vol(df, ax=ax1)
+for kind in ('top_buff', 'bottom_buff', 'high_sma'):
+    ax1.plot(df[kind])
 
 # for kind in ('dvsai', 'dvsaima', 'dvsaiu', 'dvsaid'):
 #     ax2.plot(df[kind])
-ax2.plot(df['rev_pat'])
+# ax2.plot(df['rev_pat'])
 # plt.plot(df['ave_up'])
 # plt.plot(df['ave_down'])
 # plt.plot(df['stair_pc_windowed'],color='blue')

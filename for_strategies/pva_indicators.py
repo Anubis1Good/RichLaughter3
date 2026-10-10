@@ -32,6 +32,25 @@ def add_kusuruken_channel(df:pd.DataFrame, period=20,period2=40):
     
     return df
 
+def add_kusuruken_bb(df:pd.DataFrame, period_big=40,period_small=20, mult_big=3,mult_small=1.5):
+    """
+        add 'sma_big', 'bbu_big', 'bbd_big', 'sma_small', 'bbu_small', 'bbd_small'
+    
+    """
+    roll = df['close'].rolling(period_big)
+    df['sma_big'] = roll.mean()
+    std_dev = roll.std() * mult_big
+    df['bbu_big'] = df['sma_big'] + std_dev
+    df['bbd_big'] = df['sma_big'] - std_dev
+
+    roll = df['close'].rolling(period_small)
+    df['sma_small'] = roll.mean()
+    std_dev = roll.std() * mult_small
+    df['bbu_small'] = df['sma_small'] + std_dev
+    df['bbd_small'] = df['sma_small'] - std_dev
+    
+    return df
+
 # def add_average_fractals(df:pd.DataFrame, period=5):
 #     """add 'ave_up', 'ave_down'"""
 #     up_points = df[df['fractal_up']]
