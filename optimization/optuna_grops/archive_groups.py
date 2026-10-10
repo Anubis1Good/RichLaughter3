@@ -10,6 +10,18 @@ group = (
         ]
     ),
     (
+        PEG4_UNIVERSAL, 
+        [
+            (2,max_period,1),
+            (2,max_period,1),
+            (5,45,1),
+            (5,45,1),
+            ["DC","VG","BB","VC","WC"],
+            ["rsi","rsi_tw","mfi","s","uo"],      
+            (2,period2s_max,1),
+        ]
+    ),
+    (
         PEG8_LOBSTER, 
         [
             (2,max_period,1),
@@ -273,6 +285,28 @@ group = (
             (0,1,0.01),
             (0,1),
             (0,1),
+        ]
+    ),
+        (
+        WEG10_sleep, 
+        [
+            (2,max_period,1),
+            (0.5,3,0.1),
+            (2,max_period,1),
+            (max_period,),
+            (0,1),
+
+        ]
+    ),
+    (
+        WEG10_sonny, 
+        [
+            (2,max_period,1),
+            (0.5,3,0.1),
+            (2,max_period,1),
+            (max_period,),
+            (0,1),
+            (0.01, 0.99, 0.01),
         ]
     ),
 )

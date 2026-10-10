@@ -4,16 +4,45 @@ from optimization.optuna_grops.opt_params import *
 # (min, max, step)
 
 group = (
+
     (
-        PEG4_UNIVERSAL, 
+        PEG4_U4, 
         [
             (2,max_period,1),
             (2,max_period,1),
-            (5,45,1),
-            (5,45,1),
-            ["DC","VG","BB","VC","WC"],
-            ["rsi","rsi_tw","mfi","s","uo"],      
+            (2,max_period,1),
+            (max_period,),
+            ("DC","VG","BB","VC","WC","SC"),
+            ("rsi","mfi","s","uo","velcro","pedal","wpedal","diff_pedals","real_pedal", "real_wpedal", "real_diff_pedals"),
             (2,period2s_max,1),
+            (0.01, 0.5, 0.01),
+        ]
+    ),
+    (
+        PEG4_U5, 
+        [
+            (2,max_period,1),
+            (2,max_period,1),
+            (max_period,),
+            ("DC","VG","BB","VC","WC","SC"),
+            ("rsi","mfi","s","uo","velcro","pedal","wpedal","real_pedal", "real_wpedal"),
+            (2,period2s_max,1),
+            (1,50,1),
+            (1,50,1),
+        ]
+    ),
+    (
+        PEG4_U6, 
+        [
+            (2,max_period,1),
+            (2,max_period,1),
+            (max_period,),
+            ("DC","VG","BB","VC","WC","SC"),
+            ("rsi","mfi","s","uo","pedal","wpedal","real_pedal", "real_wpedal"),
+            (2,period2s_max,1),
+            (1,50,1),
+            (1,50,1),
+            (1,50,1),
         ]
     ),
     (
