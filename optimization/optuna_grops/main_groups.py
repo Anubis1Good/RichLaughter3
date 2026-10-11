@@ -37,12 +37,13 @@ group = (
             (2,max_period,1),
             (2,max_period,1),
             (max_period,),
-            ("DC","VG","BB","VC","WC","SC"),
+            ("DC","VG","BB","VC","WC"),
             ("rsi","mfi","s","uo","pedal","wpedal","real_pedal", "real_wpedal"),
             (2,period2s_max,1),
             (1,50,1),
             (1,50,1),
             (1,50,1),
+            (2,max_period,1),
         ]
     ),
     (

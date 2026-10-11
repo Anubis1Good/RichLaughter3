@@ -232,18 +232,18 @@ class PEG4_U5(BaseEG):
             
 class PEG4_U6(BaseEG):
     '''
-    stop=None, take=None, period_channel=20, period_rsi=20, max_period=70, kind_channel='DC', kind_rsi='wpedal',period2s = 3, thresh_enter=30,thresh_exit=40,threshold_velcro=20 \n
-    kind_channel in ["DC","VG","BB","VC","WC","SC"]
+    stop=None, take=None, period_channel=20, period_rsi=20, max_period=70, kind_channel='DC', kind_rsi='real_wpedal',period2s = 3, thresh_enter=30,thresh_exit=40,threshold_velcro=20,period_velcro=30 \n
+    kind_channel in ["DC","VG","BB","VC","WC"]
     kind_rsi in ["rsi","mfi","s","uo","pedal","wpedal","real_pedal", "real_wpedal"]
     '''
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_channel=20, period_rsi=20, max_period=70, kind_channel='DC', kind_rsi='real_wpedal',period2s = 3, thresh_enter=30,thresh_exit=40,threshold_velcro=20):
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_channel=20, period_rsi=20, max_period=70, kind_channel='DC', kind_rsi='real_wpedal',period2s = 3, thresh_enter=30,thresh_exit=40,threshold_velcro=20,period_velcro=30):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
         self.period_rsi = period_rsi
         self.period2s = period2s
         self.kind_channel = kind_channel
         self.kind_rsi = kind_rsi
-        self.period_channel,self.period_smooth = fix_two_periods_hm(period_channel,period_channel,max_period)
+        self.period_channel,self.period_velcro = fix_two_periods_hm(period_channel,period_velcro,max_period)
         self.up = 'max_hb'
         self.down = 'min_hb'
         self.thresh_enter = thresh_enter
@@ -269,8 +269,6 @@ class PEG4_U6(BaseEG):
             df = df.rename({'top_buff': self.up, 'bottom_buff': self.down}, axis=1)
         else:
             df = add_donchan_channel(df, self.period_channel)
-            if self.kind_channel == 'SC':
-                df = add_smooth_channel(df, self.period_smooth)
         return df
     
     def add_rsi(self, df):
@@ -307,7 +305,7 @@ class PEG4_U6(BaseEG):
         df = tdata['chart']
         df = self.add_channel(df)
         df = self.add_rsi(df)
-        df = add_velcro_indicator(df, self.period_smooth)
+        df = add_velcro_indicator(df, self.period_velcro)
         df['nl'] = df['high'] - df['close'] > df['close'] - df['low']
         df = self.add_slice_df(df)
         pdata['chart'] = df
