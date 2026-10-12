@@ -520,7 +520,8 @@ class LEG1_PHOBO(BaseEG):
             return 'open_short'
         
         return None
-        
+
+# 12.10.2026 пробовать добавить версию с закрытие вне тренда
 class LEG1_LAKSAe(BaseEG):
     """stop=None, take=None, period=20, period2=5"""
     def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=20, period2=5):

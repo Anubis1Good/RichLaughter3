@@ -123,6 +123,7 @@ class WEG7_PARADOX2(BaseEG):
                 return 'open_short'
 
 # 07.10.2026 пока сыроват. Может открыть сделки в хаях, но и держать по тренду
+# 12.10.2026 Открыл шорт в лоях закрыл в хаях
 class WEG8_MOUSE(BaseEG):
     """stop=None, take=None, period_dc=20, period_velcro=50, threshold_velcro=30, period_cdvsai=30, period_rsi=30, period_q=30, period_adx=40, threshold_adx=30, max_period=55, quantile=0.3"""
     def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_dc=20, period_velcro=50, threshold_velcro=30, period_cdvsai=30, period_rsi=30, period_q=30, period_adx=40, threshold_adx=30, max_period=55, quantile=0.3):

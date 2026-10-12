@@ -581,7 +581,8 @@ class PEG13_DWDDCr(BaseEG):
                 return 'open_short'
             else:
                 return 'close_long'
-            
+
+# 12.10.2026 надо соединить с GRAVY2, а то не подстраивается под волатильность немного. 
 class PEG13_DUNE(BaseEG):
     """stop=None, take=None, period_dc=55, period_ao=20,period_rsi=20,period_q=20,quantile=0.2,max_period=70,period_ao_roll=20,offset_range=0.1"""
     def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_dc=55, period_ao=20,period_rsi=20,period_q=20,quantile=0.2,max_period=70,period_ao_roll=20,offset_range=0.1):
@@ -696,9 +697,9 @@ class PEG14_REGAL(BaseEG):
     
     def _get_action_from_row(self, row):
         if row['sma_chop1'] > row['sma_chop2']:
-            if row['low'] <= row['min_hb']:
+            if row['low'] <= row['min_hb'] and row['nl']:
                 return 'close_short'
-            if row['high'] >= row['max_hb']:
+            if row['high'] >= row['max_hb'] and not row['nl']:
                 return 'close_long'
         else:            
             if row['low'] <= row['min_hb'] and row['nl'] and row['rsi'] < self.threshold:
@@ -1111,7 +1112,8 @@ class PEG17_PROBIUS(BaseEG):
                 return 'open_long'
             if row['high'] >= row['max_hb'] and row['rsi'] >= row['top_q']:
                 return 'open_short'
-           
+
+# 12.10.2026 надо сделать версию с закрытием вне боковика
 class PEG17_ZEALOT(BaseEG):
     """stop=None, take=None, period_quantile=55, period_dc=20, period_rsi=20, period_velcro=50, threshold_velcro=30, max_period=55"""
     def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_quantile=55, period_dc=20, period_rsi=20, period_velcro=50, threshold_velcro=30, max_period=55):

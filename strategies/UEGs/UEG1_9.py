@@ -1315,7 +1315,8 @@ class UEG9_GRAVY2(BaseEG):
                 return 'close_short'
             if row['close'] < row['bottom_stop']:
                 return 'close_long'
-            
+
+# 12.10.2026 Надо подумать над тем, что бы в тренде скользящие были ближе. Может два периода для тренда и боковика
 class UEG9_POLITICIAN(BaseEG):
     '''
     stop=None, take=None, period_wzz=55, frac_wzz=0.1, n_wzp=8, buffer_mean=0.1,use_rsi=0,period_rsi=30,thresh_rsi=30
