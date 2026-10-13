@@ -357,6 +357,7 @@ class VEG1_EARTH(BaseEG):
         return self.stop_loss_action(row)
     
 # Возможно стоит ограничить нижний лимит на period_wzz
+# 13.10.2026 переписать логику работы с трендовыми паттернами (хотя он вроде не мог открыть сделку)
 class VEG1_MOON(BaseEG):
     """stop=None, take=None, \n
     divider_buff=5, period_wzz=30, frac_wzz=0.1, n_wzp=6, threshold_p18=0.1, close_ext_trend=1,close_mid_range=1,close_mid_weak=1,open_reverse_weak=1"""
@@ -402,7 +403,7 @@ class VEG1_MOON(BaseEG):
                 return 'open_short'
             if self.close_ext_trend and close <= row['pbzp4']:
                 return 'close_short'
-        if pattern == 'joc':
+        if pattern == 'joc': # 13.10.2026 из-за этого условия может иногда прям в хай зайти, если joc слабый и только начался
             if close <= row['pbzp2']:
                 return 'open_long'
             if self.close_ext_trend and close >= row['mbzp4']:

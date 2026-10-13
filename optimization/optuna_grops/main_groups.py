@@ -3,6 +3,7 @@ from strategies.all_egs import *
 from optimization.optuna_grops.opt_params import *
 # (min, max, step)
 
+# 13.10.2026 каждется надо ввести еще параметр min_period. Ибо 2 - это очень маленький период. Надо хотя бы 5
 group = (
 
     (

@@ -70,7 +70,9 @@ class PEG11_KUSURUKEN(BaseEG):
                 return 'open_long'
             if row['high'] >= row['max_hb'] and not nearest_long and row['rsi'] > 100 - self.threshold:
                 return 'open_short'
-            
+
+# 13.10.2026 кажется бывает слишком сложно закрыть позицию
+# 13.10.2026 бывает перетягивает сделки
 class PEG11_RAYMIYAMOTO(BaseEG):
     """stop=None, take=None, period_bkb=55, period_skb=10, mult_bkb=3,mult_skb=1.5, period_rsi_big=10, period_rsi_small=20, kind_rsi_big='rsi',kind_rsi_small='rsi',period2s=3,max_period=70,period_chop=50,thresh_chop=60,thresh_rs_enter=30,thresh_rs_exit=40,thresh_rb_enter=30,thresh_rb_exit=40,use_safe=1,offset_chop=10
     \n

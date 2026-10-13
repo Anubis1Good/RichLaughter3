@@ -110,7 +110,8 @@ class PEG30_ETC(BaseEG):
             else:
                 return 'close_all'
 
-#12.10.2026 попробуй соедить с дюной 
+# 12.10.2026 попробуй соедить с дюной 
+# 13.10.2026 могут быть проблемы со входами в 18:55-19:00 из-за бредового стакана
 class PEG30_ETC2(BaseEG):
     """stop=None, take=None, \n
       work_trend=1,min_spred=5,use_long=1,use_short=1,period_adx=14,period_chop=14,period_sma_l=30,period_sma_s=15,thr_adx=30,thr_chop=40"""
