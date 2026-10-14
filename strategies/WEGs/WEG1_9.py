@@ -164,3 +164,35 @@ class WEG8_MOUSE(BaseEG):
                 return 'open_short'
             
       
+class WEG9_(BaseEG):
+    """stop=None, take=None, period_dc=14, period_rsi=14, thresh_enter=30,thresh_exit=40"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_dc=14, period_rsi=14, thresh_enter=30,thresh_exit=40):
+        super().__init__(symbol, price_step, mult_ps, mode, stop, take)
+        self.needs_info = {'chart': self.symbol}
+        self.period_dc = period_dc
+        self.period_rsi = period_rsi
+        self.thresh_enter = thresh_enter
+        self.thresh_exit = thresh_exit
+
+    def preprocessing(self, tdata):
+        pdata = {}
+        df = tdata['chart']
+        df = add_donchan_channel(df,self.period_dc)
+        df = add_CDV(df)
+        df = add_rsi(df, self.period_rsi, 'cdv')
+        df['nl'] = df['high'] - df['close'] > df['close'] - df['low']
+        df = self.add_slice_df(df)
+        pdata['chart'] = df
+        return pdata
+    
+    def _get_action_from_row(self, row):
+        # if row['low'] <= row['min_hb'] and row['nl']:
+            if row['rsi'] <= self.thresh_enter:
+                return 'open_long'
+            if row['rsi'] <= self.thresh_exit:
+                return 'close_short'
+        # if row['high'] >= row['max_hb'] and not row['nl']:
+            if row['rsi'] >= 100 - self.thresh_enter:
+                return 'open_short'
+            if row['rsi'] >= 100 - self.thresh_exit:
+                return 'close_long'

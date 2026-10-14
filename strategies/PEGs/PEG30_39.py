@@ -59,6 +59,7 @@ class PEG30_MURKY(BaseEG):
                     return 'close_all'
 
 #Нет закрытия кроме тейка! Изменить надо! 
+# 14.10.2026 возможно стоит оставить только ETC2
 class PEG30_ETC(BaseEG):
     """stop=None, take=None, \n
       work_trend=1,min_spred=5,use_long=1,use_short=1,period_adx=14,period_chop=14,period_sma_l=30,period_sma_s=15,thr_adx=30,thr_chop=40"""

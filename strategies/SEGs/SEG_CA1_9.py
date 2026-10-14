@@ -212,6 +212,7 @@ class SEG2_ULTRA(BaseEG):
         return None
 
 # 13.10.2026 может частить очень странно. буквально открывает и сразу закрывает сделку
+# 14.10.2026 ПОЧЕМУ РОБОТ, КОТОРЫЙ СОЗДАН, КАК ТРЕНДОВЫЙ ПО СУТИ ВЕДЕТ СЕБЯ, КАК ФЛЕТОВЫЙ РОБОТ И ТЯНЕТ УБЫТОЧНУЮ СДЕЛКУ В ТРЕНДЕ. ХОТЯ ВАРИАНТЫ ЗАЙТИ БЫЛИ
 class SEG3_FORCE(BaseEG):
     """stop=None, take=None, period=55, mult_bb=2, mult_bv=3, period_adx=30, threshold_adx=30, period_sma=55,percent_threshold=0.3"""
     def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=55, mult_bb=2, mult_bv=3, period_adx=30, threshold_adx=30, period_sma=55,percent_threshold=0.3):

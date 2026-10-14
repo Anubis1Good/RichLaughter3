@@ -175,6 +175,7 @@ class LEG2_ALKASH(BaseEG):
         
         return None
 
+# 14.10.2026 надо подумать над тем, что бы избегать контрендовых сделок
 class LEG2_FENNEC(BaseEG):
     """stop=None, take=None, period=100, multiplier=2, period2=10, threshold_enter=40, threshold_exit=20, divider=1, use_stop=1"""
     def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=55, multiplier=2, period2=10, threshold_enter=40, threshold_exit=20, divider=1, use_stop=1):

@@ -1040,6 +1040,7 @@ class PEG16_ARTANIS(BaseEG):
 # 05.10.2026 сделать версию с входом по low
 # 07.10.2026 при малом периоде велкро может творить жесть. Открыл в хаях, закрыл в лоях 'T2':(PEG17_PHOENIX,(None,None,18,23,33,2,15,0,60),1,None),
 # 11.10.2026 нажна версия с только закрытием в тренде
+# 14.10.2026 ну вход с середины в тренде - это явно не лучшая фишка феникса. Порой заходит прям на дне
 class PEG17_PHOENIX(BaseEG):
     """stop=None, take=None, period=100, period_dc=20, period_rsi=20, period_velcro=50, threshold_velcro=30, use_stop=0, max_period=55"""
     def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_quantile=55, period_dc=20, period_rsi=20, period_velcro=50, threshold_velcro=30, use_stop=0, max_period=55):
