@@ -3,7 +3,7 @@ from strategies.BaseEG import BaseEG
 from for_strategies.classic_indicators import add_rsi,add_chop,add_adx,add_donchan_channel
 from for_strategies.zigzag_indicators import add_dzz_peaks,add_analys_dzz
 from for_strategies.help_indicators import add_ideal_pos
-from for_strategies.ml_indicators import add_segmented_regression_from_end,add_find_similar_pattern_lite
+from for_strategies.ml_indicators import add_segmented_regression_from_end,add_find_similar_pattern_lite,add_linear_regression_window
 from sklearn.tree import DecisionTreeClassifier
 
 class SEGML2_NEWAVE(BaseEG):
@@ -31,8 +31,45 @@ class SEGML2_NEWAVE(BaseEG):
         if row['lower_channel'] > row['close'] and row['rsi'] < self.threshold:
             return 'open_long'
         
-        return None
+class SEGML2_TUNNELER(BaseEG):
+    """stop=None, take=None, period_lr=70, buf_mode='std',buf_mult=1, slope_trend=0.5
+    \n
+    buf_mode in 'std' | 'maxdev' | 'pct'"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_lr=70, buf_mode='std',buf_mult=1, slope_trend=0.02):
+        super().__init__(symbol, price_step, mult_ps, mode, stop, take)
+        self.needs_info = {'chart': self.symbol}
+        self.period_lr = period_lr
+        self.buf_mode = buf_mode
+        self.buf_mult = buf_mult
+        self.slope_trend = slope_trend
 
+    def preprocessing(self, tdata):
+        pdata = {}
+        df = tdata['chart']
+        df = add_linear_regression_window(df,self.period_lr,self.buf_mode,self.buf_mult)
+        df['nl'] = df['high'] - df['close'] > df['close'] - df['low']
+        df = self.add_slice_df(df)
+        pdata['chart'] = df
+        return pdata
+    
+    def _get_action_from_row(self, row):
+        can_long = True
+        can_short = True
+        if row['lr_slope_pct'] > self.slope_trend: #long
+            can_short = False
+        if row['lr_slope_pct'] < -self.slope_trend: #short
+            can_long = False
+
+        if row['lr_upper'] <= row['high'] and not row['nl']:
+            if can_short:
+                return 'open_short'
+            return 'close_long'
+        if row['lr_lower'] >= row['low'] and row['nl']:
+            if can_long:
+                return 'open_long'
+            return 'close_short'
+
+            
 #TODO Переделать
 class SEGML2_SID(BaseEG):
     """stop=None, take=None, period=200, window=10, forecast_length=5, threshold=30, percent_threshold=0.1
