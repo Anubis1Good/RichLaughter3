@@ -138,3 +138,81 @@ def add_find_similar_pattern_lite(
     epsilon = 1e-8  # Маленькое значение для стабильности
     df['per_fs'] = (((df['forecast_high'] - df['forecast_low']) / (df['forecast_high'] + epsilon)) * 100).round(2)
     return df
+
+def add_linear_regression_window(
+    df: pd.DataFrame,
+    window: int = 50,
+    buffer_mode: str = "std",   # "std" | "maxdev" | "pct"
+    buffer_mult: float = 1.0,
+    price_col: str = "close",
+) -> pd.DataFrame:
+    """
+    Векторизованная версия. Все колонки считаются через cumsum, без цикла по барам.
+    """
+    df = df.copy()
+    n = len(df)
+    cols = [
+        "lr_value", "lr_slope", "lr_slope_pct", "lr_intercept",
+        "lr_buffer", "lr_upper", "lr_lower",
+    ]
+    for c in cols:
+        df[c] = np.nan
+
+    if n < window:
+        return df
+
+    y = df[price_col].to_numpy(dtype=float)
+
+    # --- скользящие суммы через cumsum ---
+    y_cumsum = np.concatenate(([0.0], np.cumsum(y)))
+    idx_end = np.arange(window - 1, n)              # индексы последних баров окон
+    sum_y = y_cumsum[idx_end + 1] - y_cumsum[idx_end + 1 - window]
+    mean_y = sum_y / window
+
+    # --- константы для x = 0..window-1 ---
+    x = np.arange(window, dtype=float)
+    x_mean = x.mean()
+    x_centered = x - x_mean
+    x_var = (x_centered ** 2).sum()
+
+    # --- slope через скользящую сумму x*y ---
+    t = np.arange(n, dtype=float)
+    ty = t * y
+    ty_cumsum = np.concatenate(([0.0], np.cumsum(ty)))
+    sum_ty = ty_cumsum[idx_end + 1] - ty_cumsum[idx_end + 1 - window]
+    start_idx = idx_end - window + 1
+    sum_xy = sum_ty - start_idx * sum_y
+
+    k = (sum_xy - window * x_mean * mean_y) / x_var
+    b = mean_y - k * x_mean
+    lr_value = k * (window - 1) + b
+
+    # --- буфер ---
+    if buffer_mode == "pct":
+        base = y[idx_end] * buffer_mult / 100.0
+    else:
+        from numpy.lib.stride_tricks import sliding_window_view
+        y_win = sliding_window_view(y, window)
+        y_centered = y_win - mean_y[:, None]
+        resid = y_centered - k[:, None] * x_centered[None, :]
+        if buffer_mode == "std":
+            base = resid.std(axis=1) * buffer_mult
+        elif buffer_mode == "maxdev":
+            base = np.abs(resid).max(axis=1) * buffer_mult
+        else:
+            raise ValueError(f"Unknown buffer_mode: {buffer_mode}")
+
+    # --- slope_pct ---
+    price_now = y[idx_end]
+    slope_pct = np.where(price_now != 0, k / price_now * 100.0, np.nan)
+
+    # --- записываем ---
+    df.iloc[idx_end, df.columns.get_loc("lr_value")]     = lr_value
+    df.iloc[idx_end, df.columns.get_loc("lr_slope")]     = k
+    df.iloc[idx_end, df.columns.get_loc("lr_slope_pct")] = slope_pct
+    df.iloc[idx_end, df.columns.get_loc("lr_intercept")] = b
+    df.iloc[idx_end, df.columns.get_loc("lr_buffer")]    = base
+    df.iloc[idx_end, df.columns.get_loc("lr_upper")]     = lr_value + base
+    df.iloc[idx_end, df.columns.get_loc("lr_lower")]     = lr_value - base
+
+    return df
