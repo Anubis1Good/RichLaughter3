@@ -545,7 +545,16 @@ group = (
             (0.1, max_percent_threshold, 0.1),
         ]
     ),
- 
+    (
+        SEGML2_TUNNELER, 
+        [
+            (min_period,max_period,1),
+            ["std","maxdev","pct"],
+            (0.1,10,0.1),
+            (0,0.5,0.001),
+   
+        ]
+    ),
     (
         UEG4_CANADIAN, 
         [
