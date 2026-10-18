@@ -4,7 +4,7 @@ from strategies.helpEGs.debugEG import DebugAction,DebugMean
 from testing.test_constants import *
 
 
-# PATH_DF = '_data_for_tests\data_stock_5m\FEES_5_1791662935.parquet'
+PATH_DF = '_data_for_tests\data_stock_5m\CHMF_5_1792258136.parquet'
 symbol = PATH_DF.split('\\')[-1].split('_')[0]
 # fee = 0.001
 # window = 60
@@ -14,8 +14,8 @@ symbol = PATH_DF.split('\\')[-1].split('_')[0]
 # ws = [EG,(100,30,20)]
 # ws = [UEG4_FALCON,],
 
-# ws = (PEG4_U6,(None,3,66,56,70,'DC','wpedal',3,50,21,6),1,None)
-ws = (UEG9_BIRDWATCHER2,[])
+ws = (PEG30_ETC,(None,None,1,5,1,1,11,6,37,15,14,65),1,None)
+# ws = (UEG9_BIRDWATCHER2,[])
 # ws = (UEG7_LOVERDUCK,[])
 # ws = (DebugMean,[])
 cegt = CheckEGTrader(
