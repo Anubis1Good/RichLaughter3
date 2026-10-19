@@ -40,7 +40,7 @@ class WEG3_BATYA(BaseEG):
         
 
 # Нужна смесь WEG3/4 c PEG18 на st
-
+# 19.10.2026 открыл сделку в самый лой, хотя до этого был отличный пик для закрытия и открытия шорта
 class WEG4_DOG(BaseEG):
     """stop=None, take=None, period=14, threshold=30"""
     def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period=14, threshold=30):

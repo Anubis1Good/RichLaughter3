@@ -585,6 +585,7 @@ class PEG13_DWDDCr(BaseEG):
                 return 'close_long'
 
 # 12.10.2026 надо соединить с GRAVY2, а то не подстраивается под волатильность немного. 
+# 19.10.2026 почему-то не закрыл +1.5% сделку и тупо ждал отката.
 class PEG13_DUNE(BaseEG):
     """stop=None, take=None, period_dc=55, period_ao=20,period_rsi=20,period_q=20,quantile=0.2,max_period=70,period_ao_roll=20,offset_range=0.1"""
     def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_dc=55, period_ao=20,period_rsi=20,period_q=20,quantile=0.2,max_period=70,period_ao_roll=20,offset_range=0.1):
@@ -1041,6 +1042,8 @@ class PEG16_ARTANIS(BaseEG):
 # 07.10.2026 при малом периоде велкро может творить жесть. Открыл в хаях, закрыл в лоях 'T2':(PEG17_PHOENIX,(None,None,18,23,33,2,15,0,60),1,None),
 # 11.10.2026 нажна версия с только закрытием в тренде
 # 14.10.2026 ну вход с середины в тренде - это явно не лучшая фишка феникса. Порой заходит прям на дне
+# 19.10.2026 V-образный разворо == смерть
+# 19.10.2026 надо добавить nearest_long!!!
 class PEG17_PHOENIX(BaseEG):
     """stop=None, take=None, period=100, period_dc=20, period_rsi=20, period_velcro=50, threshold_velcro=30, use_stop=0, max_period=55"""
     def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_quantile=55, period_dc=20, period_rsi=20, period_velcro=50, threshold_velcro=30, use_stop=0, max_period=55):
@@ -1117,6 +1120,7 @@ class PEG17_PROBIUS(BaseEG):
                 return 'open_short'
 
 # 12.10.2026 надо сделать версию с закрытием вне боковика
+# 19.10.2026 в v-образном кроется слишком рано
 class PEG17_ZEALOT(BaseEG):
     """stop=None, take=None, period_quantile=55, period_dc=20, period_rsi=20, period_velcro=50, threshold_velcro=30, max_period=55"""
     def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_quantile=55, period_dc=20, period_rsi=20, period_velcro=50, threshold_velcro=30, max_period=55):

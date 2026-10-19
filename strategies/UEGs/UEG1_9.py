@@ -1033,6 +1033,7 @@ class UEG7_SHERIFF(BaseEG):
         return None
 
 # 13.10.2026 открывал и закрывал сделки жестко в хаях 'VTBR':(UEG7_DETECTIVE,(None,95,65,56,17,8,2.5),8,None),
+# 19.10.2026 опять в лоях открывает сделки
 class UEG7_DETECTIVE(BaseEG):
     """stop=None, take=None, period_bb=55, period_window=55,period_fractal_free=5, n_fractals=5, mult_bb=2
     \n
