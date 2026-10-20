@@ -22,7 +22,7 @@ class VT7:
             conf_data:dict,
             symbols:list[str],
             close_on_time:bool=True,
-            close_map:tuple=((22,30),(22,30),(22,30),(22,30),(22,30),(17,30),(17,30),),
+            close_map:tuple=((21,30),(21,30),(21,30),(21,30),(21,30),(17,30),(17,30),),
             debug_mode:bool=False
             ):
         self.debug_mode = debug_mode
