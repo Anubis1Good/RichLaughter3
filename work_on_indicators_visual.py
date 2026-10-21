@@ -1,4 +1,5 @@
 from for_strategies.classic_indicators import *
+from for_strategies.classic_indicators2 import *
 from for_strategies.help_indicators import *
 from for_strategies.ml_indicators import *
 from for_strategies.other_indicators import *
@@ -36,9 +37,13 @@ max_period = 55
 # df = add_zigzag_window_260926(df,80)
 # df = add_pattern18_zzw_260926(df)
 # df = add_pattern18_zzw_260926(df)
-df['high_sma'] = df['high'].rolling(20).mean()
-df['low_sma'] = df['low'].rolling(20).mean()
-df = add_buffer_add(df, 'high_sma', 'low_sma', 0.5)
+df = add_fractal_dimension_index(df)
+df = add_hurst_exponent(df)
+df = add_vhf(df)
+df = add_variance_ratio(df)
+df = add_range_compression_zscore(df)
+df = add_percentile_rank(df)
+df = add_composite_blender_score(df)
 # df['stair_pc'] = df['stair']
 # df = add_hl_stair_fast(df)
 
@@ -48,12 +53,19 @@ print(df.tail(20))
 fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 10), sharex=True)
 
 draw_bars_chart_wo_vol(df, ax=ax1)
-for kind in ('top_buff', 'bottom_buff', 'high_sma'):
-    ax1.plot(df[kind])
+# for kind in ('top_buff', 'bottom_buff', 'high_sma'):
+#     ax1.plot(df[kind])
 
 # for kind in ('dvsai', 'dvsaima', 'dvsaiu', 'dvsaid'):
 #     ax2.plot(df[kind])
-# ax2.plot(df['rev_pat'])
+# ax2.plot(df['fdi'])
+# ax2.plot(df['hurst'])
+# ax2.plot(df['vhf'])
+# ax2.plot(df['vr'])
+# ax2.plot(df['vr_z'])
+# ax2.plot(df['rc_z'])
+# ax2.plot(df['pct_rank'])
+ax2.plot(df['blender_score'])
 # plt.plot(df['ave_up'])
 # plt.plot(df['ave_down'])
 # plt.plot(df['stair_pc_windowed'],color='blue')

@@ -1,3 +1,4 @@
+import matplotlib.pyplot as plt
 from testing.CheckEGTrader import CheckEGTrader
 from strategies.all_egs import *
 from strategies.helpEGs.debugEG import DebugAction,DebugMean
@@ -45,6 +46,8 @@ cegt.plot_chart_and_sequtity()
 # cegt.check_strategy_window(normalization=True)
 # cegt.check_strategy_window(normalization=False)
 # ef_window = cegt.trade_data['step_eq_fee']
+eqf = cegt.trade_data['equity_fee']
+print(eqf)
 # cegt.ws.save_to_csv("window_actions.csv")
 # cegt.ws.save_to_csv("window_means.csv")
 # cegt.check_strategy_fast_debug()
@@ -53,14 +56,14 @@ cegt.plot_chart_and_sequtity()
 
 cegt.print_statistics()
 # cegt.plot_chart_and_sequtity()
-# import matplotlib.pyplot as plt
-
+cegt.process_old_type_result()
 # full_name_img = os.path.join(images_folder, f"{name_file}.png")
 # name_bot = 'Vasya'
-# plt.figure(figsize=(12, 6))
+plt.figure(figsize=(12, 6))
+plt.plot(eqf, color='red', label='Equity')
 # plt.plot(ef_window, color='red', label='Equity')
 # plt.plot(ef_fast, color='blue', label='Equity with Fees')
-# plt.show()
+plt.show()
 # plt.title(f"{name_bot}")
 # plt.legend()
 # plt.savefig(full_name_img, bbox_inches='tight')

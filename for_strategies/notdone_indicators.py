@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 
+# 21.10.2026 Что это?
 def find_point_by_price(df, start_pos, end_pos, base_price, threshold, direction):
     """
     Ищет точку, где цена отклонилась от base_price на threshold процентов

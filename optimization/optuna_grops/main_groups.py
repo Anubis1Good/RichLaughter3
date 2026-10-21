@@ -149,14 +149,7 @@ group = (
             (0,1),
         ]
     ),
-        (
-        PEG13_DWDDCr, 
-        [
-            (min_period,max_period,1),
-            (5, 45, 1),
-            (min_period,max_period,1),
-        ]
-    ),
+
     (
         PEG13_DUNE, 
         [
@@ -214,22 +207,6 @@ group = (
             (5, 100, 1),
         ]
     ),
-    (
-        PEG15_ANNA, 
-        [
-            (min_period,max_period,1),
-            (5, 45, 1),
-        ]
-    ),
-    (
-        PEG15_SILVANA, 
-        [
-            (min_period,max_period,1),
-            (5, 45, 1),
-            (min_period,max_period,1),
-        ]
-    ),
-
 
     (
         PEG17_PHOENIX, 
@@ -297,55 +274,14 @@ group = (
             (max_period,),
         ]
     ),
-    (
-        PEG18_BLAZE, 
-        [
-            (min_period,max_period,1),
-            (min_period,max_period,1),
-            (min_period,max_period,1),
-            (5, 40, 1),
-            (5, 40, 1),
-            (0, 1),
-            (max_period,),
-        ]
-    ),
-
-    (
-        PEG18_ANDUIN, 
-        [
-            (min_period,max_period,1),
-            (0.5,4,0.1),
-            (min_period,max_period,1),
-            (5, 40, 1),
-            (5, 70, 1),
-            (2, half_max_period, 1),
-            (0,1),
-            (max_period, ),
-        ]
-    ),
-    (
-        PEG19_ANUBARAK, 
-        [
-            (min_period,max_period,1),
-            (min_period,max_period,1),
-            (min_period,max_period,1),
-            (5, 40, 1),
-            (5, 50, 1),
-            (0, 100, 1),
-            (0,1),
-            (max_period, ),
-        ]
-    ),
-
-
 
     (
         PEG26_UNKNOWN, 
         [
             (min_period,max_period,1),
             (min_period,max_period,1),
-            (5, 40, 1),
-            (5, 40, 1),
+            (5, 45, 1),
+            (5, 45, 1),
             (min_period,max_period,1),
             (min_period,max_period,1),
             (min_period,max_period,1),
@@ -385,32 +321,8 @@ group = (
         ]
     ),
 
-    (
-        LEG1_BIBI2, 
-        [
-            (min_period,max_period,1),
-            (min_period,max_period,1),
-            ('cmo','rsi','rsi_tw','williams_r','mfi','ultimate_oscillator','cci','%d'),
-            (max_period, ),
-            (2,period2s_max,1),
-            (0.01, 0.4, 0.01),
-        ]
-    ),
 
-    (
-        LEG1_CC2, 
-        [
-            (min_period,max_period,1),
-            (min_period,max_period,1),
-            (max_period, ),
-            (2, 13, 1),
-            (0.5, 3, 0.1),
-            (0, 1),
-            (0, 1),
-            (2,period2s_max,1),
-            (0.01, 0.4, 0.01),
-        ]
-    ),
+
     (
         LEG1_IGOGOSHA2, 
         [
@@ -423,17 +335,7 @@ group = (
             (max_period, ),
         ]
     ),
-    (
-        LEG1_IRONANNY2, 
-        [
-            (min_period,max_period,1),
-            (min_period,max_period,1),
-            (max_period, ),
-            (2,8,1),
-            (2,period2s_max,1),
-            (0.01, 0.4, 0.01),
-        ]
-    ),
+
     (
         LEG1_LAKSAe, 
         [
@@ -441,20 +343,14 @@ group = (
             (min_period,max_period,1),
         ]
     ),
-    (
-        LEG1_OKROSHKA, 
-        [
-            (min_period,max_period,1),
-            (min_period,max_period,1),
-        ]
-    ),
+
 
     (
         LEG1_PIN, 
         [
             (min_period,max_period,1),
             (2, max_period//8, 1),
-            (11,50,1),
+            (5,50,1),
             (3,7,1)
         ]
     ),
@@ -465,8 +361,8 @@ group = (
             (min_period,max_period,1),
             (0.5,3,0.1),
             (min_period,max_period,1),
-            (11,40,1),
-            (11,40,1),
+            (5,45,1),
+            (5,45,1),
             (0,1)
         ]
     ),
@@ -476,8 +372,8 @@ group = (
             (min_period,max_period,1),
             (0.5,3,0.1),
             (min_period,max_period,1),
-            (11,40,1),
-            (11,40,1),
+            (5,45,1),
+            (5,45,1),
             (0,1)
         ]
     ),
@@ -487,8 +383,8 @@ group = (
             (min_period,max_period,1),
             (0.5,3,0.1),
             (min_period,max_period,1),
-            (11,40,1),
-            (11,40,1),
+            (5,45,1),
+            (5,45,1),
             (0.5,2,0.1),
             (0,1)
         ]
@@ -499,8 +395,8 @@ group = (
             (min_period,max_period,1),
             (0.5,3,0.1),
             (min_period,max_period,1),
-            (11,40,1),
-            (11,40,1),
+            (5,45,1),
+            (5,45,1),
             (0,1)
         ]
     ),
@@ -533,18 +429,6 @@ group = (
         ]
     ),
 
-    (
-        SEG3_FORCE, 
-        [
-            (min_period,max_period,1),
-            (0.5,3,0.1),
-            (1,5,1),
-            (2, half_max_period, 1),
-            (10,90,1),
-            (min_period,max_period,1),
-            (0.1, max_percent_threshold, 0.1),
-        ]
-    ),
     (
         SEGML2_TUNNELER, 
         [
@@ -587,40 +471,7 @@ group = (
             (0,1),
         ]
     ),
-    (
-        UEG6_PIGEON, 
-        [
-            (min_period,max_period,1),
-            (min_period,max_period,1),
-            (min_period,max_period,1),
-            (2,period_fractal_max,1),
-            (1,5,1),
-            (0,1,0.01),
-            (0.1,3,0.1),
-            (0,1)
-        ]
-    ),
-    (
-        UEG6_SHERIFF, 
-        [
-            (min_period,max_period,1),
-            (min_period,max_period,1),
-            (0.1,3,0.1),
-        ]
-    ),
-    (
-        UEG6_VULTURE, 
-        [
-            (min_period,max_period,1),
-            (min_period,max_period,1),
-            (10,70,1),
-            (min_period,max_period,1),
-            (2,period_fractal_max,1),
-            (1,5,1),
-            (0,1,0.01),
-            (2, half_max_period, 1),
-        ]
-    ),
+
    (
         UEG7_LOVERGOOSE, 
         [
@@ -643,42 +494,6 @@ group = (
             (10,70,1),
             (min_period,max_period,1),
             (0,1),
-        ]
-    ),
-    (
-        UEG7_CELEBRITY, 
-        [
-            (min_period,max_period,1),
-            (10, max_period, 1),
-            (2, half_max_period, 1),
-            (1,10,1),
-            (0.1,3,0.1),
-            (0,1)
-        ]
-    ),
-    (
-        UEG7_CARRIER, 
-        [
-            (min_period,max_period,1),
-            (10, max_period, 1),
-            (2, half_max_period, 1),
-            (1,10,1),
-            (10, max_period, 1),
-            (2, half_max_period, 1),
-            (1,10,1),
-            (0,1,0.01),
-            (0.1,3,0.1),
-            (0,1)
-        ]
-    ),
-    (
-        UEG7_DETECTIVE, 
-        [
-            (min_period,max_period,1),
-            (10, max_period, 1),
-            (2, half_max_period, 1),
-            (1,10,1),
-            (0.1,3,0.1),
         ]
     ),
     (
@@ -744,20 +559,6 @@ group = (
         ]
     ),
     (
-        VEG1_MOON, 
-        [
-            (2,20,1),
-            (20,max_period,1),
-            (0,1,0.01),
-            (4,12,2),
-            (0,1,0.01),
-            (0,1),
-            (0,1),
-            (0,1),
-            (0,1),
-        ]
-    ),
-    (
         VEG1_EARTH, 
         [   
             (20,max_period,1),
@@ -786,15 +587,15 @@ group = (
         WEG4_DOG, 
         [
             (min_period,max_period,1),
-            (10, 40, 1),
+            (5, 45, 1),
         ]
     ),
     (
         WEG4_PUPPY, 
         [
             (min_period,max_period,1),
-            (10, 40, 1),
-            (10, 40, 1),
+            (5, 45, 1),
+            (5, 45, 1),
         ]
     ),
 

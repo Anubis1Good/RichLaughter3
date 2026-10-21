@@ -10,6 +10,7 @@ from utils.work_dfs.load_df import simple_load_df
 from utils.work_dfs.convert_tf import convert_timeframe
 from utils.work_dfs.other import get_price_step
 from utils.drawing.chart import draw_hb_chart_fast
+from utils.metrics.equity_metrics import equity_curve_metrics,composite_score,lex_score
 
 def duration_time(func):
     def wrapper(self, *args, **kwargs):
@@ -593,6 +594,14 @@ class CheckEGTrader:
         closes = np.array(self.trade_data['c_longs'] + self.trade_data['c_shorts']) if (self.trade_data['c_longs'] or self.trade_data['c_shorts']) else np.array([])
         equity = np.array(self.trade_data['equity'])
         equity_fee = np.array(self.trade_data['equity_fee'])
+                # === НОВОЕ: метрики кривой ===
+        em = equity_curve_metrics(self.trade_data['equity_fee'])
+        # добавим с префиксом, чтобы не пересечься с существующими ключами
+        trades.update({f'curve_{k}': v for k, v in em.items()})
+        trades['curve_composite'] = composite_score(
+            em['total_return'], em
+        )
+        trades['curve_lex'] = lex_score(em, tr_eps=0.01, dd_limit=1.0)
         return trades,equity,equity_fee,longs,shorts,closes
 
     def print_statistics(self):
@@ -684,18 +693,19 @@ class CheckEGTrader:
     
     def plot_transaction(self):
         td = self.trade_data
-        td['o_longs'] = np.array(td['o_longs'])
-        td['o_shorts'] = np.array(td['o_shorts'])
-        td['c_longs'] = np.array(td['c_longs'])
-        td['c_shorts'] = np.array(td['c_shorts'])
-        if len(td['o_longs'].shape) > 1:
-            plt.scatter(td['o_longs'][:,0],td['o_longs'][:,1],marker='^',color='blue')
-        if len(td['o_shorts'].shape) > 1:
-            plt.scatter(td['o_shorts'][:,0],td['o_shorts'][:,1],marker='v',color='black')
-        if len(td['c_longs'].shape) > 1:
-            plt.scatter(td['c_longs'][:,0],td['c_longs'][:,1],marker='x',color='blue')
-        if len(td['c_shorts'].shape) > 1:
-            plt.scatter(td['c_shorts'][:,0],td['c_shorts'][:,1],marker='x',color='black')
+        o_longs  = np.array(td['o_longs'])  if len(td['o_longs'])  else np.array([])
+        o_shorts = np.array(td['o_shorts']) if len(td['o_shorts']) else np.array([])
+        c_longs  = np.array(td['c_longs'])  if len(td['c_longs'])  else np.array([])
+        c_shorts = np.array(td['c_shorts']) if len(td['c_shorts']) else np.array([])
+
+        if o_longs.ndim > 1 and o_longs.size:
+            plt.scatter(o_longs[:,0],  o_longs[:,1],  marker='^', color='blue')
+        if o_shorts.ndim > 1 and o_shorts.size:
+            plt.scatter(o_shorts[:,0], o_shorts[:,1], marker='v', color='black')
+        if c_longs.ndim > 1 and c_longs.size:
+            plt.scatter(c_longs[:,0],  c_longs[:,1],  marker='x', color='blue')
+        if c_shorts.ndim > 1 and c_shorts.size:
+            plt.scatter(c_shorts[:,0], c_shorts[:,1], marker='x', color='black')
 
     
     def plot_equity(self,show=True):

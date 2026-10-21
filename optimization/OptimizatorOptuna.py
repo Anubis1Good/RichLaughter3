@@ -11,7 +11,6 @@ from testing.CheckEGTrader import CheckEGTrader
 optuna.logging.set_verbosity(optuna.logging.CRITICAL)
 phys_cores = psutil.cpu_count(logical=False)
 
-# TODO добавить возможно не использовать стопы и тейки, а так же возможность трейлинг-стопа
 class OptimizatorOptuna:
     def __init__(self, 
                  test_folder: str,
@@ -71,6 +70,12 @@ class OptimizatorOptuna:
         self.results_cache = {}
         self.days_mode = days_mode
         self.slip_slope_delta = slip_slope_delta
+        # в __init__
+        self.metric_sign = -1 if metric in {
+            'curve_rmse_reg_norm', 'curve_max_dev_reg_norm', 'curve_max_dd_norm',
+            'curve_rmse_chord', 'curve_max_dev_chord', 'curve_jump_ratio',
+            'curve_l1_mean_chord'
+        } else 1
         if not os.path.exists(main_folder):
             os.makedirs(main_folder)
         
@@ -244,7 +249,8 @@ class OptimizatorOptuna:
             'params': trial.params.copy()
         }
 
-        return trades[self.metric]
+        value = trades[self.metric]
+        return value * self.metric_sign
     
     def get_results_table(self, study, trader, strategy_class, param_options):
         results = []
@@ -261,7 +267,10 @@ class OptimizatorOptuna:
         
         completed_trials = [t for t in study.trials if t.state == optuna.trial.TrialState.COMPLETE]
         n_top = min(5, len(completed_trials))
-        top_trials = sorted(completed_trials, key=lambda x: x.value, reverse=True)[:n_top]
+        # в get_results_table
+        top_trials = sorted(completed_trials,
+                            key=lambda x: x.value * self.metric_sign,   # возвращаем к «натуральному» смыслу
+                            reverse=True)[:n_top]
         
         if not top_trials:
             return pd.DataFrame()

@@ -20,6 +20,11 @@ top_limit = 500
 # top_limit = 2000
 test_folder = '_data_for_tests/data_stock_5m'
 # test_folder = '_data_for_tests/data_stock_5m_spred'
+# metric = 'curve_composite'    
+metric = 'curve_lex'    
+# metric = 'total_fee_per'    
+need_plot = True
+need_plot = False
 
 if __name__ == '__main__':
     optimizer = OptimizatorOptuna(
@@ -30,13 +35,13 @@ if __name__ == '__main__':
         top_limit=top_limit,
         save_cores=save_cores,
         n_trials=trials,
-        need_plot=False,
+        need_plot=need_plot,
         use_window_test=use_window,
         window_size=WINDOW,
         days_mode=DAYS_MODE,
         slip_slope_delta=SLIP_STOP_DELTA,
         use_stop=0,
-        use_take=0
+        use_take=0,
+        metric=metric
     )
-    
     optimizer.optimize_multiple_groups(group)
