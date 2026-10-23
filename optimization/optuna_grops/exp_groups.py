@@ -14,18 +14,7 @@ group = (
     #     ]
     # ),
 
-    (
-        PEG13_DUNE, 
-        [
-            (min_period,max_period,1),
-            (min_period,max_period,1),
-            (min_period,max_period,1),
-            (min_period,max_period,1),
-            (0.01,0.4,0.01),
-            (max_period,),
-            (min_period,max_period,1),
-            (0,0.3,0.01),
-        ]
-    ),
+
+
 
 )

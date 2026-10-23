@@ -4,6 +4,7 @@ from for_strategies.classic_indicators import add_rsi,add_chop,add_awesome_oscil
 from for_strategies.pva_indicators import add_kusuruken_channel,add_velcro_indicator,add_quantile_params,add_benefit,get_all_enter_exit_DC,get_all_lup,add_pc_stair_fast,add_integrity_index,add_assessment_motion_index,add_hope_channel,add_cascade_channel,add_kusuruken_bb
 from for_strategies.pva2_indicators import add_perdirlong,add_real_perdirlong
 from for_strategies.other_indicators import add_vangerchik
+from for_strategies.vsa_indicators import add_CDV
 from for_strategies.fix_params import fix_supertrend_params,fix_two_periods_hm,fix_three_periods_hm
 
 # скорее всего сильно чувствтителен к смене тренда
@@ -73,6 +74,7 @@ class PEG11_KUSURUKEN(BaseEG):
 
 # 13.10.2026 кажется бывает слишком сложно закрыть позицию
 # 13.10.2026 бывает перетягивает сделки
+# 23.10.2026 вот как-то слишком узкий канал работы что ли. Может с буфером сделать?
 class PEG11_RAYMIYAMOTO(BaseEG):
     """stop=None, take=None, period_bkb=55, period_skb=10, mult_bkb=3,mult_skb=1.5, period_rsi_big=10, period_rsi_small=20, kind_rsi_big='rsi',kind_rsi_small='rsi',period2s=3,max_period=70,period_chop=50,thresh_chop=60,thresh_rs_enter=30,thresh_rs_exit=40,thresh_rb_enter=30,thresh_rb_exit=40,use_safe=1,offset_chop=10
     \n
@@ -861,7 +863,7 @@ class PEG15_SILVANA(BaseEG):
                 return 'open_short'
             else:
                 return 'close_long'
-        
+        # очень странная логика. сразу же закрывает сделки, как открывает
         if row['low'] < row['min_hb']:
             return 'close_long'
         if row['high'] > row['max_hb']:
@@ -1085,6 +1087,51 @@ class PEG17_PHOENIX(BaseEG):
             if row['high'] >= row['max_hb'] and row['rsi'] >= row['top_q']:
                 return 'open_short'
             
+class PEG17_AIUR(BaseEG):
+    """stop=None, take=None, period_quantile=55, period_dc=20, period_rsi=20, period_velcro=50, threshold_velcro=30, open_trend=0, max_period=70,frac_offset_dc=0.5"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_quantile=55, period_dc=20, period_rsi=20, period_velcro=50, threshold_velcro=30, open_trend=0, max_period=70,frac_offset_dc=0.5):
+        super().__init__(symbol, price_step, mult_ps, mode, stop, take)
+        self.needs_info = {'chart': self.symbol}
+        self.threshold_velcro = threshold_velcro
+        self.open_trend = open_trend
+        self.frac_offset_dc = frac_offset_dc
+        self.period_dc,self.period_velcro = fix_two_periods_hm(period_dc,period_velcro,max_period)
+        self.period_quantile,self.period_rsi = fix_two_periods_hm(period_quantile,period_rsi,max_period)
+
+    def preprocessing(self, tdata):
+        pdata = {}
+        df = tdata['chart']
+        df = add_donchan_channel(df, self.period_dc)
+        df['wdc'] = df['max_hb'] - df['min_hb']
+        df = add_velcro_indicator(df, self.period_velcro)
+        df = add_rsi(df, self.period_rsi)
+        df = add_quantile_params(df, self.period_quantile)
+        df['nl'] = df['high'] - df['close'] > df['close'] - df['low']
+        df = self.add_slice_df(df)
+        pdata['chart'] = df
+        return pdata
+    
+    def _get_action_from_row(self, row):
+        if row['velcro'] > 100 - self.threshold_velcro:  # long
+            if row['nl'] and row['low'] <= row['max_hb'] - row['wdc'] * self.frac_offset_dc:
+                if self.open_trend:
+                    return 'open_long'
+                else:
+                    return 'close_short'
+        elif not row['nl'] and row['velcro'] < self.threshold_velcro:  # short
+            if row['high'] >= row['min_hb'] + row['wdc'] * self.frac_offset_dc:
+                if self.open_trend:
+                    return 'open_short'
+                else:
+                    return 'close_long'
+        else:  # range
+            if row['nl'] and row['low'] <= row['min_hb'] and row['rsi'] <= row['bottom_q']:
+                return 'open_long'
+            if not row['nl'] and row['high'] >= row['max_hb'] and row['rsi'] >= row['top_q']:
+                return 'open_short'
+            
+# TODO remake Решить вопрос лютого контр-тренда
+# 23.10.2026 удаление
 class PEG17_PROBIUS(BaseEG):
     """stop=None, take=None, period_quantile=55, period_dc=20, period_rsi=20, period_velcro=50, threshold_velcro=30, max_period=55,thersh_rsi_trend=15"""
     def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_quantile=55, period_dc=20, period_rsi=20, period_velcro=50, threshold_velcro=30, max_period=55,thersh_rsi_trend=15):
@@ -1121,6 +1168,7 @@ class PEG17_PROBIUS(BaseEG):
 
 # 12.10.2026 надо сделать версию с закрытием вне боковика
 # 19.10.2026 в v-образном кроется слишком рано
+# TODO remake      
 class PEG17_ZEALOT(BaseEG):
     """stop=None, take=None, period_quantile=55, period_dc=20, period_rsi=20, period_velcro=50, threshold_velcro=30, max_period=55"""
     def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_quantile=55, period_dc=20, period_rsi=20, period_velcro=50, threshold_velcro=30, max_period=55):
@@ -1137,17 +1185,20 @@ class PEG17_ZEALOT(BaseEG):
         df = add_velcro_indicator(df, self.period_velcro)
         df = add_rsi(df, self.period_rsi)
         df = add_quantile_params(df, self.period_quantile)
+        df['nl'] = df['high'] - df['close'] > df['close'] - df['low']
         df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     def _get_action_from_row(self, row):
         if self.threshold_velcro < row['velcro'] < 100 - self.threshold_velcro:  # long
-            if row['low'] <= row['min_hb'] and row['rsi'] <= row['bottom_q']:
+            if row['nl'] and row['low'] <= row['min_hb'] and row['rsi'] <= row['bottom_q']:
                 return 'open_long'
-            if row['high'] >= row['max_hb'] and row['rsi'] >= row['top_q']:
+            if not row['nl'] and row['high'] >= row['max_hb'] and row['rsi'] >= row['top_q']:
                 return 'open_short'
 
-# 05.10.2026 пока большые вопросы. Кажется одного велкро для входа не достаочно. Может зайти и в локальном хае   
+# 05.10.2026 пока большые вопросы. Кажется одного велкро для входа не достаочно. Может зайти и в локальном хае
+# # TODO remake 
+# 23.10.2026 удаление
 class PEG17_TEMPLAR(BaseEG):
     """stop=None, take=None, period_quantile=55, period_dc=20, period_rsi=20, period_velcro=50, threshold_velcro=30, max_period=55"""
     def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_quantile=55, period_dc=20, period_rsi=20, period_velcro=50, threshold_velcro=30, max_period=55):
@@ -1179,6 +1230,9 @@ class PEG17_TEMPLAR(BaseEG):
             if row['high'] >= row['max_hb'] and row['rsi'] >= row['top_q']:
                 return 'open_short'
             
+# TODO remake
+# 23.10.2026 если как-то отделить тренд и перевернуть логику, то получится отличный трендовый робот
+# 23.10.2026 перспективно, если придумать, как использовать это в трендах
 class PEG17_ARCHON(BaseEG):
     """stop=None, take=None,  period_dc=20, period_velcro=50, threshold_velcro=30, max_period=55"""
     def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None,  period_dc=20, period_velcro=50, threshold_velcro=30, max_period=55):
@@ -1202,14 +1256,17 @@ class PEG17_ARCHON(BaseEG):
             return 'open_long'
 
 # 05.10.2026 надо подумать над трендовой частью. Из-за нее порой открывает странные сделки в хаях
+# TODO remake
+# 23.10.2026 в боковике вроде норм, но в тренде очень странно
 class PEG17_SELENDIS(BaseEG):
-    """stop=None, take=None, period_quantile=55, period_dc=20, period_rsi=20, period_velcro=50, threshold_velcro=30, max_period=55"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_quantile=55, period_dc=20, period_rsi=20, period_velcro=50, threshold_velcro=30, max_period=55):
+    """stop=None, take=None, period_quantile=55, period_dc=20, period_rsi=20, period_velcro=50, threshold_velcro=50, max_period=70,period_mv=20"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_quantile=55, period_dc=20, period_rsi=20, period_velcro=50, threshold_velcro=50, max_period=70,period_mv=20):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
         self.threshold_velcro = threshold_velcro
         self.period_dc,self.period_velcro = fix_two_periods_hm(period_dc,period_velcro,max_period)
         self.period_quantile,self.period_rsi = fix_two_periods_hm(period_quantile,period_rsi,max_period)
+        self.period_mv = period_mv
 
     def preprocessing(self, tdata):
         pdata = {}
@@ -1218,26 +1275,76 @@ class PEG17_SELENDIS(BaseEG):
         df = add_velcro_indicator(df, self.period_velcro)
         df = add_rsi(df, self.period_rsi)
         df = add_quantile_params(df, self.period_quantile)
-        df['end_up'] = np.where((df['high'].shift(1) >= df['max_hb'].shift(1)) & (df['high'] < df['max_hb']), df['high'], np.nan)
-        df['end_down'] = np.where((df['low'].shift(1) <= df['min_hb'].shift(1)) & (df['low'] > df['min_hb']), df['low'], np.nan)
+        df['max_volume'] = df['volume'].rolling(self.period_mv).max()
+        df['end_up'] = np.where((df['high'].shift(1) >= df['max_hb'].shift(1)) & (df['high'] < df['max_hb']) & (df['high'] > df['avarege']) & (df['volume'].shift(1) == df['max_volume'].shift(1)), df['high'], np.nan)
+        df['end_down'] = np.where((df['low'].shift(1) <= df['min_hb'].shift(1)) & (df['low'] > df['min_hb']) & (df['low'] < df['avarege']) & (df['volume'].shift(1) == df['max_volume'].shift(1)), df['low'], np.nan)
+        df['nl'] = df['high'] - df['close'] > df['close'] - df['low']
         df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
     def _get_action_from_row(self, row):
-        nearest_long = row['high'] - row['close'] > row['close'] - row['low']
         if row['velcro'] > 100 - self.threshold_velcro:  # long
             if not np.isnan(row['end_down']):
-                if nearest_long:
+                if row['nl']:
                     return 'open_long'
         elif row['velcro'] < self.threshold_velcro:  # short
             if not np.isnan(row['end_up']):
-                if not nearest_long:
+                if not row['nl']:
                     return 'open_short'
         else:  # range
-            if row['low'] <= row['min_hb'] and row['rsi'] <= row['bottom_q']:
+            if row['nl'] and row['low'] <= row['min_hb'] and row['rsi'] <= row['bottom_q']:
                 return 'open_long'
-            if row['high'] >= row['max_hb'] and row['rsi'] >= row['top_q']:
+            if not row['nl'] and row['high'] >= row['max_hb'] and row['rsi'] >= row['top_q']:
+                return 'open_short'
+            
+class PEG17_ALDERA(BaseEG):
+    """stop=None, take=None, period_quantile=55, period_dc=20, period_rsi=20, period_velcro=50, threshold_velcro=50, max_period=70,period_rsi_cdv=20,thresh_cdv=30"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_quantile=55, period_dc=20, period_rsi=20, period_velcro=50, threshold_velcro=50, max_period=70,period_rsi_cdv=20,thresh_cdv=30):
+        super().__init__(symbol, price_step, mult_ps, mode, stop, take)
+        self.needs_info = {'chart': self.symbol}
+        self.threshold_velcro = threshold_velcro
+        self.period_dc,self.period_velcro = fix_two_periods_hm(period_dc,period_velcro,max_period)
+        self.period_quantile,self.period_rsi = fix_two_periods_hm(period_quantile,period_rsi,max_period)
+        self.period_rsi_cdv = period_rsi_cdv
+        self.thresh_cdv = thresh_cdv
+
+    def preprocessing(self, tdata):
+        pdata = {}
+        df = tdata['chart']
+        df = add_donchan_channel(df, self.period_dc)
+        df = add_velcro_indicator(df, self.period_velcro)
+        df = add_CDV(df)
+        df = add_rsi(df, self.period_rsi_cdv, 'cdv')
+        df = df.rename({'rsi': 'rsi_cdv'}, axis=1)
+        df = add_rsi(df, self.period_rsi)
+        df = add_quantile_params(df, self.period_quantile)
+        df['end_up'] = np.where((df['high'].shift(1) >= df['max_hb'].shift(1)) &(df['close'] < df['max_hb'].shift(1)) & (df['close'] > df['avarege']) & (df['rsi_cdv'] > 100 - self.thresh_cdv), df['high'], np.nan)
+        df['end_down'] = np.where((df['low'].shift(1) <= df['min_hb'].shift(1)) &(df['close'] > df['min_hb'].shift(1)) & (df['close'] < df['avarege']) & (df['rsi_cdv'] < self.thresh_cdv), df['low'], np.nan)
+        df['nl'] = df['high'] - df['close'] > df['close'] - df['low']
+        df = self.add_slice_df(df)
+        pdata['chart'] = df
+        return pdata
+    
+    def _get_action_from_row(self, row):
+        if row['velcro'] > 100 - self.threshold_velcro:  # long
+            if not np.isnan(row['end_down']):
+                if row['nl']:
+                    return 'open_long'
+            if not np.isnan(row['end_up']):
+                if not row['nl']:
+                    return 'close_long'
+        elif row['velcro'] < self.threshold_velcro:  # short
+            if not np.isnan(row['end_up']):
+                if not row['nl']:
+                    return 'open_short'
+            if not np.isnan(row['end_down']):
+                if row['nl']:
+                    return 'close_short'
+        else:  # range
+            if row['nl'] and row['low'] <= row['min_hb'] and row['rsi'] <= row['bottom_q']:
+                return 'open_long'
+            if not row['nl'] and row['high'] >= row['max_hb'] and row['rsi'] >= row['top_q']:
                 return 'open_short'
 
 class PEG18_REXXAR2(BaseEG):

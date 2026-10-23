@@ -5,7 +5,7 @@ from strategies.helpEGs.debugEG import DebugAction,DebugMean
 from testing.test_constants import *
 
 
-PATH_DF = '_data_for_tests\data_stock_5m\CHMF_5_1792258136.parquet'
+# PATH_DF = '_data_for_tests\data_stock_5m\CHMF_5_1792258136.parquet'
 symbol = PATH_DF.split('\\')[-1].split('_')[0]
 # fee = 0.001
 # window = 60
@@ -15,8 +15,8 @@ symbol = PATH_DF.split('\\')[-1].split('_')[0]
 # ws = [EG,(100,30,20)]
 # ws = [UEG4_FALCON,],
 
-ws = (PEG30_ETC,(None,None,1,5,1,1,11,6,37,15,14,65),1,None)
-# ws = (UEG9_BIRDWATCHER2,[])
+# ws = (PEG30_ETC,(None,None,1,5,1,1,11,6,37,15,14,65),1,None)
+ws = (PEG26_GAZLOWE,[])
 # ws = (UEG7_LOVERDUCK,[])
 # ws = (DebugMean,[])
 cegt = CheckEGTrader(
@@ -27,7 +27,7 @@ cegt = CheckEGTrader(
     measure_time=True,
     use_tqdm=True,
     window=WINDOW,
-    days_mode=DAYS_MODE,
+    days_mode=DAYS_MODE_HT, #заменить на DAYS_MODE, если надо сравнить с оптимизацией
     slip_stop_delta=SLIP_STOP_DELTA
 )
 # cegt.df = cegt.df.iloc[-500:]
@@ -39,31 +39,31 @@ cegt.check_strategy_faster(debug=True)
 # cegt.ws.save_to_csv("faster_means.csv")
 cegt.print_statistics()
 # cegt.plot_chart_and_sequtity()
-ef_fast = cegt.trade_data['step_eq_fee']
+# ef_fast = cegt.trade_data['step_eq_fee']
 
 cegt.plot_chart_and_sequtity()
 # cegt.ws.debug_data = []
 # cegt.check_strategy_window(normalization=True)
 # cegt.check_strategy_window(normalization=False)
 # ef_window = cegt.trade_data['step_eq_fee']
-eqf = cegt.trade_data['equity_fee']
-print(eqf)
+# eqf = cegt.trade_data['equity_fee']
+# print(eqf)
 # cegt.ws.save_to_csv("window_actions.csv")
 # cegt.ws.save_to_csv("window_means.csv")
 # cegt.check_strategy_fast_debug()
 # result_row = cegt.get_statistics()
 # print(result_row)
 
-cegt.print_statistics()
+# cegt.print_statistics()
 # cegt.plot_chart_and_sequtity()
-cegt.process_old_type_result()
+# cegt.process_old_type_result()
 # full_name_img = os.path.join(images_folder, f"{name_file}.png")
 # name_bot = 'Vasya'
-plt.figure(figsize=(12, 6))
-plt.plot(eqf, color='red', label='Equity')
-# plt.plot(ef_window, color='red', label='Equity')
-# plt.plot(ef_fast, color='blue', label='Equity with Fees')
-plt.show()
+# plt.figure(figsize=(12, 6))
+# plt.plot(eqf, color='red', label='Equity')
+# # plt.plot(ef_window, color='red', label='Equity')
+# # plt.plot(ef_fast, color='blue', label='Equity with Fees')
+# plt.show()
 # plt.title(f"{name_bot}")
 # plt.legend()
 # plt.savefig(full_name_img, bbox_inches='tight')

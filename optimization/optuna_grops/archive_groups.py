@@ -84,6 +84,38 @@ group = (
         ]
     ),
         (
+        PEG17_PROBIUS, 
+        [
+            (min_period,max_period,1),
+            (min_period,max_period,1),
+            (min_period,max_period,1),
+            (min_period,max_period,1),
+            (0, 50, 1),
+            (max_period,),
+            (0, 50, 1),
+        ]
+    ),
+        (
+        PEG17_TEMPLAR, 
+        [
+            (min_period,max_period,1),
+            (min_period,max_period,1),
+            (min_period,max_period,1),
+            (min_period,max_period,1),
+            (0, 50, 1),
+            (max_period,),
+        ]
+    ),
+        (
+        PEG17_ARCHON, 
+        [
+            (min_period,max_period,1),
+            (min_period,max_period,1),
+            (0, 50, 1),
+            (max_period,),
+        ]
+    ),
+        (
         PEG18_BLAZE, 
         [
             (min_period,max_period,1),
@@ -430,6 +462,27 @@ group = (
             (0,1)
         ]
     ),
+       (
+        UEG8_SOLDIER, 
+        [
+            (1,20,1),
+            (min_period,max_period,1),
+            (20,max_period,1),
+            (0,1,0.01),
+            (4,12,2),
+            (0,1,0.01),
+            (10,50,1),
+            (0,1),
+            (0,99,1),
+            (0,99,1),
+            (0,99,1),
+            (0,99,1),
+            (0,99,1),
+            (0,99,1),
+            (0,99,1),
+            (0,99,1),
+        ]
+    ),
         (
         UEG9_BIRDWATCHER2, 
         [
@@ -443,6 +496,7 @@ group = (
             (0,1),
         ]
     ),
+    
         (
         WEG10_sleep, 
         [
@@ -474,6 +528,21 @@ group = (
             (4,12,2),
             (0,1,0.01),
             (0,1),
+            (0,1),
+            (0,1),
+            (0,1),
+        ]
+    ),
+        (
+        VEG1_EARTH, 
+        [   
+            (20,max_period,1),
+            (0,1,0.01),
+            (4,12,2),
+            (0,1,0.01),
+            (0,1),
+            (0,1,0.01),
+            (2,20,1),
             (0,1),
             (0,1),
             (0,1),

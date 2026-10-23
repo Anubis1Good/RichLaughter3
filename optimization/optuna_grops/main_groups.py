@@ -53,7 +53,7 @@ group = (
             (min_period,max_period,1),
             (min_period,max_period,1),
             (min_period,max_period,1),
-            (5, 45, 1),    
+            (0, 50, 1),    
             ('c', 'hl'),    
             (max_period,),
         ]
@@ -167,7 +167,7 @@ group = (
         PEG14_RWDDCr, 
         [
             (min_period,max_period,1),
-            (5, 45, 1),
+            (1,50,1),
             (min_period,max_period,1),
             (min_period,max_period,1),
             (max_period,),
@@ -178,7 +178,7 @@ group = (
         [
             (min_period,max_period,1),
             (min_period,max_period,1),
-            (5, 50, 1),
+            (1,50,1),
             (min_period,max_period,1),
             (min_period,max_period,1),
             (min_period,max_period,1),
@@ -189,7 +189,7 @@ group = (
         PEG14_RANGER, 
         [
             (2, half_max_period, 1),
-            (5, 45, 1),
+            (1,50,1),
             (min_period,max_period,1),
             (min_period,max_period,1),
             (5, 100, 1),
@@ -200,7 +200,7 @@ group = (
         PEG14_RENEGADE, 
         [
             (2, half_max_period, 1),
-            (5, 45, 1),
+            (1,50,1),
             (min_period,max_period,1),
             (min_period,max_period,1),
             (5, 100, 1),
@@ -215,21 +215,9 @@ group = (
             (min_period,max_period,1),
             (min_period,max_period,1),
             (min_period,max_period,1),
-            (5, 45, 1),
+            (0, 50, 1),
             (0, 1),
             (max_period,),
-        ]
-    ),
-    (
-        PEG17_PROBIUS, 
-        [
-            (min_period,max_period,1),
-            (min_period,max_period,1),
-            (min_period,max_period,1),
-            (min_period,max_period,1),
-            (0, 50, 1),
-            (max_period,),
-            (0, 50, 1),
         ]
     ),
     (
@@ -244,6 +232,19 @@ group = (
         ]
     ),
     (
+        PEG17_AIUR, 
+        [
+            (min_period,max_period,1),
+            (min_period,max_period,1),
+            (min_period,max_period,1),
+            (min_period,max_period,1),
+            (0, 50, 1),
+            (0, 1),
+            (max_period,),
+            (0, 1, 0.1),
+        ]
+    ),
+    (
         PEG17_SELENDIS, 
         [
             (min_period,max_period,1),
@@ -252,19 +253,11 @@ group = (
             (min_period,max_period,1),
             (0, 50, 1),
             (max_period,),
+            (min_period,max_period,1),
         ]
     ),
     (
-        PEG17_ARCHON, 
-        [
-            (min_period,max_period,1),
-            (min_period,max_period,1),
-            (0, 50, 1),
-            (max_period,),
-        ]
-    ),
-    (
-        PEG17_TEMPLAR, 
+        PEG17_ALDERA, 
         [
             (min_period,max_period,1),
             (min_period,max_period,1),
@@ -272,16 +265,19 @@ group = (
             (min_period,max_period,1),
             (0, 50, 1),
             (max_period,),
+            (min_period,max_period,1),
+            (0, 50, 1),
         ]
     ),
+
 
     (
         PEG26_UNKNOWN, 
         [
             (min_period,max_period,1),
             (min_period,max_period,1),
-            (5, 45, 1),
-            (5, 45, 1),
+            (0, 50, 1),
+            (0, 50, 1),
             (min_period,max_period,1),
             (min_period,max_period,1),
             (min_period,max_period,1),
@@ -289,7 +285,28 @@ group = (
             (0, 1),
         ]
     ),
-    
+    (
+        PEG26_JUNKRAT, 
+        [
+            (min_period,max_period,1),
+            (0, 50, 1),
+            (0, 50, 1),
+            (min_period,max_period,1),
+            (min_period,max_period,1),
+            (0.05, 1 , 0.05),
+        ]
+    ),
+        (
+        PEG26_GAZLOWE, 
+        [
+            (min_period,max_period,1),
+            (0, 50, 1),
+            (0, 50, 1),
+            (min_period,max_period,1),
+            (min_period,max_period,1),
+            (0,50,1),
+        ]
+    ),
     (
         PEG30_ETC, 
         [   
@@ -350,7 +367,7 @@ group = (
         [
             (min_period,max_period,1),
             (2, max_period//8, 1),
-            (5,50,1),
+            (1,50,1),
             (3,7,1)
         ]
     ),
@@ -361,8 +378,8 @@ group = (
             (min_period,max_period,1),
             (0.5,3,0.1),
             (min_period,max_period,1),
-            (5,45,1),
-            (5,45,1),
+            (1,50,1),
+            (1,50,1),
             (0,1)
         ]
     ),
@@ -372,8 +389,8 @@ group = (
             (min_period,max_period,1),
             (0.5,3,0.1),
             (min_period,max_period,1),
-            (5,45,1),
-            (5,45,1),
+            (1,50,1),
+            (1,50,1),
             (0,1)
         ]
     ),
@@ -383,8 +400,8 @@ group = (
             (min_period,max_period,1),
             (0.5,3,0.1),
             (min_period,max_period,1),
-            (5,45,1),
-            (5,45,1),
+            (1,50,1),
+            (1,50,1),
             (0.5,2,0.1),
             (0,1)
         ]
@@ -395,8 +412,8 @@ group = (
             (min_period,max_period,1),
             (0.5,3,0.1),
             (min_period,max_period,1),
-            (5,45,1),
-            (5,45,1),
+            (1,50,1),
+            (1,50,1),
             (0,1)
         ]
     ),
@@ -405,7 +422,7 @@ group = (
         [
             (min_period,max_period,1),
             (min_period,max_period,1),
-            (10,50,1),
+            (10,90,1),
         ]
     ),
     (
@@ -512,28 +529,6 @@ group = (
         ]
     ),
 
-   (
-        UEG8_SOLDIER, 
-        [
-            (1,20,1),
-            (min_period,max_period,1),
-            (20,max_period,1),
-            (0,1,0.01),
-            (4,12,2),
-            (0,1,0.01),
-            (10,50,1),
-            (0,1),
-            (0,99,1),
-            (0,99,1),
-            (0,99,1),
-            (0,99,1),
-            (0,99,1),
-            (0,99,1),
-            (0,99,1),
-            (0,99,1),
-        ]
-    ),
-
     (
         UEG9_GRAVY2, 
         [
@@ -558,21 +553,7 @@ group = (
             (5,50,1),
         ]
     ),
-    (
-        VEG1_EARTH, 
-        [   
-            (20,max_period,1),
-            (0,1,0.01),
-            (4,12,2),
-            (0,1,0.01),
-            (0,1),
-            (0,1,0.01),
-            (2,20,1),
-            (0,1),
-            (0,1),
-            (0,1),
-        ]
-    ),
+
     (
         WEG3_BATYA, 
         [
@@ -587,15 +568,15 @@ group = (
         WEG4_DOG, 
         [
             (min_period,max_period,1),
-            (5, 45, 1),
+            (1, 50, 1),
         ]
     ),
     (
         WEG4_PUPPY, 
         [
             (min_period,max_period,1),
-            (5, 45, 1),
-            (5, 45, 1),
+            (1, 50, 1),
+            (1, 50, 1),
         ]
     ),
 
@@ -613,7 +594,7 @@ group = (
         [
             (min_period,max_period,1),
             (min_period,max_period,1),
-            (5, 45, 1),
+            (1, 50, 1),
             (min_period,max_period,1),
             (min_period,max_period,1),
             (min_period,max_period,1),

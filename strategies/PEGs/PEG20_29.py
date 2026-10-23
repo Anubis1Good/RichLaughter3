@@ -2,6 +2,7 @@ from strategies.BaseEG import BaseEG
 from for_strategies.classic_indicators import add_bollinger,add_rsi,add_donchan_channel,add_fractals,add_chop,add_adx,add_sma
 from for_strategies.pva_indicators import add_mean_on_fractals,add_ext_on_fractals,add_smooth_channel,add_integrity_index,add_stable_ma_direction
 from for_strategies.zigzag_indicators import add_dzz_peaks,add_analys_dzz,add_percent_zz_peaks,add_pattern18_dzz_czd,add_stop_loss_p18czd, add_analys_dzz180826, add_zigzag180826, add_shift_zz_peaks,add_percent_zz190826
+from for_strategies.fix_params import fix_supertrend_params,fix_two_periods_hm,fix_three_periods_hm
 
 class PEG20_HOGGER(BaseEG):
     """stop=None, take=None, period=100, period2=5, mult_big=2, mult_small=0.5, threshold_enter=40, threshold_exit=20"""
@@ -588,7 +589,7 @@ class PEG25_TASSADAR(BaseEG):
                 return 'close_long'
         
         return None
-
+            
 class PEG26_UNKNOWN(BaseEG):
     """stop=None, take=None, period_sma=55, period_rsi=10, threshold=30, threshold_ii=25,period_smad=55,period_dc=10,period_ii=20,max_period=55,use_stop=0"""
     def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_sma=55, period_rsi=10, threshold=30, threshold_ii=25,period_smad=55,period_dc=10,period_ii=20,max_period=55,use_stop=0):
@@ -600,16 +601,7 @@ class PEG26_UNKNOWN(BaseEG):
         self.threshold = threshold
         self.threshold_ii = threshold_ii
         self.use_stop = use_stop
-        max_total = (max_period // 3) * 2
-        total = period_sma + period_smad
-
-        if total > max_total:
-            ratio = max_total / total
-            self.period_sma = int(period_sma * ratio)
-            self.period_smad = int(period_smad * ratio)
-        else:
-            self.period_sma = period_sma
-            self.period_smad = period_smad
+        self.period_sma, self.period_smad = fix_two_periods_hm(period_sma,period_smad,max_period)
         self.problems = 'Mcfly'
 
     def preprocessing(self, tdata):
@@ -620,34 +612,107 @@ class PEG26_UNKNOWN(BaseEG):
         df = add_donchan_channel(df, self.period_dc)
         df = add_rsi(df, self.period_rsi)
         df = add_integrity_index(df, self.period_ii)
+        df['nl'] = df['high'] - df['close'] > df['close'] - df['low']
+        df['can_long'] = df['dir_ma'] > 0
         df = self.add_slice_df(df)
         pdata['chart'] = df
         return pdata
     
     def _get_action_from_row(self, row):
-        can_long = row['dir_ma'] > 0
-        nearest_long = row['high'] - row['close'] > row['close'] - row['low']
         
-        if nearest_long and can_long:
+        if row['nl'] and row['can_long']:
             if row['close'] <= row['avarege'] and row['ii'] > self.threshold_ii:
                 return 'open_long'
             if row['low'] <= row['min_hb']:
                 return 'open_long'
         
-        if not nearest_long and not can_long:
+        if not row['nl'] and not row['can_long']:
             if row['close'] >= row['avarege'] and row['ii'] < -self.threshold_ii:
                 return 'open_short'
             if row['high'] >= row['max_hb']:
                 return 'open_short'
         
-        if row['rsi'] < self.threshold and row['low'] <= row['min_hb']:
+        if row['nl'] and row['rsi'] < self.threshold and row['low'] <= row['min_hb']:
             return 'close_short'
         
-        if row['rsi'] > 100 - self.threshold and row['high'] >= row['max_hb']:
+        if not row['nl'] and row['rsi'] > 100 - self.threshold and row['high'] >= row['max_hb']:
             return 'close_long'
         
         if self.use_stop:
-            if can_long:
+            if row['can_long']:
                 return 'close_short'
             else:
                 return 'close_long'
+            
+class PEG26_JUNKRAT(BaseEG):
+    """stop=None, take=None, period_rsi=10, threshold_rsi=30, threshold_ii=25,period_dc=10,period_ii=10,allowance=0.1"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_rsi=10, threshold_rsi=30, threshold_ii=25,period_dc=10,period_ii=10,allowance=0.1):
+        super().__init__(symbol, price_step, mult_ps, mode, stop, take)
+        self.needs_info = {'chart': self.symbol}
+        self.period_rsi = period_rsi
+        self.period_dc = period_dc
+        self.period_ii = period_ii
+        self.threshold_rsi = threshold_rsi
+        self.threshold_ii = threshold_ii
+        self.allowance = allowance
+
+    def preprocessing(self, tdata):
+        pdata = {}
+        df = tdata['chart']
+        df = add_donchan_channel(df, self.period_dc)
+        df = add_rsi(df, self.period_rsi)
+        df = add_integrity_index(df, self.period_ii)
+        df['nl'] = df['high'] - df['close'] > df['close'] - df['low']
+        df['dc_diff_per'] = ((df['max_hb'] - df['min_hb']) / df['min_hb']) * 100
+        df['allowance'] = df['dc_diff_per'] > self.allowance
+        df = self.add_slice_df(df)
+        pdata['chart'] = df
+        return pdata
+    
+    def _get_action_from_row(self, row):
+        if row['allowance']:
+            if row['ii'] < self.threshold_ii or row['ii'] > 100 - self.threshold_ii:
+                if row['nl'] and  row['low'] <= row['min_hb']:
+                    return 'open_long'
+                if not row['nl'] and row['high'] >= row['max_hb']:
+                    return 'open_short'
+            else:
+                if row['nl'] and row['rsi'] < self.threshold_rsi and row['low'] <= row['min_hb']:
+                    return 'open_long'
+                if not row['nl'] and row['rsi'] > 100 - self.threshold_rsi and row['high'] >= row['max_hb']:
+                    return 'open_short'
+            
+class PEG26_GAZLOWE(BaseEG):
+    """stop=None, take=None, period_rsi=10, threshold_rsi=30, threshold_ii=10,period_dc=10,period_ii=20,sleep_thresh_ii=5"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_rsi=10, threshold_rsi=30, threshold_ii=10,period_dc=10,period_ii=20,sleep_thresh_ii=5):
+        super().__init__(symbol, price_step, mult_ps, mode, stop, take)
+        self.needs_info = {'chart': self.symbol}
+        self.period_rsi = period_rsi
+        self.period_dc = period_dc
+        self.period_ii = period_ii
+        self.threshold_rsi = threshold_rsi
+        self.threshold_ii = threshold_ii
+        self.sleep_thresh_ii = sleep_thresh_ii
+
+    def preprocessing(self, tdata):
+        pdata = {}
+        df = tdata['chart']
+        df = add_donchan_channel(df, self.period_dc)
+        df = add_rsi(df, self.period_rsi)
+        df = add_integrity_index(df, self.period_ii)
+        df['nl'] = df['high'] - df['close'] > df['close'] - df['low']
+        df = self.add_slice_df(df)
+        pdata['chart'] = df
+        return pdata
+    
+    def _get_action_from_row(self, row):
+        if row['ii'] < self.threshold_ii:
+            return 'open_short'
+        elif row['ii'] > 100 - self.threshold_ii:
+            return 'open_long'
+        elif row['ii'] < 100 - (self.threshold_ii+self.sleep_thresh_ii) and row['ii'] > self.threshold_ii + self.sleep_thresh_ii:
+            if row['nl'] and row['rsi'] < self.threshold_rsi and row['low'] <= row['min_hb']:
+                return 'open_long'
+            if not row['nl'] and row['rsi'] > 100 - self.threshold_rsi and row['high'] >= row['max_hb']:
+                return 'open_short'
+

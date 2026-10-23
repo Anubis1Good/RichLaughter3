@@ -338,8 +338,7 @@ def add_integrity_index(df:pd.DataFrame,period:int=14):
     """add 'ii'"""
     df['spred'] = df['high'] - df['low']
     df['integrity'] = np.where(df['direction'] == 1, df['spred'],-df['spred'])
-    df['ii'] = (df['integrity'].rolling(period).sum() / np.abs(df['integrity']).rolling(period).sum()) * 100
-    df['ii'] = df['ii'].round(2)
+    df['ii'] = (df['integrity'].rolling(period).sum() / df['spred'].rolling(period).sum()) * 100
     df = df.drop(['spred','integrity'],axis=1)
     return df
 
