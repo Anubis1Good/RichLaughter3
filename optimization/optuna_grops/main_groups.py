@@ -435,7 +435,16 @@ group = (
             (0,1)
         ]
     ),
-
+    (
+        LEG3a_LOTR, 
+        [
+            (min_period,max_period,1),
+            (min_period,max_period,1),
+            (0,50,1),
+            (max_period,),
+   
+        ]
+    ),
     (
         SEG1_LITE, 
         [
