@@ -64,3 +64,31 @@ def add_two_perchan(df,fast_period=5,slow_period=50,fast_percent=0.5,slow_percen
     df['uline_slow'] = df['mline_slow'] + buff
     df['dline_slow'] = df['mline_slow'] - buff
     return df
+
+def add_zebra(df,period=50,percent=0.5,n_zebra=3):
+    """ add 'mzebra', 'uzebraN', 'dzebraN'"""
+    df['mzebra'] = df['close'].rolling(period).mean()
+    buff = (df['mzebra'] * percent) / 100
+    for i in range(1,n_zebra):
+        df['uzebra'+str(i)] = df['mzebra'] + buff * i
+        df['dzebra'+str(i)] = df['mzebra'] - buff* i
+    return df
+
+def add_zechan(df,*periods):
+    """add 'tdcN','ddcN','mdcN'"""
+    for i,p in enumerate(periods):
+        df['tdc'+str(i)] = df['high'].rolling(p).max()
+        df['ddc'+str(i)] = df['low'].rolling(p).min()
+        df['mdc'+str(i)] = (df['tdc'+str(i)] + df['ddc'+str(i)]) / 2
+
+    return df
+
+def add_velcro_bb(df,period_check=10):
+    '''add "velcro_bb"'''
+    df['dbb_h'] = df['bbu'] - df['high']
+    df['dbb_l'] = df['low'] - df['bbd']
+    df['lis_bb'] = df['dbb_l'].rolling(period_check).mean()
+    df['his_bb'] = df['dbb_h'].rolling(period_check).mean()
+    df['sis_bb'] = df['lis_bb'] + df['his_bb']
+    df['velcro_bb'] = ((df['lis_bb'] / df['sis_bb']) * 100).clip(0, 100)
+    return df
