@@ -21,8 +21,8 @@ top_limit = 500
 test_folder = '_data_for_tests/data_stock_5m'
 # test_folder = '_data_for_tests/data_stock_5m_spred'
 # metric = 'curve_composite'    
-metric = 'curve_lex'    
-# metric = 'total_fee_per'    
+# metric = 'curve_lex'    
+metric = 'total_fee_per'    
 need_plot = True
 need_plot = False
 
