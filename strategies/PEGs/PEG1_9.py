@@ -130,7 +130,7 @@ class PEG4_U4(BaseEG):
         if row['high'] >= row[self.up] and row['overbought']:
             return 'open_short'
 
-    
+# 26.10.2026 целый день был боковик: 2 сделки 0% wr
 class PEG4_U5(BaseEG):
     '''
     stop=None, take=None, period=20, period_rsi=20, period_fractal=10, period_max=55, kind_channel='DC', kind_rsi='rsi',period2s = 3 \n
