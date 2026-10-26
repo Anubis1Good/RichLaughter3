@@ -10,10 +10,13 @@ start_date = str(today - timedelta(days=30))
 
 
 tickers = (
-    'SBER','VTBR','T','ROSN','NLMK','CHMF',
-    'TATN','SNGSP','SIBN','MTLR','MAGN','ALRS',
-    'SBERP','TATNP','AFLT','FEES','RUAL','VKCO',
-    'ENPG','IRAO','SFIN','RAGR','SPBE','ASTR',
+    # 'SBER','VTBR','T','ROSN','NLMK','CHMF',
+    # 'TATN','SNGSP','SIBN','MTLR','MAGN','ALRS',
+    # 'SBERP','TATNP','AFLT','FEES','RUAL','VKCO',
+    # 'ENPG','IRAO','SFIN','RAGR','SPBE','ASTR',
+
+    'AQUA','DATA','FESH','HYDR','IVAT','LSRG',
+    'OGKB','OZPH','RNFT','RTKM','RTKMP','SELG',
     )
 # tickers = (
 #     'OGKB','ETLN','TGKA','DELI','FIXR','VSEH',

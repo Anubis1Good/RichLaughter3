@@ -172,7 +172,63 @@ bot_on_ticker = {
     'VTBR':(PEG17_AIUR,(None,56,65,6,12,66,6,1,70,0.7),5,None),
     #18.10.26 ?14% +5.2 +8.6 +0.6 д
     'VTBR2':(PEG17_PHOENIX,(None,75,13,52,69,62,29,0,70),7,None),
+
+
+    #26.10.26 ?35%
+    'AQUA':(WEG7_PARADOX2,(None,None,63,0.3,22,0.3),1,None),
+    #26.10.26 ?32%
+    'AQUA2':(PEG17_AIUR,(None,None,5,8,51,48,24,0,70,0.5),1,None),
+    #26.10.26 ?20%
+    'DATA':(LEG3a_LOTR,(None,17,20,7,46,70),2,None),
+    #26.10.26 ?29%
+    'DATA2':(PEG30_ETC,(None,12,1,20,1,1,7,11,45,32,23,54),1,None),
+
+    #26.10.26 ?50%
+    'FESH':(UEG9_GRAVY2,(None,None,34,0.79,6,0.4,1.75,1),1,None),
+    #26.10.26 ?52%
+    'FESH2':(PEG11_RAYMIYAMOTO,(None,None,7,12,2.2,1.7,36,34,'real_wpedal','s',3,70,9,52,12,11,16,17,1,1),1,None),
+    # #26.10.26 ?24%
+    # 'HYDR':(WEG3_BATYA,(None,None,41,1.7,1,1,1),1,None),
+    # #26.10.26 ?19%
+    # 'HYDR2':(PEG11_ALICEMARASATO,(None,34,29,28,1.3,1.6,36,19,'real_pedal','mfi',4,70,19,53,6,8,10,0,9,1),3,None),
+
+    #26.10.26 ?54%
+    'IVAT':(LEG2_DRINKER,(None,None,24,2.8,11,49,25,0),1,None),
+    #26.10.26 ?50%
+    'IVAT2':(UEG6_SURVIVALIST,(None,None,19,11,2.4,0,8.6,46,42,0),1,None),
+    #26.10.26 ?31%
+    'LSRG':(PEG11_RAYMIYAMOTO,(None,None,60,27,2.9,1.6,18,10,'rsi','rsi',2,70,65,84,16,3,50,20,1,1),1,None),
+    #26.10.26 ?36%
+    'LSRG2':(PEG17_PHOENIX,(None,13,16,7,69,17,14,1,70),2,None),
+
+    #26.10.26 ?13%
+    'OGKB':(PEG30_ETC,(None,6,1,5,1,1,30,61,22,57,8,92),1,None),
+    #26.10.26 ?25%
+    'OGKB2':(WEG7_PARADOX2,(None,None,5,0.3,58,0.6),1,None),
+    #26.10.26 ?15%
+    'OZPH':(PEG30_ETC,(None,13,0,15,1,1,24,65,66,12,80,34),1,None),
+    #26.10.26 ?19%
+    # 'OZPH2':(LEG2_LYNX,(None,39,9,3.0,17,1.9,0),4,None),
+
+    #26.10.26 ?25%
+    'RNFT':(UEG9_POLITICIAN,(None,8,49,0.55,10,0.27,0,40,39),1,None),
+    #26.10.26 ?34%
+    # 'RNFT2':(PEG17_AIUR,(None,None,12,45,33,21,42,1,70,0.6),1,None),
+    #26.10.26 ?42%
+    'SELG':(PEG17_AIUR,(None,None,19,6,5,16,49,1,70,0.6),1,None),
+    #26.10.26 ?35%
+    'SELG2':(PEG26_JUNKRAT,(None,None,8,35,6,6,16,0.25),1,None),
+
+    #26.10.26 ?25%
+    # 'RTKM':(LEG2_DRG,(None,None,10,3.0,5,41,36,1),1,None),
+    #26.10.26 ?21%
+    # 'RTKM2':(PEG26_UNKNOWN,(None,24,52,10,47,40,13,5,34,70,0),2,None),
+    #26.10.26 ?23%
+    # 'RTKMP':(PEG30_ETC2,(None,None,1,2,1,1,10,18,20,18,80,66),1,None),
+    #26.10.26 ?15%
+    # 'RTKMP2':(PEG11_SAYATAKAGI,(None,6,40,70,0.5,3.2,57,42,'pedal','uo',3,70,58,11,48,49,38,0,5),1,None),
     
+
 }
 # sleep_group = ()
 
