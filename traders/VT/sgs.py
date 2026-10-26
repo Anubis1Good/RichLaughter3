@@ -21,6 +21,13 @@ stock_groups= {
         ['TATN','TATN2','TATNP','TATNP2'],
         ['VKCO','VKCO2','VTBR','VTBR2'],
 
+        ['AQUA','AQUA2','DATA','DATA2'],
+        ['FESH','FESH2','HYDR','HYDR2'],
+        ['IVAT','IVAT2','LSRG','LSRG2'],
+        ['OGKB','OGKB2','OZPH','OZPH2'],
+        ['RNFT','RNFT2','SELG','SELG2'],
+        ['RTKM','RTKM2','RTKMP','RTKMP2'],
+
     ),
     'CLOSE_4':(
         ['CLOSEALL1','CLOSEALL2','CLOSEALL3','CLOSEALL4'],
