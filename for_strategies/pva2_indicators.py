@@ -92,3 +92,89 @@ def add_velcro_bb(df,period_check=10):
     df['sis_bb'] = df['lis_bb'] + df['his_bb']
     df['velcro_bb'] = ((df['lis_bb'] / df['sis_bb']) * 100).clip(0, 100)
     return df
+
+def add_ratio_2ext_281026(df, period=70):
+    """
+    Векторизованная версия.
+    Окно period делится пополам:
+      left  half = [start, start + half)
+      right half = [start + half, start + period)
+    В каждой половине — max(high) и min(low).
+    """
+    n = len(df)
+    high = df['high'].to_numpy(dtype=float)
+    low = df['low'].to_numpy(dtype=float)
+    df_index = df.index.to_numpy()
+
+    half = period // 2
+    rlen = period - half
+
+    l_max = np.full(n, np.nan)
+    l_min = np.full(n, np.nan)
+    r_max = np.full(n, np.nan)
+    r_min = np.full(n, np.nan)
+
+    idx_l_max = np.full(n, np.nan)
+    idx_l_min = np.full(n, np.nan)
+    idx_r_max = np.full(n, np.nan)
+    idx_r_min = np.full(n, np.nan)
+
+    if n < period or half == 0 or rlen == 0:
+        df['l_max'] = l_max
+        df['l_min'] = l_min
+        df['r_max'] = r_max
+        df['r_min'] = r_min
+        df['idx_l_max'] = idx_l_max
+        df['idx_l_min'] = idx_l_min
+        df['idx_r_max'] = idx_r_max
+        df['idx_r_min'] = idx_r_min
+        return df
+
+    # Окна: shape (n - period + 1, period)
+    win_h = np.lib.stride_tricks.sliding_window_view(high, period)
+    win_l = np.lib.stride_tricks.sliding_window_view(low, period)
+
+    lh = win_h[:, :half]
+    ll = win_l[:, :half]
+    rh = win_h[:, half:]
+    rl = win_l[:, half:]
+
+    pl_max = np.argmax(lh, axis=1)
+    pl_min = np.argmin(ll, axis=1)
+    pr_max = np.argmax(rh, axis=1)
+    pr_min = np.argmin(rl, axis=1)
+
+    # Позиция окна k в массиве соответствует бару i = k + period - 1
+    rows = np.arange(win_h.shape[0])
+    out_i = rows + period - 1
+
+    l_max[out_i] = lh[rows, pl_max]
+    l_min[out_i] = ll[rows, pl_min]
+    r_max[out_i] = rh[rows, pr_max]
+    r_min[out_i] = rl[rows, pr_min]
+
+    idx_l_max[out_i] = df_index[rows + pl_max]
+    idx_l_min[out_i] = df_index[rows + pl_min]
+    idx_r_max[out_i] = df_index[rows + half + pr_max]
+    idx_r_min[out_i] = df_index[rows + half + pr_min]
+
+    df['l_max'] = l_max
+    df['l_min'] = l_min
+    df['r_max'] = r_max
+    df['r_min'] = r_min
+
+    df['idx_l_max'] = idx_l_max
+    df['idx_l_min'] = idx_l_min
+    df['idx_r_max'] = idx_r_max
+    df['idx_r_min'] = idx_r_min
+
+    return df
+
+def add_ratio_2ext_roll_281026(df:pd.DataFrame,period=70):
+    half_period = period // 2
+    rlen = period - half_period  
+    df['r_max'] = df['high'].rolling(rlen).max()
+    df['r_min'] = df['low'].rolling(rlen).min()
+    df['l_max'] = df['r_max'].shift(half_period)
+    df['l_min'] = df['r_min'].shift(half_period)
+    return df

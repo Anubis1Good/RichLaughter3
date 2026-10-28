@@ -42,15 +42,17 @@ max_period = 55
 # df['stair_pc'] = df['stair']
 # df = add_perchan_sma(df)
 # df = add_perchan_mid(df)
-df = add_two_perchan(df)
+# df = add_two_perchan(df)
 
+
+df = add_ratio_2ext_roll_281026(df)
 print(df.tail(20))
 # print(df['ave_up'].isna().sum())
 # print(df[['wzp1','idx_wzp1','wzp2','idx_wzp2','wzp3','idx_wzp3','wzp4','idx_wzp4',   'wzp5',  'idx_wzp5',  'wzp6',  'idx_wzp6',   'wzp7',  'idx_wzp7',   'wzp8',  'idx_wzp8']].tail())
 fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 10), sharex=True)
 
 draw_bars_chart_wo_vol(df, ax=ax1)
-for kind in ('mline_fast', 'uline_fast', 'dline_fast','mline_slow', 'uline_slow', 'dline_slow'):
+for kind in ('l_max', 'l_min', 'r_max','r_min'):
     ax1.plot(df[kind])
 
 # for kind in ('dvsai', 'dvsaima', 'dvsaiu', 'dvsaid'):
