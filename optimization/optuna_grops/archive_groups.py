@@ -83,18 +83,7 @@ group = (
             (min_period,max_period,1),
         ]
     ),
-        (
-        PEG17_PROBIUS, 
-        [
-            (min_period,max_period,1),
-            (min_period,max_period,1),
-            (min_period,max_period,1),
-            (min_period,max_period,1),
-            (0, 50, 1),
-            (max_period,),
-            (0, 50, 1),
-        ]
-    ),
+
         (
         PEG17_TEMPLAR, 
         [
@@ -295,6 +284,15 @@ group = (
         ]
     ),
         (
+        UEG4_CANADIAN, 
+        [
+            (10, max_period, 1),
+            (2, half_max_period, 1),
+            (1,10,1),
+            (0,1,0.01)
+        ]
+    ),
+        (
         UEG6_DODO, 
         [
             (2, half_max_period, 1),
@@ -344,6 +342,45 @@ group = (
             (min_period,max_period,1),
             (2,period_fractal_max,1),
             (1,5,1),
+            (0,1,0.01),
+            (2, half_max_period, 1),
+        ]
+    ),
+       (
+        UEG7_LOVERGOOSE, 
+        [
+            (2, half_max_period, 1),
+            (10, max_period, 1),
+            (2, half_max_period, 1),
+            (1,10,1),
+            (10,70,1),
+            (10,70,1),
+            (0,1),
+        ]
+    ),
+    (
+        UEG7_LOVERDUCK, 
+        [
+            (2, half_max_period, 1),
+            (10, max_period, 1),
+            (2, half_max_period, 1),
+            (1,10,1),
+            (10,70,1),
+            (min_period,max_period,1),
+            (0,1),
+        ]
+    ),
+    (
+        UEG7_CANNIBAL, 
+        [
+            (min_period,max_period,1),
+            (10,70,1),
+            (10, max_period, 1),
+            (2, half_max_period, 1),
+            (1,10,1),
+            (10, max_period, 1),
+            (2, half_max_period, 1),
+            (1,10,1),
             (0,1,0.01),
             (2, half_max_period, 1),
         ]

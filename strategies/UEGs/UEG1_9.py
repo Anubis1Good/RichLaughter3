@@ -30,7 +30,6 @@ class UEG4_CANADIAN(BaseEG):
         if row['close'] <= row['ave_down']:
             return 'open_long'
         
-        return None
      
 class UEG4_FALCON2(BaseEG):
     """stop=None, take=None, period_window=55,period_fractal_free=5, n_fractals=3, allowance=0.1"""
@@ -1292,6 +1291,7 @@ class UEG9_BIRDWATCHER2(BaseEG):
 # 05.10.2026 нужна версия с отдельной работой для боковика и тренда
 # 07.10.2026 нужна версия без входа в канале (без top_stop and bottom_stop)
 # 14.10.2026 тоже бывает открывает прям в хае сделки
+# 30.10.2026 закрыл шорт в хай
 class UEG9_GRAVY2(BaseEG):
     '''
     stop=None, take=None, period_wzz=55, frac_wzz=0.1, n_wzp=8, buffer_mean=0.1, mult_stop=0.5, use_stop=1
@@ -1332,6 +1332,7 @@ class UEG9_GRAVY2(BaseEG):
 # 21.10.2026 добавить версию, которая может закрывать сделки в случает запрета одной из сторон!
 # 25.10.2026 возможно стоит классифицировать паттерны и отбирать те, на которых можно заходить и те, на которых нельзя
 # 27.10.2026 какие-то частые входы прям в хаях. Надо это править!
+# 30.10.2026 заебал около хаев входить! Надо буффер добавить!
 class UEG9_POLITICIAN(BaseEG):
     '''
     stop=None, take=None, period_wzz=55, frac_wzz=0.1, n_wzp=8, buffer_mean=0.1,use_rsi=0,period_rsi=30,thresh_rsi=30

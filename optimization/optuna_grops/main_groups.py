@@ -221,6 +221,18 @@ group = (
         ]
     ),
     (
+        PEG17_PROBIUS, 
+        [
+            (min_period,max_period,1),
+            (min_period,max_period,1),
+            (min_period,max_period,1),
+            (min_period,max_period,1),
+            (0, 50, 1),
+            (max_period,),
+            (0, 50, 1),
+        ]
+    ),
+    (
         PEG17_ZEALOT, 
         [
             (min_period,max_period,1),
@@ -305,6 +317,7 @@ group = (
             (min_period,max_period,1),
             (min_period,max_period,1),
             (0,50,1),
+            (0,2,1),
         ]
     ),
     (
@@ -465,15 +478,7 @@ group = (
    
         ]
     ),
-    (
-        UEG4_CANADIAN, 
-        [
-            (10, max_period, 1),
-            (2, half_max_period, 1),
-            (1,10,1),
-            (0,1,0.01)
-        ]
-    ),
+
     (
         UEG6_ADVENTURE, 
         [
@@ -497,47 +502,6 @@ group = (
             (0,1),
         ]
     ),
-
-   (
-        UEG7_LOVERGOOSE, 
-        [
-            (2, half_max_period, 1),
-            (10, max_period, 1),
-            (2, half_max_period, 1),
-            (1,10,1),
-            (10,70,1),
-            (10,70,1),
-            (0,1),
-        ]
-    ),
-    (
-        UEG7_LOVERDUCK, 
-        [
-            (2, half_max_period, 1),
-            (10, max_period, 1),
-            (2, half_max_period, 1),
-            (1,10,1),
-            (10,70,1),
-            (min_period,max_period,1),
-            (0,1),
-        ]
-    ),
-    (
-        UEG7_CANNIBAL, 
-        [
-            (min_period,max_period,1),
-            (10,70,1),
-            (10, max_period, 1),
-            (2, half_max_period, 1),
-            (1,10,1),
-            (10, max_period, 1),
-            (2, half_max_period, 1),
-            (1,10,1),
-            (0,1,0.01),
-            (2, half_max_period, 1),
-        ]
-    ),
-
     (
         UEG9_GRAVY2, 
         [

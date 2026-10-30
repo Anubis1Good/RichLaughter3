@@ -681,10 +681,10 @@ class PEG26_JUNKRAT(BaseEG):
                     return 'open_long'
                 if not row['nl'] and row['rsi'] > 100 - self.threshold_rsi and row['high'] >= row['max_hb']:
                     return 'open_short'
-            
+             
 class PEG26_GAZLOWE(BaseEG):
-    """stop=None, take=None, period_rsi=10, threshold_rsi=30, threshold_ii=10,period_dc=10,period_ii=20,sleep_thresh_ii=5"""
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_rsi=10, threshold_rsi=30, threshold_ii=10,period_dc=10,period_ii=20,sleep_thresh_ii=5):
+    """stop=None, take=None, period_rsi=10, threshold_rsi=30, threshold_ii=10,period_dc=10,period_ii=20,sleep_thresh_ii=5,use_trend=0"""
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_rsi=10, threshold_rsi=30, threshold_ii=10,period_dc=10,period_ii=20,sleep_thresh_ii=5,use_trend=0):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
         self.period_rsi = period_rsi
@@ -693,6 +693,7 @@ class PEG26_GAZLOWE(BaseEG):
         self.threshold_rsi = threshold_rsi
         self.threshold_ii = threshold_ii
         self.sleep_thresh_ii = sleep_thresh_ii
+        self.use_trend = use_trend
 
     def preprocessing(self, tdata):
         pdata = {}
@@ -707,9 +708,19 @@ class PEG26_GAZLOWE(BaseEG):
     
     def _get_action_from_row(self, row):
         if row['ii'] < self.threshold_ii:
-            return 'open_short'
+            if self.use_trend == 0:
+                return
+            if self.use_trend == 1:
+                return 'open_long'
+            if self.use_trend == 2:
+                return 'open_short'
         elif row['ii'] > 100 - self.threshold_ii:
-            return 'open_long'
+            if self.use_trend == 0:
+                return
+            if self.use_trend == 1:
+                return 'open_short'
+            if self.use_trend == 2:
+                return 'open_long'
         elif row['ii'] < 100 - (self.threshold_ii+self.sleep_thresh_ii) and row['ii'] > self.threshold_ii + self.sleep_thresh_ii:
             if row['nl'] and row['rsi'] < self.threshold_rsi and row['low'] <= row['min_hb']:
                 return 'open_long'
