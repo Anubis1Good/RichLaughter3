@@ -1,8 +1,10 @@
 from strategies.BaseEG import BaseEG
 from for_strategies.classic_indicators import add_fractals,add_rsi,add_adx,add_bollinger
-from for_strategies.pva_indicators import add_average_fractals,add_plus_delta_fc,add_exp_pdfc,add_ext_on_fractals,add_mean_on_fractals,add_average_fractals_window,add_exp_pdfc_window,add_plus_delta_fc_window
+from for_strategies.pva_indicators import add_average_fractals,add_plus_delta_fc,add_exp_pdfc,add_ext_on_fractals,add_mean_on_fractals,add_average_fractals_window,add_exp_pdfc_window,add_plus_delta_fc_window,add_vodka_channel
+from for_strategies.pva2_indicators import add_per_above_sma
 from for_strategies.zigzag_indicators import add_percent_zz190826,add_dzz_peaks,add_analys_dzz,add_percent_zz_peaks,add_pattern18_dzz_czd,add_stop_loss_p18czd,add_exp_plusdelta_dzz_peaks,add_mean_dzz_peaks,add_plusdelta_dzz_peaks,add_zigzag180826,add_shift_zz_peaks,add_analys_dzz180826, add_zigzag_window_210926,add_pattern18_zzw_210926,add_zigzag_window_260926,add_mean_peaks_wzz260926, add_plusdelta_peaks_wzz260926,add_exp_plusdelta_peaks_wzz260926,add_mean_ind_wzz_peaks,add_extreme_ind_wzz_peaks,add_pattern18_zzw_260926,add_drop_last_wzp
 from for_strategies.help_indicators import add_buffer_add
+from for_strategies.fix_params import fix_supertrend_params,fix_two_periods_hm,fix_three_periods_hm
 
 class UEG4_CANADIAN(BaseEG):
     """stop=None, take=None, period_window=55,period_fractal_free=5, n_fractals=3, allowance=0.1"""
@@ -30,6 +32,7 @@ class UEG4_CANADIAN(BaseEG):
         if row['close'] <= row['ave_down']:
             return 'open_long'
         
+        return None
      
 class UEG4_FALCON2(BaseEG):
     """stop=None, take=None, period_window=55,period_fractal_free=5, n_fractals=3, allowance=0.1"""
@@ -1291,12 +1294,11 @@ class UEG9_BIRDWATCHER2(BaseEG):
 # 05.10.2026 нужна версия с отдельной работой для боковика и тренда
 # 07.10.2026 нужна версия без входа в канале (без top_stop and bottom_stop)
 # 14.10.2026 тоже бывает открывает прям в хае сделки
-# 30.10.2026 закрыл шорт в хай
 class UEG9_GRAVY2(BaseEG):
     '''
     stop=None, take=None, period_wzz=55, frac_wzz=0.1, n_wzp=8, buffer_mean=0.1, mult_stop=0.5, use_stop=1
     '''
-    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_wzz=55, frac_wzz=0.1, n_wzp=8, buffer_mean=0.1, mult_stop=0.5, use_stop=1):
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_wzz=55, frac_wzz=0.1, n_wzp=8, buffer_mean=0.1, mult_stop=0.5, use_stop=0):
         super().__init__(symbol, price_step, mult_ps, mode, stop, take)
         self.needs_info = {'chart': self.symbol}
         self.period_wzz = period_wzz
@@ -1332,7 +1334,6 @@ class UEG9_GRAVY2(BaseEG):
 # 21.10.2026 добавить версию, которая может закрывать сделки в случает запрета одной из сторон!
 # 25.10.2026 возможно стоит классифицировать паттерны и отбирать те, на которых можно заходить и те, на которых нельзя
 # 27.10.2026 какие-то частые входы прям в хаях. Надо это править!
-# 30.10.2026 заебал около хаев входить! Надо буффер добавить!
 class UEG9_POLITICIAN(BaseEG):
     '''
     stop=None, take=None, period_wzz=55, frac_wzz=0.1, n_wzp=8, buffer_mean=0.1,use_rsi=0,period_rsi=30,thresh_rsi=30
@@ -1369,5 +1370,118 @@ class UEG9_POLITICIAN(BaseEG):
             return 'open_short'
         if row['close'] <= row['bottom_mean'] and row['can_long']:
             return 'open_long'
+        
+class UEG9_ASTRAL(BaseEG):
+    '''
+    stop=None, take=None, period_vc=10, divider=1,allowance=0.1
+    '''
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_vc=10, divider=1,allowance=0.1):
+        super().__init__(symbol, price_step, mult_ps, mode, stop, take)
+        self.needs_info = {'chart': self.symbol}
+        self.period_vc = period_vc
+        self.divider = divider
+        self.allowance = allowance
+
+    def preprocessing(self, tdata):
+        pdata = {}
+        df = tdata['chart']
+        df = add_vodka_channel(df,self.period_vc)
+        df = add_buffer_add(df, 'top_mean', 'bottom_mean', self.divider)
+        df['mean_diff_percent'] = ((df['top_mean'] - df['bottom_mean']) / df['bottom_mean']) * 100
+        df['allowance'] = df['mean_diff_percent'] > self.allowance
+        df = self.add_slice_df(df)
+        pdata['chart'] = df
+        return pdata
+    
+    def _get_action_from_row(self, row):
+        if row['allowance']:
+            if row['close'] >= row['top_buff']:
+                return 'open_short'
+            if row['close'] <= row['bottom_buff']:
+                return 'open_long'
+            
+class UEG9_MEDIUM(BaseEG):
+    '''
+    stop=None, take=None, period_vc=10, divider=1,allowance=0.1,period_pas1=10,period_pas2=60,max_period=70,pas_thresh=20
+    '''
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_vc=10, divider=1,allowance=0.1,period_pas1=10,period_pas2=60,max_period=70,pas_thresh=20):
+        super().__init__(symbol, price_step, mult_ps, mode, stop, take)
+        self.needs_info = {'chart': self.symbol}
+        self.period_vc = period_vc
+        self.period_pas1, self.period_pas2 = fix_two_periods_hm(period_pas1,period_pas2,max_period)
+        self.divider = divider
+        self.allowance = allowance
+        self.pas_thresh = pas_thresh
+
+    def preprocessing(self, tdata):
+        pdata = {}
+        df = tdata['chart']
+        df = add_per_above_sma(df,self.period_pas1, self.period_pas2)
+        df = add_vodka_channel(df,self.period_vc)
+        df = add_buffer_add(df, 'top_mean', 'bottom_mean', self.divider)
+        df['mean_diff_percent'] = ((df['top_mean'] - df['bottom_mean']) / df['bottom_mean']) * 100
+        df['allowance'] = df['mean_diff_percent'] > self.allowance
+        df = self.add_slice_df(df)
+        pdata['chart'] = df
+        return pdata
+    
+    def _get_action_from_row(self, row):
+        if row['allowance']:
+            if row['pas'] >= 100-self.pas_thresh or row['pas'] <= self.pas_thresh:
+                top = 'top_buff' 
+                bottom = 'bottom_buff' 
+            else:
+                top = 'top_mean' 
+                bottom = 'bottom_mean' 
+            if row['close'] >= row[top]:
+                return 'open_short'
+            if row['close'] <= row[bottom]:
+                return 'open_long'
+    
+class UEG9_TRACKER(BaseEG):
+    '''
+    stop=None, take=None, period_vc=10, divider=1,allowance=0.1,period_pas1=10,period_pas2=60,max_period=70,pas_thresh=20
+    '''
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_vc=10, divider=1,allowance=0.1,period_pas1=10,period_pas2=60,max_period=70,pas_thresh=20):
+        super().__init__(symbol, price_step, mult_ps, mode, stop, take)
+        self.needs_info = {'chart': self.symbol}
+        self.period_vc = period_vc
+        self.period_pas1, self.period_pas2 = fix_two_periods_hm(period_pas1,period_pas2,max_period)
+        self.divider = divider
+        self.allowance = allowance
+        self.pas_thresh = pas_thresh
+
+    def preprocessing(self, tdata):
+        pdata = {}
+        df = tdata['chart']
+        df = add_per_above_sma(df,self.period_pas1, self.period_pas2)
+        df = add_vodka_channel(df,self.period_vc)
+        df = add_buffer_add(df, 'top_mean', 'bottom_mean', self.divider)
+        df['mean_diff_percent'] = ((df['top_mean'] - df['bottom_mean']) / df['bottom_mean']) * 100
+        df['allowance'] = df['mean_diff_percent'] > self.allowance
+        df = self.add_slice_df(df)
+        pdata['chart'] = df
+        return pdata
+    
+    def _get_action_from_row(self, row):
+        if row['allowance']:
+            can_long = True
+            can_short = True
+            if row['pas'] >= 100-self.pas_thresh:
+                can_short = False
+            if row['pas'] <= self.pas_thresh:
+                can_long = False
+
+            if row['close'] >= row['top_buff']:
+                if can_short:
+                    return 'open_short'
+                else:
+                    return 'close_long'
+            if row['close'] <= row['bottom_buff']:
+                if can_long:
+                    return 'open_long'
+                else:
+                    return 'close_short'
+    
 
         
