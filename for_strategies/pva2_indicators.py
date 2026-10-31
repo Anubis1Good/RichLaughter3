@@ -178,3 +178,26 @@ def add_ratio_2ext_roll_281026(df:pd.DataFrame,period=70):
     df['l_max'] = df['r_max'].shift(half_period)
     df['l_min'] = df['r_min'].shift(half_period)
     return df
+
+def add_per_above_sma(df, period_pts=10, period_sma=30, kind='close'):
+    """add 'pas','sma_fpt'"""
+    df = df.copy()
+    sma = df[kind].rolling(period_sma).mean()
+    above = (df[kind] > sma).where(sma.notna())
+    df['sma_fpt'] = sma
+    df['pas'] = above.rolling(period_pts, min_periods=period_pts).mean() * 100
+    return df
+
+def add_diff_ext_channel(df:pd.DataFrame,period_dc=30,period_diff=10,type_roll_diff='mean'):
+    """add 'top_dec','bot_dec', 'mean_dec' """
+    dch = df['high'].rolling(period_dc).max().shift(1)
+    dcl = df['low'].rolling(period_dc).min().shift(1)
+    sma = df['close'].rolling(period_dc).mean()
+    diff_dch = dch - sma
+    diff_dcl = sma - dcl
+    roll_diff_dch = diff_dch.rolling(period_diff).agg(type_roll_diff)
+    roll_diff_dcl = diff_dcl.rolling(period_diff).agg(type_roll_diff)
+    df['top_dec'] = sma + roll_diff_dch
+    df['bot_dec'] = sma - roll_diff_dcl
+    df['mean_dec'] = (df['top_dec'] + df['bot_dec'])/2
+    return df
