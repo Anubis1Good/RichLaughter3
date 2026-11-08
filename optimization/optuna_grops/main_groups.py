@@ -19,45 +19,8 @@ group = (
             (0.01, 0.5, 0.01),
         ]
     ),
-    (
-        PEG4_U5, 
-        [
-            (min_period,max_period,1),
-            (min_period,max_period,1),
-            (max_period,),
-            ("DC","VG","BB","VC","WC","SC"),
-            ("rsi","mfi","s","uo","velcro","pedal","wpedal","real_pedal", "real_wpedal"),
-            (2,period2s_max,1),
-            (1,50,1),
-            (1,50,1),
-        ]
-    ),
-    (
-        PEG4_U6, 
-        [
-            (min_period,max_period,1),
-            (min_period,max_period,1),
-            (max_period,),
-            ("DC","VG","BB","VC","WC"),
-            ("rsi","mfi","s","uo","pedal","wpedal","real_pedal", "real_wpedal"),
-            (2,period2s_max,1),
-            (1,50,1),
-            (1,50,1),
-            (1,50,1),
-            (min_period,max_period,1),
-        ]
-    ),
-    (
-        PEG11_KUSURUKEN, 
-        [
-            (min_period,max_period,1),
-            (min_period,max_period,1),
-            (min_period,max_period,1),
-            (0, 50, 1),    
-            ('c', 'hl'),    
-            (max_period,),
-        ]
-    ),
+
+
         (
         PEG11_RAYMIYAMOTO,
         [
@@ -465,15 +428,7 @@ group = (
    
         ]
     ),
-    (
-        UEG4_CANADIAN, 
-        [
-            (10, max_period, 1),
-            (2, half_max_period, 1),
-            (1,10,1),
-            (0,1,0.01)
-        ]
-    ),
+
     (
         UEG6_ADVENTURE, 
         [
@@ -495,46 +450,6 @@ group = (
             (min_period,max_period,1),
             (5,50,1),
             (0,1),
-        ]
-    ),
-
-   (
-        UEG7_LOVERGOOSE, 
-        [
-            (2, half_max_period, 1),
-            (10, max_period, 1),
-            (2, half_max_period, 1),
-            (1,10,1),
-            (10,70,1),
-            (10,70,1),
-            (0,1),
-        ]
-    ),
-    (
-        UEG7_LOVERDUCK, 
-        [
-            (2, half_max_period, 1),
-            (10, max_period, 1),
-            (2, half_max_period, 1),
-            (1,10,1),
-            (10,70,1),
-            (min_period,max_period,1),
-            (0,1),
-        ]
-    ),
-    (
-        UEG7_CANNIBAL, 
-        [
-            (min_period,max_period,1),
-            (10,70,1),
-            (10, max_period, 1),
-            (2, half_max_period, 1),
-            (1,10,1),
-            (10, max_period, 1),
-            (2, half_max_period, 1),
-            (1,10,1),
-            (0,1,0.01),
-            (2, half_max_period, 1),
         ]
     ),
 
