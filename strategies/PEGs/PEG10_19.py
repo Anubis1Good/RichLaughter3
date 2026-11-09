@@ -1088,7 +1088,8 @@ class PEG17_PHOENIX(BaseEG):
                 return 'open_long'
             if row['high'] >= row['max_hb'] and row['rsi'] >= row['top_q']:
                 return 'open_short'
-            
+
+# 09.11.26 ну то, как он порой открывает по тренду, это пиздец. Кучу раз словил контр-тренд, зато потом встал по тренду около хая и тупо получил огромный убыток от разворота тренда. В общем, вошел в нужную сторону прям под конец движения.
 class PEG17_AIUR(BaseEG):
     """stop=None, take=None, period_quantile=55, period_dc=20, period_rsi=20, period_velcro=50, threshold_velcro=30, open_trend=0, max_period=70,frac_offset_dc=0.5"""
     def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None, period_quantile=55, period_dc=20, period_rsi=20, period_velcro=50, threshold_velcro=30, open_trend=0, max_period=70,frac_offset_dc=0.5):
