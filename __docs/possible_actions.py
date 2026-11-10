@@ -16,13 +16,17 @@ action = (
     # 'open_long_level' - открыть позицию по лонговым уровням
 
     # """
-    # 'open_long_level',
-    # 'open_short_level',
-    # 'open_all_level',
+    'open_long_level',
+    'open_short_level',
+    'open_all_level',
 
-    # 'close_long_level',
-    # 'close_short_level',
-    # 'close_all_level',
+    'spred_long_level',
+    'spred_short_level',
+    'spred_all_level',
+
+    'close_long_level',
+    'close_short_level',
+    'close_all_level',
 
     # """
     #     sample type step: 'open_long_step_10' - 10 пунктов от лучшего аска

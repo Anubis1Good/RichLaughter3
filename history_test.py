@@ -16,7 +16,7 @@ symbol = PATH_DF.split('\\')[-1].split('_')[0]
 # ws = [UEG4_FALCON,],
 
 # ws = (PEG30_ETC,(None,None,1,5,1,1,11,6,37,15,14,65),1,None)
-ws = (PEG26_GAZLOWE,[])
+ws = (PEG2_DDCrWork_level_test,[])
 # ws = (UEG7_LOVERDUCK,[])
 # ws = (DebugMean,[])
 cegt = CheckEGTrader(
@@ -43,7 +43,7 @@ cegt.print_statistics()
 
 cegt.plot_chart_and_sequtity()
 # cegt.ws.debug_data = []
-# cegt.check_strategy_window(normalization=True)
+cegt.check_strategy_window(normalization=True)
 # cegt.check_strategy_window(normalization=False)
 # ef_window = cegt.trade_data['step_eq_fee']
 # eqf = cegt.trade_data['equity_fee']
@@ -54,8 +54,8 @@ cegt.plot_chart_and_sequtity()
 # result_row = cegt.get_statistics()
 # print(result_row)
 
-# cegt.print_statistics()
-# cegt.plot_chart_and_sequtity()
+cegt.print_statistics()
+cegt.plot_chart_and_sequtity()
 # cegt.process_old_type_result()
 # full_name_img = os.path.join(images_folder, f"{name_file}.png")
 # name_bot = 'Vasya'

@@ -1,7 +1,11 @@
 stock_groups= { 
-    'MAIN_PC_TEST': (
+    'MAIN_PC_TEST0': (
         ['APTK0','DELI0','ETLN0','FIXR0'],
         ['HYDR0','SOFL0','TGKA0','VSEH0'],
+    ),
+    'MAIN_PC_TEST1': (
+        ['APTK1','DELI1','ETLN1','FIXR1'],
+        ['HYDR1','SOFL1','TGKA1','VSEH1'],
     ),
     'SECOND_PC_WORK': (
         ['APTK0','DELI0','ETLN0','FIXR0'],

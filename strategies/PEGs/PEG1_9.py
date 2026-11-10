@@ -29,6 +29,30 @@ class PEG2_DDCrWork(BaseEG):
             return 'open_long'
         if row['high'] >= row['max_hb'] and not nearest_long:
             return 'open_short'
+        
+class PEG2_DDCrWork_level_test(BaseEG):
+    "stop=None, take=None,period=20"
+    def __init__(self, symbol='Test', price_step=None, mult_ps=1, mode=None, stop=None, take=None,period=20):
+        super().__init__(symbol, price_step, mult_ps, mode, stop, take)
+        self.needs_info = {'chart':self.symbol}
+        self.period = period
+
+    def preprocessing(self,tdata):
+        pdata = {}
+        df = tdata['chart']
+        df = add_donchan_channel(df,self.period)
+        df['test_top_level'] = df['max_hb'].copy()
+        df['test_bottom_level'] = df['min_hb'].copy()
+        df = self.add_slice_df(df)
+        pdata['chart'] = df
+        top_level = df['test_top_level'].iat[-1]
+        bottom_level = df['test_bottom_level'].iat[-1]
+        pdata['levels'] = [top_level,bottom_level]
+        return pdata
+    
+    def _get_action_from_row(self, row):
+        """Только логика!"""
+        return 'spred_all_level'
     
 class PEG4_U4(BaseEG):
     '''

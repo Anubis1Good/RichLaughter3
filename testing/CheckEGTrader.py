@@ -184,7 +184,7 @@ class CheckEGTrader:
         self.trade_data['c_shorts'].append((row_name,price))
         self.trade_data['pos'] = 0
 
-    def work_action(self,action:str, price, row_name, high, low):
+    def work_action(self,action:str, price, row_name, high, low,top_level,bottom_level):
         """return pos,open_price,fees,open_fee"""
         feei = self.fee * price  # fee абсолютное значение
         # print(feei)
@@ -219,8 +219,8 @@ class CheckEGTrader:
                     self.close_short(price,feei,row_name,True)
             elif 'step' in action:
                 self.work_step_action(action,price)
-            # elif 'level' in action:
-            #     self.work_level_action(action,price)
+            elif 'level' in action:
+                self.work_level_action(action,top_level,bottom_level)
 
     def work_step_action(self,action,price):
         parts_action = action.split('_')
@@ -283,30 +283,36 @@ class CheckEGTrader:
                 price_order = price-step*self.price_step
                 self.orders.append(Order(True,price_order))
 
-    # def work_level_action(self,action,price):
-    #     parts_action = action.split('_')
-    #     type_action = parts_action[0]
-    #     dir_action = parts_action[1]
-    #     step = int(parts_action[3])
-    #     if type_action == 'open':
-    #         if (dir_action == 'long' or dir_action == 'all') and self.trade_data['pos'] != 1:
-    #             price_order = price-step*self.price_step
-    #             if self.trade_data['pos'] < 0:
-    #                 self.orders.append(Order(True,price_order))
-    #             self.orders.append(Order(True,price_order))
+    def work_level_action(self,action,top_level,bottom_level):
+        parts_action = action.split('_')
+        type_action = parts_action[0]
+        dir_action = parts_action[1]
+        if type_action == 'spred':
+            if dir_action == 'long':
+                if self.trade_data['pos'] == 1:
+                    self.orders.append(Order(False,top_level))
+                else:
+                    if self.trade_data['pos'] < 0:
+                        self.orders.append(Order(True,bottom_level))
+                    self.orders.append(Order(True,bottom_level))
 
-    #         if (dir_action == 'short' or dir_action == 'all') and self.trade_data['pos'] != -1:
-    #             price_order = price+step*self.price_step
-    #             if self.trade_data['pos'] > 0: 
-    #                 self.orders.append(Order(False,price_order))
-    #             self.orders.append(Order(False,price_order))
-    #     else:
-    #         if (dir_action == 'long' or dir_action == 'all') and self.trade_data['pos'] == 1:
-    #             price_order = price+step*self.price_step
-    #             self.orders.append(Order(False,price_order))
-    #         if (dir_action == 'short' or dir_action == 'all') and self.trade_data['pos'] == -1:
-    #             price_order = price-step*self.price_step
-    #             self.orders.append(Order(True,price_order))
+            elif dir_action == 'short':
+                if self.trade_data['pos'] == -1:
+                    self.orders.append(Order(True,bottom_level))
+                else:
+                    if self.trade_data['pos'] > 0: 
+                        self.orders.append(Order(False,top_level))
+                    self.orders.append(Order(False,top_level))
+            else:
+                if self.trade_data['pos'] == 1:
+                    self.orders.append(Order(False,top_level))
+                    self.orders.append(Order(False,top_level))
+                elif self.trade_data['pos'] == -1:
+                    self.orders.append(Order(True,bottom_level))
+                    self.orders.append(Order(True,bottom_level))
+                else:
+                    self.orders.append(Order(False,top_level))              
+                    self.orders.append(Order(True,bottom_level))
 
     def add_time_features(self,df:pd.DataFrame):
         df = df.copy()
@@ -350,7 +356,7 @@ class CheckEGTrader:
                 f.write('\n')
         # Подготавливаем данные через preprocessing
         pdata = self.ws.preprocessing(self.tdata)
-        df = pdata['chart']
+        df:pd.DataFrame = pdata['chart']
         # print(df)
         window = self.window - (len(self.df) - len(df))
         self.sync_step_data(df)
@@ -370,7 +376,12 @@ class CheckEGTrader:
         lows = df['low'].values
         prices = df['close'].values
         row_names = df['x'].values
-        
+        top = df.get('test_top_level')
+        top_levels = top.values if top is not None else np.full(len(df), np.nan)
+        bottom = df.get('test_bottom_level')
+        bottom_levels = bottom.values if bottom is not None else np.full(len(df), np.nan)
+
+
         for i in self.get_iterator(range(len(df))):
             price = prices[i]
             high = highs[i]
@@ -379,6 +390,8 @@ class CheckEGTrader:
                 self.update_step_data(price)
                 continue
             row_name = row_names[i]
+            top_level = top_levels[i]
+            bottom_level = bottom_levels[i]
             
             if self.close_on_time and mask_values[i]:
                 action = 'close_all'
@@ -430,7 +443,7 @@ class CheckEGTrader:
                     f.write(row.to_string() + '\n')
                     f.write(str(row_name) +'_'+str(action) + '\n')
                     f.write('-' * 50 + '\n')  # разделитель для читаемости
-            self.work_action(action, price, row_name, high, low)
+            self.work_action(action, price, row_name, high, low, top_level,bottom_level)
             self.update_step_data(price)
     @duration_time
     def check_strategy_window(self, normalization=True):
@@ -461,7 +474,7 @@ class CheckEGTrader:
                 if (last_row['hour'] > time_close[0]) or \
                 (last_row['hour'] == time_close[0] and last_row['minute'] >= time_close[1]):
                     action = 'close_all'
-                    self.work_action(action, price, row_name,high,low)
+                    self.work_action(action, price, row_name,high,low,None,None)
                     self.update_step_data(price)
                     continue
 
@@ -479,8 +492,25 @@ class CheckEGTrader:
             # Подготавливаем данные через preprocessing стратегии
             tdata = {'chart': df_slice}
             pdata = self.ws.preprocessing(tdata)
-            
-            
+            df_pdata = pdata.get('chart')
+            top_level,bottom_level = None,None
+            if df_pdata is not None:
+                top = df_pdata.get('test_top_level')
+                if top is not None:
+                    top_level = top.iloc[-1]
+                bottom = df_pdata.get('test_bottom_level')
+                if bottom is not None:
+                    bottom_level = bottom.iloc[-1]
+            if normalization:
+                norm_price = df_pdata['close'].iloc[-1]
+                # if norm_price != price / candle_max:
+                #     print(norm_price, price / candle_max)
+                if top_level is not None:
+                    top_level = price * top_level / norm_price
+                if bottom_level is not None:
+                    bottom_level = price * bottom_level / norm_price
+
+            # print(top_level,bottom_level)
             # Вычисляем delta
             pos = self.trade_data['pos']
             open_price = self.trade_data['open_price']
@@ -518,7 +548,7 @@ class CheckEGTrader:
             action = self.ws(pdata, pos, delta)
             
             # Выполняем действие
-            self.work_action(action, price, row_name,high,low)
+            self.work_action(action, price, row_name,high,low,top_level,bottom_level)
             self.update_step_data(price)
 
     # POST_PROCESS_RESULT_FUNCS
