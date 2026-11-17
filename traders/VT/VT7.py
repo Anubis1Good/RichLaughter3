@@ -934,7 +934,7 @@ class VT7:
                     elif 'spred' in action:
                         action = action.replace('spred','close')
                     elif 'open_all' in action:
-                        action = action.replace('close_all')
+                        action = action.replace('open','close')
         return action
     
     def _check_close_on_time_OC(self,action:OrderCords,time_mode):
